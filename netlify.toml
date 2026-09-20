@@ -1,0 +1,48 @@
+# Netlify — build en hosting voor Thuis
+# Netlify leest dit bestand uit de root van de repo. Je hoeft in de
+# dashboard niets in te stellen behalve de twee environment variables
+# (zie .env.example).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Een single page app: elke URL moet index.html krijgen, anders geeft
+# /familie/medicatie een 404 zodra iemand die link rechtstreeks opent.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Gebouwde assets dragen een hash in hun naam en mogen voor altijd gecachet
+# worden. De service worker en het manifest juist niet: die moeten elke
+# keer opnieuw opgehaald worden, anders blijft een tablet op een oude
+# versie hangen.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Microfoon en locatie moeten expliciet toegelaten blijven: de
+    # spraakassistent en de veilige zones werken anders niet. Beide
+    # vragen daarna nog altijd zelf om toestemming aan de gebruiker.
+    Permissions-Policy = "microphone=(self), geolocation=(self), camera=(self)"
