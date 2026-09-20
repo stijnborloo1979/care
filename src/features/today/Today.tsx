@@ -1,0 +1,220 @@
+import { useNavigate } from 'react-router-dom'
+import type { AgendaEvent } from '../../services/agenda'
+import { dateLine, greeting, hhmm } from '../../lib/time'
+import { STATUS_LABEL, statusOf, whatNow } from './whatNow'
+import { useAgenda, useMarkDone, useNow } from './useAgenda'
+import PersonInbox from '../messages/PersonInbox'
+
+interface Props {
+  householdId: string
+  personName: string
+  timezone: string
+}
+
+export default function Today({ householdId, personName, timezone }: Props) {
+  const now = useNow()
+  const { data, isLoading, isError } = useAgenda(householdId, timezone)
+  const markDone = useMarkDone(householdId)
+  const navigate = useNavigate()
+
+  const events = data ?? []
+  const { current, next } = whatNow(events, now)
+
+  return (
+    <main className="mx-auto max-w-[36rem] px-5 pb-32 pt-6">
+      <header>
+        <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">
+          {greeting(now, timezone)}, {personName}
+        </h1>
+        <p className="mt-1 text-lg text-ink-soft">{dateLine(now, timezone)}</p>
+      </header>
+
+      <div className="mt-6">
+        <PersonInbox householdId={householdId} />
+      </div>
+
+      <section className="mt-6" aria-labelledby="nu">
+        <h2 id="nu" className="text-base font-bold text-ink-faint">
+          Nu
+        </h2>
+        <div className="mt-2">
+          {isLoading ? (
+            <p className="text-ink-soft">Bezig met laden…</p>
+          ) : isError ? (
+            <p className="text-ink-soft">De planning is nu niet te zien. Probeer het zo opnieuw.</p>
+          ) : (
+            <NowCard
+              event={current}
+              timezone={timezone}
+              onDone={(id) => markDone.mutate({ id, done: true })}
+            />
+          )}
+        </div>
+      </section>
+
+      {next ? (
+        <section className="mt-6" aria-labelledby="daarna">
+          <h2 id="daarna" className="text-base font-bold text-ink-faint">
+            Daarna
+          </h2>
+          <div className="mt-2 flex items-center gap-4 rounded-card border border-line bg-surface p-4 shadow-card">
+            <span className="text-3xl" aria-hidden="true">
+              {next.emoji ?? '📌'}
+            </span>
+            <span>
+              <span className="block text-lg font-bold">{next.title}</span>
+              <span className="text-ink-soft">om {hhmm(new Date(next.starts_at), timezone)}</span>
+            </span>
+          </div>
+        </section>
+      ) : null}
+
+      {events.length > 0 ? (
+        <section className="mt-6" aria-labelledby="vandaag">
+          <h2 id="vandaag" className="text-base font-bold text-ink-faint">
+            Vandaag
+          </h2>
+          <ol className="mt-2 rounded-card border border-line bg-surface p-4 shadow-card">
+            {events.map((e) => (
+              <TimelineRow
+                key={e.id}
+                event={e}
+                now={now}
+                timezone={timezone}
+                onToggle={(id, done) => markDone.mutate({ id, done })}
+              />
+            ))}
+          </ol>
+        </section>
+      ) : null}
+
+      <section className="mt-8 grid grid-cols-3 gap-2">
+        <BigButton emoji="🧭" label="Wat nu?" onClick={() => navigate('/nu')} highlight />
+        <BigButton emoji="👥" label="Familie" onClick={() => navigate('/wie')} />
+        <BigButton emoji="🆘" label="Help" onClick={() => navigate('/help')} alert />
+      </section>
+    </main>
+  )
+}
+
+function NowCard({
+  event,
+  timezone,
+  onDone,
+}: {
+  event: AgendaEvent | null
+  timezone: string
+  onDone: (id: string) => void
+}) {
+  if (!event) {
+    return (
+      <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-6 shadow-lift">
+        <div className="text-5xl" aria-hidden="true">
+          🍵
+        </div>
+        <p className="mt-2 text-3xl font-extrabold leading-tight tracking-tight">Even rusten</p>
+        <p className="mt-2 text-lg text-ink-soft">Er is nu niets dat moet. Straks is er weer iets.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-6 shadow-lift">
+      <div className="text-5xl" aria-hidden="true">
+        {event.emoji ?? '📌'}
+      </div>
+      <p className="mt-2 text-3xl font-extrabold leading-tight tracking-tight">{event.title}</p>
+      {event.note ? <p className="mt-2 text-lg text-ink-soft">{event.note}</p> : null}
+      <p className="mt-1 text-ink-faint">om {hhmm(new Date(event.starts_at), timezone)}</p>
+
+      <button
+        onClick={() => onDone(event.id)}
+        className="mt-5 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
+      >
+        Dit is gedaan
+      </button>
+    </div>
+  )
+}
+
+function TimelineRow({
+  event,
+  now,
+  timezone,
+  onToggle,
+}: {
+  event: AgendaEvent
+  now: Date
+  timezone: string
+  onToggle: (id: string, done: boolean) => void
+}) {
+  const status = statusOf(event, now)
+  const gedaan = status === 'done'
+
+  return (
+    <li className="flex items-start gap-3 border-b border-line py-3 last:border-none">
+      <span className="w-14 shrink-0 pt-1 font-bold tabular-nums text-ink-soft">
+        {hhmm(new Date(event.starts_at), timezone)}
+      </span>
+
+      <span
+        aria-hidden="true"
+        className={`mt-2 h-4 w-4 shrink-0 rounded-full border-2 ${
+          gedaan
+            ? 'border-ok bg-ok'
+            : status === 'now'
+              ? 'border-accent bg-accent'
+              : 'border-line-strong bg-surface'
+        }`}
+      />
+
+      <span className="min-w-0 flex-1">
+        <span className={`block text-lg font-semibold ${gedaan ? 'text-ink-faint line-through' : ''}`}>
+          {event.emoji ? `${event.emoji} ` : ''}
+          {event.title}
+        </span>
+        {/* Status nooit alleen via kleur: het woord staat er altijd bij. */}
+        <span className="text-sm text-ink-faint">{STATUS_LABEL[status]}</span>
+      </span>
+
+      <button
+        onClick={() => onToggle(event.id, !gedaan)}
+        className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
+      >
+        {gedaan ? 'Ongedaan' : 'Afvinken'}
+      </button>
+    </li>
+  )
+}
+
+function BigButton({
+  emoji,
+  label,
+  onClick,
+  highlight,
+  alert,
+}: {
+  emoji: string
+  label: string
+  onClick: () => void
+  highlight?: boolean
+  alert?: boolean
+}) {
+  const stijl = highlight
+    ? 'bg-accent-ink text-white border-accent-ink'
+    : alert
+      ? 'bg-surface text-alert border-alert'
+      : 'bg-surface border-line-strong'
+
+  return (
+    <button
+      onClick={onClick}
+      className={`flex min-h-big flex-col items-center justify-center gap-1 rounded-card border-[1.5px] px-2 text-center font-bold shadow-card ${stijl}`}
+    >
+      <span className="text-3xl" aria-hidden="true">
+        {emoji}
+      </span>
+      {label}
+    </button>
+  )
+}

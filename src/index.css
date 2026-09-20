@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* De tokens uit het prototype. Eén bron voor kleur, ruimte en schaal. */
+:root {
+  --bg: #f1efe9;
+  --surface: #ffffff;
+  --surface-2: #f8f6f1;
+  --surface-3: #ebe7de;
+  --border: #e1dcd1;
+  --border-strong: #cfc7b8;
+  --text: #221f1b;
+  --text-2: #5c554b;
+  --text-3: #857d71;
+  --accent: #b4762a;
+  --accent-ink: #8a5a1e;
+  --accent-soft: #f7eedc;
+  --ok: #3f7355;
+  --warn: #9e6b16;
+  --alert: #a8442f;
+  --r-l: 22px;
+  --shadow-s: 0 1px 2px rgba(45, 36, 24, 0.05), 0 2px 8px rgba(45, 36, 24, 0.04);
+  --shadow-m: 0 2px 4px rgba(45, 36, 24, 0.05), 0 10px 26px rgba(45, 36, 24, 0.07);
+  --scale: 1;
+
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+
+:root[data-scale='1.15'] { --scale: 1.15; }
+:root[data-scale='1.3']  { --scale: 1.3; }
+:root[data-scale='1.5']  { --scale: 1.5; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #15130f;
+    --surface: #1e1b17;
+    --surface-2: #242019;
+    --surface-3: #2e2921;
+    --border: #332d25;
+    --border-strong: #463e33;
+    --text: #f4f0e8;
+    --text-2: #c0b7a8;
+    --text-3: #968c7d;
+    --accent: #e0a44e;
+    --accent-ink: #f0bf74;
+    --accent-soft: #2c2418;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #15130f;
+  --surface: #1e1b17;
+  --surface-2: #242019;
+  --surface-3: #2e2921;
+  --border: #332d25;
+  --border-strong: #463e33;
+  --text: #f4f0e8;
+  --text-2: #c0b7a8;
+  --text-3: #968c7d;
+  --accent: #e0a44e;
+  --accent-ink: #f0bf74;
+  --accent-soft: #2c2418;
+  color-scheme: dark;
+}
+
+:root[data-contrast='high'] {
+  --border: #4a443b;
+  --border-strong: #221f1b;
+  --text: #000000;
+  --text-2: #222222;
+  --accent: #7a4a0a;
+  --accent-ink: #5e3806;
+}
+
+html {
+  height: 100%;
+  font-size: calc(16px * var(--scale));
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Figtree, 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Eenvoudige modus: alles ruimer, minder tegelijk, grotere raakvlakken. */
+body[data-simple='true'] {
+  line-height: 1.6;
+}
+body[data-simple='true'] h1 {
+  font-size: 2.4rem;
+}
+body[data-simple='true'] button,
+body[data-simple='true'] a[href^='tel:'] {
+  min-height: 3.6rem;
+}
+body[data-simple='true'] nav a {
+  min-height: 4.2rem;
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
