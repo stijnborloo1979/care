@@ -9,6 +9,7 @@ import {
   type Routine,
 } from '../../services/routines'
 import { useHousehold } from '../household/useHousehold'
+import QuickAdd from './QuickAdd'
 
 function labelVan(rrule: string) {
   return HERHALING.find((h) => h.waarde === rrule)?.label ?? rrule
@@ -41,11 +42,13 @@ export default function Planning() {
         </p>
       </header>
 
+      <QuickAdd householdId={hh} />
+
       {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {(data ?? []).map((r) => (
-          <section key={r.id} className="rounded-card border border-line bg-surface p-5 shadow-card">
+          <section key={r.id} className="rounded-card bg-surface p-6 shadow-card">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold">

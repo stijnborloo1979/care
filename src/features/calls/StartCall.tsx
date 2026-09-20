@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Icon from '../../components/Icon'
 import { startCall } from '../../services/calls'
 import CallScreen from './CallScreen'
 import { heeftTurn } from './useWebRTC'
@@ -38,7 +39,7 @@ export default function StartCall({
   }
 
   return (
-    <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+    <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Videobellen met {metWie}</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Het beeld gaat rechtstreeks van toestel naar toestel, versleuteld. Er komt geen dienst van
@@ -50,7 +51,14 @@ export default function StartCall({
         disabled={bezig}
         className="mt-4 flex min-h-touch w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
       >
-        {bezig ? 'Bezig…' : `📹 Bel ${metWie}`}
+        {bezig ? (
+          'Bezig…'
+        ) : (
+          <>
+            <Icon naam="bellen" size={20} />
+            Bel {metWie}
+          </>
+        )}
       </button>
 
       {!heeftTurn() ? (

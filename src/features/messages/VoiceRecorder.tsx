@@ -50,7 +50,7 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
   }
 
   return (
-    <div className="rounded-card border border-line bg-surface p-5 shadow-card">
+    <div className="rounded-card bg-surface p-6 shadow-card">
       <h3 className="text-lg font-bold">Spreek een bericht in voor {recipient}</h3>
       <p className="mt-1 text-sm text-ink-soft">
         Maximaal {maxSeconds} seconden. {recipient} hoort je stem, en hoeft niets te lezen.

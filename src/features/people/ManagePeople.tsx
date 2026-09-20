@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import Avatar from '../../components/Avatar'
 import { deletePerson, savePerson, uploadPersonPhoto, type PersonCard } from '../../services/people'
 import { usePeople } from './usePeople'
+import DictateButton from '../../components/DictateButton'
 
 const SOORT: { waarde: PersonCard['kind']; label: string }[] = [
   { waarde: 'family', label: 'Familie' },
@@ -20,7 +21,7 @@ export default function ManagePeople({ householdId }: { householdId: string }) {
   const [open, setOpen] = useState<string | null>(null)
 
   return (
-    <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+    <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Wie is wie</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Familie, zorgverleners en buren, met een zin die uitlegt wie ze zijn.
@@ -168,15 +169,18 @@ function PersonEditor({
         </label>
       </div>
 
-      <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Wie is dit? In de je-vorm</span>
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-ink-soft">Wie is dit? In de je-vorm</span>
+          <DictateButton onTekst={(t) => setDescription(t)} />
+        </div>
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Els is je dochter. Ze woont in Leuven."
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
-      </label>
+      </div>
 
       <label className="block">
         <span className="text-sm font-semibold text-ink-soft">Extra, mag leeg blijven</span>

@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import Skeleton from '../../components/Skeleton'
 import { useHousehold } from '../household/useHousehold'
 import { useItems, useRooms } from './useHomeMemory'
 
@@ -9,7 +10,14 @@ export default function RoomGrid() {
   const { data: rooms, isLoading } = useRooms(hh)
   const { data: items } = useItems(hh)
 
-  if (isLoading) return <p className="text-ink-soft">Bezig met laden…</p>
+  if (isLoading)
+    return (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-[7.5rem]" />
+        ))}
+      </div>
+    )
   if (!rooms || rooms.length === 0) {
     return (
       <div className="rounded-card border-[1.5px] border-dashed border-line-strong bg-surface-soft p-8 text-center text-ink-soft">

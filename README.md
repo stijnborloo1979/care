@@ -139,6 +139,11 @@ Bovenaan verschijnt dan één regel die zegt wat er wacht.
 De rest van de schermen komt uit het HTML-prototype; dat blijft de
 referentie voor de UI.
 
+`quickAdd()` zet gewone taal om in een afspraak: "donderdag 14u dokter"
+wordt een agenda-item. Begrijpt ze de tijd niet, dan geeft ze null terug
+in plaats van te gokken — een afspraak op het verkeerde uur is erger dan
+een afspraak die je zelf moet invullen.
+
 `src/features/today/whatNow.ts` is bewust een pure functie zonder React of
 Supabase: die logica bepaalt wat de persoon te zien krijgt en moet met een
 vaste klok te testen zijn.

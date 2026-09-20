@@ -8,8 +8,8 @@
   --surface: #ffffff;
   --surface-2: #f8f6f1;
   --surface-3: #ebe7de;
-  --border: #e1dcd1;
-  --border-strong: #cfc7b8;
+  --border: #e7e2d8;
+  --border-strong: #d4ccbd;
   --text: #221f1b;
   --text-2: #5c554b;
   --text-3: #857d71;
@@ -19,9 +19,12 @@
   --ok: #3f7355;
   --warn: #9e6b16;
   --alert: #a8442f;
-  --r-l: 22px;
-  --shadow-s: 0 1px 2px rgba(45, 36, 24, 0.05), 0 2px 8px rgba(45, 36, 24, 0.04);
-  --shadow-m: 0 2px 4px rgba(45, 36, 24, 0.05), 0 10px 26px rgba(45, 36, 24, 0.07);
+  --r-l: 20px;
+  /* Schaduwen in twee lagen: een scherpe lijn vlak onder de rand en een
+     zachte wolk eronder. Eén brede schaduw oogt altijd goedkoop. */
+  --shadow-s: 0 1px 1px rgba(45, 36, 24, 0.04), 0 2px 6px rgba(45, 36, 24, 0.05);
+  --shadow-m: 0 1px 2px rgba(45, 36, 24, 0.05), 0 8px 24px -6px rgba(45, 36, 24, 0.14);
+  --shadow-l: 0 2px 4px rgba(45, 36, 24, 0.06), 0 24px 48px -12px rgba(45, 36, 24, 0.2);
   --scale: 1;
 
   box-sizing: border-box;
@@ -121,4 +124,74 @@ body[data-simple='true'] nav a {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+
+/* ---------------------------------------------------------------
+   Beweging. Subtiel: een scherm dat rustig verschijnt voelt duurder
+   dan welke kleurkeuze ook, en het helpt begrijpen wat er verandert.
+   --------------------------------------------------------------- */
+@keyframes opkomen {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+main {
+  animation: opkomen 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Alles wat je kan aanraken, reageert ook. */
+button,
+a {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s ease;
+}
+
+button:active,
+a:active {
+  transform: scale(0.985);
+}
+
+@keyframes glans {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 37%,
+    var(--surface-2) 63%
+  );
+  background-size: 200% 100%;
+  animation: glans 1.4s ease-in-out infinite;
+}
+
+/* Typografie: koppen mogen groter en strakker dan de standaard. */
+h1 {
+  letter-spacing: -0.03em;
+}
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Cijfers in tijdlijnen en klokjes blijven op hun plaats staan. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }

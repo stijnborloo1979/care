@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import Icon from '../../components/Icon'
 import StoragePhoto from '../../components/StoragePhoto'
 import { useItem } from './useHomeMemory'
 
@@ -76,7 +77,8 @@ export default function ItemDetail() {
         onClick={leesVoor}
         className="mt-6 flex min-h-touch w-full items-center justify-center gap-2 rounded-pill border-[1.5px] border-line-strong px-5 text-lg font-semibold"
       >
-        🔊 Lees dit voor
+        <Icon naam="voorlezen" size={20} />
+        Lees dit voor
       </button>
     </main>
   )

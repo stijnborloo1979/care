@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Icon from '../../components/Icon'
 import { Link } from 'react-router-dom'
 import StoragePhoto from '../../components/StoragePhoto'
 import { useHousehold } from '../household/useHousehold'
@@ -27,9 +28,10 @@ export default function Photos() {
         <>
           <button
             onClick={() => setSlide(0)}
-            className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink text-lg font-semibold text-white"
+            className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink text-lg font-semibold text-white shadow-lift"
           >
-            ▶ Rustig bekijken
+            <Icon naam="afspelen" size={20} />
+            Rustig bekijken
           </button>
 
           <ol className="mt-6 space-y-4">

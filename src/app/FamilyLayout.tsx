@@ -4,18 +4,19 @@ import { useHousehold } from "../features/household/useHousehold";
 import { useDisplayPrefs } from "../features/settings/useDisplayPrefs";
 import { useRealtime } from "../features/realtime/useRealtime";
 import InstallPrompt from "../features/install/InstallPrompt";
+import Icon, { type IconNaam } from "../components/Icon";
 
-const NAV = [
-  { to: "/familie", end: true, label: "Dashboard", emoji: "📊" },
-  { to: "/familie/planning", label: "Planning", emoji: "🔁" },
-  { to: "/familie/wie", label: "Familie", emoji: "👥" },
-  { to: "/familie/huis", label: "Home Memory", emoji: "🏠" },
-  { to: "/familie/fotos", label: "Herinneringen", emoji: "📷" },
-  { to: "/familie/weetjes", label: "Weetjes", emoji: "📓" },
-  { to: "/familie/berichten", label: "Berichten", emoji: "🎤" },
-  { to: "/familie/logboek", label: "Zorglogboek", emoji: "📝" },
-  { to: "/familie/documenten", label: "Documenten", emoji: "📄" },
-  { to: "/familie/instellingen", label: "Instellingen", emoji: "⚙️" },
+const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
+  { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
+  { to: '/familie/planning', label: 'Planning', icoon: 'planning' },
+  { to: '/familie/wie', label: 'Familie', icoon: 'wie' },
+  { to: '/familie/huis', label: 'Home Memory', icoon: 'vandaag' },
+  { to: '/familie/fotos', label: 'Herinneringen', icoon: 'fotos' },
+  { to: '/familie/weetjes', label: 'Weetjes', icoon: 'weetjes' },
+  { to: '/familie/berichten', label: 'Berichten', icoon: 'praten' },
+  { to: '/familie/logboek', label: 'Zorglogboek', icoon: 'logboek' },
+  { to: '/familie/documenten', label: 'Documenten', icoon: 'documenten' },
+  { to: '/familie/instellingen', label: 'Instellingen', icoon: 'instellingen' },
 ];
 
 export default function FamilyLayout() {
@@ -35,7 +36,7 @@ export default function FamilyLayout() {
       <div className="flex min-h-screen">
         {/* Sidebar op desktop, onderaan tabs op mobiel. Familie werkt aan
           een bureau, de persoon op een tablet: twee verschillende noden. */}
-        <aside className="hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:block">
+        <aside className="hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
           <div className="px-2 pb-5">
             <p className="text-lg font-extrabold tracking-tight">Thuis</p>
             <p className="text-sm text-ink-soft">{household.person_name}</p>
@@ -55,9 +56,7 @@ export default function FamilyLayout() {
                   }`
                 }
               >
-                <span className="w-6 text-center" aria-hidden="true">
-                  {n.emoji}
-                </span>
+                <Icon naam={n.icoon} size={19} />
                 {n.label}
               </NavLink>
             ))}
@@ -104,9 +103,7 @@ export default function FamilyLayout() {
                   }`
                 }
               >
-                <span className="text-xl leading-none" aria-hidden="true">
-                  {n.emoji}
-                </span>
+                <Icon naam={n.icoon} size={20} />
                 {n.label}
               </NavLink>
             ))}

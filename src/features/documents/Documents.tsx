@@ -69,7 +69,7 @@ export default function Documents() {
           setError(null)
           voegToe.mutate()
         }}
-        className="rounded-card border border-line bg-surface p-5 shadow-card"
+        className="rounded-card bg-surface p-6 shadow-card"
       >
         <div className="flex flex-wrap gap-3">
           <label className="min-w-[12rem] flex-1">
@@ -136,7 +136,7 @@ export default function Documents() {
         {CATEGORIEEN.map((c) => {
           const docs = lijst.filter((d) => d.category === c.waarde)
           return (
-            <section key={c.waarde} className="rounded-card border border-line bg-surface p-5 shadow-card">
+            <section key={c.waarde} className="rounded-card bg-surface p-6 shadow-card">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold">{c.label}</h2>
                 <span className="rounded-pill border border-line px-3 py-0.5 text-sm font-semibold text-ink-soft">

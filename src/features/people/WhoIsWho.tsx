@@ -105,7 +105,7 @@ export function PersonDetail() {
         <p className="text-lg text-ink-soft">{p.relation}</p>
       </div>
 
-      <div className="mt-6 rounded-card border border-line bg-surface p-5 shadow-card">
+      <div className="mt-6 rounded-card bg-surface p-6 shadow-card">
         {p.description ? <p className="text-xl leading-snug">{p.description}</p> : null}
         {p.detail ? <p className="mt-3 text-lg text-ink-soft">{p.detail}</p> : null}
         {vandaag ? (

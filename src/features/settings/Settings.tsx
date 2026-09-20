@@ -25,7 +25,7 @@ export default function Settings() {
         </p>
       </header>
 
-      <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Leesbaarheid</h2>
 
         <Rij
@@ -88,7 +88,7 @@ export default function Settings() {
         </Rij>
       </section>
 
-      <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Zo ziet het eruit</h2>
         <div className="mt-4 rounded-card border-[1.5px] border-accent bg-accent-soft p-5">
           <p className="text-4xl" aria-hidden="true">
@@ -102,7 +102,7 @@ export default function Settings() {
         </p>
       </section>
 
-      <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Op het beginscherm zetten</h2>
         <p className="mt-1 text-sm text-ink-soft">
           Op de tablet van {voornaam} hoort Thuis als app te staan, niet als tabblad in een browser.
@@ -117,7 +117,7 @@ export default function Settings() {
 
       <LocationSettings />
 
-      <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Privacy</h2>
         <ul className="mt-3 space-y-2 text-sm text-ink-soft">
           <li>Elke rol ziet alleen wat ze nodig heeft; documenten blijven bij de familie.</li>

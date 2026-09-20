@@ -13,7 +13,7 @@ export default function ManageMemories({ householdId }: { householdId: string })
   const [open, setOpen] = useState<string | null>(null)
 
   return (
-    <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+    <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Herinneringen</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Foto&rsquo;s met een jaartal en het verhaal erbij.

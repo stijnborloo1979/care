@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Icon from '../../components/Icon'
 import { Link } from 'react-router-dom'
 import { CATEGORIEEN } from '../../services/notes'
 import { useHousehold } from '../household/useHousehold'
@@ -47,14 +48,15 @@ export default function Notes() {
             </h2>
             <ul className="mt-3 space-y-3">
               {notities.map((n) => (
-                <li key={n.id} className="rounded-card border border-line bg-surface p-5 shadow-card">
+                <li key={n.id} className="rounded-card bg-surface p-6 shadow-card">
                   <p className="text-lg font-bold">{n.title}</p>
                   <p className="mt-1 text-lg text-ink-soft">{n.body}</p>
                   <button
                     onClick={() => spreek(`${n.title}. ${n.body}`)}
-                    className="mt-3 min-h-[2.6rem] rounded-pill border-[1.5px] border-line-strong px-4 font-semibold"
+                    className="mt-3 inline-flex min-h-[2.6rem] items-center gap-2 rounded-pill border-[1.5px] border-line-strong px-4 font-semibold"
                   >
-                    🔊 Voorlezen
+                    <Icon naam="voorlezen" size={18} />
+                    Voorlezen
                   </button>
                 </li>
               ))}

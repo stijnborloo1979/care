@@ -55,7 +55,7 @@ export default function WhatNow() {
       )}
 
       {next ? (
-        <div className="mt-6 rounded-card border border-line bg-surface p-5 shadow-card">
+        <div className="mt-6 rounded-card bg-surface p-6 shadow-card">
           <p className="text-base font-bold text-ink-faint">Daarna</p>
           <p className="mt-1 text-2xl font-bold">
             {next.emoji ? `${next.emoji} ` : ''}

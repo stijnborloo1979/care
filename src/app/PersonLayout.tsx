@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import Icon, { type IconNaam } from '../components/Icon'
 import { useHousehold } from '../features/household/useHousehold'
 import { useDisplayPrefs } from '../features/settings/useDisplayPrefs'
 import { useRealtime } from '../features/realtime/useRealtime'
@@ -6,14 +7,14 @@ import { useLocationReporter, useLocationSetting } from '../features/location/us
 import IncomingCall from '../features/calls/IncomingCall'
 import InstallPrompt from '../features/install/InstallPrompt'
 
-const NAV = [
-  { to: '/', label: 'Vandaag', emoji: '🏠' },
-  { to: '/wie', label: 'Wie?', emoji: '👥' },
+const NAV: { to: string; label: string; icoon: IconNaam; mic?: boolean }[] = [
+  { to: '/', label: 'Vandaag', icoon: 'vandaag' },
+  { to: '/wie', label: 'Wie?', icoon: 'wie' },
   // De microfoon staat in het midden en valt op: het is de weg terug
   // wanneer iemand niet meer weet waar te kijken.
-  { to: '/praten', label: 'Praten', emoji: '🎤', mic: true },
-  { to: '/memory', label: 'In huis', emoji: '🧠' },
-  { to: '/help', label: 'Help', emoji: '🆘' },
+  { to: '/praten', label: 'Praten', icoon: 'praten', mic: true },
+  { to: '/memory', label: 'In huis', icoon: 'memory' },
+  { to: '/help', label: 'Help', icoon: 'help' },
 ]
 
 /**
@@ -48,7 +49,7 @@ export default function PersonLayout() {
 
       <nav
         aria-label="Hoofdnavigatie"
-        className="fixed inset-x-0 bottom-0 z-40 flex justify-around gap-1 border-t border-line bg-surface px-2 pt-1"
+        className="fixed inset-x-0 bottom-0 z-40 flex justify-around gap-1 border-t border-line bg-surface/90 px-2 pt-1 backdrop-blur-xl"
         style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
       >
         {NAV.map((n) => {
@@ -67,9 +68,7 @@ export default function PersonLayout() {
                     : 'text-ink-faint'
               }`}
             >
-              <span className="text-2xl leading-none" aria-hidden="true">
-                {n.emoji}
-              </span>
+              <Icon naam={n.icoon} size={n.mic ? 24 : 22} />
               {n.label}
             </NavLink>
           )

@@ -55,7 +55,7 @@ export default function InviteMember({ householdId, personName }: Props) {
   }
 
   return (
-    <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+    <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Iemand uitnodigen</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Voor wie mee wil zorgen voor {personName}. De link werkt alleen voor het adres dat je hier

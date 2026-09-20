@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CATEGORIEEN, deleteNote, saveNote, type MemoryNote } from '../../services/notes'
 import { useNotes } from './useNotes'
+import DictateButton from '../../components/DictateButton'
 
 export default function ManageNotes({ householdId }: { householdId: string }) {
   const { data } = useNotes(householdId)
@@ -32,7 +33,7 @@ export default function ManageNotes({ householdId }: { householdId: string }) {
         {CATEGORIEEN.map((c) => {
           const notities = (data ?? []).filter((n) => n.category === c.waarde)
           return (
-            <section key={c.waarde} className="rounded-card border border-line bg-surface p-5 shadow-card">
+            <section key={c.waarde} className="rounded-card bg-surface p-6 shadow-card">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold">
                   {c.emoji} {c.label}
@@ -173,8 +174,11 @@ function NoteEditor({
         </label>
       </div>
 
-      <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Het antwoord, in gewone taal</span>
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-ink-soft">Het antwoord, in gewone taal</span>
+          <DictateButton onTekst={(t) => setBody(t)} />
+        </div>
         <textarea
           required
           value={body}
@@ -186,7 +190,7 @@ function NoteEditor({
         <span className="mt-1 block text-xs text-ink-faint">
           Zo kort mogelijk. Dit wordt voorgelezen als antwoord op een vraag.
         </span>
-      </label>
+      </div>
 
       <label className="block">
         <span className="text-sm font-semibold text-ink-soft">Labels, gescheiden door komma&rsquo;s</span>

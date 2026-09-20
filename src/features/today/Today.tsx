@@ -4,6 +4,8 @@ import { dateLine, greeting, hhmm } from '../../lib/time'
 import { STATUS_LABEL, statusOf, whatNow } from './whatNow'
 import { useAgenda, useMarkDone, useNow } from './useAgenda'
 import PersonInbox from '../messages/PersonInbox'
+import Icon, { type IconNaam } from '../../components/Icon'
+import Skeleton from '../../components/Skeleton'
 
 interface Props {
   householdId: string
@@ -39,7 +41,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
         </h2>
         <div className="mt-2">
           {isLoading ? (
-            <p className="text-ink-soft">Bezig met laden…</p>
+            <Skeleton className="h-52 w-full" />
           ) : isError ? (
             <p className="text-ink-soft">De planning is nu niet te zien. Probeer het zo opnieuw.</p>
           ) : (
@@ -57,7 +59,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
           <h2 id="daarna" className="text-base font-bold text-ink-faint">
             Daarna
           </h2>
-          <div className="mt-2 flex items-center gap-4 rounded-card border border-line bg-surface p-4 shadow-card">
+          <div className="mt-2 flex items-center gap-4 rounded-card bg-surface p-5 shadow-card">
             <span className="text-3xl" aria-hidden="true">
               {next.emoji ?? '📌'}
             </span>
@@ -74,7 +76,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
           <h2 id="vandaag" className="text-base font-bold text-ink-faint">
             Vandaag
           </h2>
-          <ol className="mt-2 rounded-card border border-line bg-surface p-4 shadow-card">
+          <ol className="mt-2 rounded-card bg-surface p-5 shadow-card">
             {events.map((e) => (
               <TimelineRow
                 key={e.id}
@@ -89,9 +91,9 @@ export default function Today({ householdId, personName, timezone }: Props) {
       ) : null}
 
       <section className="mt-8 grid grid-cols-3 gap-2">
-        <BigButton emoji="🧭" label="Wat nu?" onClick={() => navigate('/nu')} highlight />
-        <BigButton emoji="👥" label="Familie" onClick={() => navigate('/wie')} />
-        <BigButton emoji="🆘" label="Help" onClick={() => navigate('/help')} alert />
+        <BigButton icoon="praten" label="Wat nu?" onClick={() => navigate('/nu')} highlight />
+        <BigButton icoon="wie" label="Familie" onClick={() => navigate('/wie')} />
+        <BigButton icoon="help" label="Help" onClick={() => navigate('/help')} alert />
       </section>
     </main>
   )
@@ -108,7 +110,7 @@ function NowCard({
 }) {
   if (!event) {
     return (
-      <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-6 shadow-lift">
+      <div className="rounded-card bg-accent-soft p-7 shadow-lift ring-1 ring-accent/25">
         <div className="text-5xl" aria-hidden="true">
           🍵
         </div>
@@ -119,7 +121,7 @@ function NowCard({
   }
 
   return (
-    <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-6 shadow-lift">
+    <div className="rounded-card bg-accent-soft p-7 shadow-lift ring-1 ring-accent/25">
       <div className="text-5xl" aria-hidden="true">
         {event.emoji ?? '📌'}
       </div>
@@ -129,8 +131,9 @@ function NowCard({
 
       <button
         onClick={() => onDone(event.id)}
-        className="mt-5 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
+        className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white shadow-lift"
       >
+        <Icon naam="gedaan" size={20} />
         Dit is gedaan
       </button>
     </div>
@@ -152,7 +155,7 @@ function TimelineRow({
   const gedaan = status === 'done'
 
   return (
-    <li className="flex items-start gap-3 border-b border-line py-3 last:border-none">
+    <li className="flex items-start gap-3 border-b border-line/70 py-3 last:border-none">
       <span className="w-14 shrink-0 pt-1 font-bold tabular-nums text-ink-soft">
         {hhmm(new Date(event.starts_at), timezone)}
       </span>
@@ -188,32 +191,30 @@ function TimelineRow({
 }
 
 function BigButton({
-  emoji,
+  icoon,
   label,
   onClick,
   highlight,
   alert,
 }: {
-  emoji: string
+  icoon: IconNaam
   label: string
   onClick: () => void
   highlight?: boolean
   alert?: boolean
 }) {
   const stijl = highlight
-    ? 'bg-accent-ink text-white border-accent-ink'
+    ? 'bg-accent-ink text-white border-accent-ink shadow-lift'
     : alert
-      ? 'bg-surface text-alert border-alert'
-      : 'bg-surface border-line-strong'
+      ? 'bg-surface text-alert border-alert/40'
+      : 'bg-surface border-line'
 
   return (
     <button
       onClick={onClick}
       className={`flex min-h-big flex-col items-center justify-center gap-1 rounded-card border-[1.5px] px-2 text-center font-bold shadow-card ${stijl}`}
     >
-      <span className="text-3xl" aria-hidden="true">
-        {emoji}
-      </span>
+      <Icon naam={icoon} size={28} />
       {label}
     </button>
   )

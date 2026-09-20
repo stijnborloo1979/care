@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { addCareEntry, deleteCareEntry, getCareLog } from '../../services/careLog'
 import { hhmm } from '../../lib/time'
 import { useHousehold } from '../household/useHousehold'
+import DictateButton from '../../components/DictateButton'
 
 const HERKOMST: Record<string, string> = {
   family: 'familie',
@@ -78,7 +79,7 @@ export default function CareLog() {
           setError(null)
           voegToe.mutate()
         }}
-        className="rounded-card border border-line bg-surface p-5 shadow-card"
+        className="rounded-card bg-surface p-6 shadow-card"
       >
         <label className="block">
           <span className="text-sm font-semibold text-ink-soft">Wat gebeurde er?</span>
@@ -91,8 +92,11 @@ export default function CareLog() {
           />
         </label>
 
-        <label className="mt-3 block">
-          <span className="text-sm font-semibold text-ink-soft">Notitie, mag leeg blijven</span>
+        <div className="mt-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-ink-soft">Notitie, mag leeg blijven</span>
+            <DictateButton onTekst={(t) => setNote((v) => (v ? v + ' ' + t : t))} />
+          </div>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -100,7 +104,7 @@ export default function CareLog() {
             placeholder="Vandaag wat vermoeid."
             className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
           />
-        </label>
+        </div>
 
         <button
           type="submit"
@@ -120,7 +124,7 @@ export default function CareLog() {
       {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
 
       {[...perDag.entries()].map(([dag, entries]) => (
-        <section key={dag} className="rounded-card border border-line bg-surface p-5 shadow-card">
+        <section key={dag} className="rounded-card bg-surface p-6 shadow-card">
           <h2 className="text-lg font-bold capitalize">{dag}</h2>
           <ul className="mt-3 space-y-3">
             {entries.map((e) => (

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { dismissAlert, getSummary, type Summary } from '../../services/dashboard'
 import { dateLine, greeting, hhmm } from '../../lib/time'
 import { useNow } from '../today/useAgenda'
+import Icon from '../../components/Icon'
+import Skeleton from '../../components/Skeleton'
 
 interface Props {
   householdId: string
@@ -71,7 +73,16 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['summary', householdId] }),
   })
 
-  if (isLoading) return <p className="text-ink-soft">Bezig met laden…</p>
+  if (isLoading)
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-28 w-full" />
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Skeleton className="h-56 w-full" />
+          <Skeleton className="h-56 w-full" />
+        </div>
+      </div>
+    )
   if (isError || !data) return <p className="text-ink-soft">Het overzicht is nu niet te laden.</p>
 
   const t = toestandVan(data, now)
@@ -87,28 +98,42 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         </p>
       </header>
 
-      <div className="flex items-center gap-4 rounded-card border border-line bg-surface p-5 shadow-card">
-        <span
-          className="h-4 w-4 shrink-0 rounded-full"
-          style={{ background: t.kleur }}
-          aria-hidden="true"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="text-xl font-bold">{t.titel}</p>
-          <p className="text-ink-soft">{t.onder}</p>
+      {/* De hele bedoeling van dit scherm in één blik. Daarom groot, met
+          ruimte eromheen, en niet als zoveelste rij in een lijst. */}
+      <div
+        className="relative overflow-hidden rounded-[28px] p-7 shadow-lift"
+        style={{
+          background: t.ok
+            ? 'linear-gradient(135deg, var(--ok-soft, var(--surface-2)), var(--surface))'
+            : 'linear-gradient(135deg, var(--accent-soft), var(--surface))',
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ background: t.kleur }}
+            aria-hidden="true"
+          />
+          {/* Nooit alleen kleur: het woord staat er altijd bij. */}
+          <span className="text-sm font-bold uppercase tracking-wide text-ink-faint">
+            {t.ok ? 'rustig' : 'opvolgen'}
+          </span>
         </div>
-        {/* Nooit alleen kleur: het woord staat er altijd bij. */}
-        <span className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold">
-          {t.ok ? 'rustig' : 'opvolgen'}
-        </span>
+
+        <p className="mt-3 text-3xl font-extrabold leading-tight tracking-tight">{t.titel}</p>
+        <p className="mt-1 text-lg text-ink-soft">{t.onder}</p>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+        <section className="rounded-card bg-surface p-6 shadow-card">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Vandaag</h2>
-            <Link to="/persoon" className="text-sm font-semibold text-accent-ink underline underline-offset-4">
+            <Link
+              to="/persoon"
+              className="flex items-center gap-1 text-sm font-semibold text-accent-ink"
+            >
               Scherm van {personName}
+              <Icon naam="verder" size={16} />
             </Link>
           </div>
 
@@ -135,7 +160,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           </p>
         </section>
 
-        <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+        <section className="rounded-card bg-surface p-6 shadow-card">
           <h2 className="text-lg font-bold">Aandacht</h2>
           {data.alerts.length === 0 ? (
             <p className="mt-3 text-ink-soft">Niets dat opvolging vraagt.</p>
@@ -165,7 +190,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         </section>
       </div>
 
-      <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Medicatie vandaag</h2>
         {data.meds.length === 0 ? (
           <p className="mt-3 text-ink-soft">Geen medicatie ingepland.</p>

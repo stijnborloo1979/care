@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import StoragePhoto from '../../components/StoragePhoto'
 import { deleteItem, saveItem, uploadItemPhoto, type Item } from '../../services/homeMemory'
 import { useItem, useItems, useRooms } from './useHomeMemory'
+import { SJABLONEN } from './sjablonen'
+import DictateButton from '../../components/DictateButton'
 
 interface Props {
   householdId: string
@@ -23,7 +25,7 @@ export default function ManageHomeMemory({ householdId }: Props) {
   const lijst = (items ?? []).filter((i) => i.room_id === actieveKamer)
 
   return (
-    <section className="rounded-card border border-line bg-surface p-5 shadow-card">
+    <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Home Memory</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Wat er in huis staat, waar het ligt en hoe het werkt.
@@ -196,6 +198,17 @@ function ItemForm({
   const [steps, setSteps] = useState((bestaand?.item_step ?? []).map((s) => s.body).join('\n'))
   const [error, setError] = useState<string | null>(null)
 
+  function neemSjabloon(naam: string) {
+    const t = SJABLONEN.find((x) => x.naam === naam)
+    if (!t) return
+    setName(t.naam)
+    setEmoji(t.emoji)
+    // Wat er al ingevuld is blijft staan: een sjabloon vult aan, het
+    // overschrijft geen werk dat iemand net heeft gedaan.
+    setWhere((v) => v || t.waar)
+    setSteps((v) => v || t.stappen.join('\n'))
+  }
+
   const opslaan = useMutation({
     mutationFn: () =>
       saveItem({
@@ -224,6 +237,26 @@ function ItemForm({
       }}
       className="space-y-3 rounded-2xl border border-line bg-surface p-4"
     >
+      {!itemId ? (
+        <div>
+          <span className="text-sm font-semibold text-ink-soft">
+            Begin met een sjabloon, of typ het zelf
+          </span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {SJABLONEN.map((t) => (
+              <button
+                key={t.naam}
+                type="button"
+                onClick={() => neemSjabloon(t.naam)}
+                className="min-h-[2.4rem] rounded-pill border border-line bg-surface-soft px-3 text-sm font-semibold text-ink-soft"
+              >
+                {t.emoji} {t.naam}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex gap-3">
         <label className="w-20">
           <span className="text-sm font-semibold text-ink-soft">Icoon</span>
@@ -246,18 +279,28 @@ function ItemForm({
         </label>
       </div>
 
-      <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Waar ligt of staat het?</span>
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-ink-soft">Waar ligt of staat het?</span>
+          <DictateButton onTekst={(t) => setWhere(t)} />
+        </div>
         <input
           value={where}
           onChange={(e) => setWhere(e.target.value)}
           placeholder="Op het aanrecht, rechts van de gootsteen."
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Stappen, één per lijn</span>
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-ink-soft">Stappen, één per lijn</span>
+          {/* Elke ingesproken zin wordt een eigen stap. */}
+          <DictateButton
+            label="Stap inspreken"
+            onTekst={(t) => setSteps((v) => (v ? v + '\n' + t : t))}
+          />
+        </div>
         <textarea
           value={steps}
           onChange={(e) => setSteps(e.target.value)}
@@ -266,9 +309,9 @@ function ItemForm({
           className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
         />
         <span className="mt-1 block text-xs text-ink-faint">
-          Korte zinnen, één handeling per lijn. Maria leest ze als losse kaarten.
+          Korte zinnen, één handeling per lijn. Ze worden als losse kaarten getoond.
         </span>
-      </label>
+      </div>
 
       <div className="flex gap-2">
         <button
