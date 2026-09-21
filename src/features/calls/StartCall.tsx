@@ -63,9 +63,8 @@ export default function StartCall({
 
       {!heeftTurn() ? (
         <p className="mt-3 text-sm text-ink-faint">
-          Er is nog geen TURN-server ingesteld. Op de meeste thuisnetwerken werkt het gesprek, op
-          sommige mobiele netwerken niet. Zie <code>11_calls.sql</code> voor wat je daarvoor nodig
-          hebt.
+          Er is nog geen TURN-server ingesteld. Bellen werkt dan op wifi, maar meestal niet op 4G
+          of 5G. Zie de edge function <code>turn-credentials</code>.
         </p>
       ) : null}
 

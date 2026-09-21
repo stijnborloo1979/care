@@ -12,17 +12,37 @@ export interface ActiveCall {
   started_at: string
 }
 
+const GEEN_TURN = 'thuis.geen-turn'
+
 /**
- * De verbinding loopt rechtstreeks tussen de twee toestellen. Lukt dat
- * niet, dan is een TURN-server nodig: zet die in de omgeving en hij wordt
- * vanzelf gebruikt. Zonder TURN werkt het op de meeste thuisnetwerken,
- * maar niet op elk mobiel netwerk.
+ * Welke servers helpen de twee toestellen elkaar te vinden.
+ *
+ * STUN laat een toestel zijn publieke adres ontdekken. Zonder STUN kennen
+ * de toestellen alleen hun lokale adres, en werkt bellen enkel als ze op
+ * hetzelfde wifi zitten. Er gaat geen beeld of geluid via een STUN-server.
+ *
+ * TURN geeft het beeld door wanneer een rechtstreekse verbinding niet
+ * lukt, zoals op 4G en 5G. Het blijft versleuteld van toestel tot
+ * toestel; de TURN-server kan niets zien of horen.
  */
-function ijsservers(): RTCIceServer[] {
+async function ijsservers(): Promise<RTCIceServer[]> {
+  // 1. Tijdelijke TURN-gegevens via de edge function, als die bestaat.
+  if (sessionStorage.getItem(GEEN_TURN) !== '1') {
+    try {
+      const { data, error } = await supabase.functions.invoke('turn-credentials')
+      const lijst = data?.iceServers as RTCIceServer[] | null | undefined
+      if (!error && Array.isArray(lijst) && lijst.length > 0) return lijst
+      sessionStorage.setItem(GEEN_TURN, '1')
+    } catch {
+      // Niet ingesteld: deze sessie niet opnieuw proberen.
+      sessionStorage.setItem(GEEN_TURN, '1')
+    }
+  }
+
+  // 2. Vaste gegevens uit de omgeving, als die gezet zijn.
   const servers: RTCIceServer[] = []
   const stun = import.meta.env.VITE_STUN_URL
   const turn = import.meta.env.VITE_TURN_URL
-
   if (stun) servers.push({ urls: stun })
   if (turn) {
     servers.push({
@@ -31,19 +51,53 @@ function ijsservers(): RTCIceServer[] {
       credential: import.meta.env.VITE_TURN_CREDENTIAL,
     })
   }
+
+  // 3. Altijd minstens een STUN-server. Zonder was bellen buiten hetzelfde
+  //    wifi-netwerk onmogelijk.
+  if (!stun) servers.push({ urls: 'stun:stun.cloudflare.com:3478' })
   return servers
 }
 
 export function heeftTurn() {
-  return !!import.meta.env.VITE_TURN_URL
+  return !!import.meta.env.VITE_TURN_URL || sessionStorage.getItem(GEEN_TURN) !== '1'
+}
+
+/** Wacht tot alle verbindingsmogelijkheden verzameld zijn, hoogstens even. */
+function wachtOpKandidaten(pc: RTCPeerConnection, ms = 3000) {
+  if (pc.iceGatheringState === 'complete') return Promise.resolve()
+  return new Promise<void>((klaar) => {
+    const t = window.setTimeout(klaar, ms)
+    pc.addEventListener('icegatheringstatechange', () => {
+      if (pc.iceGatheringState === 'complete') {
+        window.clearTimeout(t)
+        klaar()
+      }
+    })
+  })
 }
 
 type Signaal =
+  | { soort: 'klaar' }
   | { soort: 'offer'; sdp: RTCSessionDescriptionInit }
   | { soort: 'answer'; sdp: RTCSessionDescriptionInit }
-  | { soort: 'ice'; kandidaat: RTCIceCandidateInit }
   | { soort: 'hangup' }
 
+/**
+ * Het afspreken van de verbinding loopt over een Realtime-kanaal. Dat
+ * kanaal bewaart niets: een bericht dat verstuurd wordt voor de andere
+ * kant luistert, is weg.
+ *
+ * Precies daar liep het mis. De beller stuurde zijn voorstel meteen, maar
+ * de ontvanger begon pas te luisteren nadat hij had opgenomen — seconden
+ * later. Het voorstel was dan al verdwenen, en beide kanten bleven op
+ * "Verbinden…" staan. Dat het soms wel lukte, was geluk met de timing.
+ *
+ * Nu meldt de ontvanger eerst "klaar", en herhaalt dat tot hij een
+ * voorstel heeft. De beller stuurt zijn voorstel pas als hij dat hoort, en
+ * herhaalt het tot er een antwoord is. Alle verbindingsmogelijkheden gaan
+ * in één keer mee in het voorstel en het antwoord, zodat er onderweg geen
+ * losse berichten meer verloren kunnen gaan.
+ */
 export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
   const [state, setState] = useState<CallState>('idle')
   const [fout, setFout] = useState<string | null>(null)
@@ -55,10 +109,11 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
   const lokaalRef = useRef<HTMLVideoElement | null>(null)
   const externRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  // Kandidaten die binnenkomen voor de beschrijving er is, moeten wachten.
-  const wachtendRef = useRef<RTCIceCandidateInit[]>([])
+  const timersRef = useRef<number[]>([])
 
   const stop = useCallback(() => {
+    timersRef.current.forEach((t) => window.clearInterval(t))
+    timersRef.current = []
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
     pcRef.current?.close()
@@ -79,6 +134,20 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
     if (!callId) return
     let afgebroken = false
 
+    function stuur(payload: Signaal) {
+      kanaalRef.current?.send({ type: 'broadcast', event: 'signaal', payload })
+    }
+
+    function herhaal(fn: () => void, ms: number, maxMs = 30_000) {
+      const start = Date.now()
+      const id = window.setInterval(() => {
+        if (Date.now() - start > maxMs) window.clearInterval(id)
+        else fn()
+      }, ms)
+      timersRef.current.push(id)
+      return id
+    }
+
     async function opzetten() {
       setFout(null)
       setState('connecting')
@@ -98,17 +167,27 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
         stream.getTracks().forEach((t) => t.stop())
         return
       }
-
       streamRef.current = stream
       if (lokaalRef.current) lokaalRef.current.srcObject = stream
 
-      const pc = new RTCPeerConnection({ iceServers: ijsservers() })
+      const pc = new RTCPeerConnection({ iceServers: await ijsservers() })
+      if (afgebroken) {
+        pc.close()
+        return
+      }
       pcRef.current = pc
       stream.getTracks().forEach((t) => pc.addTrack(t, stream))
 
       pc.ontrack = (e) => {
         if (externRef.current) externRef.current.srcObject = e.streams[0]
-        setState('active')
+      }
+
+      // Oudere Safari-versies melden connectionState niet altijd; de
+      // ICE-status wel. Beide kijken, dan mis je geen van de twee.
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+          setState('active')
+        }
       }
 
       pc.onconnectionstatechange = () => {
@@ -116,47 +195,63 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
         if (pc.connectionState === 'failed') {
           setState('failed')
           setFout(
-            heeftTurn()
-              ? 'De verbinding kwam niet tot stand. Probeer het opnieuw.'
-              : 'De verbinding kwam niet tot stand. Op dit netwerk is een TURN-server nodig.',
+            'De verbinding kwam niet tot stand. Op mobiel internet (4G of 5G) is daarvoor een TURN-server nodig.',
           )
         }
       }
 
-      const kanaal = supabase.channel(`call:${callId}`, { config: { broadcast: { self: false } } })
-      kanaalRef.current = kanaal
-
-      pc.onicecandidate = (e) => {
-        if (e.candidate) {
-          kanaal.send({
-            type: 'broadcast',
-            event: 'signaal',
-            payload: { soort: 'ice', kandidaat: e.candidate.toJSON() },
-          })
+      // Geen verbinding na 25 seconden: dan zeggen we dat, in plaats van
+      // eindeloos "Verbinden…" te tonen.
+      const wachttijd = window.setTimeout(() => {
+        if (pc.connectionState !== 'connected') {
+          setState('failed')
+          setFout(
+            'Het gesprek kwam niet tot stand. Zitten jullie op verschillende netwerken of op 4G/5G, dan is een TURN-server nodig.',
+          )
         }
-      }
+      }, 25_000)
+      timersRef.current.push(wachttijd)
+
+      let voorstel: RTCSessionDescriptionInit | null = null
+      let antwoord: RTCSessionDescriptionInit | null = null
+
+      const kanaal = supabase.channel(`call:${callId}`, {
+        config: { broadcast: { self: false } },
+      })
+      kanaalRef.current = kanaal
 
       kanaal.on('broadcast', { event: 'signaal' }, async ({ payload }) => {
         const s = payload as Signaal
         try {
-          if (s.soort === 'offer' && rol === 'ontvanger') {
-            await pc.setRemoteDescription(new RTCSessionDescription(s.sdp))
-            for (const k of wachtendRef.current) await pc.addIceCandidate(k)
-            wachtendRef.current = []
-            const antwoord = await pc.createAnswer()
-            await pc.setLocalDescription(antwoord)
-            kanaal.send({
-              type: 'broadcast',
-              event: 'signaal',
-              payload: { soort: 'answer', sdp: antwoord },
-            })
-          } else if (s.soort === 'answer' && rol === 'beller') {
-            await pc.setRemoteDescription(new RTCSessionDescription(s.sdp))
-            for (const k of wachtendRef.current) await pc.addIceCandidate(k)
-            wachtendRef.current = []
-          } else if (s.soort === 'ice') {
-            if (pc.remoteDescription) await pc.addIceCandidate(s.kandidaat)
-            else wachtendRef.current.push(s.kandidaat)
+          if (rol === 'beller' && s.soort === 'klaar') {
+            if (!voorstel) {
+              await pc.setLocalDescription(await pc.createOffer())
+              await wachtOpKandidaten(pc)
+              voorstel = pc.localDescription!.toJSON()
+              stuur({ soort: 'offer', sdp: voorstel })
+              // Blijf het voorstel herhalen tot er een antwoord is.
+              herhaal(() => {
+                if (pc.signalingState === 'have-local-offer' && voorstel) {
+                  stuur({ soort: 'offer', sdp: voorstel })
+                }
+              }, 2000)
+            } else if (pc.signalingState === 'have-local-offer') {
+              stuur({ soort: 'offer', sdp: voorstel })
+            }
+          } else if (rol === 'ontvanger' && s.soort === 'offer') {
+            if (!pc.remoteDescription) {
+              await pc.setRemoteDescription(s.sdp)
+              await pc.setLocalDescription(await pc.createAnswer())
+              await wachtOpKandidaten(pc)
+              antwoord = pc.localDescription!.toJSON()
+            }
+            // Ook bij een herhaald voorstel: het antwoord kan onderweg
+            // verloren zijn gegaan.
+            if (antwoord) stuur({ soort: 'answer', sdp: antwoord })
+          } else if (rol === 'beller' && s.soort === 'answer') {
+            if (pc.signalingState === 'have-local-offer') {
+              await pc.setRemoteDescription(s.sdp)
+            }
           } else if (s.soort === 'hangup') {
             stop()
             setState('ended')
@@ -167,18 +262,14 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
         }
       })
 
-      kanaal.subscribe(async (status) => {
-        // De beller doet het voorstel, maar pas als het kanaal echt open
-        // staat. Eerder sturen betekent dat de andere kant het mist.
-        if (status === 'SUBSCRIBED' && rol === 'beller') {
-          const voorstel = await pc.createOffer()
-          await pc.setLocalDescription(voorstel)
-          kanaal.send({
-            type: 'broadcast',
-            event: 'signaal',
-            payload: { soort: 'offer', sdp: voorstel },
-          })
-        }
+      kanaal.subscribe((status) => {
+        if (status !== 'SUBSCRIBED' || rol !== 'ontvanger') return
+        // De ontvanger meldt dat hij luistert, en herhaalt dat tot er een
+        // voorstel binnen is. Zo maakt het niet uit wie eerst klaar is.
+        stuur({ soort: 'klaar' })
+        herhaal(() => {
+          if (!pc.remoteDescription) stuur({ soort: 'klaar' })
+        }, 1500)
       })
     }
 
