@@ -103,11 +103,18 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
   const [fout, setFout] = useState<string | null>(null)
   const [microfoonAan, setMicrofoonAan] = useState(true)
   const [cameraAan, setCameraAan] = useState(true)
+  const [geluidGeblokkeerd, setGeluidGeblokkeerd] = useState(false)
+  const [externHeeftGeluid, setExternHeeftGeluid] = useState(true)
 
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const kanaalRef = useRef<RealtimeChannel | null>(null)
   const lokaalRef = useRef<HTMLVideoElement | null>(null)
   const externRef = useRef<HTMLVideoElement | null>(null)
+  // Geluid via een apart audio-element. Een video met geluid mag van de
+  // browser vaak niet vanzelf afspelen; een stille video wel. Door beeld
+  // en geluid te scheiden, is het beeld er altijd, en weten we precies
+  // wanneer alleen het geluid geblokkeerd wordt.
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const timersRef = useRef<number[]>([])
 
@@ -179,7 +186,20 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
       stream.getTracks().forEach((t) => pc.addTrack(t, stream))
 
       pc.ontrack = (e) => {
-        if (externRef.current) externRef.current.srcObject = e.streams[0]
+        const stroom = e.streams[0]
+        if (externRef.current && externRef.current.srcObject !== stroom) {
+          externRef.current.srcObject = stroom
+        }
+        if (audioRef.current && audioRef.current.srcObject !== stroom) {
+          audioRef.current.srcObject = stroom
+          audioRef.current
+            .play()
+            .then(() => setGeluidGeblokkeerd(false))
+            // Geweigerd: er is nog geen tik op het scherm geweest, zoals bij
+            // automatisch opnemen. Dan vragen we om die ene tik.
+            .catch(() => setGeluidGeblokkeerd(true))
+        }
+        setExternHeeftGeluid(stroom.getAudioTracks().length > 0)
       }
 
       // Oudere Safari-versies melden connectionState niet altijd; de
@@ -281,6 +301,13 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
     }
   }, [callId, rol, stop])
 
+  function zetGeluidAan() {
+    audioRef.current
+      ?.play()
+      .then(() => setGeluidGeblokkeerd(false))
+      .catch(() => setGeluidGeblokkeerd(true))
+  }
+
   function zetMicrofoon(aan: boolean) {
     streamRef.current?.getAudioTracks().forEach((t) => (t.enabled = aan))
     setMicrofoonAan(aan)
@@ -296,6 +323,10 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
     fout,
     lokaalRef,
     externRef,
+    audioRef,
+    geluidGeblokkeerd,
+    externHeeftGeluid,
+    zetGeluidAan,
     hangUp,
     microfoonAan,
     cameraAan,

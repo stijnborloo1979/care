@@ -22,6 +22,10 @@ export default function CallScreen({
     fout,
     lokaalRef,
     externRef,
+    audioRef,
+    geluidGeblokkeerd,
+    externHeeftGeluid,
+    zetGeluidAan,
     hangUp,
     microfoonAan,
     cameraAan,
@@ -59,6 +63,7 @@ export default function CallScreen({
           ref={externRef}
           autoPlay
           playsInline
+          muted
           className="h-full w-full bg-black object-cover"
         />
 
@@ -74,6 +79,23 @@ export default function CallScreen({
             </p>
             {fout ? <p className="max-w-sm text-lg text-white/80">{fout}</p> : null}
           </div>
+        ) : null}
+
+        <audio ref={audioRef} autoPlay />
+
+        {geluidGeblokkeerd && state === 'active' ? (
+          <button
+            onClick={zetGeluidAan}
+            className="absolute inset-x-6 top-6 flex min-h-[4rem] items-center justify-center rounded-card bg-white text-xl font-bold text-black shadow-lift"
+          >
+            🔊 Tik hier voor geluid
+          </button>
+        ) : null}
+
+        {state === 'active' && !externHeeftGeluid ? (
+          <p className="absolute inset-x-6 top-6 rounded-card bg-black/70 p-4 text-center text-lg text-white">
+            Er komt geen geluid van de andere kant. Staat daar de microfoon uit of geblokkeerd?
+          </p>
         ) : null}
 
         {/* Het eigen beeld klein in de hoek: je moet kunnen zien dat je
