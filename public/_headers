@@ -1,0 +1,21 @@
+# Cloudflare Pages leest dit bestand; netlify.toml doet hier niets.
+
+# Gebouwde bestanden dragen een hash in hun naam: die mogen voor altijd
+# in de cache.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# De service worker en het manifest juist nooit. Anders blijft een tablet
+# op een oude versie hangen, ook na een nieuwe deploy.
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache
+/registerSW.js
+  Cache-Control: no-cache
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: microphone=(self), geolocation=(self), camera=(self)

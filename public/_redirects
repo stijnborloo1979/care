@@ -1,0 +1,3 @@
+# Een single page app: elke route krijgt index.html, anders geeft
+# /familie/planning een 404 zodra iemand die link rechtstreeks opent.
+/*    /index.html   200
