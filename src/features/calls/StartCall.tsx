@@ -3,6 +3,7 @@ import Icon from '../../components/Icon'
 import { startCall } from '../../services/calls'
 import CallScreen from './CallScreen'
 import { heeftTurn } from './useWebRTC'
+import ConnectionTest from './ConnectionTest'
 
 /**
  * De familiekant: één knop, die de oproep aanmaakt en meteen het
@@ -67,6 +68,8 @@ export default function StartCall({
           of 5G. Zie de edge function <code>turn-credentials</code>.
         </p>
       ) : null}
+
+      <ConnectionTest />
 
       {fout ? (
         <p role="alert" className="mt-3 text-sm text-alert">

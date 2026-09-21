@@ -12,7 +12,7 @@ export interface ActiveCall {
   started_at: string
 }
 
-const GEEN_TURN = 'thuis.geen-turn'
+export const GEEN_TURN = 'thuis.geen-turn'
 
 /**
  * Welke servers helpen de twee toestellen elkaar te vinden.
@@ -25,7 +25,7 @@ const GEEN_TURN = 'thuis.geen-turn'
  * lukt, zoals op 4G en 5G. Het blijft versleuteld van toestel tot
  * toestel; de TURN-server kan niets zien of horen.
  */
-async function ijsservers(): Promise<RTCIceServer[]> {
+export async function ijsservers(): Promise<RTCIceServer[]> {
   // 1. Tijdelijke TURN-gegevens via de edge function, als die bestaat.
   if (sessionStorage.getItem(GEEN_TURN) !== '1') {
     try {
