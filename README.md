@@ -49,6 +49,28 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     toestellen; de tabel houdt alleen bij dát er gebeld wordt. Voor elk
     netwerk werkt het pas met een eigen TURN-server (coturn); zie de
     uitleg onderaan dat bestand.
+12. `12_pairing.sql` — de tablet van de persoon koppelen met een code van
+    acht cijfers. Hoort bij de edge function `pair-device`.
+
+## Inloggen
+
+`/login` toont drie deuren: wie zorgt, wie uitgenodigd werd, en de tablet
+van de persoon. Familie logt in met een code van zes cijfers uit de mail,
+of met een wachtwoord. De tablet wordt één keer gekoppeld met een code uit
+Instellingen en blijft daarna ingelogd.
+
+Zodat de mail een code bevat, pas je in Supabase het sjabloon aan:
+Authentication → Emails → Magic Link. Vervang de inhoud door:
+
+```html
+<h2>Je code voor Thuis</h2>
+<p style="font-size:32px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
+<p>Of klik op deze link: <a href="{{ .ConfirmationURL }}">inloggen</a></p>
+<p>De code is een uur geldig.</p>
+```
+
+Zonder `{{ .Token }}` in het sjabloon krijg je alleen een link en werkt
+het invullen van de code niet.
 
 ## Edge functions
 
@@ -59,6 +81,10 @@ Functions → Deploy a new function → plak het bestand.
   `MAIL_FROM`, `APP_URL`.
 - `embed` — berekent embeddings voor weetjes en dingen. Plan elke nacht
   in, na `run_nightly()`. Secret: `OPENAI_API_KEY`.
+- `pair-device` — koppelt de tablet van de persoon. Zet **Verify JWT
+  uit** voor deze functie: de tablet is op dat moment nog niet ingelogd.
+  De beveiliging zit in de code zelf: acht cijfers, tien minuten geldig,
+  eenmalig, en hoogstens tien mislukte pogingen per kwartier per adres.
 - `ask` — beantwoordt een vraag uit de eigen gegevens. Secret:
   `OPENAI_API_KEY`. Vindt de zoektocht niets boven de drempel, dan wordt
   het model niet eens aangeroepen.

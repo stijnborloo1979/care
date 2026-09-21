@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from './AuthProvider'
-import SignIn from './SignIn'
+import CodeLogin from './CodeLogin'
 
 interface Preview {
   person_name: string
@@ -91,7 +91,10 @@ export default function AcceptInvite() {
             <div className="mt-6">
               {/* Eerst inloggen, dan pas aanvaarden: het token alleen geeft
                   geen toegang, het mailadres moet kloppen. */}
-              <SignIn intro="Log eerst in met het adres waarop je de uitnodiging kreeg." />
+              <CodeLogin
+                titel="Eerst even inloggen"
+                uitleg="Gebruik het e-mailadres waarop je de uitnodiging kreeg. Je krijgt een code van zes cijfers."
+              />
             </div>
           )}
         </div>

@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 
@@ -13,9 +15,20 @@ export interface Household {
 }
 
 /**
- * Het eerste wat de app na het inloggen opvraagt. De rol bepaalt welk
- * scherm iemand krijgt: 'person' gaat nooit naar het familiescherm.
+ * Welk huishouden actief is, bewaard op het toestel. Wie voor twee ouders
+ * zorgt, of een verpleegkundige met meerdere cliënten, wisselt zo zonder
+ * opnieuw in te loggen.
  */
+const useKeuze = create<{ gekozen: string | null; kies: (id: string) => void }>()(
+  persist(
+    (set) => ({
+      gekozen: null,
+      kies: (id) => set({ gekozen: id }),
+    }),
+    { name: 'thuis.huishouden' },
+  ),
+)
+
 export function useHouseholds() {
   const { session } = useAuth()
 
@@ -31,9 +44,12 @@ export function useHouseholds() {
   })
 }
 
-/** Het actieve huishouden. Bij meerdere cliënten kiest een keuzescherm. */
 export function useHousehold() {
   const { data, isLoading, isError } = useHouseholds()
-  const actief = data && data.length > 0 ? data[0] : null
-  return { household: actief, all: data ?? [], isLoading, isError }
+  const { gekozen, kies } = useKeuze()
+
+  const lijst = data ?? []
+  const actief = lijst.find((h) => h.household_id === gekozen) ?? lijst[0] ?? null
+
+  return { household: actief, all: lijst, isLoading, isError, kies }
 }

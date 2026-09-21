@@ -2,6 +2,7 @@ import { useDisplayPrefs, type DisplayPrefs } from './useDisplayPrefs'
 import { useHousehold } from '../household/useHousehold'
 import { Link } from 'react-router-dom'
 import LocationSettings from '../location/LocationSettings'
+import PairTablet from '../family/PairTablet'
 
 const SCHAAL: { waarde: DisplayPrefs['scale']; label: string }[] = [
   { waarde: '1', label: 'A' },
@@ -114,6 +115,8 @@ export default function Settings() {
           Uitleg per toestel
         </Link>
       </section>
+
+      <PairTablet householdId={hh} personName={voornaam} />
 
       <LocationSettings />
 

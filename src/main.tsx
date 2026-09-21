@@ -7,7 +7,7 @@ import { persister, queryClient } from "./app/queryClient";
 import OfflineBanner from "./app/OfflineBanner";
 import { AuthProvider, useAuth } from "./features/auth/AuthProvider";
 import AcceptInvite from "./features/auth/AcceptInvite";
-import SignIn from "./features/auth/SignIn";
+import Welcome from "./features/auth/Welcome";
 import PersonShell from "./PersonShell";
 import PersonLayout from "./app/PersonLayout";
 import WhoIsWho, { PersonDetail } from "./features/people/WhoIsWho";
@@ -65,27 +65,6 @@ import SetupNeeded from "./app/SetupNeeded";
 import { pasLokaalToe } from "./features/settings/useDisplayPrefs";
 import "./index.css";
 
-function LoginPagina() {
-  const { session, loading } = useAuth();
-
-  // De magic link keert terug op deze pagina. De sessie komt dan wel
-  // binnen, maar zonder deze regel bleef het inlogformulier gewoon staan
-  // en leek het alsof er niets gebeurd was.
-  if (loading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
-  if (session) return <Navigate to="/" replace />;
-
-  return (
-    <main className="mx-auto max-w-[32rem] px-5 py-12">
-      <h1 className="text-[2rem] font-extrabold tracking-tight">Thuis</h1>
-      <p className="mt-1 text-lg text-ink-soft">
-        Een digitaal geheugen voor elke dag.
-      </p>
-      <div className="mt-8">
-        <SignIn />
-      </div>
-    </main>
-  );
-}
 
 /** Wie niet ingelogd is, ziet het inlogscherm. Meer poortwachter is dit niet. */
 function Beveiligd({ children }: { children: React.ReactNode }) {
@@ -150,7 +129,7 @@ if (!configuratieOk) {
                 fallback={<p className="p-6 text-ink-soft">Even geduld…</p>}
               >
                 <Routes>
-                  <Route path="/login" element={<LoginPagina />} />
+                  <Route path="/login/*" element={<Welcome />} />
                   <Route path="/uitnodiging" element={<AcceptInvite />} />
                   <Route path="/installeren" element={<InstallGuide />} />
                   <Route

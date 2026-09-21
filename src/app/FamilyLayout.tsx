@@ -1,10 +1,10 @@
 import { NavLink, Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../features/auth/AuthProvider";
 import { useHousehold } from "../features/household/useHousehold";
 import { useDisplayPrefs } from "../features/settings/useDisplayPrefs";
 import { useRealtime } from "../features/realtime/useRealtime";
 import InstallPrompt from "../features/install/InstallPrompt";
 import Icon, { type IconNaam } from "../components/Icon";
+import AccountBar from "./AccountBar";
 
 const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
@@ -21,7 +21,6 @@ const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
 
 export default function FamilyLayout() {
   const { household, isLoading } = useHousehold();
-  const { signOut } = useAuth();
   useDisplayPrefs(household?.household_id ?? "");
   useRealtime(household?.household_id ?? "");
 
@@ -37,9 +36,9 @@ export default function FamilyLayout() {
         {/* Sidebar op desktop, onderaan tabs op mobiel. Familie werkt aan
           een bureau, de persoon op een tablet: twee verschillende noden. */}
         <aside className="hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
-          <div className="px-2 pb-5">
-            <p className="text-lg font-extrabold tracking-tight">Thuis</p>
-            <p className="text-sm text-ink-soft">{household.person_name}</p>
+          <div className="pb-4">
+            <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">Thuis</p>
+            <AccountBar />
           </div>
 
           <nav aria-label="Hoofdnavigatie" className="space-y-0.5">
@@ -69,17 +68,14 @@ export default function FamilyLayout() {
             >
               Scherm van {household.person_name.split(" ")[0]}
             </NavLink>
-            <button
-              onClick={signOut}
-              className="font-semibold text-ink-soft underline underline-offset-4"
-            >
-              Uitloggen
-            </button>
           </div>
         </aside>
 
         <div className="min-w-0 flex-1">
           <div className="mx-auto max-w-5xl px-5 pb-28 pt-6 lg:pb-12">
+            <div className="mb-4 lg:hidden">
+              <AccountBar />
+            </div>
             <Outlet />
           </div>
 
