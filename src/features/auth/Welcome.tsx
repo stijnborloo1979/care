@@ -63,11 +63,14 @@ function Deuren() {
       </p>
 
       <div className="mt-8 space-y-3">
+        {/* Neutraal geformuleerd: de app is er ook voor wie ze zelf gebruikt.
+            "Ik zorg voor iemand" als enige hoofddeur sloot die persoon
+            buiten, net nu de persoon eigenaar kan zijn. */}
         <Deur
           naar="/login/familie"
           icoon={<Heart size={24} strokeWidth={1.75} />}
-          titel="Ik zorg voor iemand"
-          onder="Inloggen, of een account maken voor je familie."
+          titel="Inloggen of beginnen"
+          onder="Voor jezelf, of voor iemand voor wie je zorgt."
           hoofd
         />
         <Deur
@@ -80,7 +83,7 @@ function Deuren() {
           naar="/login/tablet"
           icoon={<Tablet size={24} strokeWidth={1.75} />}
           titel="Dit is de tablet van de persoon"
-          onder="Eén keer koppelen met een code van de familie."
+          onder="Eén keer koppelen met een code."
         />
       </div>
     </>

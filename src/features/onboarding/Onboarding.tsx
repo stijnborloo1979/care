@@ -27,7 +27,9 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const [voorWie, setVoorWie] = useState<'zelf' | 'familielid'>('familielid')
+  // Geen standaardkeuze: of je de app zelf gebruikt of voor iemand anders,
+  // bepaalt wie eigenaar wordt. Dat moet een bewuste keuze zijn.
+  const [voorWie, setVoorWie] = useState<'zelf' | 'familielid' | null>(null)
   const [naam, setNaam] = useState('')
   const [adres, setAdres] = useState('')
   const [mensen, setMensen] = useState<Persoon[]>([LEEG, LEEG, LEEG])
@@ -88,7 +90,8 @@ export default function Onboarding() {
   const stappen = [
     {
       titel: 'Voor wie is deze app?',
-      onder: 'Dat bepaalt welk scherm je straks ziet.',
+      onder: 'Dat bepaalt wie de app beheert en welk scherm je straks ziet.',
+      verplicht: voorWie === null,
       inhoud: (
         <div className="space-y-3">
           {(
