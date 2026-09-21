@@ -2,7 +2,9 @@ import type { AgendaEvent } from '../../services/agenda'
 import type { Item } from '../../services/homeMemory'
 import type { PersonCard } from '../../services/people'
 import type { MemoryNote } from '../../services/notes'
-import { hhmm } from '../../lib/time'
+import type { QuickNote } from '../../services/quickNotes'
+import type { MedMoment } from '../../services/medsToday'
+import { hhmm, localDateKey } from '../../lib/time'
 import { whatNow } from '../today/whatNow'
 
 export interface Answer {
@@ -14,6 +16,8 @@ export interface Answer {
   bellen?: { naam: string; nummer: string }
   /** Waar het antwoord vandaan komt. Zo weet de persoon wie het schreef. */
   bron?: string
+  /** Medicatiemomenten die de persoon vanuit het antwoord kan bevestigen. */
+  bevestig?: string[]
 }
 
 export interface Kennis {
@@ -21,6 +25,10 @@ export interface Kennis {
   items: Item[]
   people: PersonCard[]
   notes: MemoryNote[]
+  /** Wat de persoon zelf heeft laten onthouden, nieuwste eerst. */
+  onthouden?: QuickNote[]
+  /** De medicatiemomenten van vandaag. */
+  medicatie?: MedMoment[]
   tz: string
 }
 
@@ -51,6 +59,145 @@ function vindItem(vraag: string, items: Item[]): Item | null {
   return null
 }
 
+// Woorden die niets zeggen over wát er gezocht wordt.
+const STOPWOORDEN = new Set([
+  'waar', 'heb', 'hebt', 'mijn', 'gelegd', 'gezet', 'gelaten', 'ligt', 'liggen', 'staat',
+  'staan', 'zijn', 'deze', 'die', 'dat', 'het', 'een', 'de', 'ik', 'je', 'is', 'al',
+  'nog', 'wat', 'moest', 'onthouden', 'weet', 'ook', 'weer', 'toch', 'eens',
+])
+
+function kernwoorden(vraag: string): string[] {
+  return normaliseer(vraag)
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOPWOORDEN.has(w))
+}
+
+/** "sleutels" moet ook "sleutel" vinden, en omgekeerd. */
+function stam(w: string) {
+  return w.replace(/(en|s)$/, '')
+}
+
+function wanneer(iso: string, tz: string, nu: Date): string {
+  const d = new Date(iso)
+  const dag = localDateKey(d, tz)
+  const vandaag = localDateKey(nu, tz)
+  const gisteren = localDateKey(new Date(nu.getTime() - 24 * 3600_000), tz)
+  const uur = hhmm(d, tz)
+  if (dag === vandaag) return `vandaag om ${uur}`
+  if (dag === gisteren) return `gisteren om ${uur}`
+  const datum = new Intl.DateTimeFormat('nl-BE', {
+    timeZone: tz,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(d)
+  return `op ${datum}`
+}
+
+/** De nieuwste eigen notitie waar een kernwoord van de vraag in staat. */
+function vindOnthouden(vraag: string, lijst: QuickNote[]): QuickNote | null {
+  const woorden = kernwoorden(vraag).map(stam).filter((w) => w.length > 2)
+  if (woorden.length === 0) return null
+  return (
+    lijst.find((n) => {
+      const tekst = normaliseer(n.body)
+      return woorden.some((w) => tekst.includes(w))
+    }) ?? null
+  )
+}
+
+const MEDICATIEWOORDEN = /pil|medic|medicijn|tablet|druppel|capsule/
+
+const ACTIVITEIT: { woorden: RegExp; zoek: (e: AgendaEvent) => boolean }[] = [
+  { woorden: /ontbijt|ontbeten/, zoek: (e) => /ontbijt/i.test(e.title) },
+  { woorden: /lunch|middageten|middag gegeten/, zoek: (e) => /lunch|middag/i.test(e.title) },
+  { woorden: /avondeten|avondmaal|avond gegeten/, zoek: (e) => /avond/i.test(e.title) && e.kind === 'meal' },
+  { woorden: /gegeten|eten/, zoek: (e) => e.kind === 'meal' },
+  { woorden: /gewandeld|wandel/, zoek: (e) => /wandel/i.test(e.title) },
+]
+
+/**
+ * "Heb ik dit al gedaan?" — de vraag die bij beginnende geheugenproblemen
+ * het meest onrust geeft. Het antwoord komt uit wat er echt afgevinkt of
+ * bevestigd is, met het tijdstip erbij. Nooit uit een gok.
+ */
+function alGedaan(vraag: string, k: Kennis, nu: Date): Answer | null {
+  const v = normaliseer(vraag)
+
+  if (MEDICATIEWOORDEN.test(v)) {
+    const momenten = (k.medicatie ?? []).filter(
+      (m) => new Date(m.due_at).getTime() <= nu.getTime() + 30 * 60_000,
+    )
+    if ((k.medicatie ?? []).length === 0) {
+      return { vraag, titel: 'Er staat vandaag geen medicatie in je planning.', regels: [] }
+    }
+    if (momenten.length === 0) {
+      const eerste = (k.medicatie ?? [])[0]
+      return {
+        vraag,
+        titel: 'Nog niet nodig.',
+        regels: [`Je volgende medicatie is om ${hhmm(new Date(eerste.due_at), k.tz)}.`],
+      }
+    }
+
+    const open = momenten.filter((m) => !m.taken_at)
+    if (open.length === 0) {
+      const laatste = momenten[momenten.length - 1]
+      return {
+        vraag,
+        titel: 'Ja, dat heb je gedaan.',
+        regels: [
+          `Je medicatie van ${hhmm(new Date(laatste.due_at), k.tz)} is genomen, ${wanneer(
+            laatste.taken_at!,
+            k.tz,
+            nu,
+          )}.`,
+        ],
+      }
+    }
+
+    const tijden = [...new Set(open.map((m) => hhmm(new Date(m.due_at), k.tz)))].join(' en ')
+    return {
+      vraag,
+      titel: 'Nog niet.',
+      regels: [`Je medicatie van ${tijden} staat nog niet als genomen.`],
+      bevestig: open.map((m) => m.id),
+    }
+  }
+
+  for (const a of ACTIVITEIT) {
+    if (!a.woorden.test(v)) continue
+    const kandidaten = k.events
+      .filter(a.zoek)
+      .sort(
+        (x, y) =>
+          Math.abs(new Date(x.starts_at).getTime() - nu.getTime()) -
+          Math.abs(new Date(y.starts_at).getTime() - nu.getTime()),
+      )
+    const e = kandidaten[0]
+    if (!e) return null
+    const uur = hhmm(new Date(e.starts_at), k.tz)
+    if (e.done_at) {
+      return {
+        vraag,
+        titel: 'Ja, dat heb je gedaan.',
+        regels: [`${e.title} is afgevinkt, ${wanneer(e.done_at, k.tz, nu)}.`],
+      }
+    }
+    if (new Date(e.starts_at) > nu) {
+      return { vraag, titel: 'Nog niet.', regels: [`${e.title} staat gepland om ${uur}.`] }
+    }
+    return {
+      vraag,
+      titel: 'Dat staat nog niet als gedaan.',
+      regels: [`${e.title} was gepland om ${uur}.`],
+    }
+  }
+
+  return null
+}
+
 function vindPersoon(vraag: string, people: PersonCard[]): PersonCard | null {
   const v = normaliseer(vraag)
   return people.find((p) => p.kind !== 'self' && v.includes(normaliseer(p.name))) ?? null
@@ -74,6 +221,25 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
         titel: `Bel ${p.name}`,
         regels: [`${p.relation} — ${p.phone}`],
         bellen: { naam: p.name, nummer: p.phone },
+      }
+    }
+  }
+
+  // heb ik dit al gedaan?
+  if (/\bheb ik\b/.test(v) && /\bal\b|gedaan|genomen|gegeten/.test(v)) {
+    const a = alGedaan(vraag, k, nu)
+    if (a) return a
+  }
+
+  // wat moest ik onthouden?
+  if (v.includes('onthouden') || v.includes('onthoud')) {
+    const lijst = (k.onthouden ?? []).slice(0, 3)
+    if (lijst.length > 0) {
+      return {
+        vraag,
+        titel: 'Dit liet je onthouden',
+        regels: lijst.map((n) => `${n.body} — ${wanneer(n.created_at, k.tz, nu)}`),
+        bron: 'Onthouden door jou',
       }
     }
   }
@@ -128,6 +294,16 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
   // waar ligt iets
   if (v.includes('waar')) {
     const item = vindItem(vraag, k.items)
+
+    // Wat de persoon zelf heeft laten onthouden, gaat voor. Dat is waar
+    // het vandaag ligt; Home Memory zegt waar het normaal hoort te liggen.
+    const eigen = vindOnthouden(vraag, k.onthouden ?? [])
+    if (eigen) {
+      const regels = [`Dat zei je ${wanneer(eigen.created_at, k.tz, nu)}.`]
+      if (item?.where_text) regels.push(`Normaal ligt het: ${item.where_text}`)
+      return { vraag, titel: eigen.body, regels, bron: 'Onthouden door jou' }
+    }
+
     if (item) {
       return {
         vraag,
@@ -175,6 +351,8 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
 
 export const VOORBEELDVRAGEN = [
   'Wat moet ik nu doen?',
+  'Heb ik mijn pillen al genomen?',
+  'Wat moest ik onthouden?',
   'Wie komt er vandaag?',
   'Waar is mijn bril?',
   'Hoe zet ik de televisie aan?',

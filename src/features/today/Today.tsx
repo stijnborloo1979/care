@@ -6,6 +6,7 @@ import { useAgenda, useMarkDone, useNow } from './useAgenda'
 import PersonInbox from '../messages/PersonInbox'
 import Icon, { type IconNaam } from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
+import OnthoudDit from '../memory/OnthoudDit'
 
 interface Props {
   householdId: string
@@ -70,6 +71,10 @@ export default function Today({ householdId, personName, timezone }: Props) {
           </div>
         </section>
       ) : null}
+
+      <div className="mt-6">
+        <OnthoudDit householdId={householdId} timezone={timezone} />
+      </div>
 
       {events.length > 0 ? (
         <section className="mt-6" aria-labelledby="vandaag">

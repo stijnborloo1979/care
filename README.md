@@ -51,6 +51,8 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     uitleg onderaan dat bestand.
 12. `12_pairing.sql` — de tablet van de persoon koppelen met een code van
     acht cijfers. Hoort bij de edge function `pair-device`.
+13. `13_quick_notes.sql` — "Onthoud dit": notities die de persoon zelf
+    maakt, en die de assistent later kan terugvinden.
 
 ## Inloggen
 
@@ -151,6 +153,18 @@ routines, zorglogboek en documenten, elk op een eigen route.
 
 De familie-interface wordt lazy geladen: de tablet van de persoon
 downloadt hem niet.
+
+## Wat de persoon zelf kan
+
+- **Onthoud dit** — inspreken of typen wat je wil onthouden. Later vraag
+  je "waar heb ik mijn sleutels gelegd?" en krijg je het antwoord met het
+  tijdstip waarop je het zei.
+- **Heb ik dit al gedaan?** — medicatie, maaltijden en wandelingen, uit wat
+  er echt afgevinkt of bevestigd is. Staat de medicatie nog open, dan kan
+  je ze vanuit het antwoord meteen bevestigen.
+- **Herinneringen worden uitgesproken** — tien minuten voor een afspraak,
+  of meteen als de app pas na het begin opengaat. 's Nachts niet. Browsers
+  vragen daarvoor één aanraking van het scherm na elke herstart.
 
 ## Offline
 

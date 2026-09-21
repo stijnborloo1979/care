@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
+import { confirmMoments } from '../../services/medsToday'
 import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
@@ -14,8 +16,19 @@ export default function Talk() {
   const { kennis } = useKennis(hh, tz)
   const [antwoord, setAntwoord] = useState<Answer | null>(null)
   const [zoekt, setZoekt] = useState(false)
+  const [bevestigd, setBevestigd] = useState(false)
+  const queryClient = useQueryClient()
+
+  async function neemNu(ids: string[]) {
+    await confirmMoments(ids)
+    setBevestigd(true)
+    await queryClient.invalidateQueries({ queryKey: ['meds-today', hh] })
+    await queryClient.invalidateQueries({ queryKey: ['summary', hh] })
+    if (huidigePrefs().voice) spreek('Goed. Ik heb genoteerd dat je je medicatie genomen hebt.')
+  }
 
   function toon(a: Answer) {
+    setBevestigd(false)
     setAntwoord(a)
     if (huidigePrefs().voice) spreek([a.titel, ...a.regels].join('. '))
   }
@@ -94,6 +107,21 @@ export default function Talk() {
 
           {antwoord.bron ? (
             <p className="mt-3 text-sm text-ink-faint">Genoteerd door je familie: {antwoord.bron}</p>
+          ) : null}
+
+          {antwoord.bevestig && antwoord.bevestig.length > 0 ? (
+            bevestigd ? (
+              <p className="mt-4 rounded-2xl bg-accent-soft p-3 text-lg font-semibold text-accent-ink">
+                Genoteerd. Je familie ziet het ook.
+              </p>
+            ) : (
+              <button
+                onClick={() => neemNu(antwoord.bevestig!)}
+                className="mt-4 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
+              >
+                Ik heb ze nu genomen
+              </button>
+            )
           ) : null}
 
           {antwoord.bellen ? (

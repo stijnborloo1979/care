@@ -6,6 +6,9 @@ import { useRealtime } from '../features/realtime/useRealtime'
 import { useLocationReporter, useLocationSetting } from '../features/location/useLocation'
 import IncomingCall from '../features/calls/IncomingCall'
 import InstallPrompt from '../features/install/InstallPrompt'
+import { useAgenda } from '../features/today/useAgenda'
+import { useProactiveSpeech } from '../features/today/useProactiveSpeech'
+import { huidigePrefs } from '../features/settings/useDisplayPrefs'
 
 const NAV: { to: string; label: string; icoon: IconNaam; mic?: boolean }[] = [
   { to: '/', label: 'Vandaag', icoon: 'vandaag' },
@@ -30,6 +33,9 @@ export default function PersonLayout() {
   useRealtime(household?.household_id ?? '')
   const { setting } = useLocationSetting(household?.household_id ?? '')
   useLocationReporter(household?.household_id ?? '', !!setting?.enabled)
+  const tz = household?.timezone ?? 'Europe/Brussels'
+  const { data: vandaag } = useAgenda(household?.household_id ?? '', tz)
+  const { spraakVrij } = useProactiveSpeech(vandaag ?? [], tz)
 
   return (
     <>
@@ -38,6 +44,14 @@ export default function PersonLayout() {
       {/* Klein gehouden: wie de tablet klaarzet ziet het, en het leidt
           de persoon zelf niet af. */}
       <InstallPrompt compact />
+
+      {/* Browsers laten een stem pas toe na één aanraking. Op de tablet is
+          dat één tik na elke herstart; daarna verdwijnt deze regel. */}
+      {!spraakVrij && huidigePrefs().voice ? (
+        <p className="bg-accent-soft px-4 py-2 text-center text-sm font-semibold text-accent-ink">
+          Tik één keer op het scherm, dan kan ik je met mijn stem herinneren.
+        </p>
+      ) : null}
 
       {setting?.enabled ? (
         <p className="bg-surface-soft px-4 py-1.5 text-center text-sm font-semibold text-ink-soft">

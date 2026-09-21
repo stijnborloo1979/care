@@ -118,3 +118,81 @@ describe('beantwoord', () => {
     expect(beantwoord('Wanneer komt Els?', leeg, NU).titel).toContain('niet in de planning')
   })
 })
+
+describe('heb ik dit al gedaan', () => {
+  const med = (id: string, uur: string, genomen: string | null) => ({
+    id,
+    naam: 'Metformine',
+    due_at: `2026-03-10T${uur}:00+01:00`,
+    taken_at: genomen ? `2026-03-10T${genomen}:00+01:00` : null,
+  })
+
+  it('zegt ja, met het tijdstip, als de medicatie bevestigd is', () => {
+    const k = { ...kennis, medicatie: [med('m1', '08:30', '08:42')] }
+    const a = beantwoord('Heb ik mijn pillen al genomen?', k, NU)
+    expect(a.titel).toBe('Ja, dat heb je gedaan.')
+    expect(a.regels[0]).toContain('08:42')
+    expect(a.bevestig).toBeUndefined()
+  })
+
+  it('zegt nog niet, en biedt aan om te bevestigen', () => {
+    const k = { ...kennis, medicatie: [med('m1', '08:30', null)] }
+    const a = beantwoord('heb ik mijn medicatie al genomen', k, NU)
+    expect(a.titel).toBe('Nog niet.')
+    expect(a.bevestig).toEqual(['m1'])
+  })
+
+  it('vraagt niets te bevestigen wat pas later vandaag moet', () => {
+    const k = { ...kennis, medicatie: [med('m2', '21:00', null)] }
+    const a = beantwoord('Heb ik mijn pillen al genomen?', k, NU)
+    expect(a.titel).toBe('Nog niet nodig.')
+    expect(a.regels[0]).toContain('21:00')
+  })
+
+  it('weet of de lunch al voorbij is', () => {
+    const k = {
+      ...kennis,
+      events: [{ ...kennis.events[0], done_at: '2026-03-10T12:40:00+01:00' }],
+    }
+    const a = beantwoord('Heb ik al gegeten?', k, new Date('2026-03-10T13:30:00+01:00'))
+    expect(a.titel).toBe('Ja, dat heb je gedaan.')
+    expect(a.regels[0]).toContain('12:40')
+  })
+})
+
+describe('onthoud dit', () => {
+  const eigen = [
+    {
+      id: 'q2',
+      household_id: 'hh',
+      body: 'Mijn sleutels liggen in de inkomhal.',
+      created_at: '2026-03-10T10:14:00+01:00',
+    },
+    {
+      id: 'q1',
+      household_id: 'hh',
+      body: 'De sleutel ligt op de keukentafel.',
+      created_at: '2026-03-09T09:00:00+01:00',
+    },
+  ]
+
+  it('geeft de nieuwste eigen notitie, met wanneer je het zei', () => {
+    const a = beantwoord('Waar heb ik mijn sleutels gelegd?', { ...kennis, onthouden: eigen }, NU)
+    expect(a.titel).toBe('Mijn sleutels liggen in de inkomhal.')
+    expect(a.regels[0]).toBe('Dat zei je vandaag om 10:14.')
+    expect(a.bron).toBe('Onthouden door jou')
+  })
+
+  it('gaat voor op waar iets normaal ligt, maar noemt dat erbij', () => {
+    const bril = [{ ...eigen[0], body: 'Mijn bril ligt in de auto.' }]
+    const a = beantwoord('Waar is mijn bril?', { ...kennis, onthouden: bril }, NU)
+    expect(a.titel).toBe('Mijn bril ligt in de auto.')
+    expect(a.regels[1]).toContain('nachtkastje')
+  })
+
+  it('somt op wat je liet onthouden', () => {
+    const a = beantwoord('Wat moest ik onthouden?', { ...kennis, onthouden: eigen }, NU)
+    expect(a.regels).toHaveLength(2)
+    expect(a.regels[1]).toContain('gisteren')
+  })
+})

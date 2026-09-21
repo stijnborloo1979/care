@@ -11,7 +11,8 @@ import { supabase } from '../../lib/supabase'
  */
 const TABELLEN: { tabel: string; sleutels: string[] }[] = [
   { tabel: 'agenda_event', sleutels: ['agenda', 'summary'] },
-  { tabel: 'medication_log', sleutels: ['summary'] },
+  { tabel: 'medication_log', sleutels: ['summary', 'meds-today'] },
+  { tabel: 'quick_note', sleutels: ['quicknotes'] },
   { tabel: 'care_log', sleutels: ['carelog', 'summary'] },
   { tabel: 'message', sleutels: ['inbox'] },
 ]
