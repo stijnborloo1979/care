@@ -181,7 +181,14 @@ export default function CodeLogin({
       {stap === 'code' ? (
         <div>
           <p className="mt-2 text-ink-soft">
-            We stuurden een code naar <strong>{email}</strong>. Kijk ook even in je spam.
+            We stuurden een mail naar <strong>{email}</strong>. Kijk ook even in je spam.
+          </p>
+          {/* Zonder eigen mailserver stuurt Supabase alleen een link, geen
+              code. Dan moet dit scherm dat zeggen, in plaats van te
+              wachten op iets dat niet komt. */}
+          <p className="mt-3 rounded-2xl bg-surface-soft p-3 text-sm text-ink-soft">
+            Staat er alleen een link in de mail en geen code? Klik dan gewoon op die link — dan ben
+            je ook binnen.
           </p>
           <input
             ref={codeRef}
