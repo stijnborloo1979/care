@@ -35,7 +35,12 @@ export function useHouseholds() {
   return useQuery({
     queryKey: ['households', session?.user.id],
     enabled: !!session,
-    staleTime: 5 * 60_000,
+    // Bij elke start opnieuw vragen. De lijst wordt ook in de browser
+    // bewaard voor offline gebruik, en zonder dit bleef een gewist of
+    // nieuw huishouden tot vijf minuten lang onzichtbaar. De vraag is
+    // klein; de verwarring als het niet klopt is groot.
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: async (): Promise<Household[]> => {
       const { data, error } = await supabase.rpc('my_households')
       if (error) throw error
