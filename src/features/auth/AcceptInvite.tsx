@@ -51,8 +51,8 @@ export default function AcceptInvite() {
     try {
       const { error } = await supabase.rpc('accept_invite', { invite_token: token })
       if (error) throw error
-      await queryClient.invalidateQueries({ queryKey: ['households'] })
-      navigate('/')
+      await queryClient.refetchQueries({ queryKey: ['households'], type: 'all' })
+      navigate('/', { replace: true })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Aanvaarden lukte niet.')
     } finally {

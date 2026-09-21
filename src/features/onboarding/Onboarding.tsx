@@ -71,8 +71,11 @@ export default function Onboarding() {
         })
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['households'] })
-      navigate(voorWie === 'zelf' ? '/' : '/familie')
+      // Eerst het nieuwe huishouden echt ophalen, dan pas doorsturen. Alleen
+      // invalideren volstond niet: op dit scherm keek niemand naar die
+      // query, dus werd hij niet ververst en kwam de oude lege lijst eerst.
+      await queryClient.refetchQueries({ queryKey: ['households'], type: 'all' })
+      navigate(voorWie === 'zelf' ? '/' : '/familie', { replace: true })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Er ging iets mis. Probeer het opnieuw.')
       setBusy(false)

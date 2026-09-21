@@ -45,11 +45,17 @@ export function useHouseholds() {
 }
 
 export function useHousehold() {
-  const { data, isLoading, isError } = useHouseholds()
+  const { data, isLoading, isFetching, isError } = useHouseholds()
   const { gekozen, kies } = useKeuze()
 
   const lijst = data ?? []
   const actief = lijst.find((h) => h.household_id === gekozen) ?? lijst[0] ?? null
 
-  return { household: actief, all: lijst, isLoading, isError, kies }
+  // Een lege lijst uit de cache is geen antwoord zolang er nog een nieuwe
+  // onderweg is. Zonder dit stuurde de app je na de onboarding terug naar
+  // /start: het huishouden bestond al, maar de oude, lege cache kwam eerst
+  // binnen en de app besliste daarop.
+  const bezig = isLoading || (isFetching && lijst.length === 0)
+
+  return { household: actief, all: lijst, isLoading: bezig, isError, kies }
 }
