@@ -4,6 +4,24 @@ import { supabase } from '../../lib/supabase'
 type Manier = 'link' | 'wachtwoord'
 
 /**
+ * Een link die verlopen of al gebruikt is, komt terug met een fout in het
+ * adres. Die tonen we, anders ziet het eruit alsof de link niets deed.
+ * Mailprogramma's die links vooraf openen om ze te scannen, verbruiken
+ * ze soms al voor je zelf klikt — vandaar die uitleg.
+ */
+function foutUitLink(): string | null {
+  const bron = new URLSearchParams(
+    window.location.hash.replace(/^#/, '') || window.location.search.replace(/^\?/, ''),
+  )
+  const code = bron.get('error_code')
+  if (!code && !bron.get('error')) return null
+  if (code === 'otp_expired') {
+    return 'Deze link is verlopen of al gebruikt. Vraag een nieuwe aan en klik er meteen op.'
+  }
+  return bron.get('error_description')?.replace(/\+/g, ' ') ?? 'De link werkte niet.'
+}
+
+/**
  * Twee manieren, met de magic link als standaard: een wachtwoord dat je
  * moet onthouden is precies wat deze doelgroep niet kan.
  *
@@ -18,7 +36,7 @@ export default function SignIn({ intro }: { intro?: string }) {
   const [wachtwoord, setWachtwoord] = useState('')
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() => foutUitLink())
 
   async function verstuur(e: React.FormEvent) {
     e.preventDefault()
@@ -35,9 +53,16 @@ export default function SignIn({ intro }: { intro?: string }) {
         return
       }
 
+      // Vanaf het inlogscherm keren we terug naar de start. Vanaf een
+      // uitnodiging juist naar die uitnodiging, met het token erbij.
+      const terug =
+        window.location.pathname === '/login'
+          ? window.location.origin + '/'
+          : window.location.origin + window.location.pathname + window.location.search
+
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { emailRedirectTo: window.location.origin + window.location.pathname },
+        options: { emailRedirectTo: terug },
       })
       if (error) throw error
       setSent(true)

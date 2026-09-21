@@ -66,6 +66,14 @@ import { pasLokaalToe } from "./features/settings/useDisplayPrefs";
 import "./index.css";
 
 function LoginPagina() {
+  const { session, loading } = useAuth();
+
+  // De magic link keert terug op deze pagina. De sessie komt dan wel
+  // binnen, maar zonder deze regel bleef het inlogformulier gewoon staan
+  // en leek het alsof er niets gebeurd was.
+  if (loading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  if (session) return <Navigate to="/" replace />;
+
   return (
     <main className="mx-auto max-w-[32rem] px-5 py-12">
       <h1 className="text-[2rem] font-extrabold tracking-tight">Thuis</h1>
