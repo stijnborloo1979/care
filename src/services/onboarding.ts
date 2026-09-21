@@ -17,12 +17,17 @@ export const STANDAARD_OCHTEND = [
   { at: '18:00', title: 'Avondeten' },
 ]
 
-export async function createHousehold(personName: string, address: string): Promise<string> {
+export async function createHousehold(
+  personName: string,
+  address: string,
+  ikBenDePersoon = false,
+): Promise<string> {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Brussels'
   const { data, error } = await supabase.rpc('create_household', {
     person_name: personName,
     tz,
     address: address || null,
+    ik_ben_de_persoon: ikBenDePersoon,
   })
   if (error) throw error
   return data as string

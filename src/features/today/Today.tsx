@@ -7,6 +7,9 @@ import PersonInbox from '../messages/PersonInbox'
 import Icon, { type IconNaam } from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import OnthoudDit from '../memory/OnthoudDit'
+import SupportRequestBanner from '../sharing/SupportRequestBanner'
+import { useHousehold } from '../household/useHousehold'
+import { Link } from 'react-router-dom'
 
 interface Props {
   householdId: string
@@ -32,7 +35,8 @@ export default function Today({ householdId, personName, timezone }: Props) {
         <p className="mt-1 text-lg text-ink-soft">{dateLine(now, timezone)}</p>
       </header>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-4">
+        <SupportRequestBanner />
         <PersonInbox householdId={householdId} />
       </div>
 
@@ -100,6 +104,8 @@ export default function Today({ householdId, personName, timezone }: Props) {
         <BigButton icoon="wie" label="Familie" onClick={() => navigate('/wie')} />
         <BigButton icoon="help" label="Help" onClick={() => navigate('/help')} alert />
       </section>
+
+      <EigenaarLinks />
     </main>
   )
 }
@@ -222,5 +228,25 @@ function BigButton({
       <Icon naam={icoon} size={28} />
       {label}
     </button>
+  )
+}
+
+/**
+ * Wie de app zelf gebruikt, beheert ook zelf: afspraken, Home Memory,
+ * familie uitnodigen, en wie wat ziet. Bewust klein onderaan, zodat het
+ * dagscherm rustig blijft.
+ */
+function EigenaarLinks() {
+  const { household } = useHousehold()
+  if (!household?.is_self) return null
+  return (
+    <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-base font-semibold text-accent-ink">
+      <Link to="/familie" className="underline underline-offset-4">
+        Beheren
+      </Link>
+      <Link to="/delen" className="underline underline-offset-4">
+        Wie ziet wat
+      </Link>
+    </div>
   )
 }

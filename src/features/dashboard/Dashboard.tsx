@@ -5,6 +5,7 @@ import { dateLine, greeting, hhmm } from '../../lib/time'
 import { useNow } from '../today/useAgenda'
 import Icon from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
+import { useHousehold } from '../household/useHousehold'
 
 interface Props {
   householdId: string
@@ -55,6 +56,7 @@ function toestandVan(s: Summary, now: Date): Toestand {
 
 export default function Dashboard({ householdId, personName, timezone, viewerName }: Props) {
   const now = useNow()
+  const { household } = useHousehold()
   const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery({
@@ -86,6 +88,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
   if (isError || !data) return <p className="text-ink-soft">Het overzicht is nu niet te laden.</p>
 
   const t = toestandVan(data, now)
+  const niveau = household?.support_level ?? 'ondersteund'
 
   return (
     <div className="space-y-6">
@@ -98,6 +101,26 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         </p>
       </header>
 
+      {niveau === 'zelf' && !household?.is_self ? (
+        <div className="rounded-[28px] bg-surface p-7 shadow-card">
+          <p className="text-2xl font-extrabold tracking-tight">
+            {personName} gebruikt Thuis zelfstandig
+          </p>
+          <p className="mt-2 text-lg text-ink-soft">
+            Je kan mee plannen en berichten sturen. Medicatie, het logboek en persoonlijke notities
+            ziet alleen {personName}, tot {personName} zelf meer deelt.
+          </p>
+          <Link
+            to="/familie/delen"
+            className="mt-4 inline-flex min-h-touch items-center rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
+          >
+            Meer hulp voorstellen
+          </Link>
+        </div>
+      ) : null}
+
+      {niveau !== 'zelf' || household?.is_self ? (
+      <>
       {/* De hele bedoeling van dit scherm in één blik. Daarom groot, met
           ruimte eromheen, en niet als zoveelste rij in een lijst. */}
       <div
@@ -237,6 +260,8 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           bel de huisarts.
         </p>
       </section>
+      </>
+      ) : null}
     </div>
   )
 }

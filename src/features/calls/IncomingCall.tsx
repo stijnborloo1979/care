@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { answerCall, endCall, getActiveCall } from '../../services/calls'
 import { supabase } from '../../lib/supabase'
 import CallScreen from './CallScreen'
+import { useHousehold } from '../household/useHousehold'
 
 const AUTO_NA = 5
 
@@ -17,6 +18,10 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
   const [inGesprek, setInGesprek] = useState<string | null>(null)
   const [aftellen, setAftellen] = useState(AUTO_NA)
   const [gestopt, setGestopt] = useState(false)
+  const { household } = useHousehold()
+  // Automatisch opnemen hoort bij de ondersteunde fase. Wie zelfstandig is,
+  // beslist zelf of hij opneemt — anders voelt het als binnenvallen.
+  const autoOpnemen = household?.support_level === 'ondersteund'
 
   const { data: oproep } = useQuery({
     queryKey: ['active-call', householdId],
@@ -50,14 +55,14 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
       setGestopt(false)
       return
     }
-    if (gestopt) return
+    if (gestopt || !autoOpnemen) return
 
     const id = window.setInterval(() => setAftellen((v) => v - 1), 1000)
     return () => window.clearInterval(id)
-  }, [rinkelt, gestopt])
+  }, [rinkelt, gestopt, autoOpnemen])
 
   useEffect(() => {
-    if (rinkelt && !gestopt && aftellen <= 0 && oproep) {
+    if (autoOpnemen && rinkelt && !gestopt && aftellen <= 0 && oproep) {
       opnemen(oproep.id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,7 +112,7 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
         Opnemen
       </button>
 
-      {!gestopt ? (
+      {!gestopt && autoOpnemen ? (
         <p className="text-lg text-ink-soft">
           Het gesprek begint vanzelf over {Math.max(0, aftellen)} seconden.{' '}
           <button onClick={() => setGestopt(true)} className="underline underline-offset-4">

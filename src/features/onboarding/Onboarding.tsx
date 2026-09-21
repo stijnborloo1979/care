@@ -44,7 +44,10 @@ export default function Onboarding() {
     setBusy(true)
     setError(null)
     try {
-      const hh = await createHousehold(naam.trim(), adres.trim())
+      // Wie de app zelf gebruikt, wordt eigenaar van zijn eigen huishouden
+      // en start in de zelfstandige fase. Familie komt er later bij, op
+      // uitnodiging.
+      const hh = await createHousehold(naam.trim(), adres.trim(), voorWie === 'zelf')
 
       await addPersonCards(hh, mensen)
 
@@ -114,8 +117,11 @@ export default function Onboarding() {
       ),
     },
     {
-      titel: 'Over wie gaat het?',
-      onder: 'De naam die op het scherm komt te staan.',
+      titel: voorWie === 'zelf' ? 'Hoe heet je?' : 'Over wie gaat het?',
+      onder:
+        voorWie === 'zelf'
+          ? 'Zo spreekt de app je aan.'
+          : 'De naam die op het scherm komt te staan.',
       inhoud: (
         <div className="space-y-3">
           <label className="block">

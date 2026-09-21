@@ -221,6 +221,53 @@ begin
 end
 $$;
 
+-- ---------------------------------------------------------------------
+--  Zelfstandige fase: familie kijkt niet mee (vereist 14_ownership.sql)
+-- ---------------------------------------------------------------------
+
+reset role;
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+             where table_name = 'household' and column_name = 'support_level') then
+    update public.household set support_level = 'zelf' where person_name = 'Testpersoon';
+  end if;
+end
+$$;
+set local role authenticated;
+
+do $$
+declare
+  n integer;
+begin
+  if not exists (select 1 from information_schema.columns
+                 where table_name = 'household' and column_name = 'support_level') then
+    raise notice 'overgeslagen: 14_ownership.sql is nog niet gedraaid';
+    return;
+  end if;
+
+  perform pg_temp.als('member@test.be');
+  select count(*) into n from public.care_log;
+  if n <> 0 then
+    raise exception 'GEZAKT: familie ziet het logboek in de zelfstandige fase (% rijen)', n;
+  end if;
+  raise notice 'ok: familie ziet het logboek niet in de zelfstandige fase';
+
+  select count(*) into n from public.agenda_event;
+  if n = 0 then
+    raise exception 'GEZAKT: familie ziet de agenda niet meer in de zelfstandige fase';
+  end if;
+  raise notice 'ok: familie ziet wel nog de agenda, om samen te plannen';
+
+  perform pg_temp.als('person@test.be');
+  select count(*) into n from public.care_log;
+  if n = 0 then
+    raise exception 'GEZAKT: de persoon ziet zijn eigen logboek niet';
+  end if;
+  raise notice 'ok: de persoon ziet zijn eigen logboek';
+end
+$$;
+
 reset role;
 
 do $$

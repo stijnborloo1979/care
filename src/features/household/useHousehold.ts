@@ -6,12 +6,19 @@ import { useAuth } from '../auth/AuthProvider'
 
 export type Role = 'person' | 'admin' | 'member' | 'caregiver'
 
+export type SupportLevel = 'zelf' | 'samen' | 'ondersteund'
+
 export interface Household {
   household_id: string
   person_name: string
   timezone: string
   role: Role
   org_id: string | null
+  /** Ben jij de persoon over wie dit huishouden gaat? Dat bepaalt het scherm. */
+  is_self: boolean
+  support_level: SupportLevel
+  requested_support_level: SupportLevel | null
+  share_quick_notes: boolean
 }
 
 /**

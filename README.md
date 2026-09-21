@@ -53,6 +53,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     acht cijfers. Hoort bij de edge function `pair-device`.
 13. `13_quick_notes.sql` — "Onthoud dit": notities die de persoon zelf
     maakt, en die de assistent later kan terugvinden.
+14. `14_ownership.sql` — de persoon als eigenaar. Drie fasen: zelf, samen,
+    ondersteund. Meer ondersteuning vraagt de toestemming van de persoon.
+    Bestaande huishoudens blijven op 'ondersteund'.
 
 ## Inloggen
 
@@ -153,6 +156,20 @@ routines, zorglogboek en documenten, elk op een eigen route.
 
 De familie-interface wordt lazy geladen: de tablet van de persoon
 downloadt hem niet.
+
+## Meegroeiende ondersteuning
+
+| Fase | Familie ziet | Meldingen |
+|---|---|---|
+| Zelf | De agenda, om mee te plannen | Geen |
+| Samen | Agenda, medicatie, logboek | Geen |
+| Ondersteund | Alles wat nodig is | Bij afwijkingen |
+
+Wie de app zelf aanmaakt, is eigenaar en start in "zelf". Familie kan meer
+ondersteuning voorstellen; de persoon beslist op het scherm "Wie ziet wat".
+Minder ondersteuning kan altijd, meteen, zonder toestemming van iemand
+anders. Dit wordt afgedwongen in de database (`mag_meekijken()`), niet
+alleen in het scherm.
 
 ## Wat de persoon zelf kan
 

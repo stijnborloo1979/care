@@ -16,6 +16,7 @@ const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie/berichten', label: 'Berichten', icoon: 'praten' },
   { to: '/familie/logboek', label: 'Zorglogboek', icoon: 'logboek' },
   { to: '/familie/documenten', label: 'Documenten', icoon: 'documenten' },
+  { to: '/familie/delen', label: 'Wie ziet wat', icoon: 'wie' },
   { to: '/familie/instellingen', label: 'Instellingen', icoon: 'instellingen' },
 ];
 
@@ -37,7 +38,9 @@ export default function FamilyLayout() {
           een bureau, de persoon op een tablet: twee verschillende noden. */}
         <aside className="hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
           <div className="pb-4">
-            <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">Thuis</p>
+            <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">
+              {household.is_self ? "Beheren" : "Thuis"}
+            </p>
             <AccountBar />
           </div>
 

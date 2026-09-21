@@ -49,6 +49,7 @@ const MessagesPage = lazy(() =>
   })),
 );
 const Settings = lazy(() => import("./features/settings/Settings"));
+const Delen = lazy(() => import("./features/sharing/Delen"));
 const ManageNotesPage = lazy(() =>
   import("./features/family/FamilyPages").then((m) => ({
     default: m.NotesPage,
@@ -78,10 +79,11 @@ function Beveiligd({ children }: { children: React.ReactNode }) {
 function Start() {
   const { household, all, isLoading } = useHousehold();
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
-  // Wie nergens bij hoort, is nieuw: meteen naar de onboarding in plaats
-  // van naar een leeg scherm met een foutmelding.
+  // Wie nergens bij hoort, is nieuw: meteen naar de onboarding.
   if (all.length === 0) return <Navigate to="/start" replace />;
-  if (household && household.role !== "person")
+  // Het scherm hangt af van wie je bent, niet van je rol: wie de app zelf
+  // gebruikt is ook beheerder, maar hoort het scherm van de persoon te zien.
+  if (household && !household.is_self && household.role !== "person")
     return <Navigate to="/familie" replace />;
   return <PersonShell />;
 }
@@ -154,6 +156,14 @@ if (!configuratieOk) {
                     <Route path="/nu" element={<WhatNow />} />
                     <Route path="/praten" element={<Talk />} />
                     <Route path="/help" element={<Help />} />
+              <Route
+                path="/delen"
+                element={
+                  <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
+                    <Delen />
+                  </main>
+                }
+              />
                     <Route path="/memory" element={<MemoryHome />} />
                     <Route path="/fotos" element={<Photos />} />
                     <Route path="/weetjes" element={<Notes />} />
@@ -180,7 +190,8 @@ if (!configuratieOk) {
                     <Route path="logboek" element={<CareLog />} />
                     <Route path="documenten" element={<Documents />} />
                     <Route path="weetjes" element={<ManageNotesPage />} />
-                    <Route path="instellingen" element={<Settings />} />
+                    <Route path="delen" element={<Delen />} />
+              <Route path="instellingen" element={<Settings />} />
                   </Route>
                 </Routes>
               </Suspense>
