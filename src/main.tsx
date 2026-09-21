@@ -50,6 +50,7 @@ const MessagesPage = lazy(() =>
 );
 const Settings = lazy(() => import("./features/settings/Settings"));
 const Delen = lazy(() => import("./features/sharing/Delen"));
+const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const ManageNotesPage = lazy(() =>
   import("./features/family/FamilyPages").then((m) => ({
     default: m.NotesPage,
@@ -182,7 +183,8 @@ if (!configuratieOk) {
                     }
                   >
                     <Route index element={<DashboardPage />} />
-                    <Route path="planning" element={<Planning />} />
+                    <Route path="kalender" element={<Calendar />} />
+              <Route path="planning" element={<Planning />} />
                     <Route path="wie" element={<PeoplePage />} />
                     <Route path="huis" element={<HomeMemoryPage />} />
                     <Route path="fotos" element={<MemoriesPage />} />

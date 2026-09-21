@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabase'
  * foto's veranderen zelden, en een abonnement erop is ruis.
  */
 const TABELLEN: { tabel: string; sleutels: string[] }[] = [
-  { tabel: 'agenda_event', sleutels: ['agenda', 'summary'] },
+  { tabel: 'agenda_event', sleutels: ['agenda', 'summary', 'week'] },
   { tabel: 'medication_log', sleutels: ['summary', 'meds-today'] },
   { tabel: 'quick_note', sleutels: ['quicknotes'] },
   { tabel: 'care_log', sleutels: ['carelog', 'summary'] },

@@ -21,6 +21,18 @@ Beide waarden staan in Supabase onder Project Settings → API. De anon key
 mag publiek zijn: RLS beschermt de data, niet die sleutel. De `service_role`
 key hoort nooit in deze repo en nooit in een `VITE_`-variabele.
 
+## Online zetten via Cloudflare Pages
+
+Werkt ook, naast of in plaats van Netlify. Cloudflare leest `netlify.toml`
+niet; daarvoor staan `public/_headers` en `public/_redirects` klaar.
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Environment variables (Settings → Variables and Secrets, bij Production):
+  `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, en `NODE_VERSION` = `22`
+- Zet het `pages.dev`-adres in Supabase bij Authentication → URL
+  Configuration, als Site URL en met `/**` bij Redirect URLs.
+
 ## Database
 
 De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
@@ -56,6 +68,8 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 14. `14_ownership.sql` — de persoon als eigenaar. Drie fasen: zelf, samen,
     ondersteund. Meer ondersteuning vraagt de toestemming van de persoon.
     Bestaande huishoudens blijven op 'ondersteund'.
+15. `15_calendar.sql` — zorgverleners mogen zelf afspraken plannen en hun
+    eigen afspraken wijzigen. Wat familie plande, blijft van familie.
 
 ## Inloggen
 

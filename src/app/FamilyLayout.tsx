@@ -8,7 +8,8 @@ import AccountBar from "./AccountBar";
 
 const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
-  { to: '/familie/planning', label: 'Planning', icoon: 'planning' },
+  { to: '/familie/kalender', label: 'Kalender', icoon: 'agenda' },
+  { to: '/familie/planning', label: 'Routines', icoon: 'planning' },
   { to: '/familie/wie', label: 'Familie', icoon: 'wie' },
   { to: '/familie/huis', label: 'Home Memory', icoon: 'vandaag' },
   { to: '/familie/fotos', label: 'Herinneringen', icoon: 'fotos' },

@@ -9,7 +9,6 @@ import {
   type Routine,
 } from '../../services/routines'
 import { useHousehold } from '../household/useHousehold'
-import QuickAdd from './QuickAdd'
 
 function labelVan(rrule: string) {
   return HERHALING.find((h) => h.waarde === rrule)?.label ?? rrule
@@ -35,14 +34,12 @@ export default function Planning() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Planning en routines</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Routines</h1>
         <p className="mt-1 text-ink-soft">
           Vaste momenten die elke dag terugkomen. De nachtelijke job zet ze om in de agenda van
           morgen.
         </p>
       </header>
-
-      <QuickAdd householdId={hh} />
 
       {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
 

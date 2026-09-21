@@ -37,3 +37,35 @@ describe('tijd in de tijdzone van het huishouden', () => {
     expect(minutesBetween(a, new Date('2026-03-10T11:45:00Z'))).toBe(-15)
   })
 })
+
+import { maandagVan, plusDagen, zonedToUtc } from './time'
+
+describe('kalenderrekenen', () => {
+  it('zet 08:00 in Brussel in de winter om naar 07:00 UTC', () => {
+    expect(zonedToUtc('2026-03-10', '08:00', 'Europe/Brussels').toISOString()).toBe(
+      '2026-03-10T07:00:00.000Z',
+    )
+  })
+
+  it('en in de zomer naar 06:00 UTC', () => {
+    expect(zonedToUtc('2026-07-10', '08:00', 'Europe/Brussels').toISOString()).toBe(
+      '2026-07-10T06:00:00.000Z',
+    )
+  })
+
+  it('klopt ook op de dag van de zomertijdwissel', () => {
+    expect(zonedToUtc('2026-03-29', '08:00', 'Europe/Brussels').toISOString()).toBe(
+      '2026-03-29T06:00:00.000Z',
+    )
+  })
+
+  it('vindt de maandag van de week', () => {
+    expect(maandagVan('2026-09-24')).toBe('2026-09-21')
+    expect(maandagVan('2026-09-27')).toBe('2026-09-21')
+    expect(maandagVan('2026-09-21')).toBe('2026-09-21')
+  })
+
+  it('telt dagen over een maandgrens heen', () => {
+    expect(plusDagen('2026-09-28', 5)).toBe('2026-10-03')
+  })
+})

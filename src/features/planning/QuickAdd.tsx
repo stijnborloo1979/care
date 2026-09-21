@@ -35,6 +35,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
       setGelukt(`${r.titel} staat in de planning, ${r.uitleg}.`)
       setTekst('')
       await queryClient.invalidateQueries({ queryKey: ['agenda', householdId] })
+      await queryClient.invalidateQueries({ queryKey: ['week', householdId] })
       await queryClient.invalidateQueries({ queryKey: ['summary', householdId] })
     },
     onError: (e) => setFout(e instanceof Error ? e.message : 'Toevoegen lukte niet.'),
