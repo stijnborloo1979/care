@@ -2,6 +2,44 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 /**
+ * Haalt een leesbare fout uit wat supabase.functions.invoke teruggeeft.
+ *
+ * Dat is niet altijd een HTTP-antwoord: lukt de verbinding zelf niet (de
+ * functie staat niet online, of de browser blokkeert het verzoek), dan
+ * is "context" een gewone fout zonder .json(). Vroeger liep de app daar
+ * op vast met "json is not a function", en zag je de echte oorzaak niet.
+ */
+async function leesFout(error: unknown): Promise<string> {
+  const context = (error as { context?: unknown }).context as
+    | { status?: number; json?: () => Promise<unknown>; clone?: () => { json: () => Promise<unknown> } }
+    | undefined
+
+  const status = context?.status
+  if (status === 404) {
+    return 'De koppelfunctie staat nog niet online. Maak in Supabase de edge function "pair-device" aan.'
+  }
+  if (status === 401) {
+    return 'De koppelfunctie weigert het verzoek. Zet "Verify JWT" uit bij de edge function "pair-device".'
+  }
+
+  if (context && typeof context.json === 'function') {
+    try {
+      const body = (await (context.clone ? context.clone().json() : context.json())) as {
+        error?: string
+      }
+      if (body?.error) return body.error
+    } catch {
+      // Geen JSON in het antwoord; val terug op de algemene melding.
+    }
+  }
+
+  if (!status) {
+    return 'De koppelfunctie is niet bereikbaar. Controleer of "pair-device" bestaat in Supabase en of "Verify JWT" uit staat.'
+  }
+  return error instanceof Error ? error.message : 'Koppelen lukte niet.'
+}
+
+/**
  * De tablet van de persoon wordt één keer gekoppeld, door de familie, met
  * een code uit het familiescherm. Daarna blijft hij ingelogd. De persoon
  * zelf ziet hier nooit iets van.
@@ -26,12 +64,7 @@ export default function TabletPair() {
       const { data, error } = await supabase.functions.invoke('pair-device', {
         body: { code: cijfers },
       })
-      if (error) {
-        // De functie geeft een leesbare fout terug in de body.
-        const context = (error as { context?: Response }).context
-        const tekst = context ? await context.json().catch(() => null) : null
-        throw new Error(tekst?.error ?? 'Koppelen lukte niet.')
-      }
+      if (error) throw new Error(await leesFout(error))
       if (!data?.token_hash) throw new Error(data?.error ?? 'Koppelen lukte niet.')
 
       const { error: sessieFout } = await supabase.auth.verifyOtp({
