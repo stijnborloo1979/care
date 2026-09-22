@@ -61,9 +61,12 @@ begin
 
   -- Eén geldige code per huishouden tegelijk: een oude code die nog rondslingert,
   -- vervalt zodra er een nieuwe gemaakt wordt.
-  update public.device_pairing
+  -- De kolommen expliciet via een alias: "code" en "expires_at" zijn ook
+  -- de namen van wat deze functie teruggeeft, en zonder alias weet
+  -- Postgres niet welke van de twee bedoeld is. Dat gaf een fout 400.
+  update public.device_pairing dp
      set expires_at = now()
-   where household_id = hh and used_at is null and expires_at > now();
+   where dp.household_id = hh and dp.used_at is null and dp.expires_at > now();
 
   -- Acht cijfers: honderd miljoen mogelijkheden in een venster van tien
   -- minuten, en toch nog makkelijk over te tikken als 4821 9037.

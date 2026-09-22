@@ -70,6 +70,11 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     Bestaande huishoudens blijven op 'ondersteund'.
 15. `15_calendar.sql` — zorgverleners mogen zelf afspraken plannen en hun
     eigen afspraken wijzigen. Wat familie plande, blijft van familie.
+16. `16_life_stories.sql` — "Vertel eens": levensverhalen, bij voorkeur in
+    de eigen stem. Per verhaal kan de persoon kiezen of familie meeluistert.
+17. `17_radio.sql` — de radiozenders van het huishouden, hoogstens vier.
+18. `18_medication.sql` — meerdere tijdstippen per medicijn, en het schema
+    van vandaag en morgen meteen bijwerken na een wijziging.
 
 ## Inloggen
 
@@ -104,6 +109,10 @@ Functions → Deploy a new function → plak het bestand.
   uit** voor deze functie: de tablet is op dat moment nog niet ingelogd.
   De beveiliging zit in de code zelf: acht cijfers, tien minuten geldig,
   eenmalig, en hoogstens tien mislukte pogingen per kwartier per adres.
+- `delete-account` — verwijdert een account (recht op vergetelheid).
+  Verify JWT aan laten.
+- `turn-credentials` — tijdelijke TURN-gegevens voor videobellen op 4G/5G.
+  Secrets: `CF_TURN_KEY_ID`, `CF_TURN_API_TOKEN`.
 - `ask` — beantwoordt een vraag uit de eigen gegevens. Secret:
   `OPENAI_API_KEY`. Vindt de zoektocht niets boven de drempel, dan wordt
   het model niet eens aangeroepen.
@@ -193,6 +202,15 @@ alleen in het scherm.
 - **Heb ik dit al gedaan?** — medicatie, maaltijden en wandelingen, uit wat
   er echt afgevinkt of bevestigd is. Staat de medicatie nog open, dan kan
   je ze vanuit het antwoord meteen bevestigen.
+- **Vertel eens** — elke dag één vraag over het eigen leven, beantwoord
+  door in te spreken of te typen. Geen teller of reeks; "niet vandaag"
+  verbergt de vraag tot morgen.
+- **Vandaag, vroeger** — elke dag één foto uit de tijdlijn, met voorrang
+  voor een echte verjaardag, en een knop om erover te vertellen.
+- **Radio** — één tik op het Vandaag-scherm speelt de favoriete zender.
+  "Zet de radio aan" werkt ook met de stem. De radio pauzeert tijdens een
+  videogesprek en wordt zachter bij een gesproken herinnering. Een routine
+  met "radio" in de naam start de zender vanzelf.
 - **Herinneringen worden uitgesproken** — tien minuten voor een afspraak,
   of meteen als de app pas na het begin opengaat. 's Nachts niet. Browsers
   vragen daarvoor één aanraking van het scherm na elke herstart.
