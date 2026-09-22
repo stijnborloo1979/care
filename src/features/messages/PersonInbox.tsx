@@ -94,7 +94,9 @@ export function MessageButton({ message }: { message: InboxMessage }) {
           {message.audio_path
             ? playing
               ? 'Aan het afspelen…'
-              : `Druk om te luisteren${message.audio_seconds ? ` · ${message.audio_seconds} sec` : ''}`
+              : message.seen
+                ? 'Druk om nog eens te luisteren'
+                : `Druk om te luisteren${message.audio_seconds ? ` · ${message.audio_seconds} sec` : ''}`
             : message.body}
         </span>
         {error ? (

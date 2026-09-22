@@ -75,6 +75,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 17. `17_radio.sql` — de radiozenders van het huishouden, hoogstens vier.
 18. `18_medication.sql` — meerdere tijdstippen per medicijn, en het schema
     van vandaag en morgen meteen bijwerken na een wijziging.
+19. `19_messages_heard.sql` — een beluisterd bericht blijft de rest van de
+    dag op Vandaag staan en is de volgende ochtend weg. Niet beluisterde
+    berichten blijven twee dagen, vastgezette altijd.
 
 ## Inloggen
 
