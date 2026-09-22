@@ -7,6 +7,10 @@ import PersonInbox from '../messages/PersonInbox'
 import Icon, { type IconNaam } from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import OnthoudDit from '../memory/OnthoudDit'
+import VertelEens from '../stories/VertelEens'
+import VandaagVroeger from '../memories/VandaagVroeger'
+import { RadioKaart } from '../radio/Radio'
+import { useState } from 'react'
 import SupportRequestBanner from '../sharing/SupportRequestBanner'
 import { useHousehold } from '../household/useHousehold'
 import { Link } from 'react-router-dom'
@@ -22,6 +26,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
   const { data, isLoading, isError } = useAgenda(householdId, timezone)
   const markDone = useMarkDone(householdId)
   const navigate = useNavigate()
+  const [fotoVraag, setFotoVraag] = useState<string | null>(null)
 
   const events = data ?? []
   const { current, next } = whatNow(events, now)
@@ -78,6 +83,25 @@ export default function Today({ householdId, personName, timezone }: Props) {
 
       <div className="mt-6">
         <OnthoudDit householdId={householdId} timezone={timezone} />
+      </div>
+
+      {/* Na het praktische: iets om naar te kijken en iets om te vertellen. */}
+      <div className="mt-8 space-y-4">
+        <RadioKaart householdId={householdId} />
+        <VandaagVroeger
+          householdId={householdId}
+          timezone={timezone}
+          onVertel={(v) => setFotoVraag(v)}
+        />
+        {fotoVraag ? (
+          <VertelEens
+            householdId={householdId}
+            timezone={timezone}
+            extraVraag={fotoVraag}
+            onKlaar={() => setFotoVraag(null)}
+          />
+        ) : null}
+        <VertelEens householdId={householdId} timezone={timezone} />
       </div>
 
       {events.length > 0 ? (

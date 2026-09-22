@@ -85,6 +85,18 @@ export default function Delen() {
     onSuccess: ververs,
   })
 
+  const maakBeheerder = useMutation({
+    mutationFn: async (profileId: string) => {
+      const { error } = await supabase
+        .from('membership')
+        .update({ role: 'admin' })
+        .eq('household_id', hh)
+        .eq('profile_id', profileId)
+      if (error) throw error
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members', hh] }),
+  })
+
   const verwijder = useMutation({
     mutationFn: async (profileId: string) => {
       const { error } = await supabase
@@ -245,6 +257,17 @@ export default function Delen() {
                 <span className="block font-semibold">{l.profile?.full_name ?? 'Onbekend'}</span>
                 <span className="text-sm text-ink-soft">{ROL[l.role] ?? l.role}</span>
               </span>
+              {isBeheerder && l.role === 'member' ? (
+                <button
+                  onClick={() => {
+                    if (confirm(`${l.profile?.full_name ?? 'Deze persoon'} ook beheerder maken?`))
+                      maakBeheerder.mutate(l.profile_id)
+                  }}
+                  className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold text-ink-soft"
+                >
+                  Maak beheerder
+                </button>
+              ) : null}
               {isBeheerder && l.role !== 'admin' ? (
                 <button
                   onClick={() => {

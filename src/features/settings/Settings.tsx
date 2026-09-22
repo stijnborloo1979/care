@@ -3,6 +3,9 @@ import { useHousehold } from '../household/useHousehold'
 import { Link } from 'react-router-dom'
 import LocationSettings from '../location/LocationSettings'
 import PairTablet from '../family/PairTablet'
+import ManageRadio from '../radio/ManageRadio'
+import { useLicht } from '../licht/lichtStore'
+import MijnGegevens from '../privacy/MijnGegevens'
 
 const SCHAAL: { waarde: DisplayPrefs['scale']; label: string }[] = [
   { waarde: '1', label: 'A' },
@@ -80,6 +83,37 @@ export default function Settings() {
           />
         </Rij>
 
+        <Rij
+          titel="Licht bij een melding"
+          onder="De randen van het scherm lichten zacht op bij een bericht, een oproep of een herinnering."
+        >
+          <div className="flex items-center gap-3">
+            {/* Zien hoe het eruitziet, voor je het op de tablet aanzet. */}
+            <button
+              onClick={() => useLicht.getState().start('bericht')}
+              className="min-h-[2.4rem] rounded-pill border border-line px-3 text-sm font-semibold"
+            >
+              Probeer
+            </button>
+            <Schakelaar
+              aan={prefs.licht}
+              label="Licht bij een melding"
+              onClick={() => zet.mutate({ licht: !prefs.licht })}
+            />
+          </div>
+        </Rij>
+
+        <Rij
+          titel="Scherm altijd aan"
+          onder="Voor een tablet die in de lader staat. Op een telefoon kost dit batterij."
+        >
+          <Schakelaar
+            aan={prefs.schermAan}
+            label="Scherm altijd aan"
+            onClick={() => zet.mutate({ schermAan: !prefs.schermAan })}
+          />
+        </Rij>
+
         <Rij titel="Voorlezen" onder="Berichten en verhalen worden hardop voorgelezen.">
           <Schakelaar
             aan={prefs.voice}
@@ -116,19 +150,13 @@ export default function Settings() {
         </Link>
       </section>
 
+      <ManageRadio householdId={hh} />
+
       <PairTablet householdId={hh} personName={voornaam} />
 
       <LocationSettings />
 
-      <section className="rounded-card bg-surface p-6 shadow-card">
-        <h2 className="text-lg font-bold">Privacy</h2>
-        <ul className="mt-3 space-y-2 text-sm text-ink-soft">
-          <li>Elke rol ziet alleen wat ze nodig heeft; documenten blijven bij de familie.</li>
-          <li>Foto&rsquo;s en documenten staan in privébuckets, met links die vervallen.</li>
-          <li>Elke wijziging aan documenten, medicatie en rollen wordt gelogd.</li>
-          <li>Locatie staat uit tot iemand er expliciet toestemming voor geeft.</li>
-        </ul>
-      </section>
+      <MijnGegevens />
     </div>
   )
 }

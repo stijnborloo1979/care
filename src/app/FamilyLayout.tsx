@@ -5,11 +5,13 @@ import { useRealtime } from "../features/realtime/useRealtime";
 import InstallPrompt from "../features/install/InstallPrompt";
 import Icon, { type IconNaam } from "../components/Icon";
 import AccountBar from "./AccountBar";
+import Licht from "../features/licht/Licht";
 
 const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
   { to: '/familie/kalender', label: 'Kalender', icoon: 'agenda' },
   { to: '/familie/planning', label: 'Routines', icoon: 'planning' },
+  { to: '/familie/medicatie', label: 'Medicatie', icoon: 'medicatie' },
   { to: '/familie/wie', label: 'Familie', icoon: 'wie' },
   { to: '/familie/huis', label: 'Home Memory', icoon: 'vandaag' },
   { to: '/familie/fotos', label: 'Herinneringen', icoon: 'fotos' },
@@ -33,6 +35,7 @@ export default function FamilyLayout() {
   return (
     <>
       <InstallPrompt />
+      <Licht />
 
       <div className="flex min-h-screen">
         {/* Sidebar op desktop, onderaan tabs op mobiel. Familie werkt aan

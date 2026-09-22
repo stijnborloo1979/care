@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { endCall } from '../../services/calls'
 import { useWebRTC } from './useWebRTC'
+import { useRadio } from '../radio/radioStore'
 
 /**
  * Tijdens het gesprek staat het beeld van de ander schermvullend en is er
@@ -36,6 +37,12 @@ export default function CallScreen({
   useEffect(() => {
     if (state === 'ended') onKlaar()
   }, [state, onKlaar])
+
+  // Tijdens het gesprek geen muziek; daarna speelt de radio verder.
+  useEffect(() => {
+    useRadio.getState().pauzeerVoorGesprek()
+    return () => useRadio.getState().hervatNaGesprek()
+  }, [])
 
   async function stoppen() {
     hangUp()

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { getToday } from '../../services/agenda'
+import { useLicht } from '../licht/lichtStore'
 
 /** Elke minuut een nieuwe klok, zodat "nu" vanzelf meeschuift. */
 export function useNow(): Date {
@@ -30,6 +31,13 @@ export function useMarkDone(householdId: string) {
   })
   return {
     ...mutation,
-    mutate: (v: { id: string; done: boolean }) => mutation.mutate({ ...v, householdId }),
+    mutate: (v: { id: string; done: boolean }) => {
+      // Gedaan is gedaan: het licht van die herinnering mag uit.
+      if (v.done) {
+        useLicht.getState().stop('afspraak')
+        useLicht.getState().stop('medicatie')
+      }
+      mutation.mutate({ ...v, householdId })
+    },
   }
 }

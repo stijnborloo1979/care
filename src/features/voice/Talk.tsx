@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 import { confirmMoments } from '../../services/medsToday'
+import { useRadio } from '../radio/radioStore'
 import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
@@ -30,6 +31,15 @@ export default function Talk() {
   function toon(a: Answer) {
     setBevestigd(false)
     setAntwoord(a)
+    if (a.radio) {
+      const radio = useRadio.getState()
+      if (a.radio.actie === 'uit') radio.stop()
+      else {
+        const z = radio.lijst.find((x) => x.id === a.radio!.zenderId) ?? radio.lijst[0]
+        // Eerst het antwoord uitspreken, dan pas de muziek.
+        if (z) window.setTimeout(() => radio.speel(z), 1200)
+      }
+    }
     if (huidigePrefs().voice) spreek([a.titel, ...a.regels].join('. '))
   }
 

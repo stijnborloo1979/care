@@ -5,6 +5,7 @@ import ManagePeople from '../people/ManagePeople'
 import VoiceRecorder from '../messages/VoiceRecorder'
 import StartCall from '../calls/StartCall'
 import ManageNotes from '../notes/ManageNotes'
+import Verhalen from '../stories/Verhalen'
 import InviteMember from './InviteMember'
 import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from '../household/useHousehold'
@@ -76,6 +77,7 @@ export function MemoriesPage() {
         <h1 className="text-2xl font-bold tracking-tight">Herinneringen</h1>
         <p className="mt-1 text-ink-soft">Foto&rsquo;s met een jaartal en het verhaal erbij.</p>
       </header>
+      <Verhalen householdId={c.hh} naam={c.voornaam} />
       <ManageMemories householdId={c.hh} />
     </div>
   )

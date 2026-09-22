@@ -86,6 +86,12 @@ function Deuren() {
           onder="Eén keer koppelen met een code."
         />
       </div>
+
+      <p className="mt-8 text-center text-sm text-ink-faint">
+        <Link to="/privacy" className="underline underline-offset-4">
+          Wat Thuis met je gegevens doet
+        </Link>
+      </p>
     </>
   )
 }

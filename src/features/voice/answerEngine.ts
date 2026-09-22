@@ -18,6 +18,8 @@ export interface Answer {
   bron?: string
   /** Medicatiemomenten die de persoon vanuit het antwoord kan bevestigen. */
   bevestig?: string[]
+  /** Een opdracht voor de radio, uit te voeren door het scherm. */
+  radio?: { actie: 'aan' | 'uit'; zenderId?: string }
 }
 
 export interface Kennis {
@@ -29,6 +31,8 @@ export interface Kennis {
   onthouden?: QuickNote[]
   /** De medicatiemomenten van vandaag. */
   medicatie?: MedMoment[]
+  /** De gekozen radiozenders, favoriet eerst. */
+  zenders?: { id: string; name: string }[]
   tz: string
 }
 
@@ -222,6 +226,28 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
         regels: [`${p.relation} — ${p.phone}`],
         bellen: { naam: p.name, nummer: p.phone },
       }
+    }
+  }
+
+  // radio
+  if (/\bradio\b|muziek/.test(v) || (k.zenders ?? []).some((z) => v.includes(normaliseer(z.name)))) {
+    const zenders = k.zenders ?? []
+    if (/\b(uit|stop|stil|zwijg)\b/.test(v)) {
+      return { vraag, titel: 'De radio gaat uit.', regels: [], radio: { actie: 'uit' } }
+    }
+    if (zenders.length === 0) {
+      return {
+        vraag,
+        titel: 'Er zijn nog geen zenders gekozen.',
+        regels: ['Vraag je familie om er een paar in te stellen.'],
+      }
+    }
+    const gevraagd = zenders.find((z) => v.includes(normaliseer(z.name))) ?? zenders[0]
+    return {
+      vraag,
+      titel: `${gevraagd.name} speelt.`,
+      regels: [],
+      radio: { actie: 'aan', zenderId: gevraagd.id },
     }
   }
 

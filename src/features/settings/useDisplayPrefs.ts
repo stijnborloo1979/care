@@ -8,6 +8,10 @@ export interface DisplayPrefs {
   theme: 'auto' | 'light' | 'dark'
   simple: boolean
   voice: boolean
+  /** Het scherm licht op bij een melding. */
+  licht: boolean
+  /** Het scherm blijft aan, voor een tablet die altijd in de lader staat. */
+  schermAan: boolean
 }
 
 export const STANDAARD: DisplayPrefs = {
@@ -16,6 +20,8 @@ export const STANDAARD: DisplayPrefs = {
   theme: 'auto',
   simple: false,
   voice: true,
+  licht: true,
+  schermAan: false,
 }
 
 const LOKAAL = 'thuis.display'

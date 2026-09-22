@@ -3,6 +3,8 @@ import type { AgendaEvent } from '../../services/agenda'
 import { hhmm, localDateKey } from '../../lib/time'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
 import { spreek } from '../voice/useSpeech'
+import { useRadio } from '../radio/radioStore'
+import { useLicht } from '../licht/lichtStore'
 
 const GEZEGD = 'thuis.gezegd'
 const VOORAF_MIN = 10
@@ -68,6 +70,17 @@ export function useProactiveSpeech(events: AgendaEvent[], tz: string) {
         if (e.done_at || gezegd.has(e.id)) continue
         const min = Math.round((new Date(e.starts_at).getTime() - nu.getTime()) / 60000)
 
+        // "09:00 Radio aan" in een routine: op het uur zelf de favoriete
+        // zender starten, zonder aankondiging vooraf.
+        if (/\bradio\b/i.test(e.title)) {
+          if (min <= 0 && min > -15 && !useRadio.getState().speelt) {
+            useRadio.getState().speelFavoriet()
+            gezegd.add(e.id)
+            onthoudGezegd(dag, gezegd)
+          }
+          continue
+        }
+
         let zin: string | null = null
         if (min > 0 && min <= VOORAF_MIN) {
           zin = `Over ${min} ${min === 1 ? 'minuut' : 'minuten'}: ${e.title}.`
@@ -77,6 +90,7 @@ export function useProactiveSpeech(events: AgendaEvent[], tz: string) {
         }
 
         if (zin) {
+          if (huidigePrefs().licht) useLicht.getState().start(e.kind === 'med' ? 'medicatie' : 'afspraak')
           spreek(e.note ? `${zin} ${e.note}` : zin)
           gezegd.add(e.id)
           onthoudGezegd(dag, gezegd)

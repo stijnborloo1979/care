@@ -196,3 +196,30 @@ describe('onthoud dit', () => {
     expect(a.regels[1]).toContain('gisteren')
   })
 })
+
+describe('radio', () => {
+  const zenders = [
+    { id: 'r2', name: 'Radio 2' },
+    { id: 'nos', name: 'Nostalgie' },
+  ]
+
+  it('zet de favoriet op bij "zet de radio aan"', () => {
+    const a = beantwoord('Zet de radio aan', { ...kennis, zenders }, NU)
+    expect(a.radio).toEqual({ actie: 'aan', zenderId: 'r2' })
+  })
+
+  it('kiest de zender die je noemt', () => {
+    const a = beantwoord('Zet Nostalgie op', { ...kennis, zenders }, NU)
+    expect(a.radio).toEqual({ actie: 'aan', zenderId: 'nos' })
+  })
+
+  it('zet de radio uit', () => {
+    expect(beantwoord('Radio uit', { ...kennis, zenders }, NU).radio?.actie).toBe('uit')
+  })
+
+  it('zegt eerlijk dat er nog geen zenders zijn', () => {
+    const a = beantwoord('Zet de radio aan', kennis, NU)
+    expect(a.radio).toBeUndefined()
+    expect(a.titel).toContain('geen zenders')
+  })
+})

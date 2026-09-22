@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRadio } from '../radio/radioStore'
 
 type Herkenner = {
   lang: string
@@ -25,6 +26,11 @@ export function spreek(tekst: string) {
   const u = new SpeechSynthesisUtterance(tekst)
   u.lang = 'nl-BE'
   u.rate = 0.92
+  // De radio even zachter, anders gaat de herinnering verloren in de muziek.
+  const radio = useRadio.getState()
+  radio.demp(true)
+  u.onend = () => radio.demp(false)
+  u.onerror = () => radio.demp(false)
   window.speechSynthesis.speak(u)
 }
 

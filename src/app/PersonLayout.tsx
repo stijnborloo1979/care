@@ -9,6 +9,11 @@ import InstallPrompt from '../features/install/InstallPrompt'
 import { useAgenda } from '../features/today/useAgenda'
 import { useProactiveSpeech } from '../features/today/useProactiveSpeech'
 import { huidigePrefs } from '../features/settings/useDisplayPrefs'
+import { useZenders } from '../features/radio/useZenders'
+import { MiniSpeler } from '../features/radio/Radio'
+import Licht from '../features/licht/Licht'
+import { useLichtSignalen } from '../features/licht/useLichtSignalen'
+import { useWakeLock } from '../features/licht/useWakeLock'
 
 const NAV: { to: string; label: string; icoon: IconNaam; mic?: boolean }[] = [
   { to: '/', label: 'Vandaag', icoon: 'vandaag' },
@@ -36,6 +41,12 @@ export default function PersonLayout() {
   const tz = household?.timezone ?? 'Europe/Brussels'
   const { data: vandaag } = useAgenda(household?.household_id ?? '', tz)
   const { spraakVrij } = useProactiveSpeech(vandaag ?? [], tz)
+  // Zenders altijd laden: de stem en routines moeten ze kennen, ook als
+  // het radioscherm nooit geopend werd.
+  useZenders(household?.household_id ?? '')
+  const prefs = huidigePrefs()
+  useLichtSignalen(household?.household_id ?? '', tz, prefs.licht)
+  useWakeLock(prefs.schermAan)
 
   return (
     <>
@@ -60,6 +71,10 @@ export default function PersonLayout() {
       ) : null}
 
       <Outlet />
+
+      <MiniSpeler />
+
+      <Licht />
 
       <nav
         aria-label="Hoofdnavigatie"

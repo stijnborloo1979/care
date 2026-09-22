@@ -51,6 +51,9 @@ const MessagesPage = lazy(() =>
 const Settings = lazy(() => import("./features/settings/Settings"));
 const Delen = lazy(() => import("./features/sharing/Delen"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
+const Radio = lazy(() => import("./features/radio/Radio"));
+const Privacy = lazy(() => import("./features/privacy/Privacy"));
+const ManageMedication = lazy(() => import("./features/medication/ManageMedication"));
 const ManageNotesPage = lazy(() =>
   import("./features/family/FamilyPages").then((m) => ({
     default: m.NotesPage,
@@ -133,6 +136,7 @@ if (!configuratieOk) {
               >
                 <Routes>
                   <Route path="/login/*" element={<Welcome />} />
+            <Route path="/privacy" element={<Privacy />} />
                   <Route path="/uitnodiging" element={<AcceptInvite />} />
                   <Route path="/installeren" element={<InstallGuide />} />
                   <Route
@@ -156,7 +160,8 @@ if (!configuratieOk) {
                     <Route path="/wie/:personId" element={<PersonDetail />} />
                     <Route path="/nu" element={<WhatNow />} />
                     <Route path="/praten" element={<Talk />} />
-                    <Route path="/help" element={<Help />} />
+                    <Route path="/radio" element={<Radio />} />
+              <Route path="/help" element={<Help />} />
               <Route
                 path="/delen"
                 element={
@@ -184,6 +189,7 @@ if (!configuratieOk) {
                   >
                     <Route index element={<DashboardPage />} />
                     <Route path="kalender" element={<Calendar />} />
+              <Route path="medicatie" element={<ManageMedication />} />
               <Route path="planning" element={<Planning />} />
                     <Route path="wie" element={<PeoplePage />} />
                     <Route path="huis" element={<HomeMemoryPage />} />
