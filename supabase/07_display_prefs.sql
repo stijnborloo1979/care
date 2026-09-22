@@ -14,7 +14,7 @@ alter table public.household
   add column if not exists display_prefs jsonb not null default '{}'::jsonb;
 
 comment on column public.household.display_prefs is
-  'scale (1 | 1.15 | 1.3 | 1.5), contrast (normal | high), theme (auto | light | dark), simple (bool), voice (bool).';
+  'scale (1 | 1.15 | 1.3 | 1.5), contrast (normal | high), theme (auto | light | dark), accent (groenblauw | blauw | groen | paars | warm), simple (bool), voice (bool), licht (bool), schermAan (bool), kiosk (bool), kioskTerug (2 | 5 | 10), nachtVan, nachtTot (uur 0-23).';
 
 -- De update-policy op household is voorbehouden aan de beheerder. Deze
 -- instellingen mag elk familielid aanpassen, dus gaan ze via een functie

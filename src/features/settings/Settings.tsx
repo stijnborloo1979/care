@@ -8,6 +8,16 @@ import { useLicht } from '../licht/lichtStore'
 import MijnGegevens from '../privacy/MijnGegevens'
 import { usePush } from '../push/usePush'
 
+// De echte waarden staan in index.css; dit is alleen het bolletje in het
+// scherm. Donker en hoog contrast krijgen daar hun eigen variant.
+const ACCENTEN: { waarde: DisplayPrefs['accent']; label: string; staal: string }[] = [
+  { waarde: 'groenblauw', label: 'Groenblauw', staal: '#0f5d63' },
+  { waarde: 'blauw', label: 'Blauw', staal: '#17568f' },
+  { waarde: 'groen', label: 'Groen', staal: '#2f6b3a' },
+  { waarde: 'paars', label: 'Paars', staal: '#66409a' },
+  { waarde: 'warm', label: 'Warm bruin', staal: '#a5691f' },
+]
+
 const SCHAAL: { waarde: DisplayPrefs['scale']; label: string }[] = [
   { waarde: '1', label: 'A' },
   { waarde: '1.15', label: 'A+' },
@@ -82,6 +92,24 @@ export default function Settings() {
             actief={prefs.theme}
             onKies={(v) => zet.mutate({ theme: v as DisplayPrefs['theme'] })}
           />
+        </Rij>
+
+        <Rij titel="Accentkleur" onder="De kleur van knoppen, randen en wat de aandacht vraagt.">
+          <div className="flex flex-wrap gap-2">
+            {ACCENTEN.map((k) => (
+              <button
+                key={k.waarde}
+                onClick={() => zet.mutate({ accent: k.waarde })}
+                aria-pressed={prefs.accent === k.waarde}
+                aria-label={k.label}
+                title={k.label}
+                className={`h-11 w-11 rounded-full border-[3px] ${
+                  prefs.accent === k.waarde ? 'border-ink' : 'border-transparent'
+                }`}
+                style={{ background: k.staal }}
+              />
+            ))}
+          </div>
         </Rij>
 
         <Rij

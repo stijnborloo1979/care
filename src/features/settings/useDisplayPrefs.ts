@@ -6,6 +6,8 @@ export interface DisplayPrefs {
   scale: '1' | '1.15' | '1.3' | '1.5'
   contrast: 'normal' | 'high'
   theme: 'auto' | 'light' | 'dark'
+  /** Accentkleur. Vaste keuzes; de waarden staan in index.css. */
+  accent: 'groenblauw' | 'blauw' | 'groen' | 'paars' | 'warm'
   simple: boolean
   voice: boolean
   /** Het scherm licht op bij een melding. */
@@ -25,6 +27,7 @@ export const STANDAARD: DisplayPrefs = {
   scale: '1',
   contrast: 'normal',
   theme: 'auto',
+  accent: 'groenblauw',
   simple: false,
   voice: true,
   licht: true,
@@ -67,6 +70,8 @@ export function pasToe(p: DisplayPrefs) {
   const r = document.documentElement
   r.setAttribute('data-scale', p.simple && p.scale === '1' ? '1.15' : p.scale)
   r.setAttribute('data-contrast', p.contrast)
+  if (p.accent === 'groenblauw') r.removeAttribute('data-accent')
+  else r.setAttribute('data-accent', p.accent)
   if (p.theme === 'auto') r.removeAttribute('data-theme')
   else r.setAttribute('data-theme', p.theme)
   document.body.setAttribute('data-simple', p.simple ? 'true' : 'false')

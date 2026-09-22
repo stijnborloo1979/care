@@ -49,7 +49,7 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 6. `06_nightly_job.sql` — zet routines om in de agenda van morgen, vult de
    medicatiemomenten aan en maakt meldingen. Zet pg_cron aan via
    Database → Extensions; de migratie plant zichzelf dan in op 02:30.
-7. `07_display_prefs.sql` — tekstgrootte, contrast en eenvoudige modus,
+7. `07_display_prefs.sql` — tekstgrootte, contrast, accentkleur en eenvoudige modus,
    opgeslagen op het huishouden zodat familie ze van op afstand instelt.
 8. `08_location.sql` — locatie en veilige zones. Staat uit tot iemand
    toestemt; posities worden na zeven dagen gewist.

@@ -2,29 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* De tokens uit het prototype. Eén bron voor kleur, ruimte en schaal. */
+/* Eén bron voor kleur, ruimte en schaal.
+
+   De kleuren: een koel, licht papier met wit voor alles wat je kan
+   aanraken, en diep groenblauw als enige accent. Groenblauw omdat het
+   rustig oogt zonder ziekenhuis te worden, en omdat het genoeg verschilt
+   van het warme oranje van het lichtsignaal: dat mag als enige opvallen.
+   Elke kleurcombinatie hieronder haalt minstens 4.5:1. */
 :root {
-  --bg: #f1efe9;
+  --bg: #f4f3f0;
   --surface: #ffffff;
-  --surface-2: #f8f6f1;
-  --surface-3: #ebe7de;
-  --border: #e7e2d8;
-  --border-strong: #d4ccbd;
-  --text: #221f1b;
-  --text-2: #5c554b;
-  --text-3: #857d71;
-  --accent: #b4762a;
-  --accent-ink: #8a5a1e;
-  --accent-soft: #f7eedc;
-  --ok: #3f7355;
-  --warn: #9e6b16;
-  --alert: #a8442f;
+  --surface-2: #f8f8f5;
+  --surface-3: #eceeea;
+  --border: #e2e5e0;
+  --border-strong: #c6ccc6;
+  --text: #16211c;
+  --text-2: #4e5a54;
+  --text-3: #66726b;
+  --accent: #0f5d63;
+  --accent-ink: #0a4a4f;
+  --accent-soft: #ddefef;
+  --ok: #2e7d4f;
+  --warn: #8a5a00;
+  --alert: #b03a2e;
   --r-l: 20px;
   /* Schaduwen in twee lagen: een scherpe lijn vlak onder de rand en een
      zachte wolk eronder. Eén brede schaduw oogt altijd goedkoop. */
-  --shadow-s: 0 1px 1px rgba(45, 36, 24, 0.04), 0 2px 6px rgba(45, 36, 24, 0.05);
-  --shadow-m: 0 1px 2px rgba(45, 36, 24, 0.05), 0 8px 24px -6px rgba(45, 36, 24, 0.14);
-  --shadow-l: 0 2px 4px rgba(45, 36, 24, 0.06), 0 24px 48px -12px rgba(45, 36, 24, 0.2);
+  --shadow-s: 0 1px 1px rgba(18, 34, 30, 0.04), 0 2px 6px rgba(18, 34, 30, 0.06);
+  --shadow-m: 0 1px 2px rgba(18, 34, 30, 0.05), 0 8px 24px -6px rgba(18, 34, 30, 0.14);
+  --shadow-l: 0 2px 4px rgba(18, 34, 30, 0.06), 0 24px 48px -12px rgba(18, 34, 30, 0.2);
   --scale: 1;
 
   box-sizing: border-box;
@@ -39,45 +45,139 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #15130f;
-    --surface: #1e1b17;
-    --surface-2: #242019;
-    --surface-3: #2e2921;
-    --border: #332d25;
-    --border-strong: #463e33;
-    --text: #f4f0e8;
-    --text-2: #c0b7a8;
-    --text-3: #968c7d;
-    --accent: #e0a44e;
-    --accent-ink: #f0bf74;
-    --accent-soft: #2c2418;
+    --bg: #101413;
+    --surface: #171c1b;
+    --surface-2: #1c2221;
+    --surface-3: #252c2a;
+    --border: #2a3231;
+    --border-strong: #3e4845;
+    --text: #ecf2ef;
+    --text-2: #b6c4be;
+    --text-3: #8a9a94;
+    --accent: #5fcfc6;
+    --accent-ink: #8ce0d8;
+    --accent-soft: #10312f;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #15130f;
-  --surface: #1e1b17;
-  --surface-2: #242019;
-  --surface-3: #2e2921;
-  --border: #332d25;
-  --border-strong: #463e33;
-  --text: #f4f0e8;
-  --text-2: #c0b7a8;
-  --text-3: #968c7d;
-  --accent: #e0a44e;
-  --accent-ink: #f0bf74;
-  --accent-soft: #2c2418;
+  --bg: #101413;
+  --surface: #171c1b;
+  --surface-2: #1c2221;
+  --surface-3: #252c2a;
+  --border: #2a3231;
+  --border-strong: #3e4845;
+  --text: #ecf2ef;
+  --text-2: #b6c4be;
+  --text-3: #8a9a94;
+  --accent: #5fcfc6;
+  --accent-ink: #8ce0d8;
+  --accent-soft: #10312f;
   color-scheme: dark;
 }
 
 :root[data-contrast='high'] {
-  --border: #4a443b;
-  --border-strong: #221f1b;
+  --border: #47514c;
+  --border-strong: #16211c;
   --text: #000000;
-  --text-2: #222222;
+  --text-2: #1d2421;
+  --accent: #07393d;
+  --accent-ink: #05282b;
+}
+
+
+/* ---------------------------------------------------------------
+   Accentkleur, te kiezen door familie bij Instellingen. Vijf vaste
+   kleuren en geen kleurenkiezer: een vrije keuze levert te makkelijk
+   iets op dat niet meer leesbaar is. Elke kleur is doorgerekend voor
+   licht, donker en hoog contrast, en haalt overal minstens 4.5:1.
+   Groenblauw is de standaard en staat bovenaan in :root.
+   --------------------------------------------------------------- */
+:root[data-accent='blauw'] {
+  --accent: #17568f;
+  --accent-ink: #103f6b;
+  --accent-soft: #dde9f6;
+}
+:root[data-accent='groen'] {
+  --accent: #2f6b3a;
+  --accent-ink: #245430;
+  --accent-soft: #dfeedf;
+}
+:root[data-accent='paars'] {
+  --accent: #66409a;
+  --accent-ink: #523080;
+  --accent-soft: #eae1f7;
+}
+:root[data-accent='warm'] {
+  --accent: #a5691f;
+  --accent-ink: #8a5a1e;
+  --accent-soft: #f7eedc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light'])[data-accent='blauw'] {
+    --accent: #79bdf2;
+    --accent-ink: #a4d3f7;
+    --accent-soft: #11283c;
+  }
+  :root:not([data-theme='light'])[data-accent='groen'] {
+    --accent: #78c98a;
+    --accent-ink: #a2dcae;
+    --accent-soft: #132a1a;
+  }
+  :root:not([data-theme='light'])[data-accent='paars'] {
+    --accent: #bda2ef;
+    --accent-ink: #d2c0f5;
+    --accent-soft: #241a38;
+  }
+  :root:not([data-theme='light'])[data-accent='warm'] {
+    --accent: #e0a44e;
+    --accent-ink: #f0bf74;
+    --accent-soft: #2c2418;
+  }
+}
+
+:root[data-theme='dark'][data-accent='blauw'] {
+  --accent: #79bdf2;
+  --accent-ink: #a4d3f7;
+  --accent-soft: #11283c;
+}
+:root[data-theme='dark'][data-accent='groen'] {
+  --accent: #78c98a;
+  --accent-ink: #a2dcae;
+  --accent-soft: #132a1a;
+}
+:root[data-theme='dark'][data-accent='paars'] {
+  --accent: #bda2ef;
+  --accent-ink: #d2c0f5;
+  --accent-soft: #241a38;
+}
+:root[data-theme='dark'][data-accent='warm'] {
+  --accent: #e0a44e;
+  --accent-ink: #f0bf74;
+  --accent-soft: #2c2418;
+}
+
+:root[data-contrast='high'][data-accent='blauw'] {
+  --accent: #0c3157;
+  --accent-ink: #08213b;
+  --accent-soft: #dde9f6;
+}
+:root[data-contrast='high'][data-accent='groen'] {
+  --accent: #1b4022;
+  --accent-ink: #133017;
+  --accent-soft: #dfeedf;
+}
+:root[data-contrast='high'][data-accent='paars'] {
+  --accent: #43226e;
+  --accent-ink: #33154f;
+  --accent-soft: #eae1f7;
+}
+:root[data-contrast='high'][data-accent='warm'] {
   --accent: #7a4a0a;
   --accent-ink: #5e3806;
+  --accent-soft: #f7eedc;
 }
 
 html {
