@@ -78,6 +78,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 19. `19_messages_heard.sql` — een beluisterd bericht blijft de rest van de
     dag op Vandaag staan en is de volgende ochtend weg. Niet beluisterde
     berichten blijven twee dagen, vastgezette altijd.
+20. `20_push.sql` — pushmeldingen: de toestellen van familie, en wie wat
+    krijgt. Het versturen doet de edge function `push-notify`. Onderaan
+    het bestand staan de twee cron-regels, met pg_net.
 
 ## Inloggen
 
@@ -116,6 +119,13 @@ Functions → Deploy a new function → plak het bestand.
   Verify JWT aan laten.
 - `turn-credentials` — tijdelijke TURN-gegevens voor videobellen op 4G/5G.
   Secrets: `CF_TURN_KEY_ID`, `CF_TURN_API_TOKEN`.
+- `push-notify` — stuurt de meldingen van de nachtjob door naar de
+  toestellen van familie. Plan elke vijf minuten in. Secrets:
+  `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`. Sleutels maak
+  je met `npx web-push generate-vapid-keys`; de publieke gaat ook als
+  `VITE_VAPID_PUBLIC_KEY` naar de app. Verify JWT aan laten.
+- `cleanup-storage` — wist spraakberichten en foto's die nergens meer bij
+  horen. Plan elke nacht in, na `run_nightly()`. Verify JWT aan laten.
 - `ask` — beantwoordt een vraag uit de eigen gegevens. Secret:
   `OPENAI_API_KEY`. Vindt de zoektocht niets boven de drempel, dan wordt
   het model niet eens aangeroepen.

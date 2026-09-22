@@ -27,6 +27,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // De afhandeling van pushberichten; de rest van de service worker
+        // wordt gegenereerd. Het bestand staat in public/ en wordt dus
+        // niet gebundeld.
+        importScripts: ['push-sw.js'],
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: '/index.html',
         runtimeCaching: [

@@ -6,6 +6,7 @@ import PairTablet from '../family/PairTablet'
 import ManageRadio from '../radio/ManageRadio'
 import { useLicht } from '../licht/lichtStore'
 import MijnGegevens from '../privacy/MijnGegevens'
+import { usePush } from '../push/usePush'
 
 const SCHAAL: { waarde: DisplayPrefs['scale']; label: string }[] = [
   { waarde: '1', label: 'A' },
@@ -214,6 +215,8 @@ export default function Settings() {
         </Link>
       </section>
 
+      <Meldingen householdId={hh} voornaam={voornaam} ondersteund={household?.support_level === 'ondersteund'} />
+
       <ManageRadio householdId={hh} />
 
       <PairTablet householdId={hh} personName={voornaam} />
@@ -322,5 +325,65 @@ function Uur({
         </option>
       ))}
     </select>
+  )
+}
+
+/**
+ * Meldingen staan per toestel aan, niet per persoon: de browser geeft de
+ * toestemming, niet het account.
+ */
+function Meldingen({
+  householdId,
+  voornaam,
+  ondersteund,
+}: {
+  householdId: string
+  voornaam: string
+  ondersteund: boolean
+}) {
+  const { status, fout, aanzetten, uitzetten } = usePush(householdId)
+
+  return (
+    <section className="rounded-card bg-surface p-6 shadow-card">
+      <h2 className="text-lg font-bold">Meldingen op dit toestel</h2>
+      <p className="mt-1 text-sm text-ink-soft">
+        Een bericht op je gsm wanneer er iets afwijkt, bijvoorbeeld medicatie die om tien uur nog
+        niet bevestigd is.
+      </p>
+
+      <Rij
+        titel="Meldingen"
+        onder={
+          status === 'onbeschikbaar'
+            ? 'Deze browser kan geen meldingen tonen. Op iPhone en iPad lukt het alleen als Thuis op het beginscherm staat.'
+            : status === 'geweigerd'
+              ? 'De browser houdt meldingen tegen. Zet ze weer aan bij de instellingen van de site.'
+              : 'Geldt alleen voor dit toestel. Zet het ook aan op je andere toestellen.'
+        }
+      >
+        {status === 'onbeschikbaar' || status === 'geweigerd' ? (
+          <span className="text-sm font-semibold text-ink-faint">Niet mogelijk</span>
+        ) : (
+          <Schakelaar
+            aan={status === 'aan'}
+            label="Meldingen op dit toestel"
+            onClick={() => (status === 'aan' ? uitzetten() : aanzetten())}
+          />
+        )}
+      </Rij>
+
+      {fout ? (
+        <p role="alert" className="pt-3 text-sm text-alert">
+          {fout}
+        </p>
+      ) : null}
+
+      {status === 'aan' && !ondersteund ? (
+        <p className="pt-3 text-sm text-ink-soft">
+          Er worden nu nog geen meldingen verstuurd: die horen bij de fase &ldquo;ondersteund&rdquo;.
+          {voornaam} beslist daarover bij Wie ziet wat.
+        </p>
+      ) : null}
+    </section>
   )
 }
