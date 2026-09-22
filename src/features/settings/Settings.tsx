@@ -124,6 +124,70 @@ export default function Settings() {
       </section>
 
       <section className="rounded-card bg-surface p-6 shadow-card">
+        <h2 className="text-lg font-bold">De vaste tablet</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Geldt alleen op de tablet die met een code gekoppeld is, niet op jouw toestel.
+        </p>
+
+        <Rij
+          titel="Kioskmodus"
+          onder={`Het scherm blijft aan, keert vanzelf terug naar Vandaag en toont 's nachts een rustige klok.`}
+        >
+          <Schakelaar
+            aan={prefs.kiosk}
+            label="Kioskmodus"
+            onClick={() => zet.mutate({ kiosk: !prefs.kiosk })}
+          />
+        </Rij>
+
+        {prefs.kiosk ? (
+          <>
+            <Rij
+              titel="Terug naar Vandaag"
+              onder="Na zoveel minuten zonder aanraking. Een gesprek of opname wordt nooit onderbroken."
+            >
+              <Keuze
+                opties={[
+                  { waarde: '2', label: '2 min' },
+                  { waarde: '5', label: '5 min' },
+                  { waarde: '10', label: '10 min' },
+                ]}
+                actief={String(prefs.kioskTerug)}
+                onKies={(v) => zet.mutate({ kioskTerug: Number(v) as DisplayPrefs['kioskTerug'] })}
+              />
+            </Rij>
+
+            <Rij
+              titel="Nachtscherm"
+              onder="Een gedimde klok met dag en dagdeel. Eén tik toont even het gewone scherm."
+            >
+              <div className="flex items-center gap-2">
+                <Uur
+                  label="Nachtscherm vanaf"
+                  waarde={prefs.nachtVan}
+                  onKies={(u) => zet.mutate({ nachtVan: u })}
+                />
+                <span className="text-ink-soft">tot</span>
+                <Uur
+                  label="Nachtscherm tot"
+                  waarde={prefs.nachtTot}
+                  onKies={(u) => zet.mutate({ nachtTot: u })}
+                />
+              </div>
+            </Rij>
+
+            <p className="pt-4 text-sm text-ink-soft">
+              Zodat {voornaam} de app niet per ongeluk sluit, zet je hem ook op het toestel zelf
+              vast.{' '}
+              <Link to="/installeren" className="font-semibold underline underline-offset-4">
+                Zo doe je dat
+              </Link>
+            </p>
+          </>
+        ) : null}
+      </section>
+
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Zo ziet het eruit</h2>
         <div className="mt-4 rounded-card border-[1.5px] border-accent bg-accent-soft p-5">
           <p className="text-4xl" aria-hidden="true">
@@ -233,5 +297,30 @@ function Keuze({
         </button>
       ))}
     </div>
+  )
+}
+
+function Uur({
+  label,
+  waarde,
+  onKies,
+}: {
+  label: string
+  waarde: number
+  onKies: (uur: number) => void
+}) {
+  return (
+    <select
+      aria-label={label}
+      value={waarde}
+      onChange={(e) => onKies(Number(e.target.value))}
+      className="min-h-[2.4rem] rounded-pill border border-line bg-surface-soft px-3 font-semibold tabular-nums"
+    >
+      {Array.from({ length: 24 }, (_, u) => (
+        <option key={u} value={u}>
+          {String(u).padStart(2, '0')}:00
+        </option>
+      ))}
+    </select>
   )
 }

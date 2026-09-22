@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { endCall } from '../../services/calls'
 import { useWebRTC } from './useWebRTC'
 import { useRadio } from '../radio/radioStore'
+import { useKioskBezig } from '../kiosk/kioskStore'
 
 /**
  * Tijdens het gesprek staat het beeld van de ander schermvullend en is er
@@ -33,6 +34,9 @@ export default function CallScreen({
     zetMicrofoon,
     zetCamera,
   } = useWebRTC(callId, rol)
+
+  // Een gesprek zonder aanraking is een gewoon gesprek: de kiosk blijft eraf.
+  useKioskBezig(true)
 
   useEffect(() => {
     if (state === 'ended') onKlaar()

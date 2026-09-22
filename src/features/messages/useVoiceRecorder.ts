@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useKioskBezig } from '../kiosk/kioskStore'
 
 export type RecorderState = 'idle' | 'requesting' | 'recording' | 'ready' | 'error'
 
@@ -43,6 +44,8 @@ export function useVoiceRecorder() {
   const [seconds, setSeconds] = useState(0)
   const [recording, setRecording] = useState<Recording | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Tijdens het inspreken niet terug naar Vandaag springen.
+  useKioskBezig(state === 'requesting' || state === 'recording')
 
   const recorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])

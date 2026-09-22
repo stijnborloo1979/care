@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useKioskBezig } from '../kiosk/kioskStore'
 import { useRadio } from '../radio/radioStore'
 
 type Herkenner = {
@@ -37,6 +38,7 @@ export function spreek(tekst: string) {
 export function useSpeech(onVraag: (tekst: string) => void) {
   const [luistert, setLuistert] = useState(false)
   const [fout, setFout] = useState<string | null>(null)
+  useKioskBezig(luistert)
   const refVraag = useRef(onVraag)
   refVraag.current = onVraag
 

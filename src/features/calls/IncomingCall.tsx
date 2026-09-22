@@ -4,6 +4,7 @@ import { answerCall, endCall, getActiveCall } from '../../services/calls'
 import { supabase } from '../../lib/supabase'
 import CallScreen from './CallScreen'
 import { useHousehold } from '../household/useHousehold'
+import { useKioskBezig } from '../kiosk/kioskStore'
 
 const AUTO_NA = 5
 
@@ -48,6 +49,8 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
   }, [householdId, queryClient])
 
   const rinkelt = oproep?.status === 'ringing' && !inGesprek
+  // Een rinkelend toestel toont nooit het nachtscherm.
+  useKioskBezig(rinkelt)
 
   useEffect(() => {
     if (!rinkelt) {

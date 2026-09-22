@@ -14,6 +14,8 @@ import { MiniSpeler } from '../features/radio/Radio'
 import Licht from '../features/licht/Licht'
 import { useLichtSignalen } from '../features/licht/useLichtSignalen'
 import { useWakeLock } from '../features/licht/useWakeLock'
+import { useKiosk } from '../features/kiosk/useKiosk'
+import Nachtscherm from '../features/kiosk/Nachtscherm'
 
 const NAV: { to: string; label: string; icoon: IconNaam; mic?: boolean }[] = [
   { to: '/', label: 'Vandaag', icoon: 'vandaag' },
@@ -46,7 +48,17 @@ export default function PersonLayout() {
   useZenders(household?.household_id ?? '')
   const prefs = huidigePrefs()
   useLichtSignalen(household?.household_id ?? '', tz, prefs.licht)
-  useWakeLock(prefs.schermAan)
+  // Kioskmodus alleen op de gekoppelde tablet: familie die /persoon opent
+  // op de eigen telefoon, hoort niet teruggestuurd of gedimd te worden.
+  const kiosk = prefs.kiosk && household?.role === 'person'
+  useWakeLock(prefs.schermAan || kiosk)
+  const { nachtscherm, wek } = useKiosk({
+    actief: kiosk,
+    tz,
+    terugNa: prefs.kioskTerug,
+    nachtVan: prefs.nachtVan,
+    nachtTot: prefs.nachtTot,
+  })
 
   return (
     <>
@@ -75,6 +87,8 @@ export default function PersonLayout() {
       <MiniSpeler />
 
       <Licht />
+
+      {nachtscherm ? <Nachtscherm tz={tz} onWek={wek} /> : null}
 
       <nav
         aria-label="Hoofdnavigatie"

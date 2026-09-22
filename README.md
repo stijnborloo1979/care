@@ -215,6 +215,24 @@ alleen in het scherm.
   of meteen als de app pas na het begin opengaat. 's Nachts niet. Browsers
   vragen daarvoor één aanraking van het scherm na elke herstart.
 
+## Kioskmodus
+
+Voor de vaste tablet, aan te zetten bij Instellingen → De vaste tablet.
+Geldt alleen op de gekoppelde tablet (rol `person`), nooit op het toestel
+van familie. Staat in `display_prefs`, dus geen migratie nodig.
+
+- Scherm blijft aan (Wake Lock).
+- Na 2, 5 of 10 minuten zonder aanraking terug naar Vandaag, bovenaan.
+  Een gesprek, opname of spraakvraag wordt nooit onderbroken
+  (`useKioskBezig()`), en `/fotos` blijft staan voor de diavoorstelling.
+- 's Nachts een gedimde klok met dag en dagdeel. Eén tik toont een minuut
+  het gewone scherm.
+- Met Fully Kiosk Browser (JavaScript Interface aan) gaat ook de echte
+  helderheid omlaag, en gaat het scherm aan bij een melding.
+
+Vastzetten doet het toestel zelf: Begeleide toegang op iPad, app
+vastzetten of Fully Kiosk op Android. De uitleg staat op `/installeren`.
+
 ## Offline
 
 De query-cache wordt een dag lang in localStorage bewaard, zodat de tablet
