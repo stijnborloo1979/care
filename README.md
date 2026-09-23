@@ -84,6 +84,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 21. `21_tasks.sql` — taken voor de familie: opnemen, toewijzen, afvinken
     en terugkerende taken. Niet zichtbaar voor de persoon of voor
     zorgverleners. Plan `task_reminders()` in om 07:00 via pg_cron.
+22. `22_support_by_family.sql` — de familiebeheerder past het niveau van
+    ondersteuning meteen toe, zonder het toestel van de persoon. Elke
+    wijziging komt in het zorglogboek.
 
 ## Inloggen
 
@@ -204,11 +207,11 @@ downloadt hem niet.
 | Samen | Agenda, medicatie, logboek | Geen |
 | Ondersteund | Alles wat nodig is | Bij afwijkingen |
 
-Wie de app zelf aanmaakt, is eigenaar en start in "zelf". Familie kan meer
-ondersteuning voorstellen; de persoon beslist op het scherm "Wie ziet wat".
-Minder ondersteuning kan altijd, meteen, zonder toestemming van iemand
-anders. Dit wordt afgedwongen in de database (`mag_meekijken()`), niet
-alleen in het scherm.
+Wie de app zelf aanmaakt, is eigenaar en start in "zelf". De persoon kan
+het niveau altijd zelf wijzigen; de familiebeheerder ook, meteen (zie
+`22_support_by_family.sql`). Elke wijziging komt in het zorglogboek, met
+wie ze deed. Wat familie in elke fase ziet, wordt afgedwongen in de
+database (`mag_meekijken()`), niet alleen in het scherm.
 
 ## Wat de persoon zelf kan
 

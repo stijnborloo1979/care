@@ -124,7 +124,7 @@ export default function Delen() {
         <p className="mt-1 text-ink-soft">
           {ikBenHet
             ? 'Jij beslist hoeveel je familie meekijkt. Minder kan altijd; meer vraagt jouw ja.'
-            : `${voornaam} beslist hoeveel familie meekijkt. Jij kan meer ondersteuning voorstellen.`}
+            : `Als beheerder pas je dit meteen aan. Elke wijziging komt in het zorglogboek, zodat ${voornaam} altijd kan zien wat er veranderde.`}
         </p>
       </header>
 
@@ -153,12 +153,7 @@ export default function Delen() {
         </section>
       ) : null}
 
-      {gevraagd && !ikBenHet ? (
-        <p className="rounded-card bg-surface-soft p-4 text-ink-soft">
-          Je voorstel voor <strong>{NIVEAUS.find((n) => n.id === gevraagd)?.titel}</strong> wacht op
-          het antwoord van {voornaam}.
-        </p>
-      ) : null}
+
 
       <section className="space-y-3">
         <h2 className="flex items-center gap-2 text-lg font-bold">
@@ -191,9 +186,14 @@ export default function Delen() {
             </button>
           )
         })}
-        {niveau.data === 'aangevraagd' ? (
+        {niveau.data === 'toegepast' ? (
           <p className="text-sm font-semibold text-accent-ink">
-            Voorgesteld. {voornaam} krijgt de vraag op het eigen scherm.
+            Aangepast. Het staat in het zorglogboek.
+          </p>
+        ) : null}
+        {!ikBenHet && !isBeheerder ? (
+          <p className="text-sm text-ink-soft">
+            Alleen de familiebeheerder kan dit wijzigen.
           </p>
         ) : null}
         {niveau.error ? (
