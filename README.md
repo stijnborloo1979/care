@@ -124,7 +124,9 @@ Functions → Deploy a new function → plak het bestand.
 - `delete-account` — verwijdert een account (recht op vergetelheid).
   Verify JWT aan laten.
 - `turn-credentials` — tijdelijke TURN-gegevens voor videobellen op 4G/5G.
-  Secrets: `CF_TURN_KEY_ID`, `CF_TURN_API_TOKEN`.
+  Secrets: `CF_TURN_KEY_ID`, `CF_TURN_API_TOKEN`. Zet **Verify JWT uit**:
+  met die schakelaar aan weigert Supabase de preflight van de browser en
+  krijg je een CORS-fout. De functie controleert het token zelf.
 - `push-notify` — stuurt de meldingen van de nachtjob door naar de
   toestellen van familie. Plan elke vijf minuten in. Secrets:
   `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`. Sleutels maak

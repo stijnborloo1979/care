@@ -9,15 +9,22 @@
 // te beheren, en je werkt toch al in het Cloudflare-dashboard.
 //
 // Aanmaken: Dashboard -> Edge Functions -> Deploy a new function
-//   Naam: turn-credentials. "Verify JWT" mag AAN blijven: alleen wie
-//   ingelogd is, krijgt gegevens.
+//   Naam: turn-credentials
+//
+//   Zet "Verify JWT" UIT voor deze functie. Met die schakelaar aan
+//   weigert Supabase de preflight-vraag van de browser (een OPTIONS
+//   zonder token) nog voor deze code draait, en dan geeft de browser een
+//   CORS-fout. De controle gebeurt hieronder zelf: zonder geldig token
+//   krijgt niemand gegevens.
 //
 // Secrets (Edge Functions -> Secrets):
-//   CF_TURN_KEY_ID      de Key ID van je TURN-sleutel bij Cloudflare
+//   CF_TURN_KEY_ID      de Turn Token ID van je TURN-sleutel bij Cloudflare
 //   CF_TURN_API_TOKEN   het API-token van die sleutel
 //
 // Staan die niet ingesteld, dan geeft de functie niets terug en valt de
 // app terug op alleen STUN: bellen werkt dan op wifi, maar niet overal.
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -27,6 +34,20 @@ const CORS = {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+
+  // Wie ben je? Zonder geldig token geen TURN-gegevens: anders kan iedereen
+  // met het adres van deze functie verkeer over jouw Cloudflare-account
+  // laten lopen.
+  const auth = req.headers.get('Authorization') ?? ''
+  const jwt = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+  if (!jwt) return json({ iceServers: null, error: 'niet ingelogd' }, 401)
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+  )
+  const { data: gebruiker } = await supabase.auth.getUser(jwt)
+  if (!gebruiker?.user) return json({ iceServers: null, error: 'niet ingelogd' }, 401)
 
   const keyId = Deno.env.get('CF_TURN_KEY_ID')
   const token = Deno.env.get('CF_TURN_API_TOKEN')
@@ -61,8 +82,9 @@ Deno.serve(async (req) => {
   }
 })
 
-function json(body: unknown) {
+function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
+    status,
     headers: { ...CORS, 'Content-Type': 'application/json' },
   })
 }

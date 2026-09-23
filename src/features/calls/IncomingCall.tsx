@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import CallScreen from './CallScreen'
 import { useHousehold } from '../household/useHousehold'
 import { useKioskBezig } from '../kiosk/kioskStore'
+import { ontgrendelGeluid, startBeltoon, stopBeltoon } from './beltoon'
 
 const AUTO_NA = 5
 
@@ -51,6 +52,24 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
   const rinkelt = oproep?.status === 'ringing' && !inGesprek
   // Een rinkelend toestel toont nooit het nachtscherm.
   useKioskBezig(rinkelt)
+
+  // Geluid mag pas na één aanraking van het scherm. Die aanraking komt er
+  // toch wel; we zetten alleen klaar wat nodig is om later te kunnen bellen.
+  useEffect(() => {
+    window.addEventListener('pointerdown', ontgrendelGeluid, { once: true })
+    return () => window.removeEventListener('pointerdown', ontgrendelGeluid)
+  }, [])
+
+  // De beltoon loopt zolang het rinkelt, en stopt bij opnemen, weigeren of
+  // het automatisch opnemen na vijf seconden.
+  useEffect(() => {
+    if (!rinkelt) {
+      stopBeltoon()
+      return
+    }
+    startBeltoon()
+    return stopBeltoon
+  }, [rinkelt])
 
   useEffect(() => {
     if (!rinkelt) {

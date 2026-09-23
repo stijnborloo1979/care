@@ -1,0 +1,89 @@
+/**
+ * De beltoon voor een inkomende oproep.
+ *
+ * Zonder geluidsbestand: twee zachte tonen uit de Web Audio API. Dat
+ * scheelt een download op een tablet met hikkende wifi, en het klinkt
+ * gelijk op elk toestel.
+ *
+ * Browsers laten geluid pas toe nadat iemand het scherm één keer heeft
+ * aangeraakt. Daarom wordt de audiocontext bij de eerste aanraking al
+ * klaargezet, lang voor er iemand belt.
+ */
+
+let ctx: AudioContext | null = null
+let timer: number | null = null
+
+type AudioContextCtor = typeof AudioContext
+
+function maakContext(): AudioContext | null {
+  const Ctor: AudioContextCtor | undefined =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: AudioContextCtor }).webkitAudioContext
+  if (!Ctor) return null
+  try {
+    return new Ctor()
+  } catch {
+    return null
+  }
+}
+
+/** Eén keer bij de eerste aanraking: daarna mag er geluid uit. */
+export function ontgrendelGeluid() {
+  if (!ctx) ctx = maakContext()
+  if (ctx?.state === 'suspended') void ctx.resume()
+}
+
+function toon(start: number, hz: number, duur: number) {
+  if (!ctx) return
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.value = hz
+
+  // Zacht in- en uitvloeien: een blokgolf die abrupt begint, klinkt als
+  // een tik en schrikt iemand op.
+  gain.gain.setValueAtTime(0.0001, start)
+  gain.gain.exponentialRampToValueAtTime(0.22, start + 0.06)
+  gain.gain.setValueAtTime(0.22, start + duur - 0.08)
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duur)
+
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+  osc.start(start)
+  osc.stop(start + duur + 0.02)
+}
+
+function rinkelEens() {
+  if (!ctx) return
+  const nu = ctx.currentTime
+  toon(nu, 660, 0.4)
+  toon(nu + 0.5, 880, 0.5)
+  // Trillen waar het toestel dat kan; iPhone en iPad doen dit niet.
+  try {
+    navigator.vibrate?.([400, 200, 500])
+  } catch {
+    // Mag niet van de browser: dan alleen geluid.
+  }
+}
+
+/** Blijft herhalen tot stopBeltoon(). */
+export function startBeltoon() {
+  if (timer !== null) return
+  ontgrendelGeluid()
+  if (!ctx || ctx.state !== 'running') return
+
+  rinkelEens()
+  timer = window.setInterval(rinkelEens, 2600)
+}
+
+export function stopBeltoon() {
+  if (timer !== null) {
+    window.clearInterval(timer)
+    timer = null
+  }
+  try {
+    navigator.vibrate?.(0)
+  } catch {
+    // Niets aan te doen.
+  }
+}
