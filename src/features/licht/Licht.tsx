@@ -23,9 +23,12 @@ export default function Licht() {
   if (!actief) return null
 
   return (
+    // z-75: boven het oproepscherm en het nachtscherm. Het licht moet
+    // opvallen vanuit een andere hoek van de kamer, en het vangt geen
+    // tikken op, dus de knoppen eronder blijven gewoon werken.
     <div
       aria-hidden="true"
-      className="licht-gloed pointer-events-none fixed inset-0 z-[55]"
+      className="licht-gloed pointer-events-none fixed inset-0 z-[75]"
       style={{ ['--licht' as string]: KLEUR[actief] }}
     />
   )
