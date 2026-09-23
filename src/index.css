@@ -233,13 +233,17 @@
     align-items: start;
   }
 
-  .vandaag > header,
-  .vandaag > .eigenaar {
+  /* Rij én kolom uitschrijven. Zonder rijnummer zet de browser de
+     linkerkolom op de rij ná de rechter, want die staat eerder in de
+     code — en dan zakt alles naar beneden in plaats van ernaast. */
+  .vandaag > header {
     grid-column: 1 / -1;
+    grid-row: 1;
   }
 
   .vandaag .kolom-links,
   .vandaag .kolom-rechts {
+    grid-row: 2;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -251,6 +255,11 @@
 
   .vandaag .kolom-rechts {
     grid-column: 2;
+  }
+
+  .vandaag > .eigenaar {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 
   /* De eerste kaart van elke kolom hoort op dezelfde hoogte te beginnen. */
