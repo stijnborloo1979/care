@@ -56,8 +56,13 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
   // Geluid mag pas na één aanraking van het scherm. Die aanraking komt er
   // toch wel; we zetten alleen klaar wat nodig is om later te kunnen bellen.
   useEffect(() => {
-    window.addEventListener('pointerdown', ontgrendelGeluid, { once: true })
-    return () => window.removeEventListener('pointerdown', ontgrendelGeluid)
+    const opties = { capture: true, passive: true } as const
+    window.addEventListener('pointerdown', ontgrendelGeluid, opties)
+    window.addEventListener('keydown', ontgrendelGeluid, opties)
+    return () => {
+      window.removeEventListener('pointerdown', ontgrendelGeluid, { capture: true })
+      window.removeEventListener('keydown', ontgrendelGeluid, { capture: true })
+    }
   }, [])
 
   // De beltoon loopt zolang het rinkelt, en stopt bij opnemen, weigeren of

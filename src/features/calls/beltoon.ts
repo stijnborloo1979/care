@@ -27,10 +27,14 @@ function maakContext(): AudioContext | null {
   }
 }
 
-/** Eén keer bij de eerste aanraking: daarna mag er geluid uit. */
+/**
+ * Bij elke aanraking opnieuw proberen. Eén keer volstaat niet: een browser
+ * mag een audiocontext later weer stilleggen, bijvoorbeeld nadat de app
+ * een tijd op de achtergrond stond.
+ */
 export function ontgrendelGeluid() {
   if (!ctx) ctx = maakContext()
-  if (ctx?.state === 'suspended') void ctx.resume()
+  if (ctx?.state !== 'running') void ctx?.resume()
 }
 
 function toon(start: number, hz: number, duur: number) {
@@ -54,7 +58,12 @@ function toon(start: number, hz: number, duur: number) {
 }
 
 function rinkelEens() {
+  if (!ctx) ctx = maakContext()
   if (!ctx) return
+  if (ctx.state !== 'running') {
+    void ctx.resume()
+    return
+  }
   const nu = ctx.currentTime
   toon(nu, 660, 0.4)
   toon(nu + 0.5, 880, 0.5)
@@ -66,14 +75,25 @@ function rinkelEens() {
   }
 }
 
-/** Blijft herhalen tot stopBeltoon(). */
+/**
+ * Blijft herhalen tot stopBeltoon().
+ *
+ * Niet afhaken als de context nog niet speelt: resume() duurt even, en
+ * dan zou de eerste oproep na het opstarten stil blijven. We zetten de
+ * herhaling gewoon aan; elke beurt probeert opnieuw.
+ */
 export function startBeltoon() {
   if (timer !== null) return
   ontgrendelGeluid()
-  if (!ctx || ctx.state !== 'running') return
-
+  void ctx?.resume().then(rinkelEens)
   rinkelEens()
   timer = window.setInterval(rinkelEens, 2600)
+}
+
+/** Twee tonen, voor de knop "Beltoon proberen". */
+export function testBeltoon() {
+  ontgrendelGeluid()
+  void ctx?.resume().then(rinkelEens)
 }
 
 export function stopBeltoon() {

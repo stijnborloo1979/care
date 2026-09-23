@@ -1,3 +1,4 @@
+import { testBeltoon } from '../calls/beltoon'
 import { Link } from 'react-router-dom'
 import { platformVan, staatOpBeginscherm, useInstall } from './useInstall'
 
@@ -108,6 +109,25 @@ export default function InstallGuide() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-bold">Geluid uitproberen</h2>
+        <p className="mt-2 text-ink-soft">
+          Browsers laten geluid pas toe nadat iemand het scherm één keer heeft aangeraakt na het
+          opstarten. Druk hier na het klaarzetten één keer, dan weet je dat de beltoon werkt op dit
+          toestel.
+        </p>
+        <button
+          onClick={testBeltoon}
+          className="mt-4 flex min-h-[3.6rem] w-full items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface px-5 text-lg font-semibold"
+        >
+          Beltoon proberen
+        </button>
+        <p className="mt-2 text-sm text-ink-faint">
+          Hoor je niets, kijk dan of het toestel niet op stil staat en of het volume van de media
+          hoog genoeg is.
+        </p>
       </section>
 
       <section className="mt-10">
