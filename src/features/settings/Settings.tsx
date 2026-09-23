@@ -153,6 +153,27 @@ export default function Settings() {
       </section>
 
       <section className="rounded-card bg-surface p-6 shadow-card">
+        <h2 className="text-lg font-bold">Bellen</h2>
+
+        <Rij
+          titel="Zelf opnemen na"
+          onder={`Hoe lang de tablet rinkelt voor ze het gesprek zelf aanneemt. Tijdens het rinkelen kan ${voornaam} altijd zelf opnemen of weigeren. Geldt alleen in de fase "ondersteund".`}
+        >
+          <Keuze
+            opties={[
+              { waarde: '5', label: '5 sec' },
+              { waarde: '10', label: '10 sec' },
+              { waarde: '20', label: '20 sec' },
+              { waarde: '45', label: '45 sec' },
+              { waarde: '0', label: 'Nooit' },
+            ]}
+            actief={String(prefs.autoOpnemen)}
+            onKies={(v) => zet.mutate({ autoOpnemen: Number(v) as DisplayPrefs['autoOpnemen'] })}
+          />
+        </Rij>
+      </section>
+
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">De vaste tablet</h2>
         <p className="mt-1 text-sm text-ink-soft">
           Geldt alleen op de tablet die met een code gekoppeld is, niet op jouw toestel.

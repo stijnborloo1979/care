@@ -6,8 +6,7 @@ import CallScreen from './CallScreen'
 import { useHousehold } from '../household/useHousehold'
 import { useKioskBezig } from '../kiosk/kioskStore'
 import { ontgrendelGeluid, startBeltoon, stopBeltoon } from './beltoon'
-
-const AUTO_NA = 5
+import { huidigePrefs } from '../settings/useDisplayPrefs'
 
 /**
  * Een inkomende oproep aanvaarden is precies wat mensen met
@@ -18,12 +17,15 @@ const AUTO_NA = 5
 export default function IncomingCall({ householdId }: { householdId: string }) {
   const queryClient = useQueryClient()
   const [inGesprek, setInGesprek] = useState<string | null>(null)
-  const [aftellen, setAftellen] = useState(AUTO_NA)
+  const [aftellen, setAftellen] = useState<number>(() => huidigePrefs().autoOpnemen)
   const [gestopt, setGestopt] = useState(false)
   const { household } = useHousehold()
+  // Hoe lang er gerinkeld wordt voor de tablet zelf opneemt. Familie stelt
+  // dat in; 0 betekent dat de persoon altijd zelf opneemt.
+  const naSeconden = huidigePrefs().autoOpnemen
   // Automatisch opnemen hoort bij de ondersteunde fase. Wie zelfstandig is,
   // beslist zelf of hij opneemt — anders voelt het als binnenvallen.
-  const autoOpnemen = household?.support_level === 'ondersteund'
+  const autoOpnemen = household?.support_level === 'ondersteund' && naSeconden > 0
 
   const { data: oproep } = useQuery({
     queryKey: ['active-call', householdId],
@@ -66,7 +68,7 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
   }, [])
 
   // De beltoon loopt zolang het rinkelt, en stopt bij opnemen, weigeren of
-  // het automatisch opnemen na vijf seconden.
+  // het automatisch opnemen.
   useEffect(() => {
     if (!rinkelt) {
       stopBeltoon()
@@ -78,7 +80,7 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
 
   useEffect(() => {
     if (!rinkelt) {
-      setAftellen(AUTO_NA)
+      setAftellen(naSeconden)
       setGestopt(false)
       return
     }
@@ -86,7 +88,7 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
 
     const id = window.setInterval(() => setAftellen((v) => v - 1), 1000)
     return () => window.clearInterval(id)
-  }, [rinkelt, gestopt, autoOpnemen])
+  }, [rinkelt, gestopt, autoOpnemen, naSeconden])
 
   useEffect(() => {
     if (autoOpnemen && rinkelt && !gestopt && aftellen <= 0 && oproep) {

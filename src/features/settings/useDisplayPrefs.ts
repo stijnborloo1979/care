@@ -14,6 +14,8 @@ export interface DisplayPrefs {
   licht: boolean
   /** Het scherm blijft aan, voor een tablet die altijd in de lader staat. */
   schermAan: boolean
+  /** Seconden voor de tablet zelf opneemt. 0 betekent: nooit vanzelf. */
+  autoOpnemen: 0 | 5 | 10 | 20 | 30 | 45
   /** Kioskmodus: geldt alleen op de gekoppelde tablet van de persoon. */
   kiosk: boolean
   /** Minuten zonder aanraking voor de kiosk terugkeert naar Vandaag. */
@@ -32,6 +34,7 @@ export const STANDAARD: DisplayPrefs = {
   voice: true,
   licht: true,
   schermAan: false,
+  autoOpnemen: 5,
   kiosk: false,
   kioskTerug: 5,
   nachtVan: 22,
