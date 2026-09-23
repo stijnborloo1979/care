@@ -84,11 +84,29 @@ export default function CallScreen({
             <p className="text-xl">
               {state === 'connecting'
                 ? 'Verbinden…'
-                : state === 'failed'
-                  ? 'Het gesprek lukte niet'
-                  : 'Even geduld…'}
+                : state === 'declined'
+                  ? `${metWie} kan nu niet praten`
+                  : state === 'missed'
+                    ? `${metWie} nam niet op`
+                    : state === 'failed'
+                      ? 'Het gesprek lukte niet'
+                      : 'Even geduld…'}
             </p>
-            {fout ? <p className="max-w-sm text-lg text-white/80">{fout}</p> : null}
+
+            {/* Bij weigeren of niet opnemen geen technische uitleg: er is
+                niets kapot, er is gewoon niet opgenomen. */}
+            {state === 'declined' ? (
+              <p className="max-w-sm text-lg text-white/80">
+                Er werd op &ldquo;Nu niet&rdquo; gedrukt. Probeer het straks opnieuw, of stuur een
+                ingesproken bericht.
+              </p>
+            ) : state === 'missed' ? (
+              <p className="max-w-sm text-lg text-white/80">
+                Misschien is er niemand bij het scherm. Een ingesproken bericht blijft wel staan.
+              </p>
+            ) : fout ? (
+              <p className="max-w-sm text-lg text-white/80">{fout}</p>
+            ) : null}
           </div>
         ) : null}
 
@@ -132,7 +150,7 @@ export default function CallScreen({
 
         <button
           onClick={stoppen}
-          className="grid h-20 w-20 place-items-center rounded-full bg-[#A8442F] text-3xl text-white"
+          className="grid h-20 w-20 place-items-center rounded-full bg-[#B03A2E] text-3xl text-white"
           aria-label="Ophangen"
         >
           📵

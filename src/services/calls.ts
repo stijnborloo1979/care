@@ -30,3 +30,14 @@ export async function getActiveCall(householdId: string): Promise<ActiveCall | n
   const rij = Array.isArray(data) ? data[0] : data
   return (rij ?? null) as ActiveCall | null
 }
+
+/** De status van één gesprek. Voor de beller: geweigerd, gemist of gedaan. */
+export async function getCallStatus(callId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('call')
+    .select('status')
+    .eq('id', callId)
+    .maybeSingle()
+  if (error) return null
+  return (data?.status as string | undefined) ?? null
+}

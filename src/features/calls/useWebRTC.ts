@@ -1,8 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
+import { getCallStatus } from '../../services/calls'
 
-export type CallState = 'idle' | 'ringing' | 'connecting' | 'active' | 'ended' | 'failed'
+export type CallState =
+  | 'idle'
+  | 'ringing'
+  | 'connecting'
+  | 'active'
+  | 'ended'
+  | 'failed'
+  // Geweigerd of niet opgenomen aan de andere kant. Bewust apart van
+  // 'failed': dat er niemand opnam is iets heel anders dan een netwerk
+  // dat niet meewil, en de beller hoort dat verschil te lezen.
+  | 'declined'
+  | 'missed'
 
 export interface ActiveCall {
   id: string
@@ -136,6 +148,31 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
     stop()
     setState('ended')
   }, [stop])
+
+  // De beller kijkt mee naar de rij in de database. Drukt de andere kant
+  // op "Nu niet", dan staat daar 'declined' en hoeft er niet 25 seconden
+  // op een verbinding gewacht te worden die nooit komt.
+  useEffect(() => {
+    if (!callId || rol !== 'beller') return
+    let weg = false
+
+    const id = window.setInterval(async () => {
+      const status = await getCallStatus(callId)
+      if (weg || !status) return
+      if (status === 'declined') {
+        setState('declined')
+        stop()
+      } else if (status === 'missed') {
+        setState('missed')
+        stop()
+      }
+    }, 2000)
+
+    return () => {
+      weg = true
+      window.clearInterval(id)
+    }
+  }, [callId, rol, stop])
 
   useEffect(() => {
     if (!callId) return
