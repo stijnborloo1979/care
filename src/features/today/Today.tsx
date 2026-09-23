@@ -32,102 +32,110 @@ export default function Today({ householdId, personName, timezone }: Props) {
   const { current, next } = whatNow(events, now)
 
   return (
-    <main className="mx-auto max-w-[36rem] px-5 pb-32 pt-6">
-      <header>
+    <main className="vandaag mx-auto flex max-w-[36rem] flex-col px-5 pb-32 pt-6">
+      <header className="order-1">
         <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">
           {greeting(now, timezone)}, {personName}
         </h1>
         <p className="mt-1 text-lg text-ink-soft">{dateLine(now, timezone)}</p>
       </header>
 
-      <div className="mt-6 space-y-4">
-        <SupportRequestBanner />
-        <PersonInbox householdId={householdId} />
-      </div>
-
-      <section className="mt-6" aria-labelledby="nu">
-        <h2 id="nu" className="text-base font-bold text-ink-faint">
-          Nu
-        </h2>
-        <div className="mt-2">
-          {isLoading ? (
-            <Skeleton className="h-52 w-full" />
-          ) : isError ? (
-            <p className="text-ink-soft">De planning is nu niet te zien. Probeer het zo opnieuw.</p>
-          ) : (
-            <NowCard
-              event={current}
-              timezone={timezone}
-              onDone={(id) => markDone.mutate({ id, done: true })}
-            />
-          )}
+      {/* Twee groepen, zodat het liggende scherm er twee kolommen van
+          maakt. Staand tellen de wikkels niet mee (display: contents) en
+          zetten de order-klassen alles terug in de vertrouwde volgorde. */}
+      <div className="kolom-rechts">
+        <div className="order-2 mt-6 space-y-4">
+          <SupportRequestBanner />
+          <PersonInbox householdId={householdId} />
         </div>
-      </section>
 
-      {next ? (
-        <section className="mt-6" aria-labelledby="daarna">
-          <h2 id="daarna" className="text-base font-bold text-ink-faint">
-            Daarna
-          </h2>
-          <div className="mt-2 flex items-center gap-4 rounded-card bg-surface p-5 shadow-card">
-            <span className="text-3xl" aria-hidden="true">
-              {next.emoji ?? '📌'}
-            </span>
-            <span>
-              <span className="block text-lg font-bold">{next.title}</span>
-              <span className="text-ink-soft">om {hhmm(new Date(next.starts_at), timezone)}</span>
-            </span>
-          </div>
-        </section>
-      ) : null}
+        <div className="order-5 mt-6">
+          <OnthoudDit householdId={householdId} timezone={timezone} />
+        </div>
 
-      <div className="mt-6">
-        <OnthoudDit householdId={householdId} timezone={timezone} />
-      </div>
-
-      {/* Na het praktische: iets om naar te kijken en iets om te vertellen. */}
-      <div className="mt-8 space-y-4">
-        <RadioKaart householdId={householdId} />
-        <VandaagVroeger
-          householdId={householdId}
-          timezone={timezone}
-          onVertel={(v) => setFotoVraag(v)}
-        />
-        {fotoVraag ? (
-          <VertelEens
+        {/* Na het praktische: iets om naar te kijken en iets om te vertellen. */}
+        <div className="order-6 mt-8 space-y-4">
+          <RadioKaart householdId={householdId} />
+          <VandaagVroeger
             householdId={householdId}
             timezone={timezone}
-            extraVraag={fotoVraag}
-            onKlaar={() => setFotoVraag(null)}
+            onVertel={(v) => setFotoVraag(v)}
           />
-        ) : null}
-        <VertelEens householdId={householdId} timezone={timezone} />
+          {fotoVraag ? (
+            <VertelEens
+              householdId={householdId}
+              timezone={timezone}
+              extraVraag={fotoVraag}
+              onKlaar={() => setFotoVraag(null)}
+            />
+          ) : null}
+          <VertelEens householdId={householdId} timezone={timezone} />
+        </div>
       </div>
 
-      {events.length > 0 ? (
-        <section className="mt-6" aria-labelledby="vandaag">
-          <h2 id="vandaag" className="text-base font-bold text-ink-faint">
-            Vandaag
+      <div className="kolom-links">
+        <section className="order-3 mt-6" aria-labelledby="nu">
+          <h2 id="nu" className="text-base font-bold text-ink-faint">
+            Nu
           </h2>
-          <ol className="mt-2 rounded-card bg-surface p-5 shadow-card">
-            {events.map((e) => (
-              <TimelineRow
-                key={e.id}
-                event={e}
-                now={now}
+          <div className="mt-2">
+            {isLoading ? (
+              <Skeleton className="h-52 w-full" />
+            ) : isError ? (
+              <p className="text-ink-soft">De planning is nu niet te zien. Probeer het zo opnieuw.</p>
+            ) : (
+              <NowCard
+                event={current}
                 timezone={timezone}
-                onToggle={(id, done) => markDone.mutate({ id, done })}
+                onDone={(id) => markDone.mutate({ id, done: true })}
               />
-            ))}
-          </ol>
+            )}
+          </div>
         </section>
-      ) : null}
 
-      <section className="mt-8 grid grid-cols-3 gap-2">
-        <BigButton icoon="praten" label="Wat nu?" onClick={() => navigate('/nu')} highlight />
-        <BigButton icoon="wie" label="Familie" onClick={() => navigate('/wie')} />
-        <BigButton icoon="help" label="Help" onClick={() => navigate('/help')} alert />
-      </section>
+        {next ? (
+          <section className="order-4 mt-6" aria-labelledby="daarna">
+            <h2 id="daarna" className="text-base font-bold text-ink-faint">
+              Daarna
+            </h2>
+            <div className="mt-2 flex items-center gap-4 rounded-card bg-surface p-5 shadow-card">
+              <span className="text-3xl" aria-hidden="true">
+                {next.emoji ?? '📌'}
+              </span>
+              <span>
+                <span className="block text-lg font-bold">{next.title}</span>
+                <span className="text-ink-soft">om {hhmm(new Date(next.starts_at), timezone)}</span>
+              </span>
+            </div>
+          </section>
+        ) : null}
+
+        {events.length > 0 ? (
+          <section className="order-7 mt-6" aria-labelledby="vandaag">
+            <h2 id="vandaag" className="text-base font-bold text-ink-faint">
+              Vandaag
+            </h2>
+            <ol className="mt-2 rounded-card bg-surface p-5 shadow-card">
+              {events.map((e) => (
+                <TimelineRow
+                  key={e.id}
+                  event={e}
+                  now={now}
+                  timezone={timezone}
+                  onToggle={(id, done) => markDone.mutate({ id, done })}
+                />
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
+        <section className="order-8 mt-8 grid grid-cols-3 gap-2">
+          <BigButton icoon="praten" label="Wat nu?" onClick={() => navigate('/nu')} highlight />
+          <BigButton icoon="wie" label="Familie" onClick={() => navigate('/wie')} />
+          <BigButton icoon="help" label="Help" onClick={() => navigate('/help')} alert />
+        </section>
+      </div>
+
 
       <EigenaarLinks />
     </main>
@@ -264,7 +272,7 @@ function EigenaarLinks() {
   const { household } = useHousehold()
   if (!household?.is_self) return null
   return (
-    <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-base font-semibold text-accent-ink">
+    <div className="eigenaar mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-base font-semibold text-accent-ink">
       <Link to="/familie" className="underline underline-offset-4">
         Beheren
       </Link>

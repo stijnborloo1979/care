@@ -210,6 +210,55 @@
   }
 }
 
+/* Vandaag krijgt liggend twee kolommen: links wat er moet gebeuren (nu,
+   daarna, de dag), rechts wat er te doen of te zien is (bericht, onthoud
+   dit, radio, de foto van vroeger). De grote kaart blijft even groot als
+   staand; de breedte wordt gevuld met een tweede kolom in plaats van met
+   uitgerekte tekstregels.
+
+   Staand doen de wikkels niets: display:contents haalt ze uit de stroom,
+   en de order-klassen in Today.tsx zetten alles terug in de volgorde van
+   voorheen. Onder 64rem blijft het dus één kolom, ook liggend. */
+.vandaag .kolom-links,
+.vandaag .kolom-rechts {
+  display: contents;
+}
+
+@media (orientation: landscape) and (min-width: 64rem) {
+  .persoonsscherm main.vandaag {
+    max-width: 72rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    column-gap: 1.75rem;
+    align-items: start;
+  }
+
+  .vandaag > header,
+  .vandaag > .eigenaar {
+    grid-column: 1 / -1;
+  }
+
+  .vandaag .kolom-links,
+  .vandaag .kolom-rechts {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .vandaag .kolom-links {
+    grid-column: 1;
+  }
+
+  .vandaag .kolom-rechts {
+    grid-column: 2;
+  }
+
+  /* De eerste kaart van elke kolom hoort op dezelfde hoogte te beginnen. */
+  .vandaag .kolom-rechts > :first-child {
+    margin-top: 1.5rem;
+  }
+}
+
 html {
   height: 100%;
   font-size: calc(16px * var(--scale));
