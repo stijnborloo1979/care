@@ -81,6 +81,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 20. `20_push.sql` — pushmeldingen: de toestellen van familie, en wie wat
     krijgt. Het versturen doet de edge function `push-notify`. Onderaan
     het bestand staan de twee cron-regels, met pg_net.
+21. `21_tasks.sql` — taken voor de familie: opnemen, toewijzen, afvinken
+    en terugkerende taken. Niet zichtbaar voor de persoon of voor
+    zorgverleners. Plan `task_reminders()` in om 07:00 via pg_cron.
 
 ## Inloggen
 
@@ -177,8 +180,8 @@ Alle schermen van de persoon hangen onder `PersonLayout`, met de bottom
 navigation die op elk scherm dezelfde vier bestemmingen toont.
 - `/familie/instellingen` — leesbaarheid en privacy.
 - `/familie` — dashboard, met sidebar op desktop en tabs op mobiel.
-  Daaronder: `planning`, `wie`, `huis`, `fotos`, `berichten`, `logboek`,
-  `documenten`, `weetjes`, `instellingen`.
+  Daaronder: `planning`, `wie`, `huis`, `fotos`, `berichten`, `taken`,
+  `logboek`, `documenten`, `weetjes`, `instellingen`.
 
 ## Wat er al werkt
 

@@ -50,6 +50,7 @@ const MessagesPage = lazy(() =>
 );
 const Settings = lazy(() => import("./features/settings/Settings"));
 const Delen = lazy(() => import("./features/sharing/Delen"));
+const Taken = lazy(() => import("./features/tasks/Taken"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
@@ -195,6 +196,7 @@ if (!configuratieOk) {
                     <Route path="huis" element={<HomeMemoryPage />} />
                     <Route path="fotos" element={<MemoriesPage />} />
                     <Route path="berichten" element={<MessagesPage />} />
+                    <Route path="taken" element={<Taken />} />
                     <Route path="logboek" element={<CareLog />} />
                     <Route path="documenten" element={<Documents />} />
                     <Route path="weetjes" element={<ManageNotesPage />} />
