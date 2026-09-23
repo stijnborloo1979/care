@@ -180,6 +180,36 @@
   --accent-soft: #f7eedc;
 }
 
+/* ---------------------------------------------------------------
+   Liggend scherm
+   ---------------------------------------------------------------
+   De schermen van de persoon zijn een kolom van 36rem: precies goed
+   op een telefoon of een rechtopstaande tablet. Ligt de tablet, dan
+   blijft links en rechts een brede band wit staan. Daarom mag de kolom
+   dan meegroeien, met wat meer lucht langs de randen.
+
+   Bewust alleen bij (orientation: landscape) én genoeg breedte: een
+   telefoon die even gedraaid wordt, verandert zo niets, en staand
+   blijft alles exact zoals het was. De kolom groeit ook niet
+   onbeperkt — een regel tekst die het hele scherm overspant, leest
+   niemand graag, en zeker niet wie moeite heeft met lezen.
+   --------------------------------------------------------------- */
+@media (orientation: landscape) and (min-width: 56rem) {
+  .persoonsscherm main {
+    max-width: 52rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 72rem) {
+  .persoonsscherm main {
+    max-width: 60rem;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
 html {
   height: 100%;
   font-size: calc(16px * var(--scale));

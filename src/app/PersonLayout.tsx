@@ -82,7 +82,11 @@ export default function PersonLayout() {
         </p>
       ) : null}
 
-      <Outlet />
+      {/* De haak voor de landschapsopmaak in index.css. Verder verandert
+          deze wikkel niets aan de schermen zelf. */}
+      <div className="persoonsscherm">
+        <Outlet />
+      </div>
 
       <MiniSpeler />
 
