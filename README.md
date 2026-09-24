@@ -90,6 +90,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 23. `23_room_photo.sql` — een foto per kamer. Familie kan nu overal een
     foto toevoegen: dingen, stappen, kamers, mensen, medicatie,
     herinneringen en berichten.
+24. `24_fix_embedding_trigger.sql` — herstelt de trigger uit `09_ai.sql`.
+    Die keek naar `new.title` bij elke update op `item`, waardoor een foto
+    bij een ding niet bewaard kon worden. Alleen nodig als je 09 draaide.
 
 ## Inloggen
 

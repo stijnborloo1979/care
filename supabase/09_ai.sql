@@ -21,13 +21,19 @@ returns trigger
 language plpgsql
 as $$
 begin
-  if tg_table_name = 'memory_note'
-     and (new.title is distinct from old.title or new.body is distinct from old.body) then
-    new.embedding := null;
-  elsif tg_table_name = 'item'
-     and (new.name is distinct from old.name or new.where_text is distinct from old.where_text) then
-    new.embedding := null;
+  -- Elk veld in zijn eigen tak. Zet je de tabelnaam en het veld in één
+  -- and, dan rekent Postgres beide helften uit en klapt een update op
+  -- item eruit met "record new has no field title".
+  if tg_table_name = 'memory_note' then
+    if new.title is distinct from old.title or new.body is distinct from old.body then
+      new.embedding := null;
+    end if;
+  elsif tg_table_name = 'item' then
+    if new.name is distinct from old.name or new.where_text is distinct from old.where_text then
+      new.embedding := null;
+    end if;
   end if;
+
   return new;
 end;
 $$;
