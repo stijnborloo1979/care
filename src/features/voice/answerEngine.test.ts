@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { beantwoord, type Kennis } from './answerEngine'
+import { t, zetTaal } from '../../lib/i18n'
 
 const NU = new Date('2026-03-10T12:15:00+01:00')
 
@@ -221,5 +222,43 @@ describe('radio', () => {
     const a = beantwoord('Zet de radio aan', kennis, NU)
     expect(a.radio).toBeUndefined()
     expect(a.titel).toContain('geen zenders')
+  })
+})
+
+// ---------------------------------------------------------------------
+//  Frans en Engels
+//
+//  De logica is dezelfde; alleen de woorden waarmee iemand het vraagt
+//  verschillen. Deze tests bewaken dat de patronen uit patronen.ts de
+//  dagelijkse vragen echt raken — anders valt een Franstalige stil terug
+//  op "je n'en suis pas sûr".
+// ---------------------------------------------------------------------
+describe('andere talen', () => {
+  afterEach(() => zetTaal('nl'))
+
+  it('herkent de Franse vraag naar de medicatie', () => {
+    zetTaal('fr')
+    const a = beantwoord('Est-ce que j’ai déjà pris mes médicaments ?', kennis, NU)
+    expect(a.titel).not.toBe(t('ass.nietZeker'))
+  })
+
+  it('herkent de Franse vraag waar iets ligt', () => {
+    zetTaal('fr')
+    // De naam van het ding komt uit de gegevens van het huishouden en
+    // wordt niet vertaald: "bril" blijft "Bril", ook in een Franse zin.
+    const a = beantwoord('Où est ma bril ?', kennis, NU)
+    expect(a.titel).toContain('Bril')
+  })
+
+  it('antwoordt in het Engels op "what should I do now"', () => {
+    zetTaal('en')
+    const a = beantwoord('What should I do now?', kennis, NU)
+    expect(a.titel).not.toBe(t('ass.nietZeker'))
+  })
+
+  it('zegt het ook in het Frans als het antwoord er niet is', () => {
+    zetTaal('fr')
+    const a = beantwoord('Quelle est la capitale du Japon ?', kennis, NU)
+    expect(a.titel).toBe("Je n'en suis pas sûr.")
   })
 })

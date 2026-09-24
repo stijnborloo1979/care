@@ -273,9 +273,15 @@ Hulp, In huis, Foto's, Weetjes, Radio, Praten, Onthoud dit, het
 oproepscherm, het nachtscherm en de bottom navigation. De familiekant
 staat nog in het Nederlands en verhuist scherm per scherm naar `t()`.
 
-Nog taalgebonden en dus nog niet vertaald: de spraakassistent
-(`answerEngine.ts` zoekt op Nederlandse woorden), `quickAdd()` (leest
-Nederlandse datums), en de vragen van "Vertel eens".
+De spraakassistent werkt in de drie talen. De woorden waaraan ze een vraag
+herkent staan per taal in `src/features/voice/patronen.ts`, los van de
+logica: wat er vandaag gepland staat is in elke taal hetzelfde. Wat de
+regels niet herkennen, gaat naar de edge function `ask`, die in de eigen
+gegevens zoekt en antwoordt in de taal van het huishouden — ook als de
+gegevens in een andere taal staan.
+
+Nog taalgebonden en dus nog niet vertaald: `quickAdd()` (leest Nederlandse
+datums), de vragen van "Vertel eens", en de hele familiekant.
 
 ## Offline
 

@@ -5,6 +5,8 @@ import type { MemoryNote } from '../../services/notes'
 import type { QuickNote } from '../../services/quickNotes'
 import type { MedMoment } from '../../services/medsToday'
 import { hhmm, localDateKey } from '../../lib/time'
+import { locale, t, taal } from '../../lib/i18n'
+import { patronen } from './patronen'
 import { whatNow } from '../today/whatNow'
 
 export interface Answer {
@@ -36,14 +38,21 @@ export interface Kennis {
   tz: string
 }
 
-const NIETS_GEVONDEN = 'Dat weet ik niet zeker.'
+// De vaste teksten staan in het woordenboek; de patronen per taal in
+// patronen.ts. Deze motor kent dus geen enkel Nederlands woord meer.
 
 function normaliseer(s: string) {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
+  return (
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      // Apostrofs en koppeltekens worden spaties: "j'ai" en "est-ce que"
+      // moeten op dezelfde woorden uitkomen als "j ai" en "est ce que".
+      .replace(/['’\u2019-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  )
 }
 
 function vindItem(vraag: string, items: Item[]): Item | null {
@@ -54,27 +63,29 @@ function vindItem(vraag: string, items: Item[]): Item | null {
     const eerste = naam.split(' ')[0]
     if (eerste.length > 3 && v.includes(eerste)) return i
   }
-  if (v.includes('tv') || v.includes('televisie')) {
+  // Twee vaste bruggen: "tv" en een medicijnwoord komen in alle drie de
+  // talen op hetzelfde ding uit.
+  if (/\btv\b|telev/.test(v)) {
     return items.find((i) => normaliseer(i.name).includes('tele')) ?? null
   }
-  if (v.includes('pil') || v.includes('medic')) {
+  if (patronen(taal()).medicatie.test(v)) {
     return items.find((i) => normaliseer(i.name).includes('medic')) ?? null
   }
   return null
 }
 
-// Woorden die niets zeggen over wát er gezocht wordt.
-const STOPWOORDEN = new Set([
-  'waar', 'heb', 'hebt', 'mijn', 'gelegd', 'gezet', 'gelaten', 'ligt', 'liggen', 'staat',
-  'staan', 'zijn', 'deze', 'die', 'dat', 'het', 'een', 'de', 'ik', 'je', 'is', 'al',
-  'nog', 'wat', 'moest', 'onthouden', 'weet', 'ook', 'weer', 'toch', 'eens',
-])
-
+/** Woorden die niets zeggen over wát er gezocht wordt, per taal. */
 function kernwoorden(vraag: string): string[] {
+  const stop = new Set([
+    ...patronen(taal()).stopwoorden,
+    'waar', 'heb', 'hebt', 'mijn', 'gelegd', 'gezet', 'gelaten', 'ligt', 'liggen',
+    'staat', 'staan', 'zijn', 'deze', 'die', 'dat', 'het', 'een', 'de', 'ik', 'je',
+    'is', 'al', 'nog', 'wat', 'moest', 'onthouden', 'weet', 'ook', 'weer', 'toch', 'eens',
+  ])
   return normaliseer(vraag)
     .replace(/[^a-z0-9 ]/g, ' ')
     .split(/\s+/)
-    .filter((w) => w.length > 2 && !STOPWOORDEN.has(w))
+    .filter((w) => w.length > 2 && !stop.has(w))
 }
 
 /** "sleutels" moet ook "sleutel" vinden, en omgekeerd. */
@@ -88,15 +99,15 @@ function wanneer(iso: string, tz: string, nu: Date): string {
   const vandaag = localDateKey(nu, tz)
   const gisteren = localDateKey(new Date(nu.getTime() - 24 * 3600_000), tz)
   const uur = hhmm(d, tz)
-  if (dag === vandaag) return `vandaag om ${uur}`
-  if (dag === gisteren) return `gisteren om ${uur}`
-  const datum = new Intl.DateTimeFormat('nl-BE', {
+  if (dag === vandaag) return t('ass.vandaagOm', { tijd: uur })
+  if (dag === gisteren) return t('ass.gisterenOm', { tijd: uur })
+  const datum = new Intl.DateTimeFormat(locale(), {
     timeZone: tz,
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   }).format(d)
-  return `op ${datum}`
+  return t('ass.opDatum', { datum })
 }
 
 /** De nieuwste eigen notitie waar een kernwoord van de vraag in staat. */
@@ -110,8 +121,6 @@ function vindOnthouden(vraag: string, lijst: QuickNote[]): QuickNote | null {
     }) ?? null
   )
 }
-
-const MEDICATIEWOORDEN = /pil|medic|medicijn|tablet|druppel|capsule/
 
 const ACTIVITEIT: { woorden: RegExp; zoek: (e: AgendaEvent) => boolean }[] = [
   { woorden: /ontbijt|ontbeten/, zoek: (e) => /ontbijt/i.test(e.title) },
@@ -129,19 +138,19 @@ const ACTIVITEIT: { woorden: RegExp; zoek: (e: AgendaEvent) => boolean }[] = [
 function alGedaan(vraag: string, k: Kennis, nu: Date): Answer | null {
   const v = normaliseer(vraag)
 
-  if (MEDICATIEWOORDEN.test(v)) {
+  if (patronen(taal()).medicatie.test(v)) {
     const momenten = (k.medicatie ?? []).filter(
       (m) => new Date(m.due_at).getTime() <= nu.getTime() + 30 * 60_000,
     )
     if ((k.medicatie ?? []).length === 0) {
-      return { vraag, titel: 'Er staat vandaag geen medicatie in je planning.', regels: [] }
+      return { vraag, titel: t('ass.geenMedicatie'), regels: [] }
     }
     if (momenten.length === 0) {
       const eerste = (k.medicatie ?? [])[0]
       return {
         vraag,
-        titel: 'Nog niet nodig.',
-        regels: [`Je volgende medicatie is om ${hhmm(new Date(eerste.due_at), k.tz)}.`],
+        titel: t('ass.nogNietNodig'),
+        regels: [t('ass.volgendeMedicatie', { tijd: hhmm(new Date(eerste.due_at), k.tz) })],
       }
     }
 
@@ -150,22 +159,23 @@ function alGedaan(vraag: string, k: Kennis, nu: Date): Answer | null {
       const laatste = momenten[momenten.length - 1]
       return {
         vraag,
-        titel: 'Ja, dat heb je gedaan.',
+        titel: t('ass.jaGedaan'),
         regels: [
-          `Je medicatie van ${hhmm(new Date(laatste.due_at), k.tz)} is genomen, ${wanneer(
-            laatste.taken_at!,
-            k.tz,
-            nu,
-          )}.`,
+          t('ass.medicatieGenomen', {
+            tijd: hhmm(new Date(laatste.due_at), k.tz),
+            wanneer: wanneer(laatste.taken_at!, k.tz, nu),
+          }),
         ],
       }
     }
 
-    const tijden = [...new Set(open.map((m) => hhmm(new Date(m.due_at), k.tz)))].join(' en ')
+    const tijden = [...new Set(open.map((m) => hhmm(new Date(m.due_at), k.tz)))].join(
+      t('ass.enTussen'),
+    )
     return {
       vraag,
-      titel: 'Nog niet.',
-      regels: [`Je medicatie van ${tijden} staat nog niet als genomen.`],
+      titel: t('ass.nogNiet'),
+      regels: [t('ass.medicatieOpen', { tijden })],
       bevestig: open.map((m) => m.id),
     }
   }
@@ -185,17 +195,21 @@ function alGedaan(vraag: string, k: Kennis, nu: Date): Answer | null {
     if (e.done_at) {
       return {
         vraag,
-        titel: 'Ja, dat heb je gedaan.',
-        regels: [`${e.title} is afgevinkt, ${wanneer(e.done_at, k.tz, nu)}.`],
+        titel: t('ass.jaGedaan'),
+        regels: [t('ass.isAfgevinkt', { wat: e.title, wanneer: wanneer(e.done_at, k.tz, nu) })],
       }
     }
     if (new Date(e.starts_at) > nu) {
-      return { vraag, titel: 'Nog niet.', regels: [`${e.title} staat gepland om ${uur}.`] }
+      return {
+        vraag,
+        titel: t('ass.nogNiet'),
+        regels: [t('ass.staatGepland', { wat: e.title, tijd: uur })],
+      }
     }
     return {
       vraag,
-      titel: 'Dat staat nog niet als gedaan.',
-      regels: [`${e.title} was gepland om ${uur}.`],
+      titel: t('ass.nogNietGedaan'),
+      regels: [t('ass.wasGepland', { wat: e.title, tijd: uur })],
     }
   }
 
@@ -214,15 +228,20 @@ function vindPersoon(vraag: string, people: PersonCard[]): PersonCard | null {
  */
 export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
   const v = normaliseer(vraag)
-  const leeg: Answer = { vraag, titel: NIETS_GEVONDEN, regels: ['Wil je het aan je familie vragen?'] }
+  const P = patronen(taal())
+  const leeg: Answer = {
+    vraag,
+    titel: t('ass.nietZeker'),
+    regels: [t('ass.vraagFamilie')],
+  }
 
   // bellen
-  if (/^bel\b|bellen|opbellen/.test(v)) {
+  if (P.bellen.test(v)) {
     const p = vindPersoon(vraag, k.people)
     if (p?.phone) {
       return {
         vraag,
-        titel: `Bel ${p.name}`,
+        titel: t('ass.bel', { naam: p.name }),
         regels: [`${p.relation} — ${p.phone}`],
         bellen: { naam: p.name, nummer: p.phone },
       }
@@ -230,104 +249,110 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
   }
 
   // radio
-  if (/\bradio\b|muziek/.test(v) || (k.zenders ?? []).some((z) => v.includes(normaliseer(z.name)))) {
+  if (P.radio.test(v) || (k.zenders ?? []).some((z) => v.includes(normaliseer(z.name)))) {
     const zenders = k.zenders ?? []
-    if (/\b(uit|stop|stil|zwijg)\b/.test(v)) {
-      return { vraag, titel: 'De radio gaat uit.', regels: [], radio: { actie: 'uit' } }
+    if (P.radioUit.test(v)) {
+      return { vraag, titel: t('ass.radioUit'), regels: [], radio: { actie: 'uit' } }
     }
     if (zenders.length === 0) {
       return {
         vraag,
-        titel: 'Er zijn nog geen zenders gekozen.',
-        regels: ['Vraag je familie om er een paar in te stellen.'],
+        titel: t('ass.geenZenders'),
+        regels: [t('ass.vraagZenders')],
       }
     }
     const gevraagd = zenders.find((z) => v.includes(normaliseer(z.name))) ?? zenders[0]
     return {
       vraag,
-      titel: `${gevraagd.name} speelt.`,
+      titel: t('ass.speelt', { zender: gevraagd.name }),
       regels: [],
       radio: { actie: 'aan', zenderId: gevraagd.id },
     }
   }
 
   // heb ik dit al gedaan?
-  if (/\bheb ik\b/.test(v) && /\bal\b|gedaan|genomen|gegeten/.test(v)) {
+  if (P.hebIk.test(v) && P.al.test(v)) {
     const a = alGedaan(vraag, k, nu)
     if (a) return a
   }
 
   // wat moest ik onthouden?
-  if (v.includes('onthouden') || v.includes('onthoud')) {
+  if (P.onthouden.test(v)) {
     const lijst = (k.onthouden ?? []).slice(0, 3)
     if (lijst.length > 0) {
       return {
         vraag,
-        titel: 'Dit liet je onthouden',
+        titel: t('ass.lietOnthouden'),
         regels: lijst.map((n) => `${n.body} — ${wanneer(n.created_at, k.tz, nu)}`),
-        bron: 'Onthouden door jou',
+        bron: t('ass.bronZelf'),
       }
     }
   }
 
   // wat moet ik nu doen
-  if (v.includes('wat moet ik') || v.includes('wat nu') || v.includes('nu doen')) {
+  if (P.watNu.test(v)) {
     const { current, next } = whatNow(k.events, nu)
     const regels: string[] = []
     if (current?.note) regels.push(current.note)
-    if (!current) regels.push('Er is nu niets dat moet.')
-    if (next) regels.push(`Daarna: ${next.title} om ${hhmm(new Date(next.starts_at), k.tz)}.`)
+    if (!current) regels.push(t('ass.nietsMoet'))
+    if (next) {
+      regels.push(
+        t('ass.daarna', { wat: next.title, tijd: hhmm(new Date(next.starts_at), k.tz) }),
+      )
+    }
     return {
       vraag,
-      titel: current ? `${current.emoji ?? ''} ${current.title}`.trim() : 'Even rusten',
+      titel: current ? `${current.emoji ?? ''} ${current.title}`.trim() : t('watnu.rusten'),
       regels,
     }
   }
 
   // wie komt er
-  if (v.includes('wie komt') || v.includes('bezoek')) {
+  if (P.wieKomt.test(v)) {
     const bezoek = k.events.filter((e) => e.person_id)
     if (bezoek.length > 0) {
       return {
         vraag,
-        titel: 'Vandaag',
-        regels: bezoek.map((e) => `${e.title} om ${hhmm(new Date(e.starts_at), k.tz)}.`),
+        titel: t('vandaag.vandaag'),
+        regels: bezoek.map((e) =>
+          t('ass.staatGepland', { wat: e.title, tijd: hhmm(new Date(e.starts_at), k.tz) }),
+        ),
       }
     }
-    return { vraag, titel: 'Er komt vandaag niemand langs.', regels: [] }
+    return { vraag, titel: t('ass.niemandLangs'), regels: [] }
   }
 
   // wanneer komt X
-  if (v.includes('wanneer')) {
+  if (P.wanneer.test(v)) {
     const p = vindPersoon(vraag, k.people)
     if (p) {
       const e = k.events.find((x) => x.person_id === p.id)
       if (e) {
         return {
           vraag,
-          titel: `${p.name} komt om ${hhmm(new Date(e.starts_at), k.tz)}`,
+          titel: t('ass.komtOm', { naam: p.name, tijd: hhmm(new Date(e.starts_at), k.tz) }),
           regels: e.note ? [e.note] : [],
         }
       }
       return {
         vraag,
-        titel: `${p.name} staat vandaag niet in de planning.`,
-        regels: ['Wil je het aan je familie vragen?'],
+        titel: t('ass.nietGepland', { naam: p.name }),
+        regels: [t('ass.vraagFamilie')],
       }
     }
   }
 
   // waar ligt iets
-  if (v.includes('waar')) {
+  if (P.waar.test(v)) {
     const item = vindItem(vraag, k.items)
 
     // Wat de persoon zelf heeft laten onthouden, gaat voor. Dat is waar
     // het vandaag ligt; Home Memory zegt waar het normaal hoort te liggen.
     const eigen = vindOnthouden(vraag, k.onthouden ?? [])
     if (eigen) {
-      const regels = [`Dat zei je ${wanneer(eigen.created_at, k.tz, nu)}.`]
-      if (item?.where_text) regels.push(`Normaal ligt het: ${item.where_text}`)
-      return { vraag, titel: eigen.body, regels, bron: 'Onthouden door jou' }
+      const regels = [t('ass.datZeiJe', { wanneer: wanneer(eigen.created_at, k.tz, nu) })]
+      if (item?.where_text) regels.push(t('ass.normaalLigt', { waar: item.where_text }))
+      return { vraag, titel: eigen.body, regels, bron: t('ass.bronZelf') }
     }
 
     if (item) {
@@ -335,7 +360,7 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
         vraag,
         titel: `${item.emoji ?? ''} ${item.name}`.trim(),
         regels: item.where_text ? [item.where_text] : [],
-        link: { naar: `/memory/ding/${item.id}`, label: 'Toon uitleg' },
+        link: { naar: `/memory/ding/${item.id}`, label: t('ass.toonUitleg') },
       }
     }
     const notitie = k.notes.find((n) => v.includes(normaliseer(n.title)))
@@ -343,14 +368,14 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
   }
 
   // hoe werkt iets
-  if (v.includes('hoe')) {
+  if (P.hoe.test(v)) {
     const item = vindItem(vraag, k.items)
     if (item) {
       return {
         vraag,
         titel: `${item.emoji ?? ''} ${item.name}`.trim(),
         regels: item.where_text ? [item.where_text] : [],
-        link: { naar: `/memory/ding/${item.id}`, label: 'Stap voor stap' },
+        link: { naar: `/memory/ding/${item.id}`, label: t('ass.stapVoorStap') },
       }
     }
   }
@@ -362,7 +387,7 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
       vraag,
       titel: p.name,
       regels: [p.description, p.detail].filter((r): r is string => !!r),
-      link: { naar: `/wie/${p.id}`, label: `Meer over ${p.name}` },
+      link: { naar: `/wie/${p.id}`, label: t('ass.meerOver', { naam: p.name }) },
     }
   }
 
@@ -375,12 +400,34 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
   return leeg
 }
 
-export const VOORBEELDVRAGEN = [
-  'Wat moet ik nu doen?',
-  'Heb ik mijn pillen al genomen?',
-  'Wat moest ik onthouden?',
-  'Wie komt er vandaag?',
-  'Waar is mijn bril?',
-  'Hoe zet ik de televisie aan?',
-  'Wanneer komt Els?',
-]
+/** De voorbeeldvragen, per taal: ze moeten de patronen hierboven raken. */
+const VOORBEELDEN: Record<string, string[]> = {
+  nl: [
+    'Wat moet ik nu doen?',
+    'Heb ik mijn pillen al genomen?',
+    'Wat moest ik onthouden?',
+    'Wie komt er vandaag?',
+    'Waar is mijn bril?',
+    'Hoe zet ik de televisie aan?',
+  ],
+  fr: [
+    'Que dois-je faire maintenant ?',
+    'Est-ce que j’ai déjà pris mes médicaments ?',
+    'Qu’est-ce que je voulais retenir ?',
+    'Qui vient aujourd’hui ?',
+    'Où sont mes lunettes ?',
+    'Comment allumer la télévision ?',
+  ],
+  en: [
+    'What should I do now?',
+    'Have I already taken my pills?',
+    'What did I want to remember?',
+    'Who is coming today?',
+    'Where are my glasses?',
+    'How do I turn on the television?',
+  ],
+}
+
+export function voorbeeldvragen(): string[] {
+  return VOORBEELDEN[taal()] ?? VOORBEELDEN.nl
+}

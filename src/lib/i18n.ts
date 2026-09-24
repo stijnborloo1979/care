@@ -34,7 +34,8 @@ let huidige: Taal = 'nl'
 /** Wordt gezet zodra de instellingen geladen zijn (zie useDisplayPrefs). */
 export function zetTaal(taal: Taal) {
   huidige = taal
-  document.documentElement.lang = taal
+  // Ook bruikbaar buiten de browser (de tests draaien zonder document).
+  if (typeof document !== 'undefined') document.documentElement.lang = taal
 }
 
 export function taal(): Taal {
@@ -47,6 +48,7 @@ export function locale(): string {
 
 /** De taal van het toestel, als eerste gok bij een nieuw huishouden. */
 export function taalVanToestel(): Taal {
+  if (typeof navigator === 'undefined') return 'nl'
   const eerste = (navigator.languages?.[0] ?? navigator.language ?? 'nl').slice(0, 2)
   return eerste === 'fr' || eerste === 'en' ? eerste : 'nl'
 }
@@ -176,6 +178,43 @@ const NL: Woordenboek = {
   'fotos.rustig': 'Rustig bekijken',
   'fotos.leeg': 'Er staan nog geen foto’s.',
   'radio.geenZenders': 'Er zijn nog geen zenders gekozen. Je familie kan ze instellen.',
+
+  // Spraakassistent
+  'ass.nietZeker': 'Dat weet ik niet zeker.',
+  'ass.vraagFamilie': 'Wil je het aan je familie vragen?',
+  'ass.bel': 'Bel {naam}',
+  'ass.radioUit': 'De radio gaat uit.',
+  'ass.geenZenders': 'Er zijn nog geen zenders gekozen.',
+  'ass.vraagZenders': 'Vraag je familie om er een paar in te stellen.',
+  'ass.speelt': '{zender} speelt.',
+  'ass.lietOnthouden': 'Dit liet je onthouden',
+  'ass.bronZelf': 'Onthouden door jou',
+  'ass.nietsMoet': 'Er is nu niets dat moet.',
+  'ass.daarna': 'Daarna: {wat} om {tijd}.',
+  'ass.niemandLangs': 'Er komt vandaag niemand langs.',
+  'ass.komtOm': '{naam} komt om {tijd}',
+  'ass.nietGepland': '{naam} staat vandaag niet in de planning.',
+  'ass.datZeiJe': 'Dat zei je {wanneer}.',
+  'ass.normaalLigt': 'Normaal ligt het: {waar}',
+  'ass.toonUitleg': 'Toon uitleg',
+  'ass.stapVoorStap': 'Stap voor stap',
+  'ass.meerOver': 'Meer over {naam}',
+  'ass.geenMedicatie': 'Er staat vandaag geen medicatie in je planning.',
+  'ass.nogNietNodig': 'Nog niet nodig.',
+  'ass.volgendeMedicatie': 'Je volgende medicatie is om {tijd}.',
+  'ass.jaGedaan': 'Ja, dat heb je gedaan.',
+  'ass.medicatieGenomen': 'Je medicatie van {tijd} is genomen, {wanneer}.',
+  'ass.nogNiet': 'Nog niet.',
+  'ass.medicatieOpen': 'Je medicatie van {tijden} staat nog niet als genomen.',
+  'ass.isAfgevinkt': '{wat} is afgevinkt, {wanneer}.',
+  'ass.staatGepland': '{wat} staat gepland om {tijd}.',
+  'ass.nogNietGedaan': 'Dat staat nog niet als gedaan.',
+  'ass.wasGepland': '{wat} was gepland om {tijd}.',
+  'ass.vandaagOm': 'vandaag om {tijd}',
+  'ass.gisterenOm': 'gisteren om {tijd}',
+  'ass.opDatum': 'op {datum}',
+  'ass.enTussen': ' en ',
+
   // Instellingen
   'instellingen.taal': 'Taal',
   'instellingen.taalOnder': 'Geldt voor de schermen, de datums en de stem.',
@@ -287,6 +326,41 @@ const FR: Woordenboek = {
   'fotos.rustig': 'Regarder tranquillement',
   'fotos.leeg': 'Il n’y a pas encore de photos.',
   'radio.geenZenders': 'Aucune station choisie. Votre famille peut les régler.',
+
+  'ass.nietZeker': "Je n'en suis pas sûr.",
+  'ass.vraagFamilie': 'Voulez-vous le demander à votre famille ?',
+  'ass.bel': 'Appeler {naam}',
+  'ass.radioUit': "La radio s'éteint.",
+  'ass.geenZenders': "Aucune station n'a encore été choisie.",
+  'ass.vraagZenders': "Demandez à votre famille d'en régler quelques-unes.",
+  'ass.speelt': '{zender} joue.',
+  'ass.lietOnthouden': 'Voici ce que vous vouliez retenir',
+  'ass.bronZelf': 'Noté par vous',
+  'ass.nietsMoet': "Il n'y a rien à faire maintenant.",
+  'ass.daarna': 'Ensuite : {wat} à {tijd}.',
+  'ass.niemandLangs': "Personne ne passe aujourd'hui.",
+  'ass.komtOm': '{naam} vient à {tijd}',
+  'ass.nietGepland': "{naam} n'est pas prévu aujourd'hui.",
+  'ass.datZeiJe': 'Vous me l’avez dit {wanneer}.',
+  'ass.normaalLigt': "D'habitude, c'est ici : {waar}",
+  'ass.toonUitleg': 'Voir les explications',
+  'ass.stapVoorStap': 'Étape par étape',
+  'ass.meerOver': 'En savoir plus sur {naam}',
+  'ass.geenMedicatie': "Aucun médicament n'est prévu aujourd'hui.",
+  'ass.nogNietNodig': 'Pas encore nécessaire.',
+  'ass.volgendeMedicatie': 'Votre prochain médicament est à {tijd}.',
+  'ass.jaGedaan': 'Oui, vous l’avez fait.',
+  'ass.medicatieGenomen': 'Votre médicament de {tijd} a été pris, {wanneer}.',
+  'ass.nogNiet': 'Pas encore.',
+  'ass.medicatieOpen': "Votre médicament de {tijden} n'est pas encore noté comme pris.",
+  'ass.isAfgevinkt': '{wat} est coché, {wanneer}.',
+  'ass.staatGepland': '{wat} est prévu à {tijd}.',
+  'ass.nogNietGedaan': "Ce n'est pas encore noté comme fait.",
+  'ass.wasGepland': '{wat} était prévu à {tijd}.',
+  'ass.vandaagOm': "aujourd'hui à {tijd}",
+  'ass.gisterenOm': 'hier à {tijd}',
+  'ass.opDatum': 'le {datum}',
+  'ass.enTussen': ' et ',
   'instellingen.taal': 'Langue',
   'instellingen.taalOnder': "S'applique aux écrans, aux dates et à la voix.",
 }
@@ -397,6 +471,41 @@ const EN: Woordenboek = {
   'fotos.rustig': 'View calmly',
   'fotos.leeg': 'There are no photos yet.',
   'radio.geenZenders': 'No stations chosen yet. Your family can set them.',
+
+  'ass.nietZeker': "I'm not sure about that.",
+  'ass.vraagFamilie': 'Would you like to ask your family?',
+  'ass.bel': 'Call {naam}',
+  'ass.radioUit': 'The radio is going off.',
+  'ass.geenZenders': 'No stations have been chosen yet.',
+  'ass.vraagZenders': 'Ask your family to set a few.',
+  'ass.speelt': '{zender} is playing.',
+  'ass.lietOnthouden': 'This is what you wanted to remember',
+  'ass.bronZelf': 'Noted by you',
+  'ass.nietsMoet': 'There is nothing to do right now.',
+  'ass.daarna': 'Next: {wat} at {tijd}.',
+  'ass.niemandLangs': 'Nobody is coming by today.',
+  'ass.komtOm': '{naam} is coming at {tijd}',
+  'ass.nietGepland': '{naam} is not in the plan for today.',
+  'ass.datZeiJe': 'You told me {wanneer}.',
+  'ass.normaalLigt': 'It normally belongs here: {waar}',
+  'ass.toonUitleg': 'Show the explanation',
+  'ass.stapVoorStap': 'Step by step',
+  'ass.meerOver': 'More about {naam}',
+  'ass.geenMedicatie': 'There is no medication planned today.',
+  'ass.nogNietNodig': 'Not needed yet.',
+  'ass.volgendeMedicatie': 'Your next medication is at {tijd}.',
+  'ass.jaGedaan': 'Yes, you did that.',
+  'ass.medicatieGenomen': 'Your medication of {tijd} was taken, {wanneer}.',
+  'ass.nogNiet': 'Not yet.',
+  'ass.medicatieOpen': 'Your medication of {tijden} is not noted as taken yet.',
+  'ass.isAfgevinkt': '{wat} is ticked off, {wanneer}.',
+  'ass.staatGepland': '{wat} is planned at {tijd}.',
+  'ass.nogNietGedaan': 'That is not noted as done yet.',
+  'ass.wasGepland': '{wat} was planned at {tijd}.',
+  'ass.vandaagOm': 'today at {tijd}',
+  'ass.gisterenOm': 'yesterday at {tijd}',
+  'ass.opDatum': 'on {datum}',
+  'ass.enTussen': ' and ',
   'instellingen.taal': 'Language',
   'instellingen.taalOnder': 'Applies to the screens, the dates and the voice.',
 }

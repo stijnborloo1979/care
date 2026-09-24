@@ -6,10 +6,10 @@ import { useRadio } from '../radio/radioStore'
 import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
-import { VOORBEELDVRAGEN, beantwoord, type Answer } from './answerEngine'
+import { voorbeeldvragen, beantwoord, type Answer } from './answerEngine'
 import { useKennis } from './useKennis'
 import { spreek, useSpeech } from './useSpeech'
-import { t } from '../../lib/i18n'
+import { t, taal } from '../../lib/i18n'
 
 export default function Talk() {
   const { household } = useHousehold()
@@ -48,7 +48,9 @@ export default function Talk() {
     // Laag 1: de eigen regels. Die dekken de vragen uit de brief, kosten
     // niets en werken offline.
     const a = beantwoord(tekst, kennis)
-    if (!a.titel.startsWith('Dat weet ik niet zeker')) {
+    // De zin komt uit het woordenboek: in het Frans en het Engels staat er
+    // iets anders, dus vergelijken met de vertaalde versie.
+    if (a.titel !== t('ass.nietZeker')) {
       toon(a)
       return
     }
@@ -59,7 +61,9 @@ export default function Talk() {
     setZoekt(true)
     try {
       const { data, error } = await supabase.functions.invoke('ask', {
-        body: { household_id: hh, vraag: tekst },
+        // De taal mee: het model moet antwoorden in de taal van het
+        // huishouden, niet in die van de vraag of van de gegevens.
+        body: { household_id: hh, vraag: tekst, taal: taal() },
       })
       if (error || !data?.titel) return
       toon({
@@ -160,7 +164,7 @@ export default function Talk() {
       <section className="mt-8 text-left">
         <h2 className="text-base font-bold text-ink-faint">{t('praten.ofTik')}</h2>
         <ul className="mt-3 space-y-2">
-          {VOORBEELDVRAGEN.map((q) => (
+          {voorbeeldvragen().map((q) => (
             <li key={q}>
               <button
                 onClick={() => vraag(q)}

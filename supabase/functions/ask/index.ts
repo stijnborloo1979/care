@@ -18,10 +18,34 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const GEEN_ANTWOORD = {
-  titel: 'Dat weet ik niet zeker.',
-  regels: ['Wil je het aan je familie vragen?'],
-  bronnen: [],
+/**
+ * "Ik weet het niet" in de drie talen van de app. Deze zinnen moeten
+ * letterlijk overeenkomen met wat in src/lib/i18n.ts staat: het scherm
+ * vergelijkt erop om te zien of het antwoord leeg is.
+ */
+const NIET_ZEKER: Record<string, { titel: string; regels: string[] }> = {
+  nl: {
+    titel: 'Dat weet ik niet zeker.',
+    regels: ['Wil je het aan je familie vragen?'],
+  },
+  fr: {
+    titel: "Je n'en suis pas sûr.",
+    regels: ['Voulez-vous le demander à votre famille ?'],
+  },
+  en: {
+    titel: "I'm not sure about that.",
+    regels: ['Would you like to ask your family?'],
+  },
+}
+
+const TAALNAAM: Record<string, string> = {
+  nl: 'het Nederlands',
+  fr: 'het Frans',
+  en: 'het Engels',
+}
+
+function geenAntwoord(taal: string) {
+  return { ...(NIET_ZEKER[taal] ?? NIET_ZEKER.nl), bronnen: [] }
 }
 
 Deno.serve(async (req) => {
@@ -31,7 +55,12 @@ Deno.serve(async (req) => {
     const auth = req.headers.get('Authorization')
     if (!auth) return json({ error: 'Niet ingelogd' }, 401)
 
-    const { household_id, vraag } = await req.json()
+    const body = await req.json()
+    const { household_id, vraag } = body
+    // De taal van het huishouden, niet die van de vraag: wie in het Frans
+    // leest, hoort ook in het Frans antwoord te krijgen op een half
+    // Nederlandse zin.
+    const taal: string = ['nl', 'fr', 'en'].includes(body.taal) ? body.taal : 'nl'
     if (!household_id || !vraag) return json({ error: 'household_id of vraag ontbreekt' }, 400)
 
     // Met het token van de gebruiker: match_memory controleert zelf of
@@ -50,10 +79,10 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({ model: 'text-embedding-3-small', input: vraag }),
     })
-    if (!embedRes.ok) return json(GEEN_ANTWOORD)
+    if (!embedRes.ok) return json(geenAntwoord(taal))
 
     const vec = (await embedRes.json()).data?.[0]?.embedding
-    if (!vec) return json(GEEN_ANTWOORD)
+    if (!vec) return json(geenAntwoord(taal))
 
     const { data: treffers, error } = await supabase.rpc('match_memory', {
       hh: household_id,
@@ -62,7 +91,7 @@ Deno.serve(async (req) => {
       aantal: 4,
     })
 
-    if (error || !treffers || treffers.length === 0) return json(GEEN_ANTWOORD)
+    if (error || !treffers || treffers.length === 0) return json(geenAntwoord(taal))
 
     const context = (treffers as { titel: string; tekst: string }[])
       .map((t, i) => `[${i + 1}] ${t.titel}: ${t.tekst}`)
@@ -82,21 +111,25 @@ Deno.serve(async (req) => {
           {
             role: 'system',
             content:
-              'Je helpt iemand met geheugenproblemen. Antwoord in het Nederlands, in ' +
-              'hoogstens twee korte zinnen, in eenvoudige taal en in de je-vorm. ' +
-              'Gebruik uitsluitend de gegeven informatie. Staat het antwoord er niet bij, ' +
-              'antwoord dan exact: Dat weet ik niet zeker. Voeg nooit iets toe, gok nooit, ' +
-              'en verzin geen namen, tijden of plaatsen.',
+              `Je helpt iemand met geheugenproblemen. Antwoord in ${TAALNAAM[taal]}, ook ` +
+              'als de vraag of de informatie in een andere taal staat. Antwoord in ' +
+              'hoogstens twee korte zinnen, in eenvoudige taal en spreek de persoon ' +
+              'rechtstreeks aan. Gebruik uitsluitend de gegeven informatie. Staat het ' +
+              `antwoord er niet bij, antwoord dan exact: ${NIET_ZEKER[taal].titel} ` +
+              'Voeg nooit iets toe, gok nooit, en verzin geen namen, tijden of plaatsen. ' +
+              'Namen van mensen, kamers en dingen laat je staan zoals ze er staan.',
           },
           { role: 'user', content: `Informatie:\n${context}\n\nVraag: ${vraag}` },
         ],
       }),
     })
 
-    if (!chat.ok) return json(GEEN_ANTWOORD)
+    if (!chat.ok) return json(geenAntwoord(taal))
 
     const tekst = (await chat.json()).choices?.[0]?.message?.content?.trim()
-    if (!tekst || tekst.startsWith('Dat weet ik niet zeker')) return json(GEEN_ANTWOORD)
+    if (!tekst || tekst.startsWith(NIET_ZEKER[taal].titel.slice(0, 12))) {
+      return json(geenAntwoord(taal))
+    }
 
     return json({
       titel: tekst,
