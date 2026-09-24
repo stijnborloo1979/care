@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useKioskBezig } from '../kiosk/kioskStore'
 import { useRadio } from '../radio/radioStore'
+import { locale } from '../../lib/i18n'
 
 type Herkenner = {
   lang: string
@@ -25,7 +26,7 @@ export function spreek(tekst: string) {
   if (!('speechSynthesis' in window)) return
   window.speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(tekst)
-  u.lang = 'nl-BE'
+  u.lang = locale()
   u.rate = 0.92
   // De radio even zachter, anders gaat de herinnering verloren in de muziek.
   const radio = useRadio.getState()
@@ -53,7 +54,7 @@ export function useSpeech(onVraag: (tekst: string) => void) {
     setFout(null)
     try {
       const rec = new Klasse()
-      rec.lang = 'nl-BE'
+      rec.lang = locale()
       rec.interimResults = false
       rec.maxAlternatives = 1
       rec.onresult = (e) => refVraag.current(e.results[0][0].transcript)

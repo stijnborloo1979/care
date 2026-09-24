@@ -4,6 +4,7 @@ import { hhmm } from '../../lib/time'
 import { useHousehold } from '../household/useHousehold'
 import { useAgenda } from '../today/useAgenda'
 import { usePeople } from './usePeople'
+import { t } from '../../lib/i18n'
 
 export default function WhoIsWho() {
   const { household } = useHousehold()
@@ -18,12 +19,12 @@ export default function WhoIsWho() {
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
-      <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">Wie is wie?</h1>
-      <p className="mt-1 text-lg text-ink-soft">Tik op iemand om meer te zien.</p>
+      <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">{t('wie.titel')}</h1>
+      <p className="mt-1 text-lg text-ink-soft">{t('wie.tik')}</p>
 
       {bezoek.length > 0 ? (
         <section className="mt-6 rounded-card border border-line bg-surface-soft p-4">
-          <h2 className="text-base font-bold text-ink-faint">Vandaag</h2>
+          <h2 className="text-base font-bold text-ink-faint">{t('vandaag.vandaag')}</h2>
           <ul className="mt-2 space-y-1">
             {bezoek.map((e) => {
               const p = (people ?? []).find((x) => x.id === e.person_id)
@@ -38,10 +39,10 @@ export default function WhoIsWho() {
         </section>
       ) : null}
 
-      {isLoading ? <p className="mt-6 text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="mt-6 text-ink-soft">{t('watnu.laden')}</p> : null}
 
-      <Groep titel="Familie" mensen={familie} />
-      <Groep titel="Zorg en buren" mensen={rest} />
+      <Groep titel={t('wie.familie')} mensen={familie} />
+      <Groep titel={t('wie.zorg')} mensen={rest} />
     </main>
   )
 }
@@ -88,8 +89,8 @@ export function PersonDetail() {
   const p = (people ?? []).find((x) => x.id === personId)
   const vandaag = (events ?? []).find((e) => e.person_id === personId)
 
-  if (isLoading) return <p className="p-6 text-ink-soft">Bezig met laden…</p>
-  if (!p) return <p className="p-6 text-ink-soft">Deze persoon staat er niet meer bij.</p>
+  if (isLoading) return <p className="p-6 text-ink-soft">{t('watnu.laden')}</p>
+  if (!p) return <p className="p-6 text-ink-soft">{t('wie.wegP')}</p>
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">

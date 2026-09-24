@@ -1,3 +1,4 @@
+import { t } from '../../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import type { AgendaEvent } from '../../services/agenda'
 import { dateLine, greeting, hhmm } from '../../lib/time'
@@ -76,13 +77,13 @@ export default function Today({ householdId, personName, timezone }: Props) {
       <div className="kolom-links">
         <section className="order-3 mt-6" aria-labelledby="nu">
           <h2 id="nu" className="text-base font-bold text-ink-faint">
-            Nu
+            {t('vandaag.nu')}
           </h2>
           <div className="mt-2">
             {isLoading ? (
               <Skeleton className="h-52 w-full" />
             ) : isError ? (
-              <p className="text-ink-soft">De planning is nu niet te zien. Probeer het zo opnieuw.</p>
+              <p className="text-ink-soft">{t('vandaag.planningWeg')}</p>
             ) : (
               <NowCard
                 event={current}
@@ -96,7 +97,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
         {next ? (
           <section className="order-4 mt-6" aria-labelledby="daarna">
             <h2 id="daarna" className="text-base font-bold text-ink-faint">
-              Daarna
+              {t('vandaag.daarna')}
             </h2>
             <div className="mt-2 flex items-center gap-4 rounded-card bg-surface p-5 shadow-card">
               <span className="text-3xl" aria-hidden="true">
@@ -104,7 +105,9 @@ export default function Today({ householdId, personName, timezone }: Props) {
               </span>
               <span>
                 <span className="block text-lg font-bold">{next.title}</span>
-                <span className="text-ink-soft">om {hhmm(new Date(next.starts_at), timezone)}</span>
+                <span className="text-ink-soft">
+                  {t('vandaag.om', { tijd: hhmm(new Date(next.starts_at), timezone) })}
+                </span>
               </span>
             </div>
           </section>
@@ -113,7 +116,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
         {events.length > 0 ? (
           <section className="order-7 mt-6" aria-labelledby="vandaag">
             <h2 id="vandaag" className="text-base font-bold text-ink-faint">
-              Vandaag
+              {t('vandaag.vandaag')}
             </h2>
             <ol className="mt-2 rounded-card bg-surface p-5 shadow-card">
               {events.map((e) => (
@@ -130,9 +133,14 @@ export default function Today({ householdId, personName, timezone }: Props) {
         ) : null}
 
         <section className="order-8 mt-8 grid grid-cols-3 gap-2">
-          <BigButton icoon="praten" label="Wat nu?" onClick={() => navigate('/nu')} highlight />
-          <BigButton icoon="wie" label="Familie" onClick={() => navigate('/wie')} />
-          <BigButton icoon="help" label="Help" onClick={() => navigate('/help')} alert />
+          <BigButton
+            icoon="praten"
+            label={t('vandaag.watnu')}
+            onClick={() => navigate('/nu')}
+            highlight
+          />
+          <BigButton icoon="wie" label={t('vandaag.familie')} onClick={() => navigate('/wie')} />
+          <BigButton icoon="help" label={t('vandaag.help')} onClick={() => navigate('/help')} alert />
         </section>
       </div>
 
@@ -157,7 +165,9 @@ function NowCard({
         <div className="text-5xl" aria-hidden="true">
           🍵
         </div>
-        <p className="mt-2 text-3xl font-extrabold leading-tight tracking-tight">Even rusten</p>
+        <p className="mt-2 text-3xl font-extrabold leading-tight tracking-tight">
+          {t('watnu.rusten')}
+        </p>
         <p className="mt-2 text-lg text-ink-soft">Er is nu niets dat moet. Straks is er weer iets.</p>
       </div>
     )

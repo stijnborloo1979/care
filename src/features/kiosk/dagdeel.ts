@@ -4,6 +4,7 @@
  * het met een vaste klok te testen is.
  */
 import { hhmm } from '../../lib/time'
+import { locale, t } from '../../lib/i18n'
 
 export type Dagdeel = 'ochtend' | 'middag' | 'avond' | 'nacht'
 
@@ -29,11 +30,11 @@ export function isNacht(uur: number, van: number, tot: number): boolean {
 }
 
 function weekdag(d: Date, tz: string): string {
-  return new Intl.DateTimeFormat('nl-BE', { timeZone: tz, weekday: 'long' }).format(d)
+  return new Intl.DateTimeFormat(locale(), { timeZone: tz, weekday: 'long' }).format(d)
 }
 
 function datum(d: Date, tz: string): string {
-  return new Intl.DateTimeFormat('nl-BE', { timeZone: tz, day: 'numeric', month: 'long' }).format(d)
+  return new Intl.DateTimeFormat(locale(), { timeZone: tz, day: 'numeric', month: 'long' }).format(d)
 }
 
 /**
@@ -44,7 +45,7 @@ export function omschrijving(d: Date, tz: string): { titel: string; onder: strin
   const deel = dagdeelVan(uurIn(d, tz))
   const dag = weekdag(d, tz)
   if (deel === 'nacht') {
-    return { titel: 'Het is nacht', onder: `${hoofdletter(dag)} ${datum(d, tz)}` }
+    return { titel: t('nacht.isNacht'), onder: `${hoofdletter(dag)} ${datum(d, tz)}` }
   }
   return { titel: `Het is ${dag}${deel}`, onder: datum(d, tz) }
 }

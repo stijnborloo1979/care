@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { hhmm } from '../../lib/time'
 import { omschrijving } from './dagdeel'
+import { t } from '../../lib/i18n'
 
 /**
  * 's Nachts: alleen wat iemand nodig heeft die wakker wordt en niet weet
@@ -27,7 +28,7 @@ export default function Nachtscherm({ tz, onWek }: { tz: string; onWek: () => vo
     <button
       type="button"
       onClick={onWek}
-      aria-label={`${titel}, ${hhmm(nu, tz)}. Tik om het gewone scherm te tonen.`}
+      aria-label={`${titel}, ${hhmm(nu, tz)}. ${t('nacht.tik')}`}
       className="fixed inset-0 z-50 flex cursor-default items-center justify-center bg-black text-center"
       style={{ color: 'rgb(150, 136, 116)' }}
     >

@@ -7,6 +7,7 @@ import { useHousehold } from '../household/useHousehold'
 import { useKioskBezig } from '../kiosk/kioskStore'
 import { ontgrendelGeluid, startBeltoon, stopBeltoon } from './beltoon'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
+import { t } from '../../lib/i18n'
 
 /**
  * Een inkomende oproep aanvaarden is precies wat mensen met
@@ -130,22 +131,28 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
         📹
       </p>
       <div>
-        <p className="text-4xl font-extrabold tracking-tight">{oproep.caller_name ?? 'Familie'}</p>
-        <p className="mt-2 text-2xl text-ink-soft">belt je</p>
+        {/* Naam en "belt je" als één zin uit het woordenboek: in het Frans
+            en het Engels staat de naam op een andere plaats. */}
+        <p className="text-2xl text-ink-soft">
+          <span className="block text-4xl font-extrabold tracking-tight text-ink">
+            {oproep.caller_name ?? t('vandaag.familie')}
+          </span>
+          {t('oproep.beltOnder')}
+        </p>
       </div>
 
       <button
         onClick={() => opnemen(oproep.id)}
         className="min-h-[5rem] w-full max-w-sm rounded-card bg-accent-ink text-2xl font-bold text-white"
       >
-        Opnemen
+        {t('oproep.opnemen')}
       </button>
 
       {!gestopt && autoOpnemen ? (
         <p className="text-lg text-ink-soft">
-          Het gesprek begint vanzelf over {Math.max(0, aftellen)} seconden.{' '}
+          {t('oproep.vanzelf', { seconden: Math.max(0, aftellen) })}{' '}
           <button onClick={() => setGestopt(true)} className="underline underline-offset-4">
-            Wachten
+            {t('oproep.wachten')}
           </button>
         </p>
       ) : null}
@@ -154,7 +161,7 @@ export default function IncomingCall({ householdId }: { householdId: string }) {
         onClick={() => weigeren(oproep.id)}
         className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-6 text-lg font-semibold"
       >
-        Nu niet
+        {t('oproep.nunniet')}
       </button>
     </div>
   )

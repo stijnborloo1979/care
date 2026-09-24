@@ -5,6 +5,7 @@ import StoragePhoto from '../../components/StoragePhoto'
 import { useHousehold } from '../household/useHousehold'
 import { usePhotos } from './usePhotos'
 import Slideshow from './Slideshow'
+import { t } from '../../lib/i18n'
 
 export default function Photos() {
   const { household } = useHousehold()
@@ -16,13 +17,13 @@ export default function Photos() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
       <Link to="/memory" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ In huis
+        ‹ {t('huis.titel')}
       </Link>
 
-      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">Foto&rsquo;s</h1>
-      <p className="mt-1 text-lg text-ink-soft">Je leven, op volgorde.</p>
+      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{t('fotos.titel')}</h1>
+      <p className="mt-1 text-lg text-ink-soft">{t('fotos.uitleg')}</p>
 
-      {isLoading ? <p className="mt-6 text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="mt-6 text-ink-soft">{t('watnu.laden')}</p> : null}
 
       {lijst.length > 0 ? (
         <>
@@ -31,7 +32,7 @@ export default function Photos() {
             className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink text-lg font-semibold text-white shadow-lift"
           >
             <Icon naam="afspelen" size={20} />
-            Rustig bekijken
+            {t('fotos.rustig')}
           </button>
 
           <ol className="mt-6 space-y-4">
@@ -65,8 +66,8 @@ export default function Photos() {
         </>
       ) : !isLoading ? (
         <div className="mt-6 rounded-card border-[1.5px] border-dashed border-line-strong bg-surface-soft p-8 text-center text-ink-soft">
-          Er staan nog geen foto&rsquo;s.
-          <span className="mt-1 block text-sm">Familie kan ze toevoegen.</span>
+          {t('fotos.leeg')}
+          <span className="mt-1 block text-sm">{t('huis.familieVoegtToe')}</span>
         </div>
       ) : null}
 

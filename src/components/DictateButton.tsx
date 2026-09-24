@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Mic, Square } from 'lucide-react'
+import { locale } from '../lib/i18n'
 
 type Herkenner = {
   lang: string
@@ -44,7 +45,7 @@ export default function DictateButton({
     if (!Klasse) return
     const rec = new Klasse()
     recRef.current = rec
-    rec.lang = 'nl-BE'
+    rec.lang = locale()
     rec.interimResults = false
     rec.continuous = false
     rec.onresult = (e) => {

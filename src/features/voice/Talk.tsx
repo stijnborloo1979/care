@@ -9,6 +9,7 @@ import { huidigePrefs } from '../settings/useDisplayPrefs'
 import { VOORBEELDVRAGEN, beantwoord, type Answer } from './answerEngine'
 import { useKennis } from './useKennis'
 import { spreek, useSpeech } from './useSpeech'
+import { t } from '../../lib/i18n'
 
 export default function Talk() {
   const { household } = useHousehold()
@@ -25,7 +26,7 @@ export default function Talk() {
     setBevestigd(true)
     await queryClient.invalidateQueries({ queryKey: ['meds-today', hh] })
     await queryClient.invalidateQueries({ queryKey: ['summary', hh] })
-    if (huidigePrefs().voice) spreek('Goed. Ik heb genoteerd dat je je medicatie genomen hebt.')
+    if (huidigePrefs().voice) spreek(t('praten.medicatieGenoteerd'))
   }
 
   function toon(a: Answer) {
@@ -79,12 +80,12 @@ export default function Talk() {
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6 text-center">
-      <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">Praat met mij</h1>
-      <p className="mt-1 text-lg text-ink-soft">Stel een vraag over vandaag of over je huis.</p>
+      <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">{t('praten.titel')}</h1>
+      <p className="mt-1 text-lg text-ink-soft">{t('praten.uitleg')}</p>
 
       <button
         onClick={start}
-        aria-label="Druk om te praten"
+        aria-label={t('praten.drukPraten')}
         className={`mx-auto mt-8 grid h-36 w-36 place-items-center rounded-full bg-accent-ink text-5xl text-white shadow-lift ${
           luistert ? 'animate-pulse' : ''
         }`}
@@ -93,10 +94,10 @@ export default function Talk() {
       </button>
       <p className="mt-3 text-ink-soft">
         {luistert
-          ? 'Ik luister…'
+          ? t('praten.luister')
           : beschikbaar
-            ? 'Druk op de knop en stel je vraag.'
-            : 'Tik hieronder een vraag aan.'}
+            ? t('praten.drukKnop')
+            : t('praten.tikVraag')}
       </p>
       {fout ? (
         <p role="alert" className="mt-2 text-alert">
@@ -108,7 +109,7 @@ export default function Talk() {
         <div className="mt-7 rounded-card border border-line bg-surface p-5 text-left shadow-card">
           <p className="text-base font-bold text-ink-faint">{antwoord.vraag}</p>
           <p className="mt-1 text-2xl font-extrabold tracking-tight">{antwoord.titel}</p>
-          {zoekt ? <p className="mt-2 text-lg text-ink-faint">Ik kijk het even na…</p> : null}
+          {zoekt ? <p className="mt-2 text-lg text-ink-faint">{t('praten.kijkNa')}</p> : null}
           {antwoord.regels.map((r, i) => (
             <p key={i} className="mt-2 text-lg text-ink-soft">
               {r}
@@ -116,7 +117,9 @@ export default function Talk() {
           ))}
 
           {antwoord.bron ? (
-            <p className="mt-3 text-sm text-ink-faint">Genoteerd door je familie: {antwoord.bron}</p>
+            <p className="mt-3 text-sm text-ink-faint">
+              {t('praten.genoteerd')} {antwoord.bron}
+            </p>
           ) : null}
 
           {antwoord.bevestig && antwoord.bevestig.length > 0 ? (
@@ -155,7 +158,7 @@ export default function Talk() {
       ) : null}
 
       <section className="mt-8 text-left">
-        <h2 className="text-base font-bold text-ink-faint">Of tik een vraag aan</h2>
+        <h2 className="text-base font-bold text-ink-faint">{t('praten.ofTik')}</h2>
         <ul className="mt-3 space-y-2">
           {VOORBEELDVRAGEN.map((q) => (
             <li key={q}>

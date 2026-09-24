@@ -5,6 +5,7 @@ import { CATEGORIEEN } from '../../services/notes'
 import { useHousehold } from '../household/useHousehold'
 import { spreek } from '../voice/useSpeech'
 import { useNotes } from './useNotes'
+import { t } from '../../lib/i18n'
 
 /**
  * Weetjes zijn korte antwoorden op vragen die terugkomen: waar de
@@ -23,20 +24,20 @@ export default function Notes() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
       <Link to="/memory" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ In huis
+        ‹ {t('huis.titel')}
       </Link>
 
-      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">Weetjes</h1>
-      <p className="mt-1 text-lg text-ink-soft">Dingen die je familie voor je noteerde.</p>
+      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{t('weetjes.titel')}</h1>
+      <p className="mt-1 text-lg text-ink-soft">{t('weetjes.uitleg')}</p>
 
       <input
         value={zoek}
         onChange={(e) => setZoek(e.target.value)}
-        placeholder="Zoeken"
+        placeholder={t('weetjes.zoeken')}
         className="mt-5 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 text-lg"
       />
 
-      {isLoading ? <p className="mt-6 text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="mt-6 text-ink-soft">{t('watnu.laden')}</p> : null}
 
       {CATEGORIEEN.map((c) => {
         const notities = lijst.filter((n) => n.category === c.waarde)
@@ -67,7 +68,7 @@ export default function Notes() {
 
       {!isLoading && lijst.length === 0 ? (
         <p className="mt-6 text-lg text-ink-soft">
-          {zoek ? 'Daar vind ik niets over.' : 'Er staan nog geen weetjes.'}
+          {zoek ? t('weetjes.nietsGevonden') : t('weetjes.leeg')}
         </p>
       ) : null}
     </main>

@@ -3,6 +3,7 @@ import { Pause, Play, Radio as RadioIcon, Volume1, Volume2 } from 'lucide-react'
 import { useHousehold } from '../household/useHousehold'
 import { useRadio } from './radioStore'
 import { useZenders } from './useZenders'
+import { t } from '../../lib/i18n'
 
 /**
  * Het radioscherm van de persoon: één grote knop voor wat er nu speelt,
@@ -19,15 +20,15 @@ export default function Radio() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
       <Link to="/" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ Vandaag
+        ‹ {t('nav.vandaag')}
       </Link>
-      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">Radio</h1>
+      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{t('radio.titel')}</h1>
 
-      {isLoading ? <p className="mt-6 text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="mt-6 text-ink-soft">{t('watnu.laden')}</p> : null}
 
       {!isLoading && (zenders ?? []).length === 0 ? (
         <p className="mt-6 text-lg text-ink-soft">
-          Er zijn nog geen zenders gekozen. Je familie kan ze instellen.
+          {t('radio.geenZenders')}
         </p>
       ) : null}
 
@@ -43,7 +44,7 @@ export default function Radio() {
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-semibold uppercase tracking-wide text-white/75">
-                {laden ? 'Even geduld…' : speelt ? 'Nu aan het spelen' : 'Druk om te luisteren'}
+                {laden ? t('radio.geduld') : speelt ? t('radio.speelt') : t('radio.drukLuisteren')}
               </span>
               <span className="mt-1 block truncate text-2xl font-extrabold">{huidig.name}</span>
             </span>
@@ -58,7 +59,7 @@ export default function Radio() {
               step={0.05}
               value={volume}
               onChange={(e) => zetVolume(Number(e.target.value))}
-              aria-label="Volume"
+              aria-label={t('radio.volume')}
               className="h-10 w-full accent-[var(--accent-ink)]"
             />
             <Volume2 size={22} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-ink-soft" />
@@ -146,7 +147,7 @@ export function RadioKaart({ householdId }: { householdId: string }) {
         {speelt ? <Pause size={28} strokeWidth={2} /> : <Play size={28} strokeWidth={2} />}
       </button>
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-bold text-ink-faint">Radio</span>
+        <span className="block text-base font-bold text-ink-faint">{t('radio.titel')}</span>
         <span className="block truncate text-xl font-bold">
           {laden ? 'Even geduld…' : huidig.name}
         </span>

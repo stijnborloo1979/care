@@ -3,6 +3,7 @@ import { endCall } from '../../services/calls'
 import { useWebRTC } from './useWebRTC'
 import { useRadio } from '../radio/radioStore'
 import { useKioskBezig } from '../kiosk/kioskStore'
+import { t } from '../../lib/i18n'
 
 /**
  * Tijdens het gesprek staat het beeld van de ander schermvullend en is er
@@ -83,14 +84,14 @@ export default function CallScreen({
             <p className="text-3xl font-extrabold">{metWie}</p>
             <p className="text-xl">
               {state === 'connecting'
-                ? 'Verbinden…'
+                ? t('oproep.verbinden')
                 : state === 'declined'
-                  ? `${metWie} kan nu niet praten`
+                  ? t('oproep.geweigerd', { naam: metWie })
                   : state === 'missed'
-                    ? `${metWie} nam niet op`
+                    ? t('oproep.gemist', { naam: metWie })
                     : state === 'failed'
-                      ? 'Het gesprek lukte niet'
-                      : 'Even geduld…'}
+                      ? t('oproep.mislukt')
+                      : t('oproep.verbinden')}
             </p>
 
             {/* Bij weigeren of niet opnemen geen technische uitleg: er is

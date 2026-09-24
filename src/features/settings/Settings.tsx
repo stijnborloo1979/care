@@ -7,6 +7,7 @@ import ManageRadio from '../radio/ManageRadio'
 import { useLicht } from '../licht/lichtStore'
 import MijnGegevens from '../privacy/MijnGegevens'
 import { usePush } from '../push/usePush'
+import { TALEN } from '../../lib/i18n'
 
 // De echte waarden staan in index.css; dit is alleen het bolletje in het
 // scherm. Donker en hoog contrast krijgen daar hun eigen variant.
@@ -148,6 +149,21 @@ export default function Settings() {
             aan={prefs.voice}
             label="Voorlezen"
             onClick={() => zet.mutate({ voice: !prefs.voice })}
+          />
+        </Rij>
+      </section>
+
+      <section className="rounded-card bg-surface p-6 shadow-card">
+        <h2 className="text-lg font-bold">Taal</h2>
+
+        <Rij
+          titel="Taal van de app"
+          onder="Geldt voor de schermen, de datums en de stem: voorlezen én verstaan."
+        >
+          <Keuze
+            opties={TALEN.map((l) => ({ waarde: l.code, label: l.naam }))}
+            actief={prefs.taal}
+            onKies={(v) => zet.mutate({ taal: v as DisplayPrefs['taal'] })}
           />
         </Rij>
       </section>

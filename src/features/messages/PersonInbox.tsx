@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getPersonInbox, markRead, signedUrl, type InboxMessage } from './messages'
+import StoragePhoto from '../../components/StoragePhoto'
+import { locale } from '../../lib/i18n'
 
 /**
  * Eén bericht als één grote knop. Indrukken, afspelen, klaar.
@@ -33,7 +35,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
       // Een tekstbericht: laten voorlezen door het toestel zelf.
       if (message.body && 'speechSynthesis' in window) {
         const u = new SpeechSynthesisUtterance(message.body)
-        u.lang = 'nl-BE'
+        u.lang = locale()
         u.rate = 0.92
         window.speechSynthesis.speak(u)
       }
@@ -72,6 +74,28 @@ export function MessageButton({ message }: { message: InboxMessage }) {
   }
 
   const naam = message.author_name ?? 'Familie'
+
+  // Een foto zonder opname is niets om af te spelen: die tonen we gewoon,
+  // groot genoeg om er iets aan te hebben.
+  if (message.photo_path && !message.audio_path) {
+    return (
+      <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-4 shadow-card">
+        <p className="text-xl font-bold">Foto van {naam}</p>
+        <div className="mt-3 overflow-hidden rounded-2xl">
+          <StoragePhoto bucket="messages" path={message.photo_path} alt={`Foto van ${naam}`} />
+        </div>
+        {message.body ? <p className="mt-3 text-lg">{message.body}</p> : null}
+        {!message.seen ? (
+          <button
+            onClick={bevestig}
+            className="mt-3 min-h-touch w-full rounded-pill bg-accent-ink px-5 text-lg font-bold text-white"
+          >
+            Gezien
+          </button>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <button

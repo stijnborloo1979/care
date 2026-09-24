@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import Icon, { type IconNaam } from '../components/Icon'
+import { t } from '../lib/i18n'
 import { useHousehold } from '../features/household/useHousehold'
 import { useDisplayPrefs } from '../features/settings/useDisplayPrefs'
 import { useRealtime } from '../features/realtime/useRealtime'
@@ -18,14 +19,16 @@ import { useWakeLock } from '../features/licht/useWakeLock'
 import { useKiosk } from '../features/kiosk/useKiosk'
 import Nachtscherm from '../features/kiosk/Nachtscherm'
 
+// De labels als sleutel: de tekst komt uit het woordenboek, zodat deze
+// lijst niet per taal herschreven hoeft te worden.
 const NAV: { to: string; label: string; icoon: IconNaam; mic?: boolean }[] = [
-  { to: '/', label: 'Vandaag', icoon: 'vandaag' },
-  { to: '/wie', label: 'Wie?', icoon: 'wie' },
+  { to: '/', label: 'nav.vandaag', icoon: 'vandaag' },
+  { to: '/wie', label: 'nav.wie', icoon: 'wie' },
   // De microfoon staat in het midden en valt op: het is de weg terug
   // wanneer iemand niet meer weet waar te kijken.
-  { to: '/praten', label: 'Praten', icoon: 'praten', mic: true },
-  { to: '/memory', label: 'In huis', icoon: 'memory' },
-  { to: '/help', label: 'Help', icoon: 'help' },
+  { to: '/praten', label: 'nav.praten', icoon: 'praten', mic: true },
+  { to: '/memory', label: 'nav.inhuis', icoon: 'memory' },
+  { to: '/help', label: 'nav.help', icoon: 'help' },
 ]
 
 /**
@@ -127,7 +130,7 @@ export default function PersonLayout() {
               }`}
             >
               <Icon naam={n.icoon} size={n.mic ? 24 : 22} />
-              {n.label}
+              {t(n.label)}
             </NavLink>
           )
         })}

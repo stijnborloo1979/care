@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import Icon from '../../components/Icon'
 import StoragePhoto from '../../components/StoragePhoto'
 import { useItem } from './useHomeMemory'
+import { locale, t } from '../../lib/i18n'
 
 /**
  * Waar het ding ligt, en hoe het werkt. Eén stap per kaart, grote tekst,
@@ -21,13 +22,13 @@ export default function ItemDetail() {
     ].join('. ')
     window.speechSynthesis.cancel()
     const u = new SpeechSynthesisUtterance(tekst)
-    u.lang = 'nl-BE'
+    u.lang = locale()
     u.rate = 0.92
     window.speechSynthesis.speak(u)
   }
 
-  if (isLoading) return <p className="p-6 text-ink-soft">Bezig met laden…</p>
-  if (!item) return <p className="p-6 text-ink-soft">Dit ding bestaat niet meer.</p>
+  if (isLoading) return <p className="p-6 text-ink-soft">{t('watnu.laden')}</p>
+  if (!item) return <p className="p-6 text-ink-soft">{t('huis.dingWeg')}</p>
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
@@ -49,14 +50,14 @@ export default function ItemDetail() {
 
       {item.where_text ? (
         <div className="mt-5 rounded-card border border-line bg-surface-soft p-5">
-          <p className="text-base font-bold text-ink-faint">Waar</p>
+          <p className="text-base font-bold text-ink-faint">{t('huis.waar')}</p>
           <p className="mt-1 text-xl">{item.where_text}</p>
         </div>
       ) : null}
 
       {item.item_step.length > 0 ? (
         <section className="mt-6">
-          <h2 className="text-lg font-bold">Stap voor stap</h2>
+          <h2 className="text-lg font-bold">{t('huis.stappen')}</h2>
           <ol className="mt-3 space-y-3">
             {item.item_step.map((s, i) => (
               <li
@@ -66,7 +67,14 @@ export default function ItemDetail() {
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-[1.5px] border-accent bg-accent-soft text-lg font-extrabold text-accent-ink">
                   {i + 1}
                 </span>
-                <span className="text-xl leading-snug">{s.body}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xl leading-snug">{s.body}</span>
+                  {s.photo_path ? (
+                    <span className="mt-3 block max-w-xs overflow-hidden rounded-2xl">
+                      <StoragePhoto path={s.photo_path} alt={s.body} />
+                    </span>
+                  ) : null}
+                </span>
               </li>
             ))}
           </ol>

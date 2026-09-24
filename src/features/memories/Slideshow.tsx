@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import StoragePhoto from '../../components/StoragePhoto'
 import type { MemoryPhoto } from '../../services/memories'
+import { locale } from '../../lib/i18n'
 
 /**
  * Rustige modus: één herinnering per scherm, twee knoppen, geen tijdslimiet.
@@ -35,7 +36,7 @@ export default function Slideshow({
     const u = new SpeechSynthesisUtterance(
       [foto.year ? String(foto.year) : '', foto.title, foto.story ?? ''].filter(Boolean).join('. '),
     )
-    u.lang = 'nl-BE'
+    u.lang = locale()
     u.rate = 0.9
     window.speechSynthesis.speak(u)
     return () => window.speechSynthesis.cancel()

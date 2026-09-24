@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { taalVanToestel, zetTaal, type Taal } from '../../lib/i18n'
 
 export interface DisplayPrefs {
+  /** Taal van de schermen, de datums en de stem. */
+  taal: Taal
   scale: '1' | '1.15' | '1.3' | '1.5'
   contrast: 'normal' | 'high'
   theme: 'auto' | 'light' | 'dark'
@@ -26,6 +29,9 @@ export interface DisplayPrefs {
 }
 
 export const STANDAARD: DisplayPrefs = {
+  // De taal van het toestel als eerste gok: dat klopt vaker dan Nederlands
+  // vooropzetten, en familie kan ze altijd wijzigen.
+  taal: taalVanToestel(),
   scale: '1',
   contrast: 'normal',
   theme: 'auto',
@@ -70,6 +76,7 @@ function bewaarLokaal(p: DisplayPrefs) {
 }
 
 export function pasToe(p: DisplayPrefs) {
+  zetTaal(p.taal)
   const r = document.documentElement
   r.setAttribute('data-scale', p.simple && p.scale === '1' ? '1.15' : p.scale)
   r.setAttribute('data-contrast', p.contrast)

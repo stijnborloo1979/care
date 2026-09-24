@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import RoomGrid from './RoomGrid'
+import { t } from '../../lib/i18n'
 
 export default function MemoryHome() {
   return (
@@ -8,8 +9,8 @@ export default function MemoryHome() {
         ‹ Vandaag
       </Link>
 
-      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">In huis</h1>
-      <p className="mt-1 text-lg text-ink-soft">Waar dingen liggen en hoe ze werken.</p>
+      <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{t('huis.titel')}</h1>
+      <p className="mt-1 text-lg text-ink-soft">{t('huis.uitleg')}</p>
 
       <div className="mt-6">
         <RoomGrid />
@@ -22,7 +23,7 @@ export default function MemoryHome() {
         <span className="text-3xl" aria-hidden="true">
           📷
         </span>
-        Foto&rsquo;s en herinneringen
+        {t('fotos.titel')}
       </Link>
 
       <Link
@@ -32,7 +33,7 @@ export default function MemoryHome() {
         <span className="text-3xl" aria-hidden="true">
           📓
         </span>
-        Weetjes
+        {t('weetjes.titel')}
       </Link>
     </main>
   )

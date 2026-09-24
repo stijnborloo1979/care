@@ -1,7 +1,9 @@
+import StoragePhoto from '../../components/StoragePhoto'
 import { Link, useParams } from 'react-router-dom'
 import Skeleton from '../../components/Skeleton'
 import { useHousehold } from '../household/useHousehold'
 import { useItems, useRooms } from './useHomeMemory'
+import { t } from '../../lib/i18n'
 
 /** De plattegrond: elke kamer een grote tegel met hoeveel erin staat. */
 export default function RoomGrid() {
@@ -21,8 +23,8 @@ export default function RoomGrid() {
   if (!rooms || rooms.length === 0) {
     return (
       <div className="rounded-card border-[1.5px] border-dashed border-line-strong bg-surface-soft p-8 text-center text-ink-soft">
-        Er zijn nog geen kamers.
-        <span className="mt-1 block text-sm">Familie kan ze toevoegen.</span>
+        {t('huis.leeg')}
+        <span className="mt-1 block text-sm">{t('huis.familieVoegtToe')}</span>
       </div>
     )
   }
@@ -37,9 +39,16 @@ export default function RoomGrid() {
             to={`/memory/${r.id}`}
             className="flex min-h-[7.5rem] flex-col justify-between rounded-card border-[1.5px] border-line-strong bg-surface p-4 shadow-card"
           >
-            <span className="text-3xl" aria-hidden="true">
-              {r.emoji ?? '🚪'}
-            </span>
+            {/* Een foto van de deur zegt meer dan de naam van de kamer. */}
+            {r.photo_path ? (
+              <span className="block h-16 overflow-hidden rounded-xl">
+                <StoragePhoto path={r.photo_path} alt={r.name} />
+              </span>
+            ) : (
+              <span className="text-3xl" aria-hidden="true">
+                {r.emoji ?? '🚪'}
+              </span>
+            )}
             <span>
               <span className="block text-lg font-bold">{r.name}</span>
               <span className="text-sm font-semibold text-ink-faint">
@@ -67,17 +76,17 @@ export function RoomItems() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
       <Link to="/memory" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ Alle kamers
+        ‹ {t('huis.titel')}
       </Link>
 
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">
-        {room ? `${room.emoji ?? ''} ${room.name}` : 'Kamer'}
+        {room ? `${room.emoji ?? ''} ${room.name}` : t('huis.kamer')}
       </h1>
 
       {isLoading ? (
-        <p className="mt-6 text-ink-soft">Bezig met laden…</p>
+        <p className="mt-6 text-ink-soft">{t('watnu.laden')}</p>
       ) : lijst.length === 0 ? (
-        <p className="mt-6 text-lg text-ink-soft">Hier staat nog niets in.</p>
+        <p className="mt-6 text-lg text-ink-soft">{t('huis.leeg')}</p>
       ) : (
         <ul className="mt-6 space-y-3">
           {lijst.map((i) => (

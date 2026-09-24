@@ -3,6 +3,7 @@ import { useHousehold } from '../household/useHousehold'
 import { hhmm } from '../../lib/time'
 import { useAgenda, useMarkDone, useNow } from './useAgenda'
 import { whatNow } from './whatNow'
+import { t } from '../../lib/i18n'
 
 /**
  * Eén vraag, één antwoord, één knop. Dit scherm bestaat omdat "wat moet
@@ -21,26 +22,26 @@ export default function WhatNow() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
       <Link to="/" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ Vandaag
+        ‹ {t('nav.vandaag')}
       </Link>
 
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">
-        Wat moet ik nu doen?
+        {t('watnu.titel')}
       </h1>
-      <p className="mt-1 text-lg text-ink-soft">Het is {hhmm(now, tz)}.</p>
+      <p className="mt-1 text-lg text-ink-soft">{t('watnu.hetIs', { tijd: hhmm(now, tz) })}</p>
 
       {isLoading ? (
-        <p className="mt-8 text-ink-soft">Bezig met laden…</p>
+        <p className="mt-8 text-ink-soft">{t('watnu.laden')}</p>
       ) : (
         <div className="mt-6 rounded-card border-[1.5px] border-accent bg-accent-soft p-6 shadow-lift">
           <p className="text-6xl" aria-hidden="true">
             {current?.emoji ?? '🍵'}
           </p>
           <p className="mt-3 text-4xl font-extrabold leading-tight tracking-tight">
-            {current?.title ?? 'Even rusten'}
+            {current?.title ?? t('watnu.rusten')}
           </p>
           <p className="mt-3 text-xl text-ink-soft">
-            {current?.note ?? 'Er is nu niets dat moet. Straks is er weer iets.'}
+            {current?.note ?? t('watnu.nietsMoet')}
           </p>
 
           {current ? (
@@ -48,7 +49,7 @@ export default function WhatNow() {
               onClick={() => markDone.mutate({ id: current.id, done: true })}
               className="mt-6 flex min-h-[3.6rem] w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-xl font-semibold text-white"
             >
-              Dit is gedaan
+              {t('watnu.gedaan')}
             </button>
           ) : null}
         </div>
@@ -56,12 +57,14 @@ export default function WhatNow() {
 
       {next ? (
         <div className="mt-6 rounded-card bg-surface p-6 shadow-card">
-          <p className="text-base font-bold text-ink-faint">Daarna</p>
+          <p className="text-base font-bold text-ink-faint">{t('vandaag.daarna')}</p>
           <p className="mt-1 text-2xl font-bold">
             {next.emoji ? `${next.emoji} ` : ''}
             {next.title}
           </p>
-          <p className="text-lg text-ink-soft">om {hhmm(new Date(next.starts_at), tz)}</p>
+          <p className="text-lg text-ink-soft">
+            {t('vandaag.om', { tijd: hhmm(new Date(next.starts_at), tz) })}
+          </p>
         </div>
       ) : null}
 
@@ -69,7 +72,7 @@ export default function WhatNow() {
         to="/praten"
         className="mt-6 flex min-h-[3.6rem] w-full items-center justify-center gap-2 rounded-pill border-[1.5px] border-line-strong text-lg font-semibold"
       >
-        🎤 Vraag het hardop
+        🎤 {t('watnu.hardop')}
       </Link>
     </main>
   )

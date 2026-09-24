@@ -87,6 +87,9 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 22. `22_support_by_family.sql` — de familiebeheerder past het niveau van
     ondersteuning meteen toe, zonder het toestel van de persoon. Elke
     wijziging komt in het zorglogboek.
+23. `23_room_photo.sql` — een foto per kamer. Familie kan nu overal een
+    foto toevoegen: dingen, stappen, kamers, mensen, medicatie,
+    herinneringen en berichten.
 
 ## Inloggen
 
@@ -253,6 +256,26 @@ van familie. Staat in `display_prefs`, dus geen migratie nodig.
 
 Vastzetten doet het toestel zelf: Begeleide toegang op iPad, app
 vastzetten of Fully Kiosk op Android. De uitleg staat op `/installeren`.
+
+## Talen
+
+Nederlands, Frans en Engels. De taal staat bij de weergave-instellingen,
+dus op het huishouden: familie stelt ze van op afstand in en de tablet
+volgt. Ze bepaalt de teksten, de locale voor datums en uren, en de taal
+van de stem — voorlezen én verstaan.
+
+De woordenboeken staan in `src/lib/i18n.ts`, zonder bibliotheek: een
+object per taal en één functie `t()`. Een ontbrekende vertaling valt terug
+op het Nederlands.
+
+Alle schermen van de persoon zijn vertaald: Vandaag, Wat nu, Wie is wie,
+Hulp, In huis, Foto's, Weetjes, Radio, Praten, Onthoud dit, het
+oproepscherm, het nachtscherm en de bottom navigation. De familiekant
+staat nog in het Nederlands en verhuist scherm per scherm naar `t()`.
+
+Nog taalgebonden en dus nog niet vertaald: de spraakassistent
+(`answerEngine.ts` zoekt op Nederlandse woorden), `quickAdd()` (leest
+Nederlandse datums), en de vragen van "Vertel eens".
 
 ## Offline
 

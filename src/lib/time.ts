@@ -1,4 +1,8 @@
-/** Datum- en tijdhulp die altijd in de tijdzone van het huishouden rekent. */
+/**
+ * Datum- en tijdhulp die altijd in de tijdzone van het huishouden rekent,
+ * en in de taal van het huishouden schrijft.
+ */
+import { locale, t } from './i18n'
 
 export function localDateKey(d: Date, tz: string): string {
   // en-CA geeft YYYY-MM-DD, wat sorteerbaar en vergelijkbaar is.
@@ -11,7 +15,7 @@ export function localDateKey(d: Date, tz: string): string {
 }
 
 export function hhmm(d: Date, tz: string): string {
-  return new Intl.DateTimeFormat('nl-BE', {
+  return new Intl.DateTimeFormat(locale(), {
     timeZone: tz,
     hour: '2-digit',
     minute: '2-digit',
@@ -20,7 +24,7 @@ export function hhmm(d: Date, tz: string): string {
 }
 
 export function dateLine(d: Date, tz: string): string {
-  const s = new Intl.DateTimeFormat('nl-BE', {
+  const s = new Intl.DateTimeFormat(locale(), {
     timeZone: tz,
     weekday: 'long',
     day: 'numeric',
@@ -31,12 +35,12 @@ export function dateLine(d: Date, tz: string): string {
 
 export function greeting(d: Date, tz: string): string {
   const uur = Number(
-    new Intl.DateTimeFormat('nl-BE', { timeZone: tz, hour: '2-digit', hour12: false }).format(d),
+    new Intl.DateTimeFormat(locale(), { timeZone: tz, hour: '2-digit', hour12: false }).format(d),
   )
-  if (uur < 6) return 'Goedenacht'
-  if (uur < 12) return 'Goedemorgen'
-  if (uur < 18) return 'Goedemiddag'
-  return 'Goedenavond'
+  if (uur < 6) return t('groet.nacht')
+  if (uur < 12) return t('groet.ochtend')
+  if (uur < 18) return t('groet.middag')
+  return t('groet.avond')
 }
 
 /** Minuten tussen twee momenten, positief als b later is. */

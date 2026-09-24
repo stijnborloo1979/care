@@ -6,6 +6,7 @@ import { addQuickNote, deleteQuickNote, getQuickNotes } from '../../services/qui
 import { hhmm, localDateKey } from '../../lib/time'
 import { spreek } from '../voice/useSpeech'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
+import { t as vertaal } from '../../lib/i18n'
 
 /**
  * "Onthoud dit" — het geheugen dat de persoon zelf vult. Eén knop,
@@ -31,7 +32,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
       setTekst('')
       setOpen(false)
       await queryClient.invalidateQueries({ queryKey: ['quicknotes', householdId] })
-      if (huidigePrefs().voice) spreek('Goed, dat onthoud ik.')
+      if (huidigePrefs().voice) spreek(vertaal('onthoud.bewaard'))
     },
   })
 
@@ -53,7 +54,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
   return (
     <section aria-labelledby="onthoud">
       <h2 id="onthoud" className="text-base font-bold text-ink-faint">
-        Onthoud dit
+        {vertaal('onthoud.titel')}
       </h2>
 
       {recent.length > 0 ? (
@@ -72,7 +73,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
                 </span>
                 <button
                   onClick={() => wis.mutate(n.id)}
-                  aria-label="Dit mag weg"
+                  aria-label={vertaal('onthoud.magWeg')}
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-faint hover:bg-surface-soft"
                 >
                   <X size={18} strokeWidth={1.75} />
@@ -97,7 +98,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
             </label>
             {/* Inspreken is hier de hoofdweg: sneller dan typen, en je
                 handen zijn vaak net vol met wat je wil wegleggen. */}
-            <DictateButton onTekst={(t) => setTekst(t)} label="Inspreken" />
+            <DictateButton onTekst={(tekst) => setTekst(tekst)} label={vertaal('onthoud.inspreken')} />
           </div>
           <textarea
             id="onthoud-tekst"
@@ -105,7 +106,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
             onChange={(e) => setTekst(e.target.value)}
             rows={2}
             autoFocus
-            placeholder="Mijn sleutels liggen in de inkomhal."
+            placeholder={vertaal('onthoud.voorbeeld')}
             className="mt-2 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3 text-lg"
           />
           <div className="mt-3 flex gap-2">
@@ -114,7 +115,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
               disabled={!tekst.trim() || bewaar.isPending}
               className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-50"
             >
-              {bewaar.isPending ? 'Bezig…' : 'Onthoud dit'}
+              {bewaar.isPending ? vertaal('onthoud.bezig') : vertaal('onthoud.titel')}
             </button>
             <button
               type="button"
