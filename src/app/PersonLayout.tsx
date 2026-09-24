@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import Icon, { type IconNaam } from '../components/Icon'
 import { useHousehold } from '../features/household/useHousehold'
@@ -59,6 +60,16 @@ export default function PersonLayout() {
     nachtVan: prefs.nachtVan,
     nachtTot: prefs.nachtTot,
   })
+
+  // De zachte achtergrond hoort bij de schermen van de persoon, niet bij
+  // die van familie. PersonLayout heeft geen eigen buitenste element, dus
+  // zetten we het op de body en halen we het er weer af.
+  useEffect(() => {
+    document.body.dataset.scherm = 'persoon'
+    return () => {
+      delete document.body.dataset.scherm
+    }
+  }, [])
 
   return (
     <>
