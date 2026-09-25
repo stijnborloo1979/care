@@ -321,6 +321,33 @@ Een ondertekende link op papier zou trouwens binnen het uur verlopen.
 
 "Luister alles" speelt alle opnames na elkaar, als een luisteralbum.
 
+## Foto's: het vlak geeft de maat, niet de foto
+
+`StoragePhoto` legde de foto als roosteritem in een vlak met
+`place-items-center`. Een roosteritem wordt daar niet uitgerekt, dus
+`h-full` deed niets: de foto kreeg de breedte van het vlak en daarna zijn
+eigen hoogte, en wat eronder uitstak werd weggeknipt.
+
+Voor een liggende foto viel dat nauwelijks op. Een staande foto — en zo
+fotografeert iedereen met een telefoon — verloor boven- en onderkant. Ze
+leek ingezoomd terwijl ze gewoon afgesneden was, en `object-fit` kon er
+niets aan doen omdat het vlak nooit de maat gaf.
+
+De foto ligt nu absoluut in het vlak (`absolute inset-0`), zodat het kader
+de maat bepaalt en `object-fit` weer betekenis heeft. Dat raakt elke foto
+in de app: kamers, dingen, stappen, mensen, medicatie, herinneringen.
+
+`passend` schakelt van bijsnijden naar heel tonen. De kamertegels gebruiken
+het: daar moet je de kamer herkennen, en een randje langs de zijkant is het
+kleinere kwaad. Elders blijft bijsnijden de standaard, want dat staat
+strakker.
+
+De kamertegels zelf zijn ook groter: de foto vult de hele breedte van de
+tegel in plaats van een strook van 64 px, en het rooster gaat pas bij `lg`
+naar drie kolommen. Drie kolommen in een kolom van 36rem maakt elke foto
+zo'n 170 px breed, en dan is een kamer niet meer te herkennen — het enige
+waar die tegel voor dient.
+
 ## Medicatie: de foto van de verpakking
 
 `medication.photo_path` bestond al, maar de knop verscheen alleen bij een

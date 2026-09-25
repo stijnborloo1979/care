@@ -14,9 +14,9 @@ export default function RoomGrid() {
 
   if (isLoading)
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className={ROOSTER}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} className="h-[7.5rem]" />
+          <Skeleton key={i} className="h-[13rem]" />
         ))}
       </div>
     )
@@ -30,27 +30,31 @@ export default function RoomGrid() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+    <div className={ROOSTER}>
       {rooms.map((r) => {
         const aantal = (items ?? []).filter((i) => i.room_id === r.id).length
         return (
           <Link
             key={r.id}
             to={`/memory/${r.id}`}
-            className="flex min-h-[7.5rem] flex-col justify-between rounded-card border-[1.5px] border-line-strong bg-surface p-4 shadow-card"
+            className="flex flex-col overflow-hidden rounded-card border-[1.5px] border-line-strong bg-surface shadow-card"
           >
-            {/* Een foto van de deur zegt meer dan de naam van de kamer. */}
-            {r.photo_path ? (
-              <span className="block h-16 overflow-hidden rounded-xl">
-                <StoragePhoto path={r.photo_path} alt={r.name} />
-              </span>
-            ) : (
-              <span className="text-3xl" aria-hidden="true">
-                {r.emoji ?? '🚪'}
-              </span>
-            )}
-            <span>
-              <span className="block text-lg font-bold">{r.name}</span>
+            {/* Een foto van de kamer zegt meer dan de naam.
+                Ze vult de hele breedte van de tegel in haar eigen
+                verhouding; eerder stond ze in een strook van 64 px hoog,
+                waardoor je alleen de middelste band zag — de foto leek
+                ingezoomd terwijl hij gewoon afgeknipt was.
+                Zonder foto komt het emoji in datzelfde vlak, zodat elke
+                tegel even groot is en het rooster rustig blijft. */}
+            <StoragePhoto
+              path={r.photo_path}
+              emoji={r.emoji ?? '🚪'}
+              alt={r.name}
+              className="rounded-none"
+              passend
+            />
+            <span className="p-4">
+              <span className="block text-lg font-bold leading-snug">{r.name}</span>
               <span className="text-sm font-semibold text-ink-faint">
                 {aantal} {aantal === 1 ? 'ding' : 'dingen'}
               </span>
@@ -61,6 +65,15 @@ export default function RoomGrid() {
     </div>
   )
 }
+
+/**
+ * Twee kolommen tot een groot scherm, pas daarna drie.
+ *
+ * Drie kolommen in een kolom van 36rem maakt elke foto zo'n 170 px breed;
+ * dan is een kamer niet meer te herkennen, en dat is het enige waar deze
+ * tegel voor dient.
+ */
+const ROOSTER = 'grid grid-cols-2 gap-4 lg:grid-cols-3'
 
 /** Alles wat in één kamer staat. */
 export function RoomItems() {
