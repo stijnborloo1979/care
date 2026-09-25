@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { taalVanToestel, zetTaal, type Taal } from '../../lib/i18n'
+import { isTaal, taalVanToestel, zetTaal, type Taal } from '../../lib/i18n'
 
 export interface DisplayPrefs {
   /** Taal van de schermen, de datums en de stem. */
@@ -61,10 +61,25 @@ export function huidigePrefs(): DisplayPrefs {
 function lees(): DisplayPrefs {
   try {
     const raw = localStorage.getItem(LOKAAL)
-    return raw ? { ...STANDAARD, ...JSON.parse(raw) } : STANDAARD
+    return raw ? volledig(JSON.parse(raw)) : STANDAARD
   } catch {
     return STANDAARD
   }
+}
+
+/**
+ * Altijd een compleet object, wat er ook binnenkomt.
+ *
+ * Wat hier binnenkomt is niet te vertrouwen: een cache van een oudere
+ * versie van de app, een half ingevulde rij, of null. Ontbrak de taal, dan
+ * ging pasToe() die als undefined doorgeven en viel élk scherm van de
+ * persoon om. Eén ontbrekend veld hoort geen app te kosten.
+ */
+export function volledig(ruw: unknown): DisplayPrefs {
+  const deel = ruw && typeof ruw === 'object' ? (ruw as Partial<DisplayPrefs>) : {}
+  const p = { ...STANDAARD, ...deel }
+  if (!isTaal(p.taal)) p.taal = STANDAARD.taal
+  return p
 }
 
 function bewaarLokaal(p: DisplayPrefs) {
@@ -106,21 +121,23 @@ export function useDisplayPrefs(householdId: string) {
         .eq('id', householdId)
         .maybeSingle()
       if (error) throw error
-      const rij = (data as { display_prefs: Partial<DisplayPrefs> } | null)?.display_prefs ?? {}
-      return { ...STANDAARD, ...rij }
+      return volledig((data as { display_prefs: unknown } | null)?.display_prefs)
     },
   })
 
   useEffect(() => {
     if (query.data) {
-      bewaarLokaal(query.data)
-      pasToe(query.data)
+      // Nog eens door volledig(): query.data kan uit de bewaarde cache
+      // komen, die door een oudere versie van de app geschreven is.
+      const p = volledig(query.data)
+      bewaarLokaal(p)
+      pasToe(p)
     }
   }, [query.data])
 
   const zet = useMutation({
     mutationFn: async (deel: Partial<DisplayPrefs>) => {
-      const nieuw = { ...(query.data ?? lees()), ...deel }
+      const nieuw = volledig({ ...(query.data ?? lees()), ...deel })
       bewaarLokaal(nieuw)
       pasToe(nieuw)
       const { error } = await supabase.rpc('set_display_prefs', {

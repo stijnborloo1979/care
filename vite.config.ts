@@ -63,5 +63,18 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  // Een eigen bouwnummer per build. De bewaarde query-cache gebruikt dit
+  // als buster: zonder dit blijft een cache van een oudere versie staan en
+  // krijgt de nieuwe app objecten van de oude vorm terug. Dat legde ooit
+  // het hele scherm van de persoon plat.
+  //
+  // Bewust hier en niet als omgevingsvariabele: die moet op elke omgeving
+  // apart gezet worden, en gebeurt dat niet, dan is de buster overal
+  // hetzelfde en gooit hij nooit iets weg.
+  define: {
+    __BUILD_ID__: JSON.stringify(
+      process.env.VITE_BUILD_ID ?? process.env.CF_PAGES_COMMIT_SHA ?? String(Date.now()),
+    ),
+  },
   build: { sourcemap: false },
 })

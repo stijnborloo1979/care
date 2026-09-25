@@ -489,6 +489,40 @@ Drie dingen staan er altijd op, ook als familie ze niet zou aanvinken:
   deze regel cureert familie zonder het te beseffen wat de arts ziet, en
   weet de arts niet wat hij mist. Zie `nietOpgenomen()` en de tests ernaast.
 
+## Waarom het scherm van de persoon niet mag omvallen
+
+Er ging één keer iets mis waar drie fouten achter zaten, en ze zijn alle
+drie gerepareerd. Het is het soort ketting dat terugkomt, dus het staat
+hier.
+
+De tablet toonde "Er ging iets mis — Cannot read properties of undefined
+(reading 'nav.vandaag')" en bleef dat tonen, ook na herladen.
+
+1. **De bewaarde query-cache werd nooit weggegooid.** De `buster` stond op
+   `import.meta.env.VITE_BUILD_ID ?? "dev"`, en die variabele was nergens
+   gezet — dus was de buster bij elke versie "dev" en bleef een cache van
+   een oudere versie staan. Nu komt het bouwnummer uit `vite.config.ts`
+   (`__BUILD_ID__`), zodat het altijd verandert, ook als niemand een
+   omgevingsvariabele zet.
+2. **Een onvolledig object ging ongecontroleerd naar `pasToe()`.** Die
+   oude cache gaf een instellingenobject van de oude vorm terug, zonder
+   `taal`. Nu gaat alles door `volledig()`, dat altijd elk veld invult —
+   of het nu uit de database, uit localStorage of uit de cache komt.
+3. **`t()` viel om op een onbekende taal.** `WOORDENBOEKEN[huidige][sleutel]`
+   met `huidige` undefined is een harde fout, en `t()` draait op élk
+   scherm. Eén lege waarde nam dus de hele app mee. Nu valt elke stap
+   terug, tot en met de sleutel zelf, en weigert `zetTaal()` een taal die
+   niet bestaat.
+
+De les zit in nummer drie. Deze module had al in haar eigen commentaar
+staan: "beter een zin in de verkeerde taal dan een lege knop" — en deed
+vervolgens het tegenovergestelde. Op het scherm van de persoon is
+terugvallen op iets lelijks altijd beter dan stoppen. Dat geldt ook voor
+`normaliseer()` in de indeling, en voor elke functie die daar draait.
+
+Er staan tests op alle drie: `src/lib/i18n.test.ts` en
+`src/features/settings/volledig.test.ts`.
+
 ## Offline
 
 De query-cache wordt een dag lang in localStorage bewaard, zodat de tablet

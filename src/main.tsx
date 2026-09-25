@@ -127,7 +127,7 @@ if (!configuratieOk) {
             maxAge: 24 * 60 * 60_000,
             // Bij een nieuwe versie van de app is de oude cache niet te
             // vertrouwen; buster gooit hem dan weg.
-            buster: import.meta.env.VITE_BUILD_ID ?? "dev",
+            buster: __BUILD_ID__,
           }}
           onSuccess={() => {
             // Wat offline werd afgevinkt, gaat alsnog de deur uit.

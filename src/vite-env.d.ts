@@ -14,3 +14,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/** Het bouwnummer uit vite.config.ts; buster voor de bewaarde query-cache. */
+declare const __BUILD_ID__: string

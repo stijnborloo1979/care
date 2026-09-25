@@ -31,8 +31,19 @@ const LOCALES: Record<Taal, string> = {
 
 let huidige: Taal = 'nl'
 
-/** Wordt gezet zodra de instellingen geladen zijn (zie useDisplayPrefs). */
+export function isTaal(x: unknown): x is Taal {
+  return x === 'nl' || x === 'fr' || x === 'en'
+}
+
+/**
+ * Wordt gezet zodra de instellingen geladen zijn (zie useDisplayPrefs).
+ *
+ * Een onbekende taal wordt genegeerd in plaats van bewaard. Eén keer een
+ * lege waarde hier — uit een oude cache, een half ingevulde instelling —
+ * en élk scherm van de persoon viel om, want alles loopt via t().
+ */
 export function zetTaal(taal: Taal) {
+  if (!isTaal(taal)) return
   huidige = taal
   // Ook bruikbaar buiten de browser (de tests draaien zonder document).
   if (typeof document !== 'undefined') document.documentElement.lang = taal
@@ -43,7 +54,7 @@ export function taal(): Taal {
 }
 
 export function locale(): string {
-  return LOCALES[huidige]
+  return LOCALES[huidige] ?? LOCALES.nl
 }
 
 /** De taal van het toestel, als eerste gok bij een nieuw huishouden. */
@@ -519,7 +530,11 @@ const WOORDENBOEKEN: Record<Taal, Woordenboek> = { nl: NL, fr: FR, en: EN }
  * woorden vrij, en die verschilt per taal.
  */
 export function t(sleutel: string, waarden?: Record<string, string | number>): string {
-  const zin = WOORDENBOEKEN[huidige][sleutel] ?? NL[sleutel] ?? sleutel
+  // Elke stap valt terug in plaats van te falen, tot en met de sleutel
+  // zelf. Deze functie draait op elk scherm van de persoon; gaat zij
+  // stuk, dan is de app weg. Liever "nav.vandaag" op een knop dan een
+  // foutmelding waar zij niets mee kan.
+  const zin = (WOORDENBOEKEN[huidige] ?? NL)[sleutel] ?? NL[sleutel] ?? sleutel
   if (!waarden) return zin
   return zin.replace(/\{(\w+)\}/g, (heel, naam) => String(waarden[naam] ?? heel))
 }
