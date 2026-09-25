@@ -11,13 +11,14 @@ import Skeleton from '../../components/Skeleton'
 import OnthoudDit from '../memory/OnthoudDit'
 import VertelEens from '../stories/VertelEens'
 import VandaagVroeger from '../memories/VandaagVroeger'
+import HerinneringenKaart from '../memories/HerinneringenKaart'
 import { RadioKaart } from '../radio/Radio'
 import { useState } from 'react'
 import SupportRequestBanner from '../sharing/SupportRequestBanner'
 import { useHousehold } from '../household/useHousehold'
 import { Link } from 'react-router-dom'
 import { getIndeling, lokaleIndeling } from '../../services/layout'
-import { normaliseer } from '../layout/modules'
+import { normaliseer, type ModuleId } from '../layout/modules'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
 
 interface Props {
@@ -64,7 +65,10 @@ export default function Today({ householdId, personName, timezone }: Props) {
   const events = data ?? []
   const { current, next } = whatNow(events, now)
 
-  const blok: Record<string, React.ReactNode> = {
+  // Record<ModuleId, …>: staat er een module in de lijst zonder dat hier
+  // iets getekend wordt, dan faalt de build in plaats van dat familie een
+  // tegel kan kiezen die leeg blijft.
+  const blok: Record<ModuleId, React.ReactNode> = {
     nu: (
       <section aria-labelledby="nu">
         <h2 id="nu" className="text-base font-bold text-ink-faint">
@@ -148,6 +152,8 @@ export default function Today({ householdId, personName, timezone }: Props) {
         ) : null}
       </div>
     ),
+
+    herinneringen: <HerinneringenKaart householdId={householdId} />,
 
     vertellen: <VertelEens householdId={householdId} timezone={timezone} />,
 

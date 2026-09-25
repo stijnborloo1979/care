@@ -381,6 +381,11 @@ kolommen en mag het scherm tot 52rem breed worden — met twee kolommen
 bepaalt de kolom de regellengte, niet het venster, dus de smalle band uit
 het oude ontwerp is daar niet meer nodig.
 
+Welke modules er bestaan staat in `MODULE_IDS`, en `Today.tsx` typeert
+zijn blokken als `Record<ModuleId, ReactNode>`. Komt er een module bij
+zonder dat er iets getekend wordt, dan faalt de build — in plaats van dat
+familie een tegel kan kiezen die leeg blijft.
+
 De regels staan in `src/features/layout/modules.ts`:
 
 - **"Wat nu?" staat altijd bovenaan, vol-breed, en kan niet weg.** Dat is de

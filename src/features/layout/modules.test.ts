@@ -15,7 +15,9 @@ import {
  * het scherm dat altijd hoort te werken.
  */
 
-const t = (id: string, maat: 'vol' | 'half' = 'half'): Tegel => ({ id, maat })
+// Ook met een id dat niet bestaat: de test moet juist kunnen nagaan wat er
+// dan gebeurt, en dat is precies wat er uit een oude database kan komen.
+const t = (id: string, maat: 'vol' | 'half' = 'half'): Tegel => ({ id, maat }) as Tegel
 
 describe('normaliseer', () => {
   it('laat een geldige indeling met rust', () => {

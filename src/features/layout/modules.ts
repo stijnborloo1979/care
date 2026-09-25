@@ -17,7 +17,7 @@ import type { IconNaam } from '../../components/Icon'
 export type Maat = 'vol' | 'half'
 
 export interface Tegel {
-  id: string
+  id: ModuleId
   maat: Maat
 }
 
@@ -26,8 +26,30 @@ export interface Indeling {
   tegels: Tegel[]
 }
 
+/**
+ * De ids, apart en vastgezet.
+ *
+ * Today.tsx typeert zijn blokken als Record<ModuleId, …>, dus een module
+ * die hier bijkomt zonder dat er iets getekend wordt, is een bouwfout en
+ * geen lege tegel op het scherm van de persoon.
+ */
+export const MODULE_IDS = [
+  'nu',
+  'daarna',
+  'vandaag',
+  'berichten',
+  'onthoud',
+  'radio',
+  'vroeger',
+  'herinneringen',
+  'vertellen',
+  'knoppen',
+] as const
+
+export type ModuleId = (typeof MODULE_IDS)[number]
+
 export interface ModuleDef {
-  id: string
+  id: ModuleId
   /** Naam in de editor. De persoon ziet deze niet; die ziet de inhoud. */
   naam: string
   /** Eén regel die zegt wat erop komt te staan. */
@@ -90,7 +112,13 @@ export const MODULES: ModuleDef[] = [
   {
     id: 'vroeger',
     naam: 'Vandaag vroeger',
-    uitleg: 'Een foto van deze dag in een ander jaar.',
+    uitleg: 'Een foto van deze dag in een ander jaar. Blijft weg op dagen waar niets bij past.',
+    icoon: 'fotos',
+  },
+  {
+    id: 'herinneringen',
+    naam: 'Herinneringen',
+    uitleg: 'De nieuwste foto, met een weg naar de hele tijdlijn. Staat er elke dag.',
     icoon: 'fotos',
   },
   {
