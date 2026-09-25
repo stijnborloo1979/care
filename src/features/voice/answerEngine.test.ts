@@ -126,6 +126,9 @@ describe('heb ik dit al gedaan', () => {
     naam: 'Metformine',
     due_at: `2026-03-10T${uur}:00+01:00`,
     taken_at: genomen ? `2026-03-10T${genomen}:00+01:00` : null,
+    dosis: null,
+    instructie: null,
+    foto: null,
   })
 
   it('zegt ja, met het tijdstip, als de medicatie bevestigd is', () => {

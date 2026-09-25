@@ -130,13 +130,17 @@ export function MessageButton({ message }: { message: InboxMessage }) {
     )
   }
 
+  // De afspeelknop blijft één grote knop; "Opzij" komt eronder in plaats
+  // van erin. Een knop in een knop werkt niet, en belangrijker: de weg naar
+  // luisteren mag niet smaller worden om plaats te maken voor opruimen.
   return (
+    <div className="rounded-card border-[1.5px] border-accent bg-accent-soft shadow-card">
     <button
       onClick={speel}
       disabled={busy}
       aria-pressed={playing}
       aria-label={`Bericht van ${naam} ${playing ? 'pauzeren' : 'afspelen'}`}
-      className="flex min-h-big w-full items-center gap-4 rounded-card border-[1.5px] border-accent bg-accent-soft p-5 text-left shadow-card"
+      className="flex min-h-big w-full items-center gap-4 rounded-card p-5 text-left"
     >
       <span
         aria-hidden="true"
@@ -169,6 +173,21 @@ export function MessageButton({ message }: { message: InboxMessage }) {
         </span>
       ) : null}
     </button>
+
+    {/* Pas nadat ze het gehoord heeft. Ervoor zou het een manier zijn om
+        een bericht weg te doen zonder het te kennen. */}
+    {message.seen ? (
+      <div className="px-5 pb-4">
+        <button
+          onClick={opzij}
+          disabled={bezigOpzij}
+          className="min-h-touch rounded-pill border-[1.5px] border-line-strong bg-surface px-5 font-semibold disabled:opacity-60"
+        >
+          {bezigOpzij ? 'Bezig…' : 'Opzij'}
+        </button>
+      </div>
+    ) : null}
+    </div>
   )
 }
 

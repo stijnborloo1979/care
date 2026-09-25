@@ -334,6 +334,11 @@ scherm", met per bericht van wie, wanneer, of zij het al bekeken heeft, en
 een knop "Weghalen". Verwijderen mocht al volgens de policy op `message`
 (wie het stuurde, of een beheerder); er was alleen nergens een knop.
 
+Ingesproken berichten hebben "Opzij" pas nadat ze het bericht gehoord
+hebben — ervoor zou het een manier zijn om iets weg te doen zonder het te
+kennen. De knop staat onder de afspeelknop en niet erin: de weg naar
+luisteren mag niet smaller worden om plaats te maken voor opruimen.
+
 **De persoon** krijgt geen verwijderknop. Dat is onomkeerbaar, en "weg"
 betekent voor haar iets anders dan voor familie. Haar knop "Gezien" haalt
 de foto nu wél van het scherm — eerder bleef die staan, en beloofde de knop
@@ -361,6 +366,12 @@ Stijn" van: wat vóór de @ staat, in woorden, met hoofdletters. Geen gok over
 voor- en achternaam; beter een benadering van een naam dan een adres. Werkt
 ook voor berichten die er al staan, want het gebeurt bij het tonen.
 
+Dat blijft een gok, dus op `/familie/instellingen` staat nu **Jouw naam**.
+Zet er wat zij zou zeggen — "Els" of "mama" — en niet je volledige naam.
+Staat er nog een e-mailadres, dan blijft het veld leeg met de benadering als
+voorbeeld, in plaats van het adres alvast in te vullen. Het geldt vanaf het
+volgende bericht: wat al verstuurd is, draagt de naam die er toen bij hoorde.
+
 ## Foto's: het vlak geeft de maat, niet de foto
 
 `StoragePhoto` legde de foto als roosteritem in een vlak met
@@ -387,6 +398,31 @@ tegel in plaats van een strook van 64 px, en het rooster gaat pas bij `lg`
 naar drie kolommen. Drie kolommen in een kolom van 36rem maakt elke foto
 zo'n 170 px breed, en dan is een kamer niet meer te herkennen — het enige
 waar die tegel voor dient.
+
+## Medicatie op het scherm van de persoon
+
+Er zat een naad in het product die niemand zag: familie voerde een schema
+in, de dokter kreeg een verslag van wat bevestigd werd, de spraakassistent
+kon erover antwoorden — maar op haar scherm stond medicatie nergens. Wie
+niet praat tegen de tablet, kon zijn eigen medicatie niet bevestigen.
+
+De module **Medicatie** (`/familie/indeling`) toont het eerstvolgende
+moment dat nog moet: naam, dosis, tijd, de instructie, de foto van de doos,
+en één knop "Genomen". Wat al genomen is, staat eronder als een rustige
+regel zonder knop — dat is het antwoord op "heb ik ze al genomen?", niet
+iets om nog eens te doen.
+
+Eén moment tegelijk, niet de lijst. Vier momenten is een lijst om te lezen,
+en dat is precies wat dit scherm niet vraagt.
+
+De foto staat er groot bij en wordt niet bijgesneden: een doosje herkennen
+aan kleur en vorm is makkelijker dan een naam lezen, zeker een naam als
+"rivastigmine".
+
+De bevestiging gaat via de mutatie die op de queryClient staat
+(`['confirmMedication']`), niet via een eigen functie. Zo vertrekt een
+bevestiging die offline gegeven werd alsnog, ook nadat de tablet opnieuw
+opgestart is.
 
 ## Medicatie: de foto van de verpakking
 

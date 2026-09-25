@@ -1,4 +1,5 @@
 import { useDisplayPrefs, type DisplayPrefs } from './useDisplayPrefs'
+import JouwNaam from './JouwNaam'
 import { useHousehold } from '../household/useHousehold'
 import { Link } from 'react-router-dom'
 import LocationSettings from '../location/LocationSettings'
@@ -40,6 +41,10 @@ export default function Settings() {
           Deze instellingen gelden voor het scherm van {voornaam}, op elk toestel.
         </p>
       </header>
+
+      {/* Bovenaan, want het gaat over de instelling die je zelf aangaat:
+          de rest van deze pagina gaat over haar scherm. */}
+      <JouwNaam />
 
       <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Leesbaarheid</h2>

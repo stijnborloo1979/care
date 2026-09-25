@@ -38,6 +38,7 @@ export const MODULE_IDS = [
   'daarna',
   'vandaag',
   'berichten',
+  'medicatie',
   'onthoud',
   'radio',
   'vroeger',
@@ -104,6 +105,12 @@ export const MODULES: ModuleDef[] = [
     naam: 'Berichten',
     uitleg: 'Wat familie stuurde, met de mogelijkheid te antwoorden.',
     icoon: 'bellen',
+  },
+  {
+    id: 'medicatie',
+    naam: 'Medicatie',
+    uitleg: 'Het eerstvolgende moment met de foto van de doos, en een knop om te bevestigen.',
+    icoon: 'medicatie',
   },
   {
     id: 'onthoud',
