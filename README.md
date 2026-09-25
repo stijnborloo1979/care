@@ -391,9 +391,11 @@ De regels staan in `src/features/layout/modules.ts`:
 - **"Wat nu?" staat altijd bovenaan, vol-breed, en kan niet weg.** Dat is de
   vraag waar de app om draait; die hoort niet per huishouden ergens anders
   te staan.
-- **Zes tegels is het maximum.** Niet omdat er niet meer past, maar omdat
-  een zevende het gesprek overslaat dat je juist wil: wat heeft zij écht
-  nodig?
+- **Geen maximum aantal tegels, wel een raad.** Boven `RUSTIG_TOT` (zes)
+  zegt de editor dat elke tegel erbij één keuze meer is die zij tegelijk
+  ziet, en blokkeert verder niets. Er stond eerst een harde grens op zes;
+  die is eruit, omdat familie het huishouden beter kent dan de app. De
+  database houdt alleen een ruime bovengrens aan als foutdetectie.
 - **Sommige blokken kunnen nooit half** — een tijdlijn of een rij knoppen
   wordt in een halve kolom onleesbaar.
 - **Bij grote tekst of eenvoudige modus worden halve tegels vanzelf

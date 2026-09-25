@@ -30,10 +30,16 @@ comment on column public.household.home_layout is
 --  familiebeslissing, geen zorghandeling. De persoon zelf wel — wie de
 --  app zelf gebruikt, richt ook zijn eigen scherm in.
 --
---  De regels (maximum aantal, "Wat nu?" bovenaan, halve tegels bij grote
---  tekst) staan in de app, maar het maximum staat hier nog eens: een
---  indeling met vijftig tegels hoort de database niet te bewaren, ook niet
---  als er ooit een ander scherm langs deze functie komt.
+--  De regels ("Wat nu?" bovenaan, halve tegels bij grote tekst, en de
+--  raad om het scherm rustig te houden) staan in de app. Hier staat alleen
+--  een ruime bovengrens: er zijn maar een stuk of tien modules, dus een
+--  indeling met honderden tegels is geen keuze maar een fout, en die hoort
+--  de database niet te bewaren — ook niet als er ooit een ander scherm
+--  langs deze functie komt.
+--
+--  Bewust geen harde grens op zes meer. Familie kent het huishouden beter
+--  dan de app; de editor raadt aan om het kort te houden en blokkeert
+--  niets.
 -- ---------------------------------------------------------------------
 
 create or replace function public.set_home_layout(hh uuid, layout jsonb)
@@ -58,8 +64,8 @@ begin
     raise exception 'Een indeling heeft een lijst tegels';
   end if;
 
-  if jsonb_array_length(tegels) > 6 then
-    raise exception 'Hoogstens zes tegels';
+  if jsonb_array_length(tegels) > 30 then
+    raise exception 'Zo veel tegels bestaan er niet; dit is geen geldige indeling';
   end if;
 
   -- Helemaal vervangen, niet samenvoegen zoals display_prefs: een tegel

@@ -12,6 +12,7 @@ import OnthoudDit from '../memory/OnthoudDit'
 import VertelEens from '../stories/VertelEens'
 import VandaagVroeger from '../memories/VandaagVroeger'
 import HerinneringenKaart from '../memories/HerinneringenKaart'
+import WeetjesKaart from '../memory/WeetjesKaart'
 import { RadioKaart } from '../radio/Radio'
 import { useState } from 'react'
 import SupportRequestBanner from '../sharing/SupportRequestBanner'
@@ -154,6 +155,8 @@ export default function Today({ householdId, personName, timezone }: Props) {
     ),
 
     herinneringen: <HerinneringenKaart householdId={householdId} />,
+
+    weetjes: <WeetjesKaart householdId={householdId} />,
 
     vertellen: <VertelEens householdId={householdId} timezone={timezone} />,
 

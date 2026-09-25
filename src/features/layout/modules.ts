@@ -42,6 +42,7 @@ export const MODULE_IDS = [
   'radio',
   'vroeger',
   'herinneringen',
+  'weetjes',
   'vertellen',
   'knoppen',
 ] as const
@@ -62,13 +63,17 @@ export interface ModuleDef {
 }
 
 /**
- * Zes is de bovengrens.
+ * Er is geen bovengrens meer op het aantal tegels.
  *
- * Niet omdat er technisch niet meer past, maar omdat een zevende tegel het
- * gesprek overslaat dat je juist wil: wat heeft zij écht nodig? Wie er een
- * bij wil, moet er eerst een weghalen.
+ * Een module kan wel maar één keer op het scherm staan, dus lang kan de
+ * lijst nooit worden: hoogstens zoveel tegels als er modules zijn. Dat is
+ * een natuurlijke grens en geen regel.
+ *
+ * Vanaf dit aantal zegt de editor er wel iets over. Geen blokkade — wie
+ * het wil, doet het — maar wel het gesprek dat de moeite waard is: elke
+ * tegel erbij is een keuze minder die vanzelf spreekt.
  */
-export const MAX_TEGELS = 6
+export const RUSTIG_TOT = 6
 
 export const MODULES: ModuleDef[] = [
   {
@@ -122,6 +127,12 @@ export const MODULES: ModuleDef[] = [
     icoon: 'fotos',
   },
   {
+    id: 'weetjes',
+    naam: 'Weetjes',
+    uitleg: 'Antwoorden op vragen die terugkomen: waar iets ligt, hoe iets moet.',
+    icoon: 'weetjes',
+  },
+  {
     id: 'vertellen',
     naam: 'Vertel eens',
     uitleg: 'Elke dag één vraag over vroeger, voor het levensboek.',
@@ -171,6 +182,10 @@ export const STANDAARD: Indeling = {
  * Grote tekst maakt halve tegels vol-breed. Twee kolommen naast elkaar
  * betekenen bij die tekstgrootte drie woorden per regel — familie hoeft
  * daar niet aan te denken.
+ *
+ * Dezelfde module twee keer kan niet. Dat is geen smaakregel maar een
+ * technische: twee tegels met hetzelfde id zijn niet uit elkaar te houden
+ * bij het verplaatsen of verwijderen.
  */
 export function normaliseer(
   ruw: unknown,
@@ -204,7 +219,7 @@ export function normaliseer(
     else if (i > 0) tegels.unshift(tegels.splice(i, 1)[0])
   }
 
-  return { versie: 1, tegels: tegels.slice(0, MAX_TEGELS) }
+  return { versie: 1, tegels }
 }
 
 /** Kan deze tegel omhoog of omlaag? De vaste tegel blokkeert plek 1. */

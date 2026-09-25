@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {
-  MAX_TEGELS,
   MODULES,
   normaliseer,
   schuif,
@@ -63,17 +62,22 @@ describe('normaliseer', () => {
     expect(normaliseer(in_, { groteTekst: true }).tegels.every((x) => x.maat === 'vol')).toBe(true)
   })
 
-  it('kapt af op het maximum', () => {
-    const teveel = MODULES.map((m) => t(m.id))
-    expect(teveel.length).toBeGreaterThan(MAX_TEGELS)
-    expect(normaliseer({ versie: 1, tegels: teveel }).tegels).toHaveLength(MAX_TEGELS)
+  it('kapt niets af: er is geen maximum meer', () => {
+    const alles = MODULES.map((m) => t(m.id))
+    expect(normaliseer({ versie: 1, tegels: alles }).tegels).toHaveLength(MODULES.length)
   })
 
-  it('houdt de vaste tegel ook als er afgekapt wordt', () => {
-    const teveel = MODULES.filter((m) => !m.vast).map((m) => t(m.id))
-    const uit = normaliseer({ versie: 1, tegels: teveel })
+  it('voegt de vaste tegel toe, ook als alle andere er al staan', () => {
+    const zonderVaste = MODULES.filter((m) => !m.vast).map((m) => t(m.id))
+    const uit = normaliseer({ versie: 1, tegels: zonderVaste })
     expect(uit.tegels[0].id).toBe('nu')
-    expect(uit.tegels).toHaveLength(MAX_TEGELS)
+    expect(uit.tegels).toHaveLength(MODULES.length)
+  })
+
+  it('kan nooit meer tegels opleveren dan er modules zijn', () => {
+    // De natuurlijke grens: dezelfde module twee keer bestaat niet.
+    const veel = [...MODULES, ...MODULES, ...MODULES].map((m) => t(m.id))
+    expect(normaliseer({ versie: 1, tegels: veel }).tegels).toHaveLength(MODULES.length)
   })
 
   it('is stabiel: nog eens normaliseren verandert niets', () => {

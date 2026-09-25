@@ -6,8 +6,8 @@ import { useHousehold } from '../household/useHousehold'
 import { useDisplayPrefs } from '../settings/useDisplayPrefs'
 import { getIndeling, setIndeling } from '../../services/layout'
 import {
-  MAX_TEGELS,
   MODULES,
+  RUSTIG_TOT,
   moduleVan,
   magSchuiven,
   schuif,
@@ -25,9 +25,11 @@ import {
  * een module om hem toe te voegen.
  *
  * Wat hier niet kan, kan bewust niet: "Wat nu?" verplaatsen of weghalen,
- * meer dan zes tegels, of halve tegels bij grote tekst. De regels staan in
- * modules.ts en draaien ook op het scherm van de persoon zelf, zodat een
- * oude indeling daar nooit iets kapots oplevert.
+ * en halve tegels bij grote tekst. Het aantal tegels is géén grens meer,
+ * alleen een raad: familie kent het huishouden beter dan de app.
+ *
+ * De regels staan in modules.ts en draaien ook op het scherm van de
+ * persoon zelf, zodat een oude indeling daar nooit iets kapots oplevert.
  */
 export default function Indeling() {
   const { household } = useHousehold()
@@ -67,8 +69,8 @@ export default function Indeling() {
   const index = tegels.findIndex((t) => t.id === gekozen)
   const tegel = index === -1 ? null : tegels[index]
   const def = tegel ? moduleVan(tegel.id) : null
-  const vol = tegels.length >= MAX_TEGELS
   const beschikbaar = MODULES.filter((m) => !tegels.some((t) => t.id === m.id))
+  const lang = tegels.length > RUSTIG_TOT
 
   return (
     <div className="space-y-6">
@@ -159,9 +161,18 @@ export default function Indeling() {
           )}
 
           <p className="mt-4 text-sm text-ink-faint">
-            {tegels.length} van {MAX_TEGELS} tegels. De leesvolgorde is van boven naar beneden —
-            precies wat de voorleesfunctie aanhoudt.
+            {tegels.length} {tegels.length === 1 ? 'tegel' : 'tegels'}. De leesvolgorde is van boven
+            naar beneden — precies wat de voorleesfunctie aanhoudt.
           </p>
+
+          {/* Een opmerking, geen blokkade. Hoeveel rustig is, weet jij
+              beter dan de app. */}
+          {lang ? (
+            <p className="mt-2 text-sm text-ink-soft">
+              Dit zijn er meer dan {RUSTIG_TOT}. Dat kan, maar elke tegel erbij is één keuze meer
+              die {voornaam} tegelijk ziet. Kijk gerust of er eentje bij kan die je niet mist.
+            </p>
+          ) : null}
         </section>
 
         <div className="space-y-6">
@@ -246,12 +257,7 @@ export default function Indeling() {
           <section className="rounded-card bg-surface p-5 shadow-card">
             <h2 className="text-lg font-bold">Toevoegen</h2>
 
-            {vol ? (
-              <p className="mt-2 rounded-card bg-warn/10 p-3 text-sm leading-relaxed text-warn">
-                Zes tegels is het maximum. Haal er eerst een weg — meer keuzes tegelijk is precies
-                wat we op dit scherm willen vermijden.
-              </p>
-            ) : beschikbaar.length === 0 ? (
+            {beschikbaar.length === 0 ? (
               <p className="mt-2 text-sm text-ink-soft">Alles staat er al op.</p>
             ) : (
               <ul className="mt-3 list-none space-y-2 p-0">
