@@ -308,6 +308,87 @@ body[data-scherm='persoon'] {
   background-image: none;
 }
 
+/* ---------------------------------------------------------------
+   Het levensboek op papier
+   ---------------------------------------------------------------
+   De browser maakt hier de PDF, via "Opslaan als PDF" in het
+   printvenster. Dat scheelt een PDF-bibliotheek in de bundel, werkt op
+   een beheerde computer zonder installatie, en familie ziet vooraf wat
+   ze krijgt.
+
+   Op papier: zwart op wit, serif voor de leestekst, en een verhaal dat
+   nooit halverwege over twee bladen valt.
+   --------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4;
+    margin: 20mm 18mm;
+  }
+
+  .niet-printen {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .boek {
+    background: #ffffff;
+  }
+
+  .boek main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .boek p,
+  .boek li {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11.5pt;
+    line-height: 1.55;
+    color: #000000;
+  }
+
+  /* Het titelblad krijgt het eerste blad voor zich alleen, en elk
+     hoofdstuk begint bovenaan een nieuw blad. */
+  .boek .titelblad {
+    min-height: 0;
+    height: 24cm;
+    justify-content: center;
+    break-after: page;
+  }
+
+  .boek .na-pagina {
+    break-before: page;
+    padding-top: 0;
+  }
+
+  .boek .heel-houden {
+    break-inside: avoid;
+  }
+
+  .boek h1 { font-size: 30pt; }
+  .boek h2 { font-size: 18pt; }
+  .boek h3 { font-size: 12pt; color: #000000; }
+
+  /* Foto's en QR-codes moeten mee op papier: veel browsers laten
+     achtergronden weg, dus alles wat telt staat als <img> op de pagina. */
+  .boek img {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .boek figure { break-inside: avoid; }
+
+  .boek figcaption {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 9.5pt;
+    color: #000000;
+  }
+}
+
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;

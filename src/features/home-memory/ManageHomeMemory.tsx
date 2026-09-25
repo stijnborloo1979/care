@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import StoragePhoto from '../../components/StoragePhoto'
-import { deleteItem, saveItem, uploadItemPhoto, type Item } from '../../services/homeMemory'
+import FotoKiezer from '../../components/FotoKiezer'
+import {
+  deleteItem,
+  saveItem,
+  uploadItemPhoto,
+  uploadRoomPhoto,
+  uploadStepPhoto,
+  type Item,
+  type Room,
+} from '../../services/homeMemory'
 import { useItem, useItems, useRooms } from './useHomeMemory'
 import { SJABLONEN } from './sjablonen'
 import DictateButton from '../../components/DictateButton'
@@ -51,6 +60,13 @@ export default function ManageHomeMemory({ householdId }: Props) {
         ))}
       </div>
 
+      {actieveKamer ? (
+        <KamerFoto
+          householdId={householdId}
+          kamer={(rooms ?? []).find((r) => r.id === actieveKamer)}
+        />
+      ) : null}
+
       <ul className="mt-4 space-y-2">
         {lijst.map((i) => (
           <ItemRow
@@ -87,6 +103,35 @@ export default function ManageHomeMemory({ householdId }: Props) {
         </div>
       ) : null}
     </section>
+  )
+}
+
+/**
+ * De foto van de kamer zelf. Staat los van de dingen erin: het scherm van
+ * de persoon toont hem op de kamerknop, zodat "de berging" een deur wordt
+ * die hij herkent in plaats van een woord.
+ */
+function KamerFoto({ householdId, kamer }: { householdId: string; kamer?: Room }) {
+  const queryClient = useQueryClient()
+  if (!kamer) return null
+
+  return (
+    <div className="mt-4 flex items-center gap-3 rounded-2xl border border-line bg-surface-soft p-3">
+      <div className="w-20 flex-none">
+        <StoragePhoto path={kamer.photo_path} emoji={kamer.emoji} alt={kamer.name} />
+      </div>
+      <div>
+        <p className="font-semibold">Foto van {kamer.name}</p>
+        <FotoKiezer
+          className="mt-1 block"
+          label={kamer.photo_path ? 'Andere foto' : 'Foto kiezen'}
+          onKies={async (bestand) => {
+            await uploadRoomPhoto(householdId, kamer.id, bestand)
+            await queryClient.invalidateQueries({ queryKey: ['rooms', householdId] })
+          }}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -312,6 +357,36 @@ function ItemForm({
           Korte zinnen, één handeling per lijn. Ze worden als losse kaarten getoond.
         </span>
       </div>
+
+      {(bestaand?.item_step ?? []).length > 0 ? (
+        <div>
+          <span className="text-sm font-semibold text-ink-soft">Foto bij een stap</span>
+          <ul className="mt-2 space-y-2">
+            {(bestaand?.item_step ?? []).map((stap) => (
+              <li
+                key={stap.id}
+                className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-2"
+              >
+                <div className="w-16 flex-none">
+                  <StoragePhoto path={stap.photo_path} emoji="📷" alt={stap.body} />
+                </div>
+                <span className="min-w-0 flex-1 text-sm">{stap.body}</span>
+                <FotoKiezer
+                  label={stap.photo_path ? 'Andere foto' : 'Foto'}
+                  onKies={async (bestand) => {
+                    await uploadStepPhoto(householdId, stap.id, bestand)
+                    if (itemId) await queryClient.invalidateQueries({ queryKey: ['item', itemId] })
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+          <span className="mt-1 block text-xs text-ink-faint">
+            Een foto hoort bij de tekst van die stap. Herschrijf je de zin, dan hoort de foto er
+            niet meer bij en kies je een nieuwe.
+          </span>
+        </div>
+      ) : null}
 
       <div className="flex gap-2">
         <button

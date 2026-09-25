@@ -286,6 +286,56 @@ gegevens in een andere taal staan.
 Nog taalgebonden en dus nog niet vertaald: `quickAdd()` (leest Nederlandse
 datums), de vragen van "Vertel eens", en de hele familiekant.
 
+## Het levensboek
+
+"Vertel eens" verzamelt elke dag één antwoord. Op `/levensboek` worden die
+samen een boek: een titelblad, een inhoudsopgave en hoofdstukken die
+grofweg met een leven meelopen (`src/features/stories/hoofdstukken.ts`
+deelt de vragen in; `hoofdstukken.test.ts` bewaakt dat elke vraag ergens
+terechtkomt en dat niet alles in het resthoofdstuk belandt).
+
+Afdrukken en PDF laat de browser doen, via "Opslaan als PDF". Geen
+PDF-bibliotheek in de bundel, geen installatie op een beheerde computer,
+en familie ziet vooraf wat ze krijgt. De printregels staan in
+`src/index.css`: elk hoofdstuk op een nieuw blad, een verhaal nooit
+halverwege gesplitst.
+
+Foto's uit de tijdlijn komen in het hoofdstuk waar hun titel over gaat;
+wat niet te plaatsen is, staat achteraan onder "Uit het album". Naast elk
+verhaal met een opname staat een QR-code, die in de browser getekend
+wordt. Scannen opent `/verhaal/:id` in de app: een gewoon scherm achter
+het inloggen, zodat een boek dat rondgaat geen privéopnames publiek maakt.
+Een ondertekende link op papier zou trouwens binnen het uur verlopen.
+
+"Luister alles" speelt alle opnames na elkaar, als een luisteralbum.
+
+## Medicatie: wat er bevestigd werd
+
+`medication_log` hield al bij wanneer een moment bevestigd werd en door
+wie (`confirmed_by`), maar dat werd nergens teruggelezen. Migratie
+`25_medication_history.sql` maakt er iets van:
+
+- **`medication_change`** — een geschiedenis van het schema, gevuld door
+  een trigger op `medication`, niet door de app. Zo kan er niets gemist
+  worden, ook niet bij een wijziging via SQL. Eén rij per veld dat echt
+  veranderde; een nieuwe foto telt niet mee.
+- **Voorraad** — `stock_doses` op `medication`. Elke bevestiging trekt er
+  één af, twee keer bevestigen kost geen twee doses, en terugzetten geeft
+  er één terug. Leeg betekent: niet bijgehouden.
+- **`medication_history()`** — de momenten met wie bevestigde, afgeleid
+  uit de rol binnen dat huishouden: zelf, familie of zorgverlener.
+- **`medication_summary()`** — per tijdstip en in totaal: bevestigd,
+  waarvan zelf, en over hoeveel dagen die cijfers gaan.
+
+Dat laatste is het punt. Eén percentage verbergt twee dingen: dat de
+avonddosis het probleem is en niet de ochtend, en dat een gelijkblijvend
+totaal een groeiende afhankelijkheid kan verbergen wanneer familie steeds
+vaker bevestigt in plaats van de persoon zelf.
+
+**Bevestigd is niet ingenomen.** Dit legt vast dat er op een knop gedrukt
+is. Dat staat in de database-commentaar, op het scherm en hoort ook op elk
+verslag te staan.
+
 ## Offline
 
 De query-cache wordt een dag lang in localStorage bewaard, zodat de tablet

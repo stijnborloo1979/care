@@ -14,6 +14,20 @@
 
 begin;
 
+-- De ids van het testmateriaal, één keer opgeschreven terwijl we nog
+-- onszelf zijn. Verderop kijken we als iemand anders, en dan vindt een
+-- gewone opzoeking het testhuishouden niet meer — dat is net de bedoeling
+-- van de policies, maar de test moet er wel bij kunnen.
+create temp table testids (sleutel text primary key, waarde uuid);
+grant select on testids to public;
+
+-- De SQL-editor van Supabase toont geen NOTICE-regels, alleen het
+-- resultaat van de laatste opdracht. Elke geslaagde test komt daarom
+-- hier terecht, en onderaan halen we ze in één keer op.
+create temp table testlog (nr serial primary key, uitkomst text);
+grant select, insert on testlog to public;
+grant usage on sequence testlog_nr_seq to public;
+
 do $$
 declare
   hh        uuid;
@@ -33,9 +47,13 @@ begin
     (id_person, 'person@test.be'),
     (id_vreemd, 'vreemd@test.be');
 
+  -- De trigger on_auth_user_created heeft hierboven al een profiel
+  -- gemaakt voor elke nieuwe gebruiker. Hier alleen nog de naam erbij,
+  -- vandaar on conflict in plaats van een gewone insert.
   insert into public.profile (id, full_name) values
     (id_admin, 'Els'), (id_member, 'Jan'), (id_care, 'Lut'),
-    (id_person, 'Maria'), (id_vreemd, 'Niemand');
+    (id_person, 'Maria'), (id_vreemd, 'Niemand')
+  on conflict (id) do update set full_name = excluded.full_name;
 
   insert into public.household (person_name, timezone)
   values ('Testpersoon', 'Europe/Brussels') returning id into hh;
@@ -55,6 +73,13 @@ begin
   insert into public.person_card (household_id, name, relation)
   values (hh, 'Testcontact', 'Buur');
 
+  insert into testids (sleutel, waarde) values
+    ('hh', hh),
+    ('ev', ev_id),
+    ('doc', doc_id),
+    ('lid_care', (select id from public.membership
+                   where household_id = hh and role = 'caregiver'));
+
   raise notice 'Opgezet. Huishouden: %', hh;
 end
 $$;
@@ -63,18 +88,47 @@ $$;
 --  Een hulpfunctie om als iemand anders te kijken
 -- ---------------------------------------------------------------------
 
+-- security definer: zodra het script van rol wisselt naar 'authenticated'
+-- mag het auth.users niet meer lezen, en dat is precies wat deze functie
+-- moet doen om te weten wie je wordt. Ze draait dus met de rechten van
+-- het account dat het script start.
 create or replace function pg_temp.als(gebruiker text)
 returns void
 language plpgsql
+security definer
+set search_path = auth, public
 as $$
 declare
   uid uuid;
 begin
   select id into uid from auth.users where email = gebruiker;
+  if uid is null then
+    raise exception 'Testgebruiker % bestaat niet', gebruiker;
+  end if;
   perform set_config('request.jwt.claims',
                      json_build_object('sub', uid, 'role', 'authenticated')::text,
                      true);
 end;
+$$;
+
+create or replace function pg_temp.ok(wat text)
+returns void
+language plpgsql
+as $$
+begin
+  insert into testlog (uitkomst) values ('ok: ' || wat);
+  raise notice 'ok: %', wat;
+end;
+$$;
+
+-- Eén plaats om de ids terug op te halen. Leest de temp tabel hierboven,
+-- die geen policies heeft, dus dit werkt ongeacht als wie we kijken.
+create or replace function pg_temp.id(sleutel text)
+returns uuid
+language sql
+stable
+as $$
+  select waarde from testids where testids.sleutel = id.sleutel;
 $$;
 
 create or replace function pg_temp.verwacht(omschrijving text, werkelijk integer, verwacht integer)
@@ -85,7 +139,7 @@ begin
   if werkelijk is distinct from verwacht then
     raise exception 'GEZAKT: % — verwacht %, kreeg %', omschrijving, verwacht, werkelijk;
   end if;
-  raise notice 'ok: %', omschrijving;
+  perform pg_temp.ok(omschrijving);
 end;
 $$;
 
@@ -135,8 +189,8 @@ declare
   ev uuid;
   gelukt boolean := false;
 begin
-  select id into hh from public.household where person_name = 'Testpersoon';
-  select id into ev from public.agenda_event where household_id = hh limit 1;
+  hh := pg_temp.id('hh');
+  ev := pg_temp.id('ev');
 
   perform pg_temp.als('person@test.be');
 
@@ -151,13 +205,13 @@ begin
   if gelukt then
     raise exception 'GEZAKT: de persoon kon een agenda-item toevoegen';
   end if;
-  raise notice 'ok: de persoon kan GEEN agenda-item toevoegen';
+  perform pg_temp.ok('de persoon kan GEEN agenda-item toevoegen');
 
   perform public.mark_done(ev, true);
   if not exists (select 1 from public.agenda_event where id = ev and done_at is not null) then
     raise exception 'GEZAKT: de persoon kon niet afvinken via mark_done()';
   end if;
-  raise notice 'ok: de persoon kan wel afvinken via mark_done()';
+  perform pg_temp.ok('de persoon kan wel afvinken via mark_done()');
 
   -- En een buitenstaander niet, ook niet met een geldig id.
   perform pg_temp.als('vreemd@test.be');
@@ -168,7 +222,7 @@ begin
     if sqlerrm like 'GEZAKT%' then
       raise;
     end if;
-    raise notice 'ok: een buitenstaander kan niet afvinken';
+    perform pg_temp.ok('een buitenstaander kan niet afvinken');
   end;
 end
 $$;
@@ -182,16 +236,16 @@ declare
   hh  uuid;
   log uuid;
 begin
-  select id into hh from public.household where person_name = 'Testpersoon';
+  hh := pg_temp.id('hh');
 
   perform pg_temp.als('care@test.be');
   insert into public.care_log (household_id, title, source)
   values (hh, 'Bezoek thuisverpleging', 'caregiver') returning id into log;
-  raise notice 'ok: zorgverlener kan in het logboek schrijven';
+  perform pg_temp.ok('zorgverlener kan in het logboek schrijven');
 
   delete from public.care_log where id = log;
   if exists (select 1 from public.care_log where id = log) then
-    raise notice 'ok: zorgverlener kan het logboek niet wissen';
+    perform pg_temp.ok('zorgverlener kan het logboek niet wissen');
   else
     raise exception 'GEZAKT: zorgverlener kon een logboekregel wissen';
   end if;
@@ -207,9 +261,8 @@ declare
   hh uuid;
   m  uuid;
 begin
-  select id into hh from public.household where person_name = 'Testpersoon';
-  select id into m from public.membership
-   where household_id = hh and role = 'caregiver';
+  hh := pg_temp.id('hh');
+  m := pg_temp.id('lid_care');
 
   perform pg_temp.als('member@test.be');
   update public.membership set role = 'admin' where id = m;
@@ -217,7 +270,7 @@ begin
   if exists (select 1 from public.membership where id = m and role = 'admin') then
     raise exception 'GEZAKT: een familielid kon zichzelf of iemand anders beheerder maken';
   end if;
-  raise notice 'ok: een familielid kan geen rollen wijzigen';
+  perform pg_temp.ok('een familielid kan geen rollen wijzigen');
 end
 $$;
 
@@ -251,31 +304,27 @@ begin
   if n <> 0 then
     raise exception 'GEZAKT: familie ziet het logboek in de zelfstandige fase (% rijen)', n;
   end if;
-  raise notice 'ok: familie ziet het logboek niet in de zelfstandige fase';
+  perform pg_temp.ok('familie ziet het logboek niet in de zelfstandige fase');
 
   select count(*) into n from public.agenda_event;
   if n = 0 then
     raise exception 'GEZAKT: familie ziet de agenda niet meer in de zelfstandige fase';
   end if;
-  raise notice 'ok: familie ziet wel nog de agenda, om samen te plannen';
+  perform pg_temp.ok('familie ziet wel nog de agenda, om samen te plannen');
 
   perform pg_temp.als('person@test.be');
   select count(*) into n from public.care_log;
   if n = 0 then
     raise exception 'GEZAKT: de persoon ziet zijn eigen logboek niet';
   end if;
-  raise notice 'ok: de persoon ziet zijn eigen logboek';
+  perform pg_temp.ok('de persoon ziet zijn eigen logboek');
 end
 $$;
 
 reset role;
 
-do $$
-begin
-  raise notice '----------------------------------------';
-  raise notice 'ALLE RLS-TESTS GESLAAGD';
-  raise notice '----------------------------------------';
-end
-$$;
+-- Alles wat geslaagd is, zichtbaar in het resultaatvenster. Een gezakte
+-- test komt hier nooit: die stopt het script met een fout.
+select uitkomst as "ALLE RLS-TESTS GESLAAGD" from testlog order by nr;
 
 rollback;

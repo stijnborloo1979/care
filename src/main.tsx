@@ -51,6 +51,8 @@ const MessagesPage = lazy(() =>
 const Settings = lazy(() => import("./features/settings/Settings"));
 const Delen = lazy(() => import("./features/sharing/Delen"));
 const Taken = lazy(() => import("./features/tasks/Taken"));
+const Boek = lazy(() => import("./features/stories/Boek"));
+const VerhaalScherm = lazy(() => import("./features/stories/VerhaalScherm"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
@@ -180,6 +182,24 @@ if (!configuratieOk) {
                     />
                     <Route path="/memory/:roomId" element={<RoomItems />} />
                   </Route>
+                  {/* Het levensboek staat buiten de familie-opmaak: op
+                      papier hoort er geen zijbalk of navigatie bij. */}
+                  <Route
+                    path="/levensboek"
+                    element={
+                      <Beveiligd>
+                        <Boek />
+                      </Beveiligd>
+                    }
+                  />
+                  <Route
+                    path="/verhaal/:id"
+                    element={
+                      <Beveiligd>
+                        <VerhaalScherm />
+                      </Beveiligd>
+                    }
+                  />
                   <Route
                     path="/familie"
                     element={

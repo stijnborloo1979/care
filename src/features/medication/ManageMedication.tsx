@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pill, Plus, X } from 'lucide-react'
+import { AlertTriangle, Pill, Plus, X } from 'lucide-react'
 import StoragePhoto from '../../components/StoragePhoto'
 import { useHousehold } from '../household/useHousehold'
+import Innamegeschiedenis from './Innamegeschiedenis'
+import { dagenVoorraad, setVoorraad } from '../../services/medicationHistory'
 import {
   deleteMedicijn,
   getMedicijnen,
@@ -63,6 +65,8 @@ export default function ManageMedication() {
         </button>
       )}
 
+      <Innamegeschiedenis />
+
       {gestopt.length > 0 ? (
         <section>
           <h2 className="text-lg font-bold text-ink-soft">Gestopt</h2>
@@ -106,6 +110,7 @@ function MedRij({
             {tijdenVan(m).join(' · ')}
             {m.instruction ? ` · ${m.instruction}` : ''}
           </span>
+          <VoorraadBadge m={m} />
         </span>
         <button
           onClick={onToggle}
@@ -206,6 +211,8 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
         </label>
       </div>
 
+      {m ? <VoorraadVeld m={m} onKlaar={ververs} /> : null}
+
       <div>
         <span className="text-sm font-semibold text-ink-soft">Wanneer</span>
         <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -305,5 +312,88 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
         </p>
       ) : null}
     </form>
+  )
+}
+
+/**
+ * Hoeveel er nog in huis is. Alleen zichtbaar als familie het bijhoudt:
+ * een leeg getal betekent dat niemand de doos telt, en dat is een
+ * legitieme keuze.
+ */
+function VoorraadBadge({ m }: { m: Medicijn }) {
+  const dagen = dagenVoorraad(m.stock_doses, tijdenVan(m).length)
+  if (dagen === null || !m.active) return null
+
+  const bijna = dagen <= 7
+  return (
+    <span
+      className={`mt-1 inline-flex items-center gap-1.5 rounded-pill px-2.5 py-0.5 text-sm font-semibold ${
+        bijna ? 'bg-warn-soft text-warn' : 'text-ink-faint'
+      }`}
+    >
+      {bijna ? <AlertTriangle size={14} strokeWidth={2} aria-hidden="true" /> : null}
+      Nog {dagen} {dagen === 1 ? 'dag' : 'dagen'} voorraad
+    </span>
+  )
+}
+
+/**
+ * De voorraad zetten. Elke bevestiging trekt er vanzelf één af, dus dit
+ * is het getal van een nieuwe doos, niet iets om dagelijks bij te houden.
+ */
+function VoorraadVeld({ m, onKlaar }: { m: Medicijn; onKlaar: () => Promise<void> }) {
+  const [waarde, setWaarde] = useState(m.stock_doses === null ? '' : String(m.stock_doses))
+  const [bezig, setBezig] = useState(false)
+  const [fout, setFout] = useState<string | null>(null)
+  const dagen = dagenVoorraad(m.stock_doses, tijdenVan(m).length)
+
+  async function bewaar() {
+    setBezig(true)
+    setFout(null)
+    try {
+      const n = waarde.trim() === '' ? null : Number(waarde)
+      if (n !== null && (!Number.isFinite(n) || n < 0)) throw new Error('Geef een aantal van 0 of meer.')
+      await setVoorraad(m.id, n)
+      await onKlaar()
+    } catch (e) {
+      setFout(e instanceof Error ? e.message : 'De voorraad bijwerken lukte niet.')
+    } finally {
+      setBezig(false)
+    }
+  }
+
+  return (
+    <div>
+      <span className="text-sm font-semibold text-ink-soft">Voorraad</span>
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <input
+          type="number"
+          min={0}
+          value={waarde}
+          onChange={(e) => setWaarde(e.target.value)}
+          placeholder="aantal"
+          aria-label="Aantal doses in huis"
+          className="min-h-touch w-28 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+        />
+        <button
+          type="button"
+          onClick={bewaar}
+          disabled={bezig}
+          className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-4 font-semibold disabled:opacity-60"
+        >
+          {bezig ? 'Bezig…' : 'Bijwerken'}
+        </button>
+        <span className="text-sm text-ink-faint">
+          {dagen === null
+            ? 'Leeg laten als je de voorraad niet bijhoudt.'
+            : `Goed voor ${dagen} ${dagen === 1 ? 'dag' : 'dagen'}. Elke bevestiging trekt er één af.`}
+        </span>
+      </div>
+      {fout ? (
+        <p role="alert" className="mt-1 text-sm text-alert">
+          {fout}
+        </p>
+      ) : null}
+    </div>
   )
 }

@@ -11,6 +11,9 @@ export interface Medicijn {
   instruction: string | null
   photo_path: string | null
   active: boolean
+  /** Doses nog in huis. Leeg = geen voorraad bijgehouden. */
+  stock_doses: number | null
+  stock_updated_at: string | null
 }
 
 export function tijdenVan(m: Medicijn): string[] {
@@ -20,7 +23,7 @@ export function tijdenVan(m: Medicijn): string[] {
 export async function getMedicijnen(householdId: string): Promise<Medicijn[]> {
   const { data, error } = await supabase
     .from('medication')
-    .select('id, household_id, name, dose, at_time, at_times, instruction, photo_path, active')
+    .select('id, household_id, name, dose, at_time, at_times, instruction, photo_path, active, stock_doses, stock_updated_at')
     .eq('household_id', householdId)
     .order('active', { ascending: false })
     .order('name')

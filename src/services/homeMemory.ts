@@ -7,6 +7,8 @@ export interface Room {
   household_id: string
   name: string
   emoji: string | null
+  /** Foto van de kamer. Op het scherm van de persoon vervangt die de emoji. */
+  photo_path: string | null
   sort: number
 }
 
@@ -38,7 +40,7 @@ const BUCKET = 'home-memory'
 export async function getRooms(householdId: string): Promise<Room[]> {
   const { data, error } = await supabase
     .from('room')
-    .select('id, household_id, name, emoji, sort')
+    .select('id, household_id, name, emoji, photo_path, sort')
     .eq('household_id', householdId)
     .order('sort')
   if (error) throw error
@@ -106,13 +108,33 @@ export async function saveItem(opts: {
 
   // Stappen worden in hun geheel vervangen. Ze zijn kort en de volgorde
   // is de inhoud; één stap verplaatsen is anders een hoop boekhouding.
+  //
+  // De foto's mogen daar niet aan opgeofferd worden: wie de tekst van een
+  // stap laat staan en alleen een stap bijschrijft, houdt zijn foto. We
+  // onthouden ze per zin en zetten ze er weer bij.
+  const { data: oudeStappen } = await supabase
+    .from('item_step')
+    .select('body, photo_path')
+    .eq('item_id', id)
+
+  const fotos = new Map<string, string>()
+  for (const r of (oudeStappen ?? []) as { body: string; photo_path: string | null }[]) {
+    if (r.photo_path) fotos.set(r.body.trim(), r.photo_path)
+  }
+
   const { error: delError } = await supabase.from('item_step').delete().eq('item_id', id)
   if (delError) throw delError
 
   const rijen = opts.steps
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((body, i) => ({ item_id: id, household_id: opts.householdId, sort: i, body }))
+    .map((body, i) => ({
+      item_id: id,
+      household_id: opts.householdId,
+      sort: i,
+      body,
+      photo_path: fotos.get(body) ?? null,
+    }))
 
   if (rijen.length > 0) {
     const { error } = await supabase.from('item_step').insert(rijen)
@@ -151,4 +173,41 @@ export async function uploadItemPhoto(householdId: string, itemId: string, file:
 
 export async function photoUrl(path: string): Promise<string> {
   return signedUrl(BUCKET, path)
+}
+
+/**
+ * Een foto bij een kamer. Wie de naam "berging" niet meer plaatst,
+ * herkent de deur wel.
+ */
+export async function uploadRoomPhoto(householdId: string, roomId: string, file: File) {
+  return await bewaarFoto(`${householdId}/rooms/${roomId}`, file, 'room', roomId)
+}
+
+/** Een foto bij één stap: "draai deze knop naar links". */
+export async function uploadStepPhoto(householdId: string, stepId: string, file: File) {
+  return await bewaarFoto(`${householdId}/steps/${stepId}`, file, 'item_step', stepId)
+}
+
+/**
+ * Comprimeren, opslaan, en pas daarna het pad in de rij zetten. Mislukt
+ * dat laatste, dan gaat het bestand weer weg: een bucket vol weesbestanden
+ * is lastiger op te ruimen dan een foto die opnieuw gekozen moet worden.
+ */
+async function bewaarFoto(map: string, file: File, tabel: string, id: string) {
+  const blob = await compressImage(file)
+  const ext = extensionForImage(blob.type)
+  const path = `${map}/${crypto.randomUUID()}.${ext}`
+
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, blob, { contentType: blob.type })
+  if (error) throw error
+
+  const { error: updateError } = await supabase.from(tabel).update({ photo_path: path }).eq('id', id)
+  if (updateError) {
+    await supabase.storage.from(BUCKET).remove([path])
+    throw updateError
+  }
+
+  return path
 }

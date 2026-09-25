@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Play, Pause } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { deleteStory, getStories, storyAudioUrl, type LifeStory } from '../../services/stories'
 
 /**
@@ -20,6 +21,15 @@ export default function Verhalen({ householdId, naam }: { householdId: string; n
       <p className="mt-1 text-sm text-ink-soft">
         Elke dag stelt de app {naam} één vraag over het eigen leven. Wat gedeeld wordt, staat hier.
       </p>
+
+      {(data ?? []).length > 0 ? (
+        <Link
+          to="/levensboek"
+          className="mt-4 inline-flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-bold text-white"
+        >
+          Maak er een boek van
+        </Link>
+      ) : null}
 
       {isLoading ? <p className="mt-4 text-ink-soft">Bezig met laden…</p> : null}
 

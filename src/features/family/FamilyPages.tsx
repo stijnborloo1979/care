@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import Dashboard from '../dashboard/Dashboard'
+import FotoKiezer from '../../components/FotoKiezer'
+import { sendPhotoMessage } from '../messages/messages'
 import ManageHomeMemory from '../home-memory/ManageHomeMemory'
 import ManageMemories from '../memories/ManageMemories'
 import ManagePeople from '../people/ManagePeople'
@@ -98,8 +101,54 @@ export function MessagesPage() {
       <div className="grid max-w-3xl gap-5 md:grid-cols-2">
         <StartCall householdId={c.hh} metWie={c.voornaam} />
         <VoiceRecorder householdId={c.hh} recipient={c.voornaam} />
+        <FotoBericht householdId={c.hh} recipient={c.voornaam} />
       </div>
     </div>
+  )
+}
+
+/**
+ * Een foto naar het scherm van de persoon: de kleinkinderen op het strand,
+ * de kaart uit Spanje. Hij verschijnt bij de berichten, met het zinnetje
+ * eronder, en verdwijnt volgens dezelfde regels als de rest.
+ */
+function FotoBericht({ householdId, recipient }: { householdId: string; recipient: string }) {
+  const [zin, setZin] = useState('')
+  const [gelukt, setGelukt] = useState(false)
+
+  return (
+    <section className="rounded-card bg-surface p-6 shadow-card">
+      <h2 className="text-lg font-bold">Foto sturen</h2>
+      <p className="mt-1 text-sm text-ink-soft">
+        Eén foto, met een korte zin erbij. Die komt bovenaan het scherm van {recipient}.
+      </p>
+
+      <label className="mt-3 block">
+        <span className="text-sm font-semibold text-ink-soft">Wat staat erop?</span>
+        <input
+          value={zin}
+          onChange={(e) => {
+            setZin(e.target.value)
+            setGelukt(false)
+          }}
+          placeholder="Lotte op het strand in Oostende"
+          className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+        />
+      </label>
+
+      <FotoKiezer
+        className="mt-3 block"
+        label="Foto kiezen en sturen"
+        bezigLabel="Bezig met sturen…"
+        onKies={async (bestand) => {
+          await sendPhotoMessage({ householdId, channel: 'person', file: bestand, body: zin })
+          setZin('')
+          setGelukt(true)
+        }}
+      />
+
+      {gelukt ? <p className="mt-2 text-sm font-semibold text-ok">Verstuurd.</p> : null}
+    </section>
   )
 }
 

@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase'
 import { extensionFor } from './useVoiceRecorder'
+import { compressImage, extensionForImage } from '../../lib/image'
 
 export type Channel = 'family' | 'person'
 
@@ -54,6 +55,41 @@ export async function sendVoiceMessage(opts: {
 
   if (insertError) {
     // Anders blijft er een weesbestand achter dat niemand nog kan bereiken.
+    await supabase.storage.from(BUCKET).remove([path])
+    throw insertError
+  }
+}
+
+/**
+ * Een foto naar het scherm van de persoon, met een zin erbij. Voor de
+ * kleinkinderen op het strand of de kaart uit Spanje: familie stuurt hem
+ * van op afstand en hij staat bovenaan bij de berichten.
+ */
+export async function sendPhotoMessage(opts: {
+  householdId: string
+  channel: Channel
+  file: File
+  body?: string
+}): Promise<void> {
+  const blob = await compressImage(opts.file)
+  const ext = extensionForImage(blob.type)
+  // Huishouden en kanaal als eerste twee padsegmenten: daar grijpen de
+  // storage-policies op aan.
+  const path = `${opts.householdId}/${opts.channel}/${crypto.randomUUID()}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, blob, { contentType: blob.type, upsert: false })
+  if (uploadError) throw uploadError
+
+  const { error: insertError } = await supabase.from('message').insert({
+    household_id: opts.householdId,
+    channel: opts.channel,
+    body: opts.body?.trim() || null,
+    photo_path: path,
+  })
+
+  if (insertError) {
     await supabase.storage.from(BUCKET).remove([path])
     throw insertError
   }
