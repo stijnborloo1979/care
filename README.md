@@ -93,6 +93,11 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 24. `24_fix_embedding_trigger.sql` — herstelt de trigger uit `09_ai.sql`.
     Die keek naar `new.title` bij elke update op `item`, waardoor een foto
     bij een ding niet bewaard kon worden. Alleen nodig als je 09 draaide.
+25. `25_medication_history.sql` — leest terug wat er bevestigd werd, houdt
+    het schema bij via een trigger en de voorraad per medicijn.
+26. `26_analyse.sql` — de analyses achter `/familie/analyse` en het
+    verslag: dagritme, weekpatroon, nachtelijke activiteit en dekking.
+    Draai dit na 25.
 
 ## Inloggen
 
@@ -335,6 +340,60 @@ vaker bevestigt in plaats van de persoon zelf.
 **Bevestigd is niet ingenomen.** Dit legt vast dat er op een knop gedrukt
 is. Dat staat in de database-commentaar, op het scherm en hoort ook op elk
 verslag te staan.
+
+## Analyse en het verslag voor de dokter
+
+`/familie/analyse` is één scherm dat twee dingen doet: familie kan het hele
+jaar door kijken hoe het gaat, en wat daar aangevinkt staat, komt op het
+verslag voor de arts. Het verslag is dus geen apart product maar een afdruk
+van wat er al staat — anders bouw je twee keer dezelfde cijfers, die dan
+uiteen gaan lopen.
+
+Alles komt uit `26_analyse.sql` en rekent met gegevens die de app toch al
+bewaart. Er komt geen nieuwe registratie bij.
+
+- **`analyse_dagritme()`** — per maand het tijdstip van de eerste
+  afgevinkte activiteit, met de vroegste, de mediaan en de laatste. De
+  spreiding is het signaal, niet het gemiddelde: "ontbijt rond 8 uur" zegt
+  niets, "tussen 7:40 en 9:15 in juli, tussen 6:20 en 11:05 in september"
+  wel.
+- **`analyse_weekpatroon()`** — per dag van de week. Dit blok voorkomt de
+  grootste misinterpretatie: klopt alles op zondag omdat de dochter er dan
+  is, dan meet je bezoek en geen zelfstandigheid.
+- **`analyse_activiteit()`** — per uur, alleen handelingen door de persoon
+  zelf. Bewust geen slaapmeting; iemand kan wakker liggen zonder het scherm
+  aan te raken. Wat het wel laat zien, is of er 's nachts iets gebeurt dat
+  er eerder niet was.
+- **`analyse_dekking()`** — over hoeveel dagen de cijfers eigenlijk gaan.
+  Een tablet die twaalf dagen uit stond maakt elk percentage misleidend,
+  dus dit staat altijd bovenaan en gaat altijd mee op het verslag.
+
+Drie regels, overal:
+
+1. **Nooit één getal zonder de spreiding of de dekking erbij.**
+2. **Beschrijven, nooit oordelen.** De functies geven tellingen en
+   tijdstippen. Geen score, geen trend, geen "achteruitgang". Wat het
+   betekent, beslist een mens.
+3. **Wat niet beschikbaar is, staat er grijs bij met de reden.** Een blok
+   stilletjes weglaten laat het scherm stuk lijken en verbergt de keuze
+   erachter.
+
+`watStabielBleef()` vergelijkt de eerste helft van de periode met de
+tweede. Zonder dat blok leest elk verslag als achteruitgang, ook wanneer er
+niets aan de hand is. Onder vijf momenten per helft zegt het niets: liever
+geen regel dan "stabiel" op drie metingen. Dat zit in
+`src/services/analyse.test.ts`, omdat deze regels bij een arts terechtkomen.
+
+De keuze van blokken staat in `household.report_prefs` en niet op het
+account: het gaat over deze persoon, niet over wie toevallig inlogt. Eén
+keer kiezen, daarna elke consultatie dezelfde samenstelling — verandert het
+verslag elke keer, dan kan een arts niets vergelijken. Alleen familie
+(`admin` of `member`) kan het samenstellen; alle analysefuncties volgen
+`mag_meekijken()`.
+
+Op het verslag hoort ook te staan **wat er weggelaten is**. Anders cureert
+familie zonder het te beseffen wat de arts ziet, en weet de arts niet wat
+hij mist.
 
 ## Offline
 

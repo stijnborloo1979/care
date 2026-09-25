@@ -52,6 +52,7 @@ const Settings = lazy(() => import("./features/settings/Settings"));
 const Delen = lazy(() => import("./features/sharing/Delen"));
 const Taken = lazy(() => import("./features/tasks/Taken"));
 const Boek = lazy(() => import("./features/stories/Boek"));
+const Analyse = lazy(() => import("./features/analyse/Analyse"));
 const VerhaalScherm = lazy(() => import("./features/stories/VerhaalScherm"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const Radio = lazy(() => import("./features/radio/Radio"));
@@ -216,6 +217,7 @@ if (!configuratieOk) {
                     <Route path="huis" element={<HomeMemoryPage />} />
                     <Route path="fotos" element={<MemoriesPage />} />
                     <Route path="berichten" element={<MessagesPage />} />
+                    <Route path="analyse" element={<Analyse />} />
                     <Route path="taken" element={<Taken />} />
                     <Route path="logboek" element={<CareLog />} />
                     <Route path="documenten" element={<Documents />} />
