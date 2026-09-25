@@ -321,6 +321,46 @@ Een ondertekende link op papier zou trouwens binnen het uur verlopen.
 
 "Luister alles" speelt alle opnames na elkaar, als een luisteralbum.
 
+## Berichten weghalen
+
+Een foto die familie stuurt, blijft twee dagen op het scherm van de persoon
+staan en wordt na zeven dagen gewist. Dat stapelt dus niet op — maar wie
+net een verkeerde foto stuurde, kon er niets aan doen. De Berichten-pagina
+liet niet eens zien wát er stond, dus je kon het niet weghalen omdat je het
+niet zag. Dat was het eigenlijke gat; de knop is maar de helft ervan.
+
+**Familie** krijgt op `/familie/berichten` de lijst "Staat nu op haar
+scherm", met per bericht van wie, wanneer, of zij het al bekeken heeft, en
+een knop "Weghalen". Verwijderen mocht al volgens de policy op `message`
+(wie het stuurde, of een beheerder); er was alleen nergens een knop.
+
+**De persoon** krijgt geen verwijderknop. Dat is onomkeerbaar, en "weg"
+betekent voor haar iets anders dan voor familie. Haar knop "Gezien" haalt
+de foto nu wél van het scherm — eerder bleef die staan, en beloofde de knop
+iets dat niet gebeurde. Dat gaat via `hide_message()`, dat de vervaldatum op
+nu zet: dezelfde weg die het bericht na twee dagen toch zou gaan. Voor
+familie blijft het bestaan.
+
+### seen betekent twee dingen
+
+`person_inbox.seen` is `r.profile_id = auth.uid()`: heeft **de kijker** het
+gezien. Op het scherm van de persoon klopt dat. Zodra familie in dezelfde
+lijst meekijkt, gaat het "heeft Els het gezien" betekenen — en dan staat er
+bij een foto dat Maria hem bekeken heeft terwijl Els dat deed.
+
+Dat is geen schoonheidsfoutje: familie beslist daarop om niet te bellen.
+`29_bericht_weg.sql` voegt daarom `seen_by_person` toe, dat via
+`membership.role = 'person'` echt over haar gaat.
+
+### De naam bij een bericht
+
+Wie zich aanmeldt zonder naam op te geven, krijgt zijn e-mailadres als
+`profile.full_name` — en dan staat er "Foto van borloo.stijn@telenet.be" op
+het scherm van iemand met geheugenproblemen. `toonNaam()` maakt daar "Borloo
+Stijn" van: wat vóór de @ staat, in woorden, met hoofdletters. Geen gok over
+voor- en achternaam; beter een benadering van een naam dan een adres. Werkt
+ook voor berichten die er al staan, want het gebeurt bij het tonen.
+
 ## Foto's: het vlak geeft de maat, niet de foto
 
 `StoragePhoto` legde de foto als roosteritem in een vlak met

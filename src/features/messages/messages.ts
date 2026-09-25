@@ -15,6 +15,8 @@ export interface InboxMessage {
   pinned: boolean
   created_at: string
   seen: boolean
+  /** Door de persoon zelf gezien — niet door wie nu kijkt. */
+  seen_by_person: boolean
 }
 
 const BUCKET = 'messages'
@@ -114,4 +116,57 @@ export async function getPersonInbox(householdId: string): Promise<InboxMessage[
 export async function markRead(messageId: string) {
   const { error } = await supabase.rpc('mark_message_read', { msg: messageId })
   if (error) throw error
+}
+
+/**
+ * Van het scherm van de persoon halen, zonder te verwijderen.
+ *
+ * Zij mag niets van familie wissen — maar op háár scherm moet ze wel
+ * kunnen zeggen "gezien, dank je". De vervaldatum gaat op nu; het bericht
+ * blijft voor familie bestaan zoals elk ander verlopen bericht.
+ */
+export async function hideMessage(messageId: string) {
+  const { error } = await supabase.rpc('hide_message', { msg: messageId })
+  if (error) throw error
+}
+
+/**
+ * Echt weg: de rij én het bestand.
+ *
+ * Alleen wie het stuurde of een beheerder; dat handhaaft de policy op
+ * message. Eerst de rij, dan het bestand — mislukt het bestand, dan is er
+ * hoogstens een weesbestand in de opslag. Andersom zou er een bericht op
+ * haar scherm staan dat naar een foto wijst die er niet meer is.
+ */
+export async function deleteMessage(m: Pick<InboxMessage, 'id' | 'photo_path' | 'audio_path'>) {
+  const { error } = await supabase.from('message').delete().eq('id', m.id)
+  if (error) throw error
+
+  const paden = [m.photo_path, m.audio_path].filter((p): p is string => !!p)
+  if (paden.length > 0) await supabase.storage.from('messages').remove(paden)
+}
+
+/**
+ * De naam zoals je hem wil zien staan.
+ *
+ * Wie zich aanmeldt zonder naam op te geven, krijgt zijn e-mailadres als
+ * naam — en dan staat er "Foto van borloo.stijn@telenet.be" op het scherm
+ * van iemand met geheugenproblemen. Dat zegt haar niets.
+ *
+ * Geen gok over voor- en achternaam: we nemen wat vóór de @ staat, maken
+ * er woorden van en zetten hoofdletters. Beter een benadering van een naam
+ * dan een adres.
+ */
+export function toonNaam(naam: string | null | undefined): string {
+  const ruw = (naam ?? '').trim()
+  if (!ruw) return 'Familie'
+  if (!ruw.includes('@')) return ruw
+
+  const deel = ruw.split('@')[0].replace(/[._-]+/g, ' ').trim()
+  if (!deel) return 'Familie'
+
+  return deel
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
 }

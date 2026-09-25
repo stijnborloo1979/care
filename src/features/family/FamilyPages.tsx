@@ -6,6 +6,7 @@ import ManageHomeMemory from '../home-memory/ManageHomeMemory'
 import ManageMemories from '../memories/ManageMemories'
 import ManagePeople from '../people/ManagePeople'
 import VoiceRecorder from '../messages/VoiceRecorder'
+import OpHaarScherm from '../messages/OpHaarScherm'
 import StartCall from '../calls/StartCall'
 import ManageNotes from '../notes/ManageNotes'
 import Verhalen from '../stories/Verhalen'
@@ -102,6 +103,10 @@ export function MessagesPage() {
         <StartCall householdId={c.hh} metWie={c.voornaam} />
         <VoiceRecorder householdId={c.hh} recipient={c.voornaam} />
         <FotoBericht householdId={c.hh} recipient={c.voornaam} />
+      </div>
+
+      <div className="max-w-3xl">
+        <OpHaarScherm householdId={c.hh} naam={c.voornaam} />
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getPersonInbox, markRead, signedUrl, type InboxMessage } from './messages'
+import { getPersonInbox, hideMessage, markRead, signedUrl, toonNaam, type InboxMessage } from './messages'
 import StoragePhoto from '../../components/StoragePhoto'
 import { locale } from '../../lib/i18n'
 
@@ -12,6 +12,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
   const [playing, setPlaying] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [bezigOpzij, setBezigOpzij] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const queryClient = useQueryClient()
 
@@ -63,6 +64,20 @@ export function MessageButton({ message }: { message: InboxMessage }) {
     }
   }
 
+  async function opzij() {
+    setBezigOpzij(true)
+    try {
+      if (!message.seen) await markRead(message.id)
+      await hideMessage(message.id)
+      await queryClient.invalidateQueries({ queryKey: ['inbox', message.household_id] })
+    } catch {
+      // Lukt het niet, dan blijft de foto staan. Dat is beter dan hem laten
+      // verdwijnen terwijl hij er nog is: dan denkt zij dat het gelukt is.
+      setError('Dat lukte nu niet. Probeer het straks nog eens.')
+      setBezigOpzij(false)
+    }
+  }
+
   async function bevestig() {
     if (message.seen) return
     try {
@@ -73,7 +88,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
     }
   }
 
-  const naam = message.author_name ?? 'Familie'
+  const naam = toonNaam(message.author_name)
 
   // Een foto zonder opname is niets om af te spelen: die tonen we gewoon,
   // groot genoeg om er iets aan te hebben.
@@ -81,17 +96,35 @@ export function MessageButton({ message }: { message: InboxMessage }) {
     return (
       <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-4 shadow-card">
         <p className="text-xl font-bold">Foto van {naam}</p>
+        {/* Heel de foto, niet bijgesneden. Bij een foto die iemand stuurt
+            is het beeld de boodschap; een kop die wegvalt omdat het kader
+            liggend is, maakt het bericht zinloos. */}
         <div className="mt-3 overflow-hidden rounded-2xl">
-          <StoragePhoto bucket="messages" path={message.photo_path} alt={`Foto van ${naam}`} />
+          <StoragePhoto
+            bucket="messages"
+            path={message.photo_path}
+            alt={`Foto van ${naam}`}
+            passend
+          />
         </div>
         {message.body ? <p className="mt-3 text-lg">{message.body}</p> : null}
-        {!message.seen ? (
-          <button
-            onClick={bevestig}
-            className="mt-3 min-h-touch w-full rounded-pill bg-accent-ink px-5 text-lg font-bold text-white"
-          >
-            Gezien
-          </button>
+
+        {/* "Gezien" haalt de foto nu ook echt van het scherm. Eerder bleef
+            hij staan en stapelde het op; de knop beloofde iets dat niet
+            gebeurde. Weg is hier niet gewist: familie kan hem terugzien en
+            hij verdwijnt volgens dezelfde regels als elk ander bericht. */}
+        <button
+          onClick={opzij}
+          disabled={bezigOpzij}
+          className="mt-3 min-h-touch w-full rounded-pill bg-accent-ink px-5 text-lg font-bold text-white disabled:opacity-60"
+        >
+          {bezigOpzij ? 'Bezig…' : 'Gezien'}
+        </button>
+
+        {error ? (
+          <p role="alert" className="mt-2 text-alert">
+            {error}
+          </p>
         ) : null}
       </div>
     )
