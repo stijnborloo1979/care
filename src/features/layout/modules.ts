@@ -81,8 +81,11 @@ export const MODULES: ModuleDef[] = [
     naam: 'Wat nu?',
     uitleg: 'Wat er op dit moment moet gebeuren, met een knop om het af te vinken.',
     icoon: 'vandaag',
+    // Altijd bovenaan, maar niet per se vol-breed. Half zetten laat de
+    // kaart bovenaan de linkerkolom staan, met de dag eronder — precies
+    // het liggende scherm van voorheen. Bovenaan blijft bovenaan: in twee
+    // kolommen is dat linksboven, en dat is waar je begint te lezen.
     vast: true,
-    altijdVol: true,
   },
   {
     id: 'daarna',
@@ -172,6 +175,70 @@ export const STANDAARD: Indeling = {
 }
 
 /**
+ * Sjablonen: een indeling in één tik, om vanaf te vertrekken.
+ *
+ * Losse tegels aan- en uitzetten werkt, maar je moet dan zelf bedenken wat
+ * een goed geheel is. Een sjabloon geeft dat geheel, en daarna pas je aan.
+ *
+ * "Twee kolommen" is er omdat het liggende scherm van voorheen het mooiste
+ * was: alles half, zodat de inhoud in twee echte kolommen doorloopt en er
+ * geen ruimte onbenut blijft. Op een telefoon wordt datzelfde sjabloon
+ * vanzelf één kolom — dat is de winst van volgorde-en-grootte boven vaste
+ * posities.
+ */
+export interface Sjabloon {
+  id: string
+  naam: string
+  uitleg: string
+  tegels: Tegel[]
+}
+
+const half = (id: ModuleId): Tegel => ({ id, maat: 'half' })
+const vol = (id: ModuleId): Tegel => ({ id, maat: 'vol' })
+
+export const SJABLONEN: Sjabloon[] = [
+  {
+    id: 'rustig',
+    naam: 'Rustig',
+    uitleg: 'Drie blokken. Eén ding tegelijk, elke dag op dezelfde plek.',
+    tegels: [vol('nu'), vol('daarna'), vol('knoppen')],
+  },
+  {
+    id: 'standaard',
+    naam: 'Standaard',
+    uitleg: 'De dag en wat familie stuurt, met de grote kaart bovenaan.',
+    tegels: [vol('nu'), half('daarna'), half('berichten'), half('vandaag'), half('onthoud'), vol('knoppen')],
+  },
+  {
+    id: 'twee-kolommen',
+    naam: 'Twee kolommen',
+    uitleg:
+      'Zoals het scherm er vroeger liggend uitzag: links de dag, rechts wat er te doen en te zien is. Op een tablet loopt alles door in twee kolommen.',
+    tegels: [
+      half('nu'),
+      half('daarna'),
+      half('vandaag'),
+      half('berichten'),
+      half('onthoud'),
+      half('radio'),
+      half('herinneringen'),
+      vol('knoppen'),
+    ],
+  },
+  {
+    id: 'alles',
+    naam: 'Alles',
+    uitleg: 'Elke module, om te zien wat er bestaat. Daarna weghalen wat niet past.',
+    // Half waar het kan: zo loopt alles door in twee kolommen. Wat nooit
+    // half kan, blijft vol — anders zet normaliseer() het meteen terug en
+    // lijkt het sjabloon niet te werken.
+    tegels: MODULE_IDS.map((id) =>
+      MODULES.find((m) => m.id === id)?.altijdVol ? vol(id) : half(id),
+    ),
+  },
+]
+
+/**
  * Maakt van een opgeslagen indeling een indeling die zeker klopt.
  *
  * Dit draait op twee plaatsen: in de editor, zodat familie nooit iets kan
@@ -215,8 +282,15 @@ export function normaliseer(
   const vast = MODULES.filter((m) => m.vast)
   for (const m of vast) {
     const i = tegels.findIndex((t) => t.id === m.id)
-    if (i === -1) tegels.unshift({ id: m.id, maat: 'vol' })
-    else if (i > 0) tegels.unshift(tegels.splice(i, 1)[0])
+    if (i === -1) {
+      // Ontbrak hij, dan volgt zijn maat de rest: in een indeling die
+      // helemaal uit halve tegels bestaat, zou één vol-brede kaart de
+      // kolommen doormidden knippen.
+      const allesHalf = tegels.length > 0 && tegels.every((t) => t.maat === 'half')
+      tegels.unshift({ id: m.id, maat: allesHalf ? 'half' : 'vol' })
+    } else if (i > 0) {
+      tegels.unshift(tegels.splice(i, 1)[0])
+    }
   }
 
   return { versie: 1, tegels }

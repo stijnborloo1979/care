@@ -11,7 +11,7 @@ import {
   moduleVan,
   magSchuiven,
   schuif,
-  STANDAARD,
+  SJABLONEN,
   type Indeling as IndelingT,
   type Tegel,
 } from './modules'
@@ -99,17 +99,53 @@ export default function Indeling() {
               </>
             )}
           </span>
-          <button
-            onClick={() => {
-              setGekozen(null)
-              pas(STANDAARD.tegels)
-            }}
-            className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
-          >
-            Terugzetten
-          </button>
         </div>
       </header>
+
+      {/* Sjablonen boven de editor: eerst een geheel kiezen, dan bijstellen.
+          Losse tegels aanzetten werkt ook, maar dan moet je zelf bedenken
+          wat samen een goed scherm is. */}
+      <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
+        <h2 className="text-lg font-bold">Beginnen vanaf een sjabloon</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Dit vervangt de hele indeling. Daarna kan je nog alles aanpassen.
+        </p>
+
+        <ul className="mt-4 grid list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-4">
+          {SJABLONEN.map((sj) => {
+            const actief = gelijk(tegels, sj.tegels)
+            return (
+              <li key={sj.id}>
+                <button
+                  onClick={() => {
+                    setGekozen(null)
+                    pas(sj.tegels)
+                  }}
+                  aria-pressed={actief}
+                  className={`flex h-full w-full flex-col gap-1 rounded-card border-[1.5px] p-4 text-left ${
+                    actief ? 'border-accent-ink bg-accent-soft' : 'border-line bg-surface-soft'
+                  }`}
+                >
+                  <span className="flex w-full items-center gap-2">
+                    <span className="font-bold">{sj.naam}</span>
+                    {actief ? (
+                      <span className="ml-auto inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-accent-ink">
+                        <Icon naam="gedaan" size={14} />
+                        In gebruik
+                      </span>
+                    ) : (
+                      <span className="ml-auto text-xs font-semibold text-ink-faint">
+                        {sj.tegels.length} blokken
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-sm leading-snug text-ink-soft">{sj.uitleg}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         {/* Het voorbeeld */}
@@ -232,7 +268,8 @@ export default function Indeling() {
                 {def.vast ? (
                   <p className="mt-4 text-sm text-ink-soft">
                     "Wat nu?" staat altijd bovenaan en kan niet weg. Dat is de vraag waar de app om
-                    draait; die hoort niet per huishouden ergens anders te staan.
+                    draait; die hoort niet per huishouden ergens anders te staan. Half mag wel: op
+                    een tablet staat de kaart dan bovenaan de linkerkolom.
                   </p>
                 ) : (
                   <button
@@ -286,6 +323,11 @@ export default function Indeling() {
       </div>
     </div>
   )
+}
+
+/** Staat dit sjabloon nu op het scherm? Vergelijkt volgorde én maten. */
+function gelijk(a: Tegel[], b: Tegel[]): boolean {
+  return a.length === b.length && a.every((t, i) => t.id === b[i].id && t.maat === b[i].maat)
 }
 
 function zetMaat(tegels: Tegel[], index: number, maat: 'vol' | 'half'): Tegel[] {

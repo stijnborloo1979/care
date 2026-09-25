@@ -381,6 +381,43 @@ kolommen en mag het scherm tot 52rem breed worden — met twee kolommen
 bepaalt de kolom de regellengte, niet het venster, dus de smalle band uit
 het oude ontwerp is daar niet meer nodig.
 
+### Sjablonen
+
+`SJABLONEN` in `modules.ts` geeft vier indelingen in één tik — **Rustig**,
+**Standaard**, **Twee kolommen** en **Alles** — als vertrekpunt; daarna
+past familie losse tegels aan. Losse tegels aanzetten werkt ook, maar dan
+moet je zelf bedenken wat samen een goed geheel is.
+
+"Twee kolommen" zet alles op half, zodat de inhoud op een tablet in twee
+echte kolommen doorloopt — het liggende scherm van voorheen. Op een
+telefoon wordt datzelfde sjabloon vanzelf één kolom. Dat is de winst van
+volgorde-en-grootte boven vaste posities: één keuze die op elk scherm
+klopt.
+
+Een test controleert dat elk sjabloon ongewijzigd door `normaliseer()`
+komt. Doet het dat niet, dan springt het scherm meteen terug na het
+aantikken en lijkt het sjabloon stuk.
+
+### Kolommen, geen rijen
+
+Op een breed scherm is het dagscherm een **kolomstroom** (CSS multi-column),
+geen rooster van rijen. Dat verschil is het hele punt: in een rooster
+bepaalt de langste tegel de hoogte van de rij, dus naast de grote
+"Nu"-kaart bleef een halve kolom leeg. Met kolommen loopt de inhoud door —
+tegel voor tegel de eerste kolom vol, dan de tweede — zonder gaten.
+
+De leesvolgorde blijft die van de code: eerst de linkerkolom van boven naar
+beneden, dan de rechter. Voorlezen en toetsenbord volgen dus wat je ziet.
+Dat is precies waarom dit met kolommen kan en met vrije posities niet.
+
+Een `vol`-tegel krijgt `column-span: all` en knipt de stroom in tweeën; wat
+erna komt begint aan een nieuwe kolomreeks. Smal en bij grote tekst gaat
+het terug naar één kolom in een gewoon rooster.
+
+"Wat nu?" mag daarom óók half: de kaart staat dan bovenaan de linkerkolom
+met de dag eronder. Bovenaan blijft bovenaan — in twee kolommen is dat
+linksboven, en daar begin je te lezen.
+
 Welke modules er bestaan staat in `MODULE_IDS`, en `Today.tsx` typeert
 zijn blokken als `Record<ModuleId, ReactNode>`. Komt er een module bij
 zonder dat er iets getekend wordt, dan faalt de build — in plaats van dat
@@ -388,9 +425,9 @@ familie een tegel kan kiezen die leeg blijft.
 
 De regels staan in `src/features/layout/modules.ts`:
 
-- **"Wat nu?" staat altijd bovenaan, vol-breed, en kan niet weg.** Dat is de
-  vraag waar de app om draait; die hoort niet per huishouden ergens anders
-  te staan.
+- **"Wat nu?" staat altijd bovenaan en kan niet weg.** Dat is de vraag waar
+  de app om draait; die hoort niet per huishouden ergens anders te staan.
+  Half mag wel — zie hierboven.
 - **Geen maximum aantal tegels, wel een raad.** Boven `RUSTIG_TOT` (zes)
   zegt de editor dat elke tegel erbij één keuze meer is die zij tegelijk
   ziet, en blokkeert verder niets. Er stond eerst een harde grens op zes;

@@ -210,18 +210,27 @@
   }
 }
 
-/* Het dagscherm is één rooster. Familie kiest per tegel "vol" of "half"
-   (/familie/indeling); hier beslist alleen het scherm hoeveel kolommen er
-   zijn.
+/* Het dagscherm.
+   ---------------------------------------------------------------
+   Familie kiest per tegel "vol" of "half" (/familie/indeling); hier
+   beslist alleen het scherm hoeveel kolommen er zijn.
 
-   Bewust geen posities in de indeling, dus ook geen vaste kolommen hier:
-   een tegel schuift zelf naar de plek die er is. Daardoor overleeft een
-   indeling een gedraaide tablet, een telefoon en grotere tekst, en blijft
-   de volgorde in de code gelijk aan wat je ziet — wat voor de
-   voorleesfunctie de volgorde is die telt.
+   Smal: één kolom, alles vol-breed. Daar past niets naast elkaar, en een
+   halve tegel zou drie woorden per regel worden.
 
-   Smal is alles vol-breed: daar past niets naast elkaar, en een halve
-   tegel zou drie woorden per regel worden. */
+   Breed: een echte KOLOMSTROOM, geen rooster van rijen. Dat verschil is
+   het hele punt. In een rooster bepaalt de langste tegel de hoogte van
+   de rij, dus naast de grote "Nu"-kaart bleef een halve kolom leeg —
+   precies de witruimte waar het oude, liggende scherm geen last van had.
+   Met kolommen loopt de inhoud door: tegel voor tegel de eerste kolom
+   vol, dan de tweede, zonder gaten.
+
+   De leesvolgorde blijft die van de code — eerst de linkerkolom van boven
+   naar beneden, dan de rechter — dus voorlezen en toetsenbord volgen wat
+   je ziet. Dat is waarom dit met kolommen kan en met vrije posities niet.
+
+   "Vol" overspant beide kolommen en knipt de stroom in tweeën; wat erna
+   komt, begint aan een nieuwe kolomreeks. */
 .vandaag .tegels {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -230,13 +239,9 @@
 
 .vandaag .tegel-vol,
 .vandaag .tegel-half {
-  grid-column: 1 / -1;
   min-width: 0;
 }
 
-/* Vanaf 48rem twee kolommen — ongeveer een tablet. Bewust niet vanaf
-   40rem: een telefoon in liggende stand haalt dat ook, en daar wordt een
-   halve kolom nog geen 300 px breed. */
 @media (min-width: 48rem) {
   /* Met twee kolommen mag het scherm breder: de regellengte wordt niet
      bepaald door het venster maar door de kolom. Staand op een tablet
@@ -246,19 +251,27 @@
   }
 
   .vandaag .tegels {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
+    display: block;
+    columns: 2;
+    column-gap: 1.5rem;
   }
 
-  .vandaag .tegel-half {
-    grid-column: span 1;
+  /* Kolommen kennen geen gap tussen rijen; die ruimte komt van de marge.
+     break-inside houdt een kaart heel in plaats van hem over twee
+     kolommen te knippen. */
+  .vandaag .tegels > * {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
+
+  .vandaag .tegel-vol {
+    column-span: all;
   }
 }
 
 /* Liggend op een tablet of groot scherm blijft het bij twee kolommen; het
    scherm wordt alleen breder. Drie kolommen zou "half" stiekem een derde
-   maken, met een lege kolom naast elke halve tegel — en tekstregels die te
-   smal worden om prettig te lezen. */
+   maken, en tekstregels die te smal worden om prettig te lezen. */
 @media (orientation: landscape) and (min-width: 64rem) {
   .persoonsscherm main.vandaag {
     max-width: 60rem;
@@ -271,7 +284,9 @@
 :root[data-scale='1.3'] .vandaag .tegels,
 :root[data-scale='1.5'] .vandaag .tegels,
 body[data-simple='true'] .vandaag .tegels {
+  display: grid;
   grid-template-columns: minmax(0, 1fr);
+  columns: auto;
 }
 
 html {

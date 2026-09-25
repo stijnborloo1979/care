@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   MODULES,
+  SJABLONEN,
   normaliseer,
   schuif,
   STANDAARD,
@@ -42,8 +43,15 @@ describe('normaliseer', () => {
   })
 
   it('voegt "Wat nu?" toe als het ontbreekt', () => {
-    const uit = normaliseer({ versie: 1, tegels: [t('radio')] })
+    const uit = normaliseer({ versie: 1, tegels: [t('radio', 'vol')] })
     expect(uit.tegels[0]).toEqual(t('nu', 'vol'))
+  })
+
+  it('geeft een toegevoegde "Wat nu?" dezelfde maat als de rest', () => {
+    // In een indeling die helemaal uit halve tegels bestaat, zou één
+    // vol-brede kaart de kolommen doormidden knippen.
+    const uit = normaliseer({ versie: 1, tegels: [t('radio'), t('onthoud')] })
+    expect(uit.tegels[0]).toEqual(t('nu', 'half'))
   })
 
   it('laat dezelfde module niet twee keer toe', () => {
@@ -149,6 +157,48 @@ describe('MODULES', () => {
   it('kent elke module uit de standaardindeling', () => {
     for (const x of STANDAARD.tegels) {
       expect(MODULES.some((m) => m.id === x.id)).toBe(true)
+    }
+  })
+})
+
+describe('sjablonen', () => {
+  it('gebruiken alleen modules die bestaan', () => {
+    for (const sj of SJABLONEN) {
+      for (const x of sj.tegels) {
+        expect(MODULES.some((m) => m.id === x.id)).toBe(true)
+      }
+    }
+  })
+
+  it('komen ongewijzigd door normaliseer — anders springt het scherm meteen terug', () => {
+    for (const sj of SJABLONEN) {
+      expect(normaliseer({ versie: 1, tegels: sj.tegels }).tegels).toEqual(sj.tegels)
+    }
+  })
+
+  it('beginnen allemaal met "Wat nu?"', () => {
+    for (const sj of SJABLONEN) {
+      expect(sj.tegels[0].id).toBe('nu')
+    }
+  })
+
+  it('bevatten geen module twee keer', () => {
+    for (const sj of SJABLONEN) {
+      const ids = sj.tegels.map((x) => x.id)
+      expect(new Set(ids).size).toBe(ids.length)
+    }
+  })
+
+  it('hebben unieke ids en namen', () => {
+    expect(new Set(SJABLONEN.map((s) => s.id)).size).toBe(SJABLONEN.length)
+    expect(new Set(SJABLONEN.map((s) => s.naam)).size).toBe(SJABLONEN.length)
+  })
+
+  it('zetten in "Twee kolommen" alles half behalve wat dat niet kan', () => {
+    const tk = SJABLONEN.find((s) => s.id === 'twee-kolommen')!
+    for (const x of tk.tegels) {
+      const def = MODULES.find((m) => m.id === x.id)!
+      expect(x.maat).toBe(def.altijdVol ? 'vol' : 'half')
     }
   })
 })
