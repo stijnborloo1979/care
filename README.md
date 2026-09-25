@@ -381,6 +381,19 @@ kolommen en mag het scherm tot 52rem breed worden — met twee kolommen
 bepaalt de kolom de regellengte, niet het venster, dus de smalle band uit
 het oude ontwerp is daar niet meer nodig.
 
+### Als de migratie nog niet gedraaid is
+
+Zonder `27_layout.sql` bestaat de kolom `home_layout` niet en geeft
+PostgREST 42703. Dat vulde de console met 400's: elk scherm vroeg het
+opnieuw en react-query probeerde het elke keer nog twee keer.
+
+`getIndeling()` herkent die ene fout nu, onthoudt hem in
+`indelingKolomOntbreekt()` en geeft verder de standaardindeling terug
+zonder nog iets te vragen. Het scherm van de persoon werkt dus gewoon; de
+editor zegt bovenaan welke migratie er nog moet. Een echte fout
+(rechten, netwerk) gaat wel gewoon door — alleen deze ene wordt als
+"migratie volgt nog" behandeld. Zie `src/services/layout.test.ts`.
+
 ### Sjablonen
 
 `SJABLONEN` in `modules.ts` geeft vier indelingen in één tik — **Rustig**,

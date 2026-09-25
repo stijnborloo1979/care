@@ -32,12 +32,41 @@ function bewaarLokaal(i: Indeling) {
   }
 }
 
+/**
+ * Is 27_layout.sql nog niet gedraaid?
+ *
+ * Dan bestaat de kolom home_layout niet en geeft PostgREST 42703 terug. Dat
+ * is geen storing maar een migratie die nog moet: de app werkt intussen
+ * gewoon op de standaardindeling.
+ *
+ * Eén keer vaststellen is genoeg. Zonder deze vlag vraagt elk scherm het
+ * opnieuw, probeert react-query het nog twee keer, en loopt de console vol
+ * met 400's — wat het echte probleem juist onvindbaar maakt.
+ */
+let kolomOntbreekt = false
+
+export function indelingKolomOntbreekt(): boolean {
+  return kolomOntbreekt
+}
+
+function isOntbrekendeKolom(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false
+  return error.code === '42703' || (error.message ?? '').includes('home_layout')
+}
+
 export async function getIndeling(householdId: string): Promise<Indeling> {
+  if (kolomOntbreekt) return normaliseer(STANDAARD)
+
   const { data, error } = await supabase
     .from('household')
     .select('home_layout')
     .eq('id', householdId)
     .maybeSingle()
+
+  if (isOntbrekendeKolom(error)) {
+    kolomOntbreekt = true
+    return normaliseer(STANDAARD)
+  }
   if (error) throw error
 
   const ruw = (data as { home_layout: unknown } | null)?.home_layout
@@ -52,10 +81,23 @@ export async function getIndeling(householdId: string): Promise<Indeling> {
 export async function setIndeling(householdId: string, indeling: Indeling): Promise<Indeling> {
   const schoon = normaliseer(indeling)
   bewaarLokaal(schoon)
+
   const { error } = await supabase.rpc('set_home_layout', {
     hh: householdId,
     layout: schoon,
   })
-  if (error) throw error
+
+  if (error) {
+    // Onbekende functie of kolom: de migratie ontbreekt. Zeg dat, in plaats
+    // van een databasefout die niemand kan plaatsen.
+    if (error.code === '42883' || isOntbrekendeKolom(error)) {
+      kolomOntbreekt = true
+      throw new Error(
+        'De indeling kan nog niet bewaard worden: draai supabase/27_layout.sql in de SQL-editor.',
+      )
+    }
+    throw error
+  }
+
   return schoon
 }

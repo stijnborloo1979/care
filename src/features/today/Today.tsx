@@ -59,6 +59,10 @@ export default function Today({ householdId, personName, timezone }: Props) {
     queryFn: () => getIndeling(householdId),
     enabled: !!householdId,
     staleTime: 60_000,
+    // Niet opnieuw proberen: ontbreekt de kolom nog, dan helpt herhalen
+    // niet en vult het alleen de console. Zonder indeling toont dit scherm
+    // gewoon de standaard.
+    retry: false,
   })
 
   const indeling = normaliseer(bewaard ?? lokaleIndeling(), { groteTekst })

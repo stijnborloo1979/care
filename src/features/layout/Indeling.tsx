@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import Icon from '../../components/Icon'
 import { useHousehold } from '../household/useHousehold'
 import { useDisplayPrefs } from '../settings/useDisplayPrefs'
-import { getIndeling, setIndeling } from '../../services/layout'
+import { getIndeling, indelingKolomOntbreekt, setIndeling } from '../../services/layout'
 import {
   MODULES,
   RUSTIG_TOT,
@@ -44,6 +44,7 @@ export default function Indeling() {
     queryKey: ['indeling', hh],
     queryFn: () => getIndeling(hh),
     enabled: !!hh,
+    retry: false,
   })
 
   const [tegels, setTegels] = useState<Tegel[]>([])
@@ -101,6 +102,15 @@ export default function Indeling() {
           </span>
         </div>
       </header>
+
+      {indelingKolomOntbreekt() ? (
+        <p className="rounded-card border-[1.5px] border-warn/40 bg-warn/10 p-4 leading-relaxed">
+          <strong className="font-bold">Nog niet klaar om te bewaren.</strong> De database kent de
+          indeling nog niet. Draai <code>supabase/27_layout.sql</code> in de SQL-editor van Supabase;
+          tot dan toont het scherm van {voornaam} de standaardindeling en blijven wijzigingen hier
+          niet staan.
+        </p>
+      ) : null}
 
       {/* Sjablonen boven de editor: eerst een geheel kiezen, dan bijstellen.
           Losse tegels aanzetten werkt ook, maar dan moet je zelf bedenken
