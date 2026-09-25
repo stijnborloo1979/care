@@ -321,6 +321,30 @@ Een ondertekende link op papier zou trouwens binnen het uur verlopen.
 
 "Luister alles" speelt alle opnames na elkaar, als een luisteralbum.
 
+## Medicatie: de foto van de verpakking
+
+`medication.photo_path` bestond al, maar de knop verscheen alleen bij een
+medicijn dat je bewerkte. Bij het toevoegen was er niets — je moest dus
+eerst bewaren en het daarna in de lijst terugzoeken. Dat doet niemand.
+
+Nu staat het fotoblok er altijd. Bij een bestaand medicijn wordt de foto
+meteen bewaard; bij een nieuw medicijn houdt het formulier het bestand vast
+en uploadt het zodra het opslaan een id teruggeeft — eerder kan de foto
+nergens bij horen.
+
+De knop is de gedeelde `FotoKiezer`, die bewust geen `capture` zet. Het oude
+veld stond op `capture="environment"` en ging daarmee rechtstreeks naar de
+camera; op sommige telefoons kan je dan niet meer uit je fotoalbum kiezen.
+Zonder `capture` biedt het toestel zelf beide aan.
+
+Een foto kan ook weg: een doosje in een keukenkast is snel scheef of
+onscherp gefotografeerd. Eerst het pad wissen, dan het bestand — andersom
+zou het scherm naar een foto wijzen die er niet meer is.
+
+**Nog niet gedaan:** de persoon ziet die foto nog niet. Medicatie bereikt
+haar scherm als `agenda_event` met `kind = 'med'`, en dat event draagt geen
+`photo_path`. De foto is dus voorlopig alleen voor familie.
+
 ## Medicatie: wat er bevestigd werd
 
 `medication_log` hield al bij wanneer een moment bevestigd werd en door

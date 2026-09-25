@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, Pill, Plus, X } from 'lucide-react'
 import StoragePhoto from '../../components/StoragePhoto'
+import FotoKiezer from '../../components/FotoKiezer'
 import { useHousehold } from '../household/useHousehold'
 import Innamegeschiedenis from './Innamegeschiedenis'
 import { dagenVoorraad, setVoorraad } from '../../services/medicationHistory'
@@ -11,6 +12,7 @@ import {
   saveMedicijn,
   tijdenVan,
   uploadMedicijnFoto,
+  verwijderMedicijnFoto,
   type Medicijn,
 } from '../../services/medication'
 
@@ -130,8 +132,16 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
   const [dosis, setDosis] = useState(m?.dose ?? '')
   const [tijden, setTijden] = useState<string[]>(m ? tijdenVan(m) : ['08:00'])
   const [instructie, setInstructie] = useState(m?.instruction ?? '')
-  const [bezigFoto, setBezigFoto] = useState(false)
   const [fout, setFout] = useState<string | null>(null)
+  // Een nieuw medicijn heeft nog geen id, dus de foto kan nog nergens bij
+  // horen. We houden het bestand vast en uploaden meteen na het opslaan;
+  // zo hoeft familie niet eerst te bewaren en het daarna terug te zoeken.
+  const [nieuweFoto, setNieuweFoto] = useState<File | null>(null)
+  const [voorbeeld, setVoorbeeld] = useState<string | null>(null)
+
+  useEffect(() => () => {
+    if (voorbeeld) URL.revokeObjectURL(voorbeeld)
+  }, [voorbeeld])
 
   const ververs = async () => {
     for (const k of ['medicijnen', 'summary', 'meds-today']) {
@@ -140,8 +150,8 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
   }
 
   const bewaar = useMutation({
-    mutationFn: (actief: boolean) =>
-      saveMedicijn({
+    mutationFn: async (actief: boolean) => {
+      const id = await saveMedicijn({
         householdId: hh,
         id: m?.id,
         naam: naam.trim(),
@@ -149,7 +159,11 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
         tijden,
         instructie: instructie.trim(),
         actief,
-      }),
+      })
+      // Pas hier kan de foto ergens bij horen: nu bestaat het id.
+      if (nieuweFoto) await uploadMedicijnFoto(hh, id, nieuweFoto)
+      return id
+    },
     onSuccess: async () => {
       await ververs()
       onKlaar()
@@ -164,20 +178,6 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
       onKlaar()
     },
   })
-
-  async function kiesFoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]
-    if (!f || !m) return
-    setBezigFoto(true)
-    try {
-      await uploadMedicijnFoto(hh, m.id, f)
-      await ververs()
-    } catch (err) {
-      setFout(err instanceof Error ? err.message : 'Foto uploaden lukte niet.')
-    } finally {
-      setBezigFoto(false)
-    }
-  }
 
   return (
     <form
@@ -258,17 +258,57 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
         </span>
       </label>
 
-      {m ? (
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="w-20">
-            <StoragePhoto path={m.photo_path} bucket="home-memory" emoji="💊" alt={m.name} />
+      {/* De foto staat er ook bij een nieuw medicijn. Eerst bewaren en het
+          daarna terugzoeken om er een foto bij te zetten, doet niemand. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="w-20 shrink-0">
+          {voorbeeld ? (
+            <img src={voorbeeld} alt="" className="aspect-square w-full rounded-2xl object-cover" />
+          ) : (
+            <StoragePhoto path={m?.photo_path ?? null} bucket="home-memory" emoji="💊" alt={m?.name ?? ''} />
+          )}
+        </span>
+
+        <span className="min-w-0">
+          <FotoKiezer
+            label={m?.photo_path || voorbeeld ? 'Andere foto' : 'Foto van de verpakking'}
+            onKies={async (bestand) => {
+              if (m) {
+                // Bestaand medicijn: meteen bewaren, zoals bij een kamer.
+                await uploadMedicijnFoto(hh, m.id, bestand)
+                await ververs()
+                return
+              }
+              if (voorbeeld) URL.revokeObjectURL(voorbeeld)
+              setNieuweFoto(bestand)
+              setVoorbeeld(URL.createObjectURL(bestand))
+            }}
+          />
+
+          {m?.photo_path ? (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await verwijderMedicijnFoto(m.id, m.photo_path)
+                  await ververs()
+                } catch (err) {
+                  setFout(err instanceof Error ? err.message : 'De foto kon niet weg.')
+                }
+              }}
+              className="ml-2 min-h-[2.4rem] rounded-pill px-3 text-sm font-semibold text-ink-soft underline underline-offset-4"
+            >
+              Weghalen
+            </button>
+          ) : null}
+
+          <span className="mt-1 block text-xs text-ink-faint">
+            {voorbeeld
+              ? 'Wordt bewaard zodra je op Opslaan drukt.'
+              : 'Op je telefoon kan je kiezen tussen de camera en je fotoalbum.'}
           </span>
-          <label className="relative min-h-[2.4rem] cursor-pointer overflow-hidden rounded-pill border-[1.5px] border-line-strong px-4 py-1 text-sm font-semibold">
-            {bezigFoto ? 'Bezig…' : 'Foto van de verpakking'}
-            <input type="file" accept="image/*" capture="environment" onChange={kiesFoto} className="absolute inset-0 opacity-0" />
-          </label>
-        </div>
-      ) : null}
+        </span>
+      </div>
 
       <div className="flex flex-wrap gap-2 pt-1">
         <button

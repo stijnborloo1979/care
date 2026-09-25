@@ -81,6 +81,23 @@ export async function deleteMedicijn(householdId: string, id: string) {
   await supabase.rpc('sync_medication_today', { hh: householdId })
 }
 
+/**
+ * De foto weghalen.
+ *
+ * Een foto van een doosje is snel scheef of onscherp genomen — zeker met
+ * een telefoon in een keukenkast. Zonder deze knop blijft die staan tot
+ * iemand een betere maakt.
+ *
+ * Eerst het pad wissen, dan pas het bestand: lukt het wissen van het
+ * bestand niet, dan is er hoogstens een weesbestand in de opslag. Andersom
+ * zou het scherm naar een foto wijzen die er niet meer is.
+ */
+export async function verwijderMedicijnFoto(id: string, path: string | null) {
+  const { error } = await supabase.from('medication').update({ photo_path: null }).eq('id', id)
+  if (error) throw error
+  if (path) await supabase.storage.from('home-memory').remove([path])
+}
+
 export async function uploadMedicijnFoto(householdId: string, id: string, file: File) {
   const blob = await compressImage(file, 1200)
   const path = `${householdId}/meds/${id}/${crypto.randomUUID()}.${extensionForImage(blob.type)}`
