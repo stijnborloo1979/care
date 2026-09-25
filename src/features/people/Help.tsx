@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { usePeople } from './usePeople'
 import { t } from '../../lib/i18n'
+import BelKnop from './BelKnop'
 
 /**
  * Eén scherm, grote knoppen, geen keuzes die uitleg nodig hebben.
@@ -11,7 +12,11 @@ export default function Help() {
   const { household } = useHousehold()
   const { data: people } = usePeople(household?.household_id ?? '')
 
-  const bellen = (people ?? []).filter((p) => p.phone && p.kind !== 'self').slice(0, 3)
+  // Ook zonder telefoonnummer bereikbaar, zolang het familielid de app
+  // gebruikt: dan wordt het een vraag om terug te bellen.
+  const bellen = (people ?? [])
+    .filter((p) => (p.phone || p.profile_id) && p.kind !== 'self')
+    .slice(0, 3)
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
@@ -24,16 +29,7 @@ export default function Help() {
 
       <div className="mt-6 space-y-3">
         {bellen.map((p) => (
-          <a
-            key={p.id}
-            href={`tel:${(p.phone ?? '').replace(/\s/g, '')}`}
-            className="flex min-h-[5rem] items-center gap-4 rounded-card border-[1.5px] border-line-strong bg-surface px-5 text-xl font-bold shadow-card"
-          >
-            <span className="text-3xl" aria-hidden="true">
-              📞
-            </span>
-            {t('hulp.bel', { naam: p.name })}
-          </a>
+          <BelKnop key={p.id} p={p} householdId={household?.household_id ?? ''} />
         ))}
 
         <div className="rounded-card border-[1.5px] border-line-strong bg-surface p-5">

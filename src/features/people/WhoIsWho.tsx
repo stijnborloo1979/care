@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import BelKnop from './BelKnop'
 import Avatar from '../../components/Avatar'
 import { hhmm } from '../../lib/time'
 import { useHousehold } from '../household/useHousehold'
@@ -116,13 +117,10 @@ export function PersonDetail() {
         ) : null}
       </div>
 
-      {p.phone ? (
-        <a
-          href={`tel:${p.phone.replace(/\s/g, '')}`}
-          className="mt-5 flex min-h-[4rem] w-full items-center justify-center gap-3 rounded-card bg-accent-ink px-5 text-xl font-bold text-white"
-        >
-          📞 Bel {p.name}
-        </a>
+      {p.phone || p.profile_id ? (
+        <div className="mt-5">
+          <BelKnop p={p} householdId={hh} />
+        </div>
       ) : null}
     </main>
   )

@@ -399,6 +399,41 @@ naar drie kolommen. Drie kolommen in een kolom van 36rem maakt elke foto
 zo'n 170 px breed, en dan is een kamer niet meer te herkennen — het enige
 waar die tegel voor dient.
 
+## Bellen gaat één kant op
+
+`IncomingCall` — het stuk dat laat rinkelen en opneemt — hangt alleen in de
+schil van de persoon. Familie luistert nergens. Een gesprek dat vanaf de
+tablet gestart wordt, maakt dus een oproep aan waar niemand op wacht, en
+die valt meteen weg.
+
+Op haar Help-scherm stond intussen "Bel Els" als `tel:`-link. Een tablet
+zonder simkaart opent daarop zijn eigen belfunctie, die nergens heen kan.
+Een knop die iets belooft aan iemand die al onzeker is, is erger dan geen
+knop.
+
+`BelKnop` kiest nu op één ding: gebruikt die ander de app?
+
+- **Wel** (een familielid met een account): het wordt een vraag.
+  `vraag_gesprek()` zet een melding klaar, familie krijgt die via push en
+  belt. Op haar scherm verandert de knop in een geruststelling — "Els weet
+  het. Ze belt je zo terug." — en niet in een vinkje. Dat is wat ze wil
+  weten. Familieleden zonder telefoonnummer staan nu ook op dat scherm,
+  want ze zijn bereikbaar zonder.
+- **Niet** (de huisarts, de buurman): een gewone `tel:`-link blijft de beste
+  gok. Op een tablet werkt die niet, maar daar is deze app ook niet de weg
+  naar de huisarts. 112 blijft om dezelfde reden staan zoals het is.
+
+**Hoogstens één melding per tien minuten.** Wie onzeker is drukt nog eens,
+en nog eens; twaalf meldingen maken van ongerustheid een alarm, en dan
+begint familie ze weg te klikken — precies de gewoonte die je nooit wil
+kweken. Zij krijgt elke keer gewoon te horen dat het gelukt is: een "je hebt
+net al gevraagd" helpt niemand.
+
+Echt tweerichtingsverkeer (familie laten meeluisteren naar inkomende
+oproepen) is bewust níét gebouwd. Het voelt zoals mensen bellen verwachten,
+maar het faalt stil: belt zij en heeft niemand de app open, dan hoort ze
+niets rinkelen en denkt ze dat niemand haar wil spreken.
+
 ## Medicatie op het scherm van de persoon
 
 Er zat een naad in het product die niemand zag: familie voerde een schema

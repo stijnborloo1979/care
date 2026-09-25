@@ -41,3 +41,19 @@ export async function getCallStatus(callId: string): Promise<string | null> {
   if (error) return null
   return (data?.status as string | undefined) ?? null
 }
+
+/**
+ * "Bel me eens."
+ *
+ * Bellen gaat in deze app maar één kant op: familie belt, de tablet rinkelt
+ * en neemt op. Vanaf haar kant is dit de weg — een vraag in plaats van een
+ * gesprek. Familie krijgt een melding en belt.
+ *
+ * Hoogstens één melding per tien minuten, maar dat regelt de database. Zij
+ * krijgt altijd te horen dat het gelukt is: wie onzeker is drukt nog eens,
+ * en "je hebt net al gevraagd" helpt dan niemand.
+ */
+export async function vraagGesprek(householdId: string) {
+  const { error } = await supabase.rpc('vraag_gesprek', { hh: householdId })
+  if (error) throw error
+}
