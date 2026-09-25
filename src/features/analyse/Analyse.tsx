@@ -1,23 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
-import {
-  getActiviteit,
-  getDagritme,
-  getDekking,
-  getRapportKeuze,
-  getWeekpatroon,
-  helften,
-  setRapportKeuze,
-  watStabielBleef,
-  WEEKDAGEN,
-  type DagritmeRij,
-  type UurRij,
-  type WeekRij,
-} from '../../services/analyse'
-import { getSamenvatting, getSchemaWijzigingen, periode } from '../../services/medicationHistory'
-import { getCareLog } from '../../services/careLog'
+import { setRapportKeuze, WEEKDAGEN, type DagritmeRij, type UurRij, type WeekRij } from '../../services/analyse'
 import { locale } from '../../lib/i18n'
+import { BLOKKEN, nietOpgenomen } from './blokken'
+import { useAnalyse } from './useAnalyse'
 
 const PERIODES = [
   { dagen: 30, label: '30 dagen' },
@@ -51,42 +39,12 @@ export default function Analyse() {
   const [dagen, setDagen] = useState(90)
   const queryClient = useQueryClient()
 
-  const { van, tot } = useMemo(() => periode(dagen), [dagen])
-  const aan = { enabled: !!hh }
-
-  const dekking = useQuery({ ...aan, queryKey: ['an-dekking', hh, dagen], queryFn: () => getDekking(hh, van, tot) })
-  const medicatie = useQuery({ ...aan, queryKey: ['an-medicatie', hh, dagen], queryFn: () => getSamenvatting(hh, van, tot) })
-  const dagritme = useQuery({ ...aan, queryKey: ['an-dagritme', hh, dagen], queryFn: () => getDagritme(hh, van, tot) })
-  const week = useQuery({ ...aan, queryKey: ['an-week', hh, dagen], queryFn: () => getWeekpatroon(hh, van, tot) })
-  const activiteit = useQuery({ ...aan, queryKey: ['an-uur', hh, dagen], queryFn: () => getActiviteit(hh, van, tot) })
-  const wijzigingen = useQuery({ ...aan, queryKey: ['an-wijzigingen', hh, dagen], queryFn: () => getSchemaWijzigingen(hh, van) })
-  const notities = useQuery({ ...aan, queryKey: ['an-notities', hh, dagen], queryFn: () => getCareLog(hh, dagen) })
-
-  // Twee keer dezelfde samenvatting, over de eerste en de tweede helft.
-  // Dat is wat "bleef gelijk" betekent; één getal over de hele periode kan
-  // dat niet zeggen.
-  const h = useMemo(() => helften(dagen), [dagen])
-  const eersteHelft = useQuery({
-    ...aan,
-    queryKey: ['an-helft1', hh, dagen],
-    queryFn: () => getSamenvatting(hh, h.eerste.van, h.eerste.tot),
-  })
-  const tweedeHelft = useQuery({
-    ...aan,
-    queryKey: ['an-helft2', hh, dagen],
-    queryFn: () => getSamenvatting(hh, h.tweede.van, h.tweede.tot),
-  })
-
-  const { data: keuze } = useQuery({
-    queryKey: ['rapportkeuze', hh],
-    queryFn: () => getRapportKeuze(hh),
-    enabled: !!hh,
-  })
+  const a = useAnalyse(hh, dagen)
 
   const [blokken, setBlokken] = useState<string[]>([])
   useEffect(() => {
-    if (keuze) setBlokken(keuze.blokken)
-  }, [keuze])
+    if (a.keuze) setBlokken(a.keuze.blokken)
+  }, [a.keuze])
 
   const bewaar = useMutation({
     mutationFn: (nieuw: string[]) => setRapportKeuze(hh, { blokken: nieuw, dagen }),
@@ -99,33 +57,57 @@ export default function Analyse() {
     bewaar.mutate(nieuw)
   }
 
-  const totaal = (medicatie.data ?? []).find((r) => r.tijdstip === 'alles')
-  const perTijdstip = (medicatie.data ?? []).filter((r) => r.tijdstip !== 'alles')
+  const inhoud: Record<string, React.ReactNode> = {
+    medicatie: <Medicatie a={a} voornaam={voornaam} />,
+    dagritme: <Dagritme rijen={a.dagritme} />,
+    weekpatroon: <Weekpatroon rijen={a.week} />,
+    nacht: (
+      <>
+        <Nacht rijen={a.nacht} />
+        <p className="mt-2 text-sm text-ink-faint">
+          Dit telt alleen wat er in de app gebeurde. Iemand kan wakker liggen zonder het scherm aan
+          te raken, dus dit is geen slaapmeting.
+        </p>
+      </>
+    ),
+    schema: (
+      <ul className="space-y-1 text-sm">
+        {a.wijzigingen.slice(0, 12).map((w) => (
+          <li key={w.id} className="flex flex-wrap gap-x-2">
+            <span className="w-28 shrink-0 text-ink-faint">{datum(w.changed_at)}</span>
+            <span className="font-semibold">{w.medication_name}</span>
+            <span className="text-ink-soft">
+              {w.veld === 'status' ? (w.nieuw ?? '') : `${w.veld}: ${w.oud ?? '—'} → ${w.nieuw ?? '—'}`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    ),
+    notities: (
+      <ul className="space-y-2 text-sm">
+        {a.notities.slice(0, 10).map((n) => (
+          <li key={n.id} className="flex flex-wrap gap-x-3">
+            <span className="w-28 shrink-0 text-ink-faint">{datum(n.occurred_at)}</span>
+            <span className="min-w-0 flex-1">
+              <span className="font-semibold">{n.title}</span>
+              {n.note ? <span className="text-ink-soft"> — {n.note}</span> : null}
+            </span>
+          </li>
+        ))}
+      </ul>
+    ),
+  }
 
-  const stabiel = useMemo(() => {
-    const pct = (rij?: { momenten: number; bevestigd: number }) =>
-      rij && rij.momenten > 0 ? (rij.bevestigd / rij.momenten) * 100 : 0
-    const zoek = (rijen: typeof perTijdstip | undefined, tijdstip: string) =>
-      (rijen ?? []).find((r) => r.tijdstip === tijdstip)
+  const legeTekst: Record<string, string> = {
+    medicatie: 'Er staan in deze periode geen medicatiemomenten.',
+    dagritme: 'Er is in deze periode niets afgevinkt, dus hierover valt niets te zeggen.',
+    weekpatroon: 'Nog te weinig gegevens om per weekdag iets te tonen.',
+    nacht: "Er is 's nachts niets geregistreerd in deze periode.",
+    schema: 'Het schema is in deze periode niet gewijzigd.',
+    notities: 'Er staan geen notities in het zorglogboek voor deze periode.',
+  }
 
-    return watStabielBleef(
-      perTijdstip.map((r) => {
-        const een = zoek(eersteHelft.data, r.tijdstip)
-        const twee = zoek(tweedeHelft.data, r.tijdstip)
-        return {
-          tijdstip: r.tijdstip,
-          eerste: pct(een),
-          laatste: pct(twee),
-          momentenEerste: een?.momenten ?? 0,
-          momentenTweede: twee?.momenten ?? 0,
-        }
-      }),
-      dagritme.data ?? [],
-    )
-  }, [perTijdstip, eersteHelft.data, tweedeHelft.data, dagritme.data])
-
-  const nacht = (activiteit.data ?? []).filter((u) => u.uur >= 1 && u.uur <= 5)
-  const nachtTotaal = nacht.reduce((n, u) => n + u.aantal, 0)
+  const weg = nietOpgenomen(blokken, a.leeg)
 
   return (
     <div className="space-y-6">
@@ -138,19 +120,28 @@ export default function Analyse() {
           </p>
         </div>
 
-        <div className="flex gap-1 rounded-pill border border-line bg-surface-soft p-1">
-          {PERIODES.map((p) => (
-            <button
-              key={p.dagen}
-              onClick={() => setDagen(p.dagen)}
-              aria-pressed={dagen === p.dagen}
-              className={`min-h-[2.4rem] rounded-pill px-4 text-sm font-semibold ${
-                dagen === p.dagen ? 'bg-surface text-ink shadow-card' : 'text-ink-soft'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex gap-1 rounded-pill border border-line bg-surface-soft p-1">
+            {PERIODES.map((p) => (
+              <button
+                key={p.dagen}
+                onClick={() => setDagen(p.dagen)}
+                aria-pressed={dagen === p.dagen}
+                className={`min-h-[2.4rem] rounded-pill px-4 text-sm font-semibold ${
+                  dagen === p.dagen ? 'bg-surface text-ink shadow-card' : 'text-ink-soft'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          <Link
+            to={`/verslag?dagen=${dagen}`}
+            className="flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-bold text-white"
+          >
+            Verslag maken
+          </Link>
         </div>
       </header>
 
@@ -161,10 +152,10 @@ export default function Analyse() {
           Staat altijd op het verslag
         </h2>
 
-        {dekking.data ? (
+        {a.dekking ? (
           <p className="mt-2 text-lg">
             <strong>
-              {dekking.data.dagen_gebruik} van {dekking.data.dagen_periode} dagen
+              {a.dekking.dagen_gebruik} van {a.dekking.dagen_periode} dagen
             </strong>{' '}
             werd de app gebruikt. Alle cijfers hieronder gaan over die dagen, niet over de hele
             periode.
@@ -173,11 +164,11 @@ export default function Analyse() {
           <p className="mt-2 text-ink-soft">Bezig met laden…</p>
         )}
 
-        {stabiel.length > 0 ? (
+        {a.stabiel.length > 0 ? (
           <div className="mt-3">
             <p className="font-semibold">Wat gelijk bleef</p>
             <ul className="mt-1 list-disc pl-5 text-ink-soft">
-              {stabiel.map((z) => (
+              {a.stabiel.map((z) => (
                 <li key={z}>{z}</li>
               ))}
             </ul>
@@ -185,141 +176,29 @@ export default function Analyse() {
         ) : null}
       </section>
 
-      <Blok
-        id="medicatie"
-        titel="Medicatie bevestigd"
-        onder="Per moment van de dag, en welk deel de persoon zelf bevestigde."
-        aan={blokken.includes('medicatie')}
-        onWissel={wissel}
-        leeg={!totaal}
-        legeTekst="Er staan in deze periode geen medicatiemomenten."
-      >
-        {totaal ? (
-          <>
-            <p className="text-3xl font-extrabold tabular-nums">
-              {Math.round((totaal.bevestigd / Math.max(1, totaal.momenten)) * 100)} %
-              <span className="ml-2 text-base font-semibold text-ink-soft">
-                {totaal.bevestigd} van {totaal.momenten}, over {totaal.dagen} dagen
-              </span>
-            </p>
+      {BLOKKEN.map((b) => (
+        <Blok
+          key={b.id}
+          id={b.id}
+          titel={b.titel}
+          onder={b.onder}
+          aan={blokken.includes(b.id)}
+          onWissel={wissel}
+          leeg={!!a.leeg[b.id]}
+          legeTekst={legeTekst[b.id]}
+        >
+          {inhoud[b.id]}
+        </Blok>
+      ))}
 
-            <ul className="mt-3 space-y-2">
-              {perTijdstip.map((r) => {
-                const pct = Math.round((r.bevestigd / Math.max(1, r.momenten)) * 100)
-                const zelfPct = Math.round((r.zelf / Math.max(1, r.momenten)) * 100)
-                return (
-                  <li key={r.tijdstip} className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 tabular-nums font-semibold">{r.tijdstip}</span>
-                    <span className="flex h-3 flex-1 overflow-hidden rounded-pill bg-surface-deep">
-                      <span className="bg-accent-ink" style={{ width: `${zelfPct}%` }} />
-                      <span className="bg-accent" style={{ width: `${Math.max(0, pct - zelfPct)}%` }} />
-                    </span>
-                    <span className="w-32 shrink-0 text-right text-sm text-ink-soft tabular-nums">
-                      {pct} % · {r.zelf} zelf
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-            <p className="mt-2 text-sm text-ink-faint">
-              Donker is wat {voornaam} zelf bevestigde, lichter wat iemand anders deed. Bevestigd is
-              niet hetzelfde als ingenomen.
-            </p>
-          </>
-        ) : null}
-      </Blok>
-
-      <Blok
-        id="dagritme"
-        titel="Wanneer de dag begon"
-        onder="Het tijdstip van de eerste afgevinkte activiteit. Het uiteenlopen zegt meer dan het gemiddelde."
-        aan={blokken.includes('dagritme')}
-        onWissel={wissel}
-        leeg={(dagritme.data ?? []).length === 0}
-        legeTekst="Er is in deze periode niets afgevinkt, dus hierover valt niets te zeggen."
-      >
-        <Dagritme rijen={dagritme.data ?? []} />
-      </Blok>
-
-      <Blok
-        id="weekpatroon"
-        titel="Per dag van de week"
-        onder="Klopt alles op zondag omdat er dan bezoek is, dan meet je bezoek en geen zelfstandigheid."
-        aan={blokken.includes('weekpatroon')}
-        onWissel={wissel}
-        leeg={(week.data ?? []).every((w) => w.med_momenten === 0 && w.agenda_items === 0)}
-        legeTekst="Nog te weinig gegevens om per weekdag iets te tonen."
-      >
-        <Weekpatroon rijen={week.data ?? []} />
-      </Blok>
-
-      <Blok
-        id="nacht"
-        titel="Activiteit 's nachts"
-        onder="Handelingen door de persoon zelf tussen 1 en 6 uur."
-        aan={blokken.includes('nacht')}
-        onWissel={wissel}
-        leeg={nachtTotaal === 0}
-        legeTekst="Er is 's nachts niets geregistreerd in deze periode."
-      >
-        <Nacht rijen={nacht} />
-        <p className="mt-2 text-sm text-ink-faint">
-          Dit telt alleen wat er in de app gebeurde. Iemand kan wakker liggen zonder het scherm aan
-          te raken, dus dit is geen slaapmeting.
+      {/* Wat er wegvalt, staat ook hier al: dan weet familie vóór het
+          afdrukken wat de arts niet zal zien. */}
+      {weg.bewustWeg.length > 0 ? (
+        <p className="text-sm text-ink-soft">
+          Niet op het verslag: {weg.bewustWeg.join(', ')}. Dat staat ook op het blad zelf, zodat de
+          arts weet wat hij niet ziet.
         </p>
-      </Blok>
-
-      <Blok
-        id="schema"
-        titel="Wijzigingen aan het medicatieschema"
-        onder="Een daling betekent iets anders als er kort daarvoor een middel bijkwam."
-        aan={blokken.includes('schema')}
-        onWissel={wissel}
-        leeg={(wijzigingen.data ?? []).length === 0}
-        legeTekst="Het schema is in deze periode niet gewijzigd."
-      >
-        <ul className="space-y-1 text-sm">
-          {(wijzigingen.data ?? []).slice(0, 12).map((w) => (
-            <li key={w.id} className="flex flex-wrap gap-x-2">
-              <span className="w-28 shrink-0 text-ink-faint">
-                {new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long' }).format(
-                  new Date(w.changed_at),
-                )}
-              </span>
-              <span className="font-semibold">{w.medication_name}</span>
-              <span className="text-ink-soft">
-                {w.veld === 'status' ? (w.nieuw ?? '') : `${w.veld}: ${w.oud ?? '—'} → ${w.nieuw ?? '—'}`}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Blok>
-
-      <Blok
-        id="notities"
-        titel="Wat familie en zorgverleners noteerden"
-        onder="In hun eigen woorden. Vaak het stuk waar een arts het meest aan heeft."
-        aan={blokken.includes('notities')}
-        onWissel={wissel}
-        leeg={(notities.data ?? []).length === 0}
-        legeTekst="Er staan geen notities in het zorglogboek voor deze periode."
-      >
-        <ul className="space-y-2 text-sm">
-          {(notities.data ?? []).slice(0, 10).map((n) => (
-            <li key={n.id} className="flex flex-wrap gap-x-3">
-              <span className="w-28 shrink-0 text-ink-faint">
-                {new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long' }).format(
-                  new Date(n.occurred_at),
-                )}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="font-semibold">{n.title}</span>
-                {n.note ? <span className="text-ink-soft"> — {n.note}</span> : null}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Blok>
+      ) : null}
 
       {/* Wat er niet is, staat er met de reden bij. Weglaten zou het
           scherm stuk doen lijken, en verbergt dat er een keuze achter zit. */}
@@ -339,6 +218,10 @@ export default function Analyse() {
       </section>
     </div>
   )
+}
+
+function datum(iso: string) {
+  return new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long' }).format(new Date(iso))
 }
 
 /** Eén blok, met het vinkje dat bepaalt of het op het verslag komt. */
@@ -383,6 +266,44 @@ function Blok({
 
       <div className="mt-4">{leeg ? <p className="text-ink-soft">{legeTekst}</p> : children}</div>
     </section>
+  )
+}
+
+function Medicatie({ a, voornaam }: { a: ReturnType<typeof useAnalyse>; voornaam: string }) {
+  if (!a.totaal) return null
+
+  return (
+    <>
+      <p className="text-3xl font-extrabold tabular-nums">
+        {Math.round((a.totaal.bevestigd / Math.max(1, a.totaal.momenten)) * 100)} %
+        <span className="ml-2 text-base font-semibold text-ink-soft">
+          {a.totaal.bevestigd} van {a.totaal.momenten}, over {a.totaal.dagen} dagen
+        </span>
+      </p>
+
+      <ul className="mt-3 space-y-2">
+        {a.perTijdstip.map((r) => {
+          const pct = Math.round((r.bevestigd / Math.max(1, r.momenten)) * 100)
+          const zelfPct = Math.round((r.zelf / Math.max(1, r.momenten)) * 100)
+          return (
+            <li key={r.tijdstip} className="flex items-center gap-3">
+              <span className="w-14 shrink-0 tabular-nums font-semibold">{r.tijdstip}</span>
+              <span className="flex h-3 flex-1 overflow-hidden rounded-pill bg-surface-deep">
+                <span className="bg-accent-ink" style={{ width: `${zelfPct}%` }} />
+                <span className="bg-accent" style={{ width: `${Math.max(0, pct - zelfPct)}%` }} />
+              </span>
+              <span className="w-32 shrink-0 text-right text-sm text-ink-soft tabular-nums">
+                {pct} % · {r.zelf} zelf
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="mt-2 text-sm text-ink-faint">
+        Donker is wat {voornaam} zelf bevestigde, lichter wat iemand anders deed. Bevestigd is niet
+        hetzelfde als ingenomen.
+      </p>
+    </>
   )
 }
 

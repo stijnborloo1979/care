@@ -387,6 +387,74 @@ body[data-scherm='persoon'] {
     font-size: 9.5pt;
     color: #000000;
   }
+
+  /* -------------------------------------------------------------
+     Het verslag voor de dokter
+     -------------------------------------------------------------
+     Hier geen serif en geen sfeer: een arts scant dit in dertig
+     seconden. Schreefloos, compact, en elke tabelkop herhaalt zich
+     bovenaan een volgend blad. */
+  .verslag {
+    background: #ffffff;
+  }
+
+  .verslag main {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* Alles zwart, ook wat op het scherm grijs is: een verslag wordt
+     gekopieerd en gefaxt, en lichtgrijs overleeft dat niet. */
+  .verslag,
+  .verslag p,
+  .verslag li,
+  .verslag td,
+  .verslag th,
+  .verslag span,
+  .verslag strong {
+    color: #000000;
+    font-size: 10pt;
+    line-height: 1.45;
+  }
+
+  .verslag h1 { font-size: 17pt; }
+  .verslag h2 { font-size: 11pt; }
+
+  .verslag .kop {
+    border-bottom: 1px solid #000000;
+    padding-bottom: 2pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Randen tekenen in plaats van vullen: achtergronden worden bij het
+     afdrukken vaak weggelaten, een rand nooit. */
+  .verslag .kader {
+    border: 1pt solid #000000;
+    background: #ffffff;
+  }
+
+  .verslag section,
+  .verslag .heel-houden {
+    break-inside: avoid;
+  }
+
+  .verslag table { width: 100%; }
+  .verslag thead { display: table-header-group; }
+  .verslag tr { break-inside: avoid; }
+
+  .verslag th,
+  .verslag td {
+    border-color: #000000 !important;
+    padding: 1.5pt 2pt;
+  }
+
+  .verslag footer {
+    border-top: 0.5pt solid #000000;
+    color: #000000;
+    font-size: 8.5pt;
+  }
 }
 
 :focus-visible {

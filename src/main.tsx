@@ -53,6 +53,7 @@ const Delen = lazy(() => import("./features/sharing/Delen"));
 const Taken = lazy(() => import("./features/tasks/Taken"));
 const Boek = lazy(() => import("./features/stories/Boek"));
 const Analyse = lazy(() => import("./features/analyse/Analyse"));
+const Verslag = lazy(() => import("./features/analyse/Verslag"));
 const VerhaalScherm = lazy(() => import("./features/stories/VerhaalScherm"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const Radio = lazy(() => import("./features/radio/Radio"));
@@ -198,6 +199,16 @@ if (!configuratieOk) {
                     element={
                       <Beveiligd>
                         <VerhaalScherm />
+                      </Beveiligd>
+                    }
+                  />
+                  {/* Het verslag ook: op papier hoort er geen zijbalk bij,
+                      en een arts krijgt geen navigatie te zien. */}
+                  <Route
+                    path="/verslag"
+                    element={
+                      <Beveiligd>
+                        <Verslag />
                       </Beveiligd>
                     }
                   />

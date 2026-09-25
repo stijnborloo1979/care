@@ -196,8 +196,12 @@ Alle schermen van de persoon hangen onder `PersonLayout`, met de bottom
 navigation die op elk scherm dezelfde vier bestemmingen toont.
 - `/familie/instellingen` — leesbaarheid en privacy.
 - `/familie` — dashboard, met sidebar op desktop en tabs op mobiel.
-  Daaronder: `planning`, `wie`, `huis`, `fotos`, `berichten`, `taken`,
-  `logboek`, `documenten`, `weetjes`, `instellingen`.
+  Daaronder: `planning`, `wie`, `huis`, `fotos`, `berichten`, `analyse`,
+  `taken`, `logboek`, `documenten`, `weetjes`, `instellingen`.
+- `/levensboek`, `/verhaal/:id` — het levensboek en één verhaal na het
+  scannen van een QR-code.
+- `/verslag?dagen=90` — het verslag voor de dokter. Staat bewust buiten de
+  familie-opmaak: op papier hoort er geen zijbalk bij.
 
 ## Wat er al werkt
 
@@ -391,9 +395,40 @@ verslag elke keer, dan kan een arts niets vergelijken. Alleen familie
 (`admin` of `member`) kan het samenstellen; alle analysefuncties volgen
 `mag_meekijken()`.
 
-Op het verslag hoort ook te staan **wat er weggelaten is**. Anders cureert
-familie zonder het te beseffen wat de arts ziet, en weet de arts niet wat
-hij mist.
+### Het verslag
+
+`/verslag` staat buiten de familie-opmaak, net als het levensboek: op papier
+hoort er geen zijbalk bij en een arts krijgt geen navigatie te zien. De knop
+"Verslag maken" staat op het analysescherm en geeft de gekozen periode mee
+in de URL.
+
+De pagina **rekent niets uit**. Ze haalt dezelfde cijfers uit dezelfde hook
+(`useAnalyse`) en drukt af wat aangevinkt staat. Zou ze eigen queries doen,
+dan ligt er bij de arts vroeg of laat iets anders dan wat familie zag.
+`BLOKKEN` in `blokken.ts` is om dezelfde reden één lijst voor beide
+schermen.
+
+Op papier geen balken en geen kleuren: browsers laten achtergronden weg bij
+het afdrukken, en een arts leest liever een getal met de teller en de noemer
+erbij. Het worden tabellen, alles zwart — ook wat op het scherm grijs is,
+want een verslag wordt gekopieerd en lichtgrijs overleeft dat niet. De
+tabelkoppen herhalen zich bovenaan een volgend blad (`display:
+table-header-group`) en een rij valt nooit over twee bladen.
+
+Er staat geen PDF-bibliotheek in de bundel: de browser maakt de PDF via
+"Opslaan als PDF" in het printvenster. Werkt op een beheerde computer zonder
+installatie, en familie ziet vooraf precies wat ze krijgt.
+
+Drie dingen staan er altijd op, ook als familie ze niet zou aanvinken:
+
+- **De dekking** — zonder het aantal dagen is elk percentage misleidend.
+- **Wat "bevestigd" wel en niet betekent** — bovenáán, vóór de cijfers. Wie
+  de kop leest en doorbladert, moet die beperking al gezien hebben.
+- **Wat er niet op staat.** Met het onderscheid tussen *weggelaten door
+  familie* (die gegevens bestaan) en *geen gegevens* (er is niets
+  vastgelegd). Dat verschil betekent voor een arts iets heel anders. Zonder
+  deze regel cureert familie zonder het te beseffen wat de arts ziet, en
+  weet de arts niet wat hij mist. Zie `nietOpgenomen()` en de tests ernaast.
 
 ## Offline
 
