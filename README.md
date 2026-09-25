@@ -638,6 +638,34 @@ terugvallen op iets lelijks altijd beter dan stoppen. Dat geldt ook voor
 Er staan tests op alle drie: `src/lib/i18n.test.ts` en
 `src/features/settings/volledig.test.ts`.
 
+## Wit scherm na een nieuwe versie
+
+Een browser kan na een deploy nog een oude `index.html` hebben — uit de
+service worker of uit zijn eigen cache. Die verwijst naar bestanden die op
+de server niet meer bestaan. Cloudflare Pages stuurt voor elk onbekend
+adres `index.html` terug, de browser weigert dat als script of stylesheet
+("Expected a JavaScript-or-Wasm module script but the server responded with
+a MIME type of text/html"), en er verschijnt niets.
+
+Op een computer los je dat op met een harde herlading. Op de tablet in de
+keuken is er niemand die dat weet, dus doet de app het zelf. In
+`index.html` staat een kleine bewaker die luistert of een bestand onder
+`/assets/` niet laadt; gebeurt dat, dan gooit hij de service worker en de
+caches weg en laadt één keer opnieuw.
+
+Twee dingen die daaraan vastzitten, en allebei zijn ze getest:
+
+- **Precies één keer**, bewaakt met `sessionStorage`. Een herlaadlus is
+  erger dan een wit scherm: daar komt niemand nog uit.
+- **Alleen onze eigen bestanden.** Eerst keek de bewaker naar elke
+  mislukte `<script>` of `<link>`, en dan herlaadde hij ook wanneer alleen
+  het lettertype van Google niet binnenkwam — offline of op een netwerk dat
+  Google Fonts blokkeert. De app werkt dan gewoon, met een ander lettertype.
+
+De service worker neemt nu ook meteen over (`skipWaiting`, `clientsClaim`,
+`cleanupOutdatedCaches`) in plaats van te wachten tot elk tabblad gesloten
+is. Op een tablet die maandenlang aan staat gebeurt dat laatste nooit.
+
 ## Offline
 
 De query-cache wordt een dag lang in localStorage bewaard, zodat de tablet

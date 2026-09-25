@@ -31,6 +31,13 @@ export default defineConfig({
         // wordt gegenereerd. Het bestand staat in public/ en wordt dus
         // niet gebundeld.
         importScripts: ['push-sw.js'],
+        // Een nieuwe versie neemt meteen over in plaats van te wachten tot
+        // elk tabblad gesloten is. Op een tablet die maandenlang aan staat
+        // gebeurt dat laatste nooit, en dan blijft de oude index.html naar
+        // bestanden wijzen die na een deploy niet meer bestaan.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: '/index.html',
         runtimeCaching: [

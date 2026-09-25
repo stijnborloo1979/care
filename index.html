@@ -13,6 +13,76 @@
       rel="stylesheet"
     />
     <title>Thuis</title>
+
+    <!--
+      Zelfherstel bij een wit scherm.
+
+      Na een nieuwe versie kan een browser nog een oude index.html hebben —
+      uit de service worker of uit zijn eigen cache. Die verwijst dan naar
+      bestanden die op de server niet meer bestaan; de server stuurt voor
+      elk van die adressen index.html terug, de browser weigert dat als
+      script of stylesheet, en er verschijnt niets.
+
+      Op een computer los je dat op met een harde herlading. Op de tablet
+      in de keuken is er niemand die dat weet. Dus doet de app het zelf:
+      één keer de service worker en de caches weggooien en opnieuw laden.
+
+      Precies één keer, bewaakt met sessionStorage: een herlaadlus is
+      erger dan een wit scherm, want daar komt niemand nog uit.
+    -->
+    <script>
+      window.addEventListener(
+        'error',
+        function (e) {
+          var el = e.target
+          if (!el || (el.tagName !== 'SCRIPT' && el.tagName !== 'LINK')) return
+
+          // Alleen onze eigen bestanden. Een lettertype van Google dat niet
+          // laadt — geen verbinding, of geblokkeerd op een bedrijfsnetwerk —
+          // is geen reden om te herladen: de app werkt dan gewoon met een
+          // ander lettertype.
+          var bron = el.src || el.href || ''
+          if (bron.indexOf(location.origin + '/assets/') !== 0) return
+
+          try {
+            if (sessionStorage.getItem('thuis.herstel')) return
+            sessionStorage.setItem('thuis.herstel', '1')
+          } catch (_) {
+            return
+          }
+
+          var klaar = function () {
+            location.reload()
+          }
+          var taken = []
+          if (window.caches) {
+            taken.push(
+              caches.keys().then(function (namen) {
+                return Promise.all(
+                  namen.map(function (n) {
+                    return caches.delete(n)
+                  }),
+                )
+              }),
+            )
+          }
+          if (navigator.serviceWorker) {
+            taken.push(
+              navigator.serviceWorker.getRegistrations().then(function (rs) {
+                return Promise.all(
+                  rs.map(function (r) {
+                    return r.unregister()
+                  }),
+                )
+              }),
+            )
+          }
+          // Wat er ook misgaat bij het opruimen: herladen gebeurt hoe dan ook.
+          Promise.all(taken).then(klaar, klaar)
+        },
+        true,
+      )
+    </script>
   </head>
   <body>
     <div id="root"></div>
