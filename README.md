@@ -374,6 +374,13 @@ ziet, wat voor de voorleesfunctie en het toetsenbord de volgorde is die
 telt. Het rooster in `index.css` is daardoor vier regels: één kolom smal,
 twee vanaf 40rem, één bij grote tekst.
 
+De standaardindeling is één grote kaart bovenaan en daaronder vier halve,
+zodat een tablet twee kolommen toont zoals het scherm er voorheen liggend
+uitzag. Een telefoon krijgt alles vol-breed. Vanaf 48rem zijn er twee
+kolommen en mag het scherm tot 52rem breed worden — met twee kolommen
+bepaalt de kolom de regellengte, niet het venster, dus de smalle band uit
+het oude ontwerp is daar niet meer nodig.
+
 De regels staan in `src/features/layout/modules.ts`:
 
 - **"Wat nu?" staat altijd bovenaan, vol-breed, en kan niet weg.** Dat is de

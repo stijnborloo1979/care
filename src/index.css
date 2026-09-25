@@ -234,7 +234,17 @@
   min-width: 0;
 }
 
-@media (min-width: 40rem) {
+/* Vanaf 48rem twee kolommen — ongeveer een tablet. Bewust niet vanaf
+   40rem: een telefoon in liggende stand haalt dat ook, en daar wordt een
+   halve kolom nog geen 300 px breed. */
+@media (min-width: 48rem) {
+  /* Met twee kolommen mag het scherm breder: de regellengte wordt niet
+     bepaald door het venster maar door de kolom. Staand op een tablet
+     stond er anders 12 cm wit aan beide kanten. */
+  .persoonsscherm main.vandaag {
+    max-width: 52rem;
+  }
+
   .vandaag .tegels {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;

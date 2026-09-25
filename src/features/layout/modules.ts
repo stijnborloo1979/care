@@ -68,14 +68,12 @@ export const MODULES: ModuleDef[] = [
     naam: 'Vandaag',
     uitleg: 'De hele dag als tijdlijn, met wat al gedaan is.',
     icoon: 'agenda',
-    altijdVol: true,
   },
   {
     id: 'berichten',
     naam: 'Berichten',
     uitleg: 'Wat familie stuurde, met de mogelijkheid te antwoorden.',
     icoon: 'bellen',
-    altijdVol: true,
   },
   {
     id: 'onthoud',
@@ -115,16 +113,20 @@ export function moduleVan(id: string): ModuleDef | undefined {
 }
 
 /**
- * De indeling waarmee een nieuw huishouden begint. Dit is wat de app deed
- * voordat familie iets kon kiezen, zodat niemand met een leeg scherm start.
+ * De indeling waarmee een nieuw huishouden begint.
+ *
+ * Eén grote kaart bovenaan en daaronder vier halve: op een tablet staan
+ * die twee aan twee naast elkaar, zoals het scherm er voorheen liggend
+ * uitzag. Op een telefoon is alles vanzelf vol-breed, want daar past niets
+ * naast elkaar.
  */
 export const STANDAARD: Indeling = {
   versie: 1,
   tegels: [
     { id: 'nu', maat: 'vol' },
-    { id: 'daarna', maat: 'vol' },
-    { id: 'berichten', maat: 'vol' },
-    { id: 'vandaag', maat: 'vol' },
+    { id: 'daarna', maat: 'half' },
+    { id: 'berichten', maat: 'half' },
+    { id: 'vandaag', maat: 'half' },
     { id: 'onthoud', maat: 'half' },
     { id: 'knoppen', maat: 'vol' },
   ],

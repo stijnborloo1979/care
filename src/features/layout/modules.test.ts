@@ -51,8 +51,8 @@ describe('normaliseer', () => {
   })
 
   it('maakt een tegel die nooit half kan, vol', () => {
-    const uit = normaliseer({ versie: 1, tegels: [t('nu', 'vol'), t('vandaag', 'half')] })
-    expect(uit.tegels.find((x) => x.id === 'vandaag')?.maat).toBe('vol')
+    const uit = normaliseer({ versie: 1, tegels: [t('nu', 'vol'), t('knoppen', 'half')] })
+    expect(uit.tegels.find((x) => x.id === 'knoppen')?.maat).toBe('vol')
   })
 
   it('maakt bij grote tekst alle halve tegels vol', () => {
@@ -81,6 +81,22 @@ describe('normaliseer', () => {
 
   it('de standaardindeling komt er ongewijzigd doorheen', () => {
     expect(normaliseer(STANDAARD)).toEqual(STANDAARD)
+  })
+
+  it('zet in de standaardindeling de halve tegels twee aan twee', () => {
+    // Anders blijft er op een tablet een halve kolom leeg naast een tegel.
+    const rij: string[] = []
+    let kolom = 0
+    for (const x of STANDAARD.tegels) {
+      if (x.maat === 'vol') {
+        if (kolom === 1) rij.push('gat')
+        kolom = 0
+      } else {
+        kolom = kolom === 1 ? 0 : 1
+      }
+    }
+    if (kolom === 1) rij.push('gat')
+    expect(rij).toEqual([])
   })
 })
 
