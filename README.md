@@ -98,6 +98,8 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 26. `26_analyse.sql` — de analyses achter `/familie/analyse` en het
     verslag: dagritme, weekpatroon, nachtelijke activiteit en dekking.
     Draai dit na 25.
+27. `27_layout.sql` — de indeling van het dagscherm van de persoon, zodat
+    familie zelf bepaalt welke blokken erop staan.
 
 ## Inloggen
 
@@ -197,11 +199,12 @@ navigation die op elk scherm dezelfde vier bestemmingen toont.
 - `/familie/instellingen` — leesbaarheid en privacy.
 - `/familie` — dashboard, met sidebar op desktop en tabs op mobiel.
   Daaronder: `planning`, `wie`, `huis`, `fotos`, `berichten`, `analyse`,
-  `taken`, `logboek`, `documenten`, `weetjes`, `instellingen`.
+  `indeling`, `taken`, `logboek`, `documenten`, `weetjes`, `instellingen`.
 - `/levensboek`, `/verhaal/:id` — het levensboek en één verhaal na het
   scannen van een QR-code.
 - `/verslag?dagen=90` — het verslag voor de dokter. Staat bewust buiten de
   familie-opmaak: op papier hoort er geen zijbalk bij.
+- `/familie/indeling` — familie stelt het dagscherm van de persoon samen.
 
 ## Wat er al werkt
 
@@ -344,6 +347,62 @@ vaker bevestigt in plaats van de persoon zelf.
 **Bevestigd is niet ingenomen.** Dit legt vast dat er op een knop gedrukt
 is. Dat staat in de database-commentaar, op het scherm en hoort ook op elk
 verslag te staan.
+
+## De indeling van het dagscherm
+
+Niet elk huishouden heeft hetzelfde nodig. Op `/familie/indeling` stelt
+familie samen welke blokken op het dagscherm van de persoon staan, in welke
+volgorde en hoe groot. Het verandert meteen op de tablet; niemand hoeft die
+aan te raken.
+
+Het model is **volgorde en grootte, nooit posities**:
+
+```json
+{ "versie": 1, "tegels": [
+    { "id": "nu",        "maat": "vol"  },
+    { "id": "daarna",    "maat": "vol"  },
+    { "id": "berichten", "maat": "half" }
+] }
+```
+
+Dat is de hele truc. Met x/y klopt een indeling alleen op het scherm waarop
+ze gemaakt is: draait de tablet, zet de persoon de tekst groter, of bewerkt
+familie het op een telefoon, dan schuift alles over elkaar. Met volgorde en
+grootte kan niets overlappen, blijven er geen gaten staan, herschikt het
+zich vanzelf — en is de volgorde in de code per definitie gelijk aan wat je
+ziet, wat voor de voorleesfunctie en het toetsenbord de volgorde is die
+telt. Het rooster in `index.css` is daardoor vier regels: één kolom smal,
+twee vanaf 40rem, één bij grote tekst.
+
+De regels staan in `src/features/layout/modules.ts`:
+
+- **"Wat nu?" staat altijd bovenaan, vol-breed, en kan niet weg.** Dat is de
+  vraag waar de app om draait; die hoort niet per huishouden ergens anders
+  te staan.
+- **Zes tegels is het maximum.** Niet omdat er niet meer past, maar omdat
+  een zevende het gesprek overslaat dat je juist wil: wat heeft zij écht
+  nodig?
+- **Sommige blokken kunnen nooit half** — een tijdlijn of een rij knoppen
+  wordt in een halve kolom onleesbaar.
+- **Bij grote tekst of eenvoudige modus worden halve tegels vanzelf
+  vol-breed.** Familie hoeft daar niet aan te denken; de editor biedt half
+  dan niet eens aan.
+
+`normaliseer()` past die regels toe en draait op twee plaatsen: in de
+editor, zodat familie niets kan bewaren dat niet kan, en op het scherm van
+de persoon, zodat een oude of half kapotte indeling daar nooit iets stuk
+maakt. Die tweede is de belangrijkste — dat scherm hoort altijd te werken,
+dus een onbekende module verdwijnt er stilletjes in plaats van een
+foutmelding te tonen. Daar staan tests op.
+
+Tikken, niet slepen. Slepen is op een telefoon lastig, met een toetsenbord
+onmogelijk en met de voorleesfunctie niet te doen — en familie zit vaak op
+een telefoon.
+
+Bewaard in `household.home_layout`, net als de weergave-instellingen, en
+eerst gelezen uit localStorage: op de tablet is verspringende tekst erger
+dan een halve seconde oude informatie. Zorgverleners kunnen het niet
+wijzigen; de persoon zelf wel.
 
 ## Analyse en het verslag voor de dokter
 

@@ -19,6 +19,7 @@ const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie/berichten', label: 'Berichten', icoon: 'praten' },
   { to: '/familie/taken', label: 'Taken', icoon: 'taken' },
   { to: '/familie/analyse', label: 'Analyse', icoon: 'dashboard' },
+  { to: '/familie/indeling', label: 'Indeling', icoon: 'instellingen' },
   { to: '/familie/logboek', label: 'Zorglogboek', icoon: 'logboek' },
   { to: '/familie/documenten', label: 'Documenten', icoon: 'documenten' },
   { to: '/familie/delen', label: 'Wie ziet wat', icoon: 'wie' },

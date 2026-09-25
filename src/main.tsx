@@ -54,6 +54,7 @@ const Taken = lazy(() => import("./features/tasks/Taken"));
 const Boek = lazy(() => import("./features/stories/Boek"));
 const Analyse = lazy(() => import("./features/analyse/Analyse"));
 const Verslag = lazy(() => import("./features/analyse/Verslag"));
+const IndelingPagina = lazy(() => import("./features/layout/Indeling"));
 const VerhaalScherm = lazy(() => import("./features/stories/VerhaalScherm"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const Radio = lazy(() => import("./features/radio/Radio"));
@@ -229,6 +230,7 @@ if (!configuratieOk) {
                     <Route path="fotos" element={<MemoriesPage />} />
                     <Route path="berichten" element={<MessagesPage />} />
                     <Route path="analyse" element={<Analyse />} />
+                    <Route path="indeling" element={<IndelingPagina />} />
                     <Route path="taken" element={<Taken />} />
                     <Route path="logboek" element={<CareLog />} />
                     <Route path="documenten" element={<Documents />} />
