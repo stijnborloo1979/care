@@ -26,6 +26,18 @@ export interface DisplayPrefs {
   /** Nachtscherm van dit uur tot dat uur (0–23). Gelijk betekent: geen nachtscherm. */
   nachtVan: number
   nachtTot: number
+  /**
+   * Kan dit toestel echt telefoneren?
+   *
+   * Standaard nee. Een tablet zonder simkaart kan het niet, en dat is het
+   * gewone geval. Staat dit verkeerd op ja, dan toont het Help-scherm een
+   * knop "112" die niets doet — en dat is de gevaarlijkste knop die je kan
+   * maken. Liever een eerlijke instructie op een toestel dat het wél kon,
+   * dan een lege belofte op een toestel dat het niet kan.
+   */
+  kanBellen: boolean
+  /** Wat zij moet doen bij nood als dit toestel niet kan bellen. */
+  noodplan: string
 }
 
 export const STANDAARD: DisplayPrefs = {
@@ -45,6 +57,8 @@ export const STANDAARD: DisplayPrefs = {
   kioskTerug: 5,
   nachtVan: 22,
   nachtTot: 7,
+  kanBellen: false,
+  noodplan: '',
 }
 
 const LOKAAL = 'thuis.display'

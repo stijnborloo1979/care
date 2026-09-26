@@ -57,3 +57,15 @@ export async function vraagGesprek(householdId: string) {
   const { error } = await supabase.rpc('vraag_gesprek', { hh: householdId })
   if (error) throw error
 }
+
+/**
+ * "Ik heb hulp nodig."
+ *
+ * Geen noodnummer en het mag er nooit voor doorgaan. Het is wat een toestel
+ * zonder telefoon wél kan: familie meteen laten weten dat er iets is.
+ * Niveau alert, hoogstens één melding per twee minuten.
+ */
+export async function vraagHulp(householdId: string) {
+  const { error } = await supabase.rpc('vraag_hulp', { hh: householdId })
+  if (error) throw error
+}

@@ -46,6 +46,48 @@ export default function Settings() {
           de rest van deze pagina gaat over haar scherm. */}
       <JouwNaam />
 
+      {/* Vlak onder de naam, want dit is de instelling met de grootste
+          gevolgen op dit scherm: ze bepaalt of er een 112-knop staat. */}
+      <section className="rounded-card bg-surface p-6 shadow-card">
+        <h2 className="text-lg font-bold">Bellen met dit toestel</h2>
+        <p className="mt-1 max-w-[62ch] text-ink-soft">
+          Een tablet zonder simkaart kan niet telefoneren. Staat dit op nee, dan toont het
+          Help-scherm van {voornaam} geen knop "112" — want die zou niets doen, en daar drukt iemand
+          op in een echte noodsituatie.
+        </p>
+
+        <Rij
+          titel="Dit toestel kan telefoneren"
+          onder="Zet dit alleen aan bij een telefoon of een tablet met simkaart. Twijfel je? Probeer het uit op het toestel van de persoon."
+        >
+          <Schakelaar
+            aan={prefs.kanBellen}
+            label="Dit toestel kan telefoneren"
+            onClick={() => zet.mutate({ kanBellen: !prefs.kanBellen })}
+          />
+        </Rij>
+
+        {!prefs.kanBellen ? (
+          <label className="mt-4 block">
+            <span className="font-semibold">Wat moet ze doen bij nood?</span>
+            <span className="mt-1 block text-sm text-ink-soft">
+              Dit staat op haar Help-scherm in plaats van de 112-knop. Wees heel concreet: waar de
+              telefoon ligt, bij wie ze kan aanbellen.
+            </span>
+            <textarea
+              defaultValue={prefs.noodplan}
+              onBlur={(e) => {
+                const nu = e.target.value.trim()
+                if (nu !== prefs.noodplan) zet.mutate({ noodplan: nu })
+              }}
+              rows={2}
+              placeholder="Bel 112 met de telefoon in de gang, naast de voordeur. Of bel aan bij de buren op nummer 14."
+              className="mt-2 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
+            />
+          </label>
+        ) : null}
+      </section>
+
       <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Leesbaarheid</h2>
 

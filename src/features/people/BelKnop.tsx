@@ -22,7 +22,16 @@ import type { PersonCard } from '../../services/people'
  * Na het vragen verandert de knop in een geruststelling en niet in een
  * vinkje: "Els weet het. Ze belt je zo terug." Dat is wat ze wil weten.
  */
-export default function BelKnop({ p, householdId }: { p: PersonCard; householdId: string }) {
+export default function BelKnop({
+  p,
+  householdId,
+  kanBellen,
+}: {
+  p: PersonCard
+  householdId: string
+  /** Kan dit toestel echt telefoneren? Zo niet, dan wordt een nummer tekst. */
+  kanBellen: boolean
+}) {
   const [gevraagd, setGevraagd] = useState(false)
 
   const vraag = useMutation({
@@ -33,8 +42,24 @@ export default function BelKnop({ p, householdId }: { p: PersonCard; householdId
   const stijl =
     'flex min-h-[5rem] w-full items-center gap-4 rounded-card border-[1.5px] border-line-strong bg-surface px-5 text-left text-xl font-bold shadow-card'
 
-  // Geen account: de gewone telefoonlink blijft de beste gok.
-  if (!p.profile_id) {
+  // Familie bereik je via de melding, of hun kaart nu aan een account
+  // gekoppeld is of niet — die koppeling wordt in de praktijk bijna nooit
+  // gelegd, en dat had tot gevolg dat hier toch weer een telefoonlink
+  // stond. Voor de huisarts of de buurman blijft de telefoonlink kloppen:
+  // die krijgen geen melding.
+  if (p.kind !== 'family') {
+    // Kan dit toestel niet bellen, dan is een telefoonlink een lege
+    // belofte. Het nummer zelf is dan wél bruikbaar: iemand kan het
+    // overtypen op een gewone telefoon.
+    if (!kanBellen) {
+      return (
+        <div className={stijl.replace('items-center', 'flex-col items-start justify-center')}>
+          <span>{p.name}</span>
+          <span className="text-lg font-semibold tabular-nums text-ink-soft">{p.phone}</span>
+        </div>
+      )
+    }
+
     return (
       <a href={`tel:${(p.phone ?? '').replace(/\s/g, '')}`} className={stijl}>
         <span className="text-3xl" aria-hidden="true">

@@ -499,6 +499,47 @@ lijst in de handen van een verpleegkundige is gevaarlijker dan geen lijst.
 Dat ze gewend is om acht uur iets te krijgen, is zorgcontext en geen
 voorschrift — dat staat er dus wel, met die zin erbij.
 
+## De 112-knop die niet kon bellen
+
+Op het Help-scherm stond "Noodnummer 112" als `tel:`-link. Op een tablet
+zonder simkaart doet die niets. Dat is de gevaarlijkste knop die je kan
+maken: iemand drukt erop in een echte noodsituatie en wacht op hulp die
+niet komt.
+
+De app kan niet zelf weten of een toestel kan bellen — de browser zegt dat
+niet. Dus vraagt ze het: **"Dit toestel kan telefoneren"** bij de
+instellingen, en **standaard staat het op nee**. Dat is de veilige kant op
+gokken: een eerlijke instructie op een toestel dat het wél kon, is minder
+erg dan een lege belofte op een toestel dat het niet kan. En het gewone
+geval is een tablet in de keuken.
+
+Staat het op nee, dan:
+
+- wordt de 112-knop een blok met wat familie daar invulde — waar de
+  telefoon ligt, bij wie ze kan aanbellen. Concreet, want "bel 112" zonder
+  telefoon is geen instructie.
+- wordt het nummer van de huisarts leesbare tekst in plaats van een link
+  die niets doet. Overtypen op een gewone telefoon kan wel.
+- staat er een knop die wél werkt: **"Laat mijn familie weten dat ik hulp
+  nodig heb"** (`vraag_hulp()`, niveau alert, hoogstens één melding per
+  twee minuten).
+
+Die knop is bewust niet rood en staat bewust ónder het 112-blok. Rood en
+bovenaan zou hem tot noodknop maken, en dat is hij niet. Wat hij doet, zegt
+hij letterlijk: familie krijgt een bericht.
+
+### Waarom de terugbelknop niet verscheen
+
+`BelKnop` koos op `person_card.profile_id` — of de kaart van dat familielid
+aan een app-account gekoppeld is. Die koppeling wordt in de praktijk bijna
+nooit gelegd: het beheerscherm zet hem niet, en in de demo-gegevens heeft
+alleen de beheerder er een. Dus viel bijna elk familielid terug op een
+telefoonlink.
+
+Nu kiest hij op `kind`. Familie is bereikbaar via de melding, gekoppeld of
+niet; de huisarts en de buurman krijgen geen melding, dus voor hen blijft
+een nummer het juiste antwoord.
+
 ## Bellen gaat één kant op
 
 `IncomingCall` — het stuk dat laat rinkelen en opneemt — hangt alleen in de
