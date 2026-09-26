@@ -170,7 +170,7 @@ function PersonEditor({
       </div>
 
       <div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-semibold text-ink-soft">Wie is dit? In de je-vorm</span>
           <DictateButton onTekst={(t) => setDescription(t)} />
         </div>

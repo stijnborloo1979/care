@@ -387,7 +387,7 @@ function ItemEditor({
         </label>
 
         <div className="mt-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-semibold text-ink-soft">
               Wat moet de persoon weten?
             </span>

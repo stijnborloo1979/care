@@ -354,27 +354,63 @@ function Dagritme({ rijen }: { rijen: DagritmeRij[] }) {
   )
 }
 
+/**
+ * Zeven kolommen naast elkaar, behalve op een telefoon.
+ *
+ * Op 360 px is elke kolom nog geen 45 px breed en loopt "85 %" tegen de
+ * rand van zijn vakje. Horizontaal scrollen is hier geen uitweg — dat is
+ * nergens in deze app een uitweg — dus worden het regels. Dezelfde
+ * gegevens, een andere vorm; dat is wat een telefoon vraagt.
+ */
 function Weekpatroon({ rijen }: { rijen: WeekRij[] }) {
+  const cijfers = rijen.map((r) => ({
+    r,
+    pct: r.med_momenten > 0 ? Math.round((r.med_bevestigd / r.med_momenten) * 100) : null,
+    zelf: r.med_bevestigd > 0 ? Math.round((r.med_zelf / r.med_bevestigd) * 100) : 0,
+  }))
+
   return (
-    <div className="grid grid-cols-7 gap-2">
-      {rijen.map((r) => {
-        const pct = r.med_momenten > 0 ? Math.round((r.med_bevestigd / r.med_momenten) * 100) : null
-        const zelf = r.med_bevestigd > 0 ? Math.round((r.med_zelf / r.med_bevestigd) * 100) : 0
-        return (
+    <>
+      {/* Telefoon: één regel per dag, met de balk liggend. */}
+      <ul className="list-none space-y-2 p-0 sm:hidden">
+        {cijfers.map(({ r, pct, zelf }) => (
+          <li key={r.weekdag} className="flex items-center gap-3">
+            {/* Breed genoeg voor "donderdag", anders raakt het woord de balk. */}
+            <span className="w-[6.5rem] shrink-0 font-semibold capitalize">
+              {WEEKDAGEN[r.weekdag - 1]}
+            </span>
+            <span className="flex h-3 flex-1 overflow-hidden rounded-pill bg-surface-deep">
+              <span className="bg-accent-ink" style={{ width: `${((pct ?? 0) * zelf) / 100}%` }} />
+              <span
+                className="bg-accent"
+                style={{ width: `${(pct ?? 0) - ((pct ?? 0) * zelf) / 100}%` }}
+              />
+            </span>
+            <span className="w-20 shrink-0 text-right text-sm tabular-nums text-ink-soft">
+              {pct === null ? '—' : `${pct} %`} · {r.dagen}d
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {/* Vanaf een tablet: de zeven kolommen, want dan is de vergelijking
+          tussen dagen in één oogopslag te maken. */}
+      <div className="hidden grid-cols-7 gap-2 sm:grid">
+        {cijfers.map(({ r, pct, zelf }) => (
           <div key={r.weekdag} className="rounded-2xl border border-line bg-surface-soft p-2 text-center">
             <p className="text-xs font-bold text-ink-faint">{WEEKDAGEN[r.weekdag - 1].slice(0, 2)}</p>
             <p className="mt-1 text-lg font-extrabold tabular-nums">{pct === null ? '—' : `${pct}%`}</p>
             <div className="mx-auto mt-1 h-16 w-3 overflow-hidden rounded-pill bg-surface-deep">
               <div className="flex h-full w-full flex-col justify-end">
-                <span className="bg-accent" style={{ height: `${(pct ?? 0) - (((pct ?? 0) * zelf) / 100)}%` }} />
+                <span className="bg-accent" style={{ height: `${(pct ?? 0) - ((pct ?? 0) * zelf) / 100}%` }} />
                 <span className="bg-accent-ink" style={{ height: `${((pct ?? 0) * zelf) / 100}%` }} />
               </div>
             </div>
             <p className="mt-1 text-xs text-ink-faint">{r.dagen}d</p>
           </div>
-        )
-      })}
-    </div>
+        ))}
+      </div>
+    </>
   )
 }
 

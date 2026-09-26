@@ -93,7 +93,7 @@ export default function CareLog() {
         </label>
 
         <div className="mt-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-semibold text-ink-soft">Notitie, mag leeg blijven</span>
             <DictateButton onTekst={(t) => setNote((v) => (v ? v + ' ' + t : t))} />
           </div>

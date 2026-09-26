@@ -173,7 +173,7 @@ export default function Delen() {
                 actief ? 'bg-accent-soft ring-2 ring-accent' : 'bg-surface'
               } disabled:cursor-default`}
             >
-              <span className="flex items-center justify-between gap-3">
+              <span className="flex flex-wrap items-center justify-between gap-3">
                 <span className="text-lg font-bold">{n.titel}</span>
                 {actief ? (
                   <span className="rounded-pill bg-accent-ink px-3 py-0.5 text-sm font-semibold text-white">

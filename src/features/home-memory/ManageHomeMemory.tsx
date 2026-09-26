@@ -325,7 +325,7 @@ function ItemForm({
       </div>
 
       <div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-semibold text-ink-soft">Waar ligt of staat het?</span>
           <DictateButton onTekst={(t) => setWhere(t)} />
         </div>
@@ -338,7 +338,7 @@ function ItemForm({
       </div>
 
       <div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-semibold text-ink-soft">Stappen, één per lijn</span>
           {/* Elke ingesproken zin wordt een eigen stap. */}
           <DictateButton
@@ -365,12 +365,12 @@ function ItemForm({
             {(bestaand?.item_step ?? []).map((stap) => (
               <li
                 key={stap.id}
-                className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-2"
+                className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-2"
               >
                 <div className="w-16 flex-none">
                   <StoragePhoto path={stap.photo_path} emoji="📷" alt={stap.body} />
                 </div>
-                <span className="min-w-0 flex-1 text-sm">{stap.body}</span>
+                <span className="min-w-[8rem] flex-1 text-sm">{stap.body}</span>
                 <FotoKiezer
                   label={stap.photo_path ? 'Andere foto' : 'Foto'}
                   onKies={async (bestand) => {

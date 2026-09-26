@@ -399,6 +399,29 @@ naar drie kolommen. Drie kolommen in een kolom van 36rem maakt elke foto
 zo'n 170 px breed, en dan is een kamer niet meer te herkennen — het enige
 waar die tegel voor dient.
 
+## Op een telefoon
+
+Twee soorten fouten, en het is de moeite ze uit elkaar te houden.
+
+**Een rij die niet wil wijken.** Overal in de familieschermen staat een
+label naast een knop: `flex items-center justify-between`. `DictateButton`
+heeft `shrink-0`, dus bij weinig ruimte krimpt het label en niet de knop —
+en dan wordt "Waar ligt of staat het?" één woord per regel terwijl de knop
+buiten beeld schuift. `flex-wrap` erbij lost het op: op een breed scherm
+verandert er niets, op een smal wipt de knop naar de volgende regel. Acht
+plaatsen, één woord per plaats.
+
+**Een vorm die niet past.** Het weekpatroon stond in zeven kolommen. Op
+360 px is elke kolom nog geen 45 px en loopt "85 %" tegen de rand van zijn
+vakje. Daar helpt geen enkele aanpassing aan de maten: zeven kolommen passen
+daar gewoon niet. Horizontaal scrollen is hier geen uitweg — dat is nergens
+in deze app een uitweg — dus worden het regels, één per dag, met de balk
+liggend. Dezelfde gegevens, een andere vorm. Vanaf `sm` komen de kolommen
+terug, want dan is de vergelijking tussen dagen in één oogopslag te maken.
+
+Gemeten op 360, 390, 412 en 820 px: nergens horizontale overloop, en geen
+enkel element buiten beeld.
+
 ## De dag klaarzetten zonder op de nacht te wachten
 
 De agenda van de persoon wordt 's nachts gemaakt uit haar routines, door

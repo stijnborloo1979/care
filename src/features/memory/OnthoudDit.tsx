@@ -92,7 +92,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
           }}
           className="mt-3 rounded-card bg-surface p-4 shadow-card"
         >
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <label htmlFor="onthoud-tekst" className="text-sm font-semibold text-ink-soft">
               Wat wil je onthouden?
             </label>
