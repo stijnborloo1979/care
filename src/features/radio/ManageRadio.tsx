@@ -116,7 +116,7 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
             value={zoek}
             onChange={(e) => setZoek(e.target.value)}
             placeholder="Radio 2, Nostalgie, Klara…"
-            className="min-h-touch min-w-[12rem] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+            className="min-h-touch min-w-[min(12rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
           <select
             value={land}

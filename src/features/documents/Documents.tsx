@@ -72,7 +72,7 @@ export default function Documents() {
         className="rounded-card bg-surface p-6 shadow-card"
       >
         <div className="flex flex-wrap gap-3">
-          <label className="min-w-[12rem] flex-1">
+          <label className="min-w-[min(12rem,100%)] flex-1">
             <span className="text-sm font-semibold text-ink-soft">Naam</span>
             <input
               required
@@ -82,7 +82,7 @@ export default function Documents() {
               className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             />
           </label>
-          <label className="min-w-[10rem]">
+          <label className="min-w-[min(10rem,100%)]">
             <span className="text-sm font-semibold text-ink-soft">Categorie</span>
             <select
               value={category}

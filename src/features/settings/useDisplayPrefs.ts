@@ -3,6 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { isTaal, taalVanToestel, zetTaal, type Taal } from '../../lib/i18n'
 
+/** Waar de app mag bellen. Zie kanBellen. */
+export type Bellen = 'nee' | 'telefoon' | 'ja'
+
+const BELLEN: Bellen[] = ['nee', 'telefoon', 'ja']
+
 export interface DisplayPrefs {
   /** Taal van de schermen, de datums en de stem. */
   taal: Taal
@@ -27,15 +32,23 @@ export interface DisplayPrefs {
   nachtVan: number
   nachtTot: number
   /**
-   * Kan dit toestel echt telefoneren?
+   * Mag de app bellen, en waar?
    *
-   * Standaard nee. Een tablet zonder simkaart kan het niet, en dat is het
-   * gewone geval. Staat dit verkeerd op ja, dan toont het Help-scherm een
-   * knop "112" die niets doet — en dat is de gevaarlijkste knop die je kan
-   * maken. Liever een eerlijke instructie op een toestel dat het wél kon,
-   * dan een lege belofte op een toestel dat het niet kan.
+   * Eén instelling voor alle toestellen van de persoon, en dat wringt:
+   * dezelfde keuze geldt voor de tablet in de living en voor haar telefoon
+   * in haar zak. Een harde ja zou op die tablet een knop "112" tonen die
+   * niets doet, en dat is de gevaarlijkste knop die je kan maken.
+   *
+   * Daarom drie standen in plaats van twee, waarvan de middelste per
+   * toestel beslist:
+   *
+   *   - 'telefoon' — alleen op een telefoon. Standaard. Een telefoon kan
+   *     altijd bellen, dus hier is een belknop nooit een lege belofte.
+   *   - 'ja' — overal. Voor een tablet met simkaart: die kan het wél, maar
+   *     dat kan de app niet zien. Familie weet het.
+   *   - 'nee' — nergens. Dan staat er wat ze in plaats daarvan moet doen.
    */
-  kanBellen: boolean
+  kanBellen: Bellen
   /** Wat zij moet doen bij nood als dit toestel niet kan bellen. */
   noodplan: string
 }
@@ -57,7 +70,7 @@ export const STANDAARD: DisplayPrefs = {
   kioskTerug: 5,
   nachtVan: 22,
   nachtTot: 7,
-  kanBellen: false,
+  kanBellen: 'telefoon',
   noodplan: '',
 }
 
@@ -93,7 +106,49 @@ export function volledig(ruw: unknown): DisplayPrefs {
   const deel = ruw && typeof ruw === 'object' ? (ruw as Partial<DisplayPrefs>) : {}
   const p = { ...STANDAARD, ...deel }
   if (!isTaal(p.taal)) p.taal = STANDAARD.taal
+  // kanBellen was een ja/nee. Rijen van voor die wijziging staan nog in de
+  // database, en een boolean die als stand doorglipt zou 'nee' noch 'ja'
+  // zijn: dan viel de keuze terug op de standaard en kreeg een tablet
+  // zonder simkaart alsnog een belknop. Wat familie ooit koos, blijft
+  // staan.
+  const ruwBellen: unknown = p.kanBellen
+  if (typeof ruwBellen === 'boolean') p.kanBellen = ruwBellen ? 'ja' : 'nee'
+  else if (!BELLEN.includes(p.kanBellen)) p.kanBellen = STANDAARD.kanBellen
+  if (typeof p.noodplan !== 'string') p.noodplan = ''
   return p
+}
+
+/**
+ * Is dit toestel een telefoon?
+ *
+ * Een simkaart kan een browser niet zien, een telefoon wel — en dat is
+ * genoeg, want een telefoon kan altijd bellen. Vergissen mag hier maar in
+ * één richting: liever een telefoon die de app voor een tablet houdt (dan
+ * staat er een instructie in plaats van een knop) dan een tablet die voor
+ * telefoon doorgaat (dan staat er een knop "112" die niets doet).
+ *
+ * Daarom alleen de zekere gevallen: userAgentData.mobile waar het bestaat
+ * (Chrome, Android, Edge — een Android-tablet zegt daar false), en anders
+ * iPhone, of Android met "Mobile" erin. Een iPad zegt "Macintosh" en valt
+ * dus af, wat precies de bedoeling is.
+ */
+export function isTelefoon(): boolean {
+  try {
+    const n = navigator as Navigator & { userAgentData?: { mobile?: boolean } }
+    if (typeof n.userAgentData?.mobile === 'boolean') return n.userAgentData.mobile
+    const ua = navigator.userAgent
+    if (/iPhone|iPod/.test(ua)) return true
+    return /Android/.test(ua) && /Mobile/.test(ua)
+  } catch {
+    return false
+  }
+}
+
+/** Mag er op dít toestel een belknop staan? */
+export function magBellen(p: DisplayPrefs, telefoon = isTelefoon()): boolean {
+  if (p.kanBellen === 'ja') return true
+  if (p.kanBellen === 'nee') return false
+  return telefoon
 }
 
 function bewaarLokaal(p: DisplayPrefs) {

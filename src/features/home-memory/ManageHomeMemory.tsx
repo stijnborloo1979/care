@@ -370,7 +370,7 @@ function ItemForm({
                 <div className="w-16 flex-none">
                   <StoragePhoto path={stap.photo_path} emoji="📷" alt={stap.body} />
                 </div>
-                <span className="min-w-[8rem] flex-1 text-sm">{stap.body}</span>
+                <span className="min-w-[min(8rem,100%)] flex-1 text-sm">{stap.body}</span>
                 <FotoKiezer
                   label={stap.photo_path ? 'Andere foto' : 'Foto'}
                   onKies={async (bestand) => {

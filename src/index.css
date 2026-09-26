@@ -289,6 +289,49 @@ body[data-simple='true'] .vandaag .tegels {
   columns: auto;
 }
 
+/* Randen krimpen bij zeer grote tekst op een smal scherm.
+
+   De oorzaak van de klachten over schalen op een smartphone: alle marges zijn
+   in rem, en rem groeit mee met de tekst. Op een scherm van 320 pixels bij
+   A+++ is de buitenrand 30 pixels, de kaart 36, het blok 24 en de kaart
+   daarin nog 24 — samen 228 van de 320, en dan blijft er 92 pixels over voor
+   een woord als "vergrendelscherm".
+
+   Vandaar één regel in plaats van honderd: alleen onder 480 pixels, alleen bij
+   de twee grootste tekstmaten, en alleen horizontaal — verticaal mag het
+   ruimer blijven, want naar onder is er plaats. De bedoeling van grote tekst
+   is meer letters kunnen lezen, niet meer wit kunnen zien.
+
+   Gemeten, niet geraden: zonder deze regel liep het meldingenblok bij A+++ op
+   320 pixels 132 pixels buiten zijn kaart. */
+@media (max-width: 480px) {
+  :root[data-scale='1.3'] .p-6,
+  :root[data-scale='1.5'] .p-6 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  :root[data-scale='1.3'] .p-5,
+  :root[data-scale='1.5'] .p-5,
+  :root[data-scale='1.3'] .p-4,
+  :root[data-scale='1.5'] .p-4 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  :root[data-scale='1.3'] .px-5,
+  :root[data-scale='1.5'] .px-5 {
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+  }
+}
+
+/* En dan nog: een lang Nederlands woord past soms niet in wat er overblijft.
+   Liever een woord dat afbreekt dan tekst die buiten zijn kaart hangt. */
+body {
+  overflow-wrap: break-word;
+}
+
 html {
   height: 100%;
   font-size: calc(16px * var(--scale));

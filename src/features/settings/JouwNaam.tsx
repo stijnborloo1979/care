@@ -77,7 +77,7 @@ export default function JouwNaam() {
         }}
         className="mt-4 flex flex-wrap items-end gap-3"
       >
-        <label className="min-w-[14rem] flex-1">
+        <label className="min-w-[min(14rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Naam</span>
           <input
             value={waarde}

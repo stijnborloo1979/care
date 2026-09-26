@@ -4,7 +4,7 @@ import { usePeople } from './usePeople'
 import { t } from '../../lib/i18n'
 import BelKnop from './BelKnop'
 import HulpKnop from './HulpKnop'
-import { huidigePrefs } from '../settings/useDisplayPrefs'
+import { huidigePrefs, magBellen } from '../settings/useDisplayPrefs'
 
 /**
  * Eén scherm, grote knoppen, geen keuzes die uitleg nodig hebben.
@@ -14,6 +14,9 @@ export default function Help() {
   const { household } = useHousehold()
   const { data: people } = usePeople(household?.household_id ?? '')
   const prefs = huidigePrefs()
+  // Eén instelling, maar ze beslist per toestel: 'alleen op een telefoon'
+  // betekent hier ja en op de tablet in de living nee.
+  const bellenKan = magBellen(prefs)
   const hh = household?.household_id ?? ''
 
   // Ook zonder telefoonnummer bereikbaar, zolang het familielid de app
@@ -33,7 +36,7 @@ export default function Help() {
 
       <div className="mt-6 space-y-3">
         {bellen.map((p) => (
-          <BelKnop key={p.id} p={p} householdId={hh} kanBellen={prefs.kanBellen} />
+          <BelKnop key={p.id} p={p} householdId={hh} kanBellen={bellenKan} />
         ))}
 
         <div className="rounded-card border-[1.5px] border-line-strong bg-surface p-5">
@@ -44,7 +47,7 @@ export default function Help() {
         {/* Een toestel dat niet kan bellen, mag geen knop "112" tonen.
             Iemand drukt daarop in een echte noodsituatie en wacht op hulp
             die niet komt. Dan liever zeggen wat ze wél moet doen. */}
-        {prefs.kanBellen ? (
+        {bellenKan ? (
           <a
             href="tel:112"
             className="flex min-h-[5rem] items-center gap-4 rounded-card border-[1.5px] border-alert bg-surface px-5 text-xl font-bold text-alert shadow-card"
@@ -74,7 +77,7 @@ export default function Help() {
       </div>
 
       <p className="mt-5 text-center text-sm text-ink-faint">
-        {prefs.kanBellen
+        {bellenKan
           ? t('hulp.noodUitleg')
           : 'Dit scherm kan niet bellen. Bij brand, gevaar of dringende medische hulp is 112 nodig, met een telefoon.'}
       </p>

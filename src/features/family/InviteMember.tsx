@@ -75,7 +75,7 @@ export default function InviteMember({ householdId, personName }: Props) {
         </label>
 
         <div className="flex flex-wrap gap-3">
-          <label className="min-w-[10rem] flex-1">
+          <label className="min-w-[min(10rem,100%)] flex-1">
             <span className="text-sm font-semibold text-ink-soft">Rol</span>
             <select
               value={role}
@@ -89,7 +89,7 @@ export default function InviteMember({ householdId, personName }: Props) {
             </select>
           </label>
 
-          <label className="min-w-[10rem] flex-1">
+          <label className="min-w-[min(10rem,100%)] flex-1">
             <span className="text-sm font-semibold text-ink-soft">Relatie</span>
             <input
               value={relation}

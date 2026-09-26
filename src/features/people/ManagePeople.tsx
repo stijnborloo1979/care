@@ -148,7 +148,7 @@ function PersonEditor({
       className="mt-3 space-y-3 rounded-2xl border border-line bg-surface p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="min-w-[8rem] flex-1">
+        <label className="min-w-[min(8rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Naam</span>
           <input
             required
@@ -157,7 +157,7 @@ function PersonEditor({
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
-        <label className="min-w-[8rem] flex-1">
+        <label className="min-w-[min(8rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Relatie</span>
           <input
             required
@@ -193,7 +193,7 @@ function PersonEditor({
       </label>
 
       <div className="flex flex-wrap gap-3">
-        <label className="min-w-[8rem] flex-1">
+        <label className="min-w-[min(8rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Telefoon</span>
           <input
             value={phone}
@@ -202,7 +202,7 @@ function PersonEditor({
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
-        <label className="min-w-[8rem] flex-1">
+        <label className="min-w-[min(8rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Soort</span>
           <select
             value={kind}

@@ -233,7 +233,7 @@ export default function Delen() {
               }`}
             >
               <span
-                className={`absolute top-1 h-6 w-6 rounded-full bg-surface shadow-card transition-transform ${
+                className={`absolute left-0 top-1 h-6 w-6 rounded-full bg-surface shadow-card transition-transform ${
                   household.share_quick_notes ? 'translate-x-8' : 'translate-x-1'
                 }`}
               />

@@ -307,7 +307,7 @@ function TimelineRow({
         }`}
       />
 
-      <span className="min-w-[6rem] flex-1">
+      <span className="min-w-[min(6rem,100%)] flex-1">
         <span className={`block text-lg font-semibold ${gedaan ? 'text-ink-faint line-through' : ''}`}>
           {event.emoji ? `${event.emoji} ` : ''}
           {event.title}

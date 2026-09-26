@@ -554,8 +554,133 @@ dat is een duwtje en geen achterdeur. Mislukt het, dan gebeurt er niets
 ergs: de melding staat in de database en gaat mee met de volgende ronde —
 áls die er is.
 
+### En als de browser helemaal geen meldingen kan geven
+
+Dan valt de hele push weg, en dan helpt geen enkele instelling. Dat is geen
+randgeval:
+
+- **iPhone en iPad** kennen web push alleen wanneer de app op het
+  beginscherm staat. In Safari als tabblad bestaat `PushManager` niet.
+- Een **beheerde werklaptop** kan meldingen per beleid blokkeren.
+- Wie ze één keer weigerde, krijgt de vraag **niet opnieuw**.
+
+Voor "medicatie nog niet bevestigd" is dat te verdragen. Voor de twee
+berichten die de persoon zélf verstuurt niet: die mogen niet afhangen van
+een browserinstelling.
+
+`35_mail.sql` geeft daarom elke melding van niveau `warn` of `alert` een
+tweede weg: **e-mail**. Geen toestemming nodig, werkt op elk toestel, komt
+ook aan als niemand de app open heeft. Dezelfde secrets als `send-invite`
+(`RESEND_API_KEY`, `MAIL_FROM`, `APP_URL`); ontbreken ze, dan blijft alleen
+de push over en zegt het antwoord van de functie `mail_uit`.
+
+Twee bewuste verschillen met push:
+
+| | push | e-mail |
+| --- | --- | --- |
+| niveaus | alles | alleen `warn` en `alert` |
+| fase | alleen "ondersteund" | elke fase |
+
+Het eerste houdt de mailbox leeg: wie mail krijgt bij elk afgevinkt ontbijt,
+ziet de ene mail die telt niet meer. Het tweede omdat de persoon hier zélf
+om contact vraagt — dat is geen toezicht, en dus hoort het niet bij de fase
+"ondersteund".
+
+Elk familielid beslist voor zichzelf, bij Meldingen. Standaard staat het
+aan, want dit is het vangnet.
+
+### Vier wegen, en waarom niet één
+
+`36_kanalen.sql` maakt er één ding van: een familielid heeft nul of meer
+kanalen, en elk kanaal krijgt dezelfde melding. Mail hoort daar ook bij,
+zonder dat er een rij voor nodig is — het adres staat al in `auth.users`.
+
+| weg | snelheid | nodig | werkt met de app dicht |
+| --- | --- | --- | --- |
+| realtime in de app | < 1 s | niets | nee |
+| push in de browser | seconden | toestemming per toestel | ja, waar het kan |
+| WhatsApp | seconden | Meta-setup, ±€0,014 per bericht | ja |
+| Telegram | seconden | een bot, gratis | ja |
+| e-mail | seconden tot minuten | niets | ja |
+
+Realtime staat er niet voor niets bij: het is de snelste en de goedkoopste,
+en het vraagt niemand iets. `useRealtime` luistert nu ook op `notification`,
+dus het familiedashboard reageert meteen in plaats van bij het volgende
+verversen. Alleen: het werkt niet met de app dicht, en daarvoor zijn de
+andere er.
+
+**WhatsApp** stuurt geen vrije tekst naar iemand die jou niet in de laatste
+24 uur berichtte, dus altijd een goedgekeurd sjabloon met één variabele —
+bijvoorbeeld `Thuis: {{1}}`, met de tekst van de melding erin. Secrets:
+`WA_TOKEN`, `WA_PHONE_ID`, `WA_TEMPLATE` en eventueel `WA_TEMPLATE_TAAL`
+(standaard `nl`). Het gratis testnummer van Meta mag naar vijf opgegeven
+nummers sturen, wat voor één familie genoeg is en de bedrijfsverificatie
+uitspaart.
+
+**Telegram** heeft alleen `TG_BOT_TOKEN` nodig. Het familielid stuurt de bot
+één keer `start` en vult de chat-id in bij Meldingen.
+
+Ontbreekt een secret, dan slaat de functie die weg over en zegt het antwoord
+welke uit staan (`wegen_uit`). Niets breekt; er valt alleen een weg weg.
+
+Het telefoonnummer wordt in de database genormaliseerd, niet in de app:
+`0475 12 34 56`, `0032 475/12.34.56` en `+32 (475) 12-34-56` worden alle drie
+`+32475123456`. Eén plaats om na te kijken in plaats van twee die uit elkaar
+lopen. Alles zonder `+` en zonder landnummer wordt geweigerd in plaats van
+geraden — een bericht naar het verkeerde nummer is erger dan geen bericht.
+
+Een kanaal is van het familielid, niet van het huishouden: `alert_channel`
+heeft row level security op `profile_id = auth.uid()`, dus een broer kan het
+nummer van zijn zus niet opvragen of wijzigen. Nagegaan met een tweede
+databankrol, niet alleen door de policy te lezen.
+
+### Eén melding, meerdere ontvangers
+
+`mark_pushed` en `mark_mailed` vinken pas af wanneer élke ontvanger bereikt
+is. Dat was in de pushkant niet zo: de melding werd afgevinkt zodra één
+toestel lukte, en verdween dan stil voor wie ze net niet kreeg. Nu telt
+`push-notify` per melding hoeveel adressen en toestellen erbij horen en
+hoeveel er weg zijn; wat niet volledig bezorgd is, blijft openstaan voor de
+volgende ronde. Een verdwenen toestel (404 of 410) telt als bezorgd, want
+wachten heeft daar geen zin.
+
 Voor een melding uit de nacht is vijf minuten wachten prima. Voor iemand
 die vraagt of je belt, niet.
+
+## Waarom de app niet goed schaalde op een smartphone
+
+Dit is vier keer apart gemeld en drie keer apart hersteld, telkens op het
+scherm waar het opviel. De oorzaak was één ding, en die zat overal:
+
+**Alle marges staan in `rem`, en `rem` groeit mee met de tekst.** Op een
+scherm van 320 pixels bij tekstgrootte A+++ is de buitenrand 30 pixels, de
+kaart 36, het blok daarin 24 en de kaart daarin nog eens 24 — samen 228 van
+de 320. Er bleef 92 pixels over voor een woord als "vergrendelscherm".
+
+Daar kwam een tweede bij: **30 plaatsen met `min-w-[12rem]` en dergelijke**.
+Een minimumbreedte in rem wordt bij A+++ anderhalf keer zo groot, dus een
+veld dat 192 pixels moest zijn, eiste er 288 — breder dan het scherm. Dat is
+wat de tijdlijn en het Home Memory-formulier uit hun kader duwde.
+
+Hersteld op de oorzaak in plaats van per scherm:
+
+- elke `min-w-[Xrem]` werd `min-w-[min(Xrem,100%)]`. Dat verlaagt nooit iets,
+  het begrenst alleen op de breedte die er werkelijk is.
+- één regel in `index.css` krimpt de horizontale randen onder 480 pixels bij
+  de twee grootste tekstmaten. Verticaal blijft het ruim — naar onder is er
+  plaats. Grote tekst is bedoeld om meer letters te kunnen lezen, niet om
+  meer wit te kunnen zien.
+- `overflow-wrap: break-word` op `body`, zodat een lang Nederlands woord
+  afbreekt in plaats van buiten zijn kaart te hangen.
+
+Nagemeten op 320, 360 en 414 pixels bij elke tekstgrootte: geen horizontale
+schuifbalk meer, op geen enkel scherm.
+
+Bij diezelfde meting bleek de schakelaar zelf stuk: het bolletje stond
+buiten de pil, op elke tekstgrootte en overal in de app. Een `absolute` kind
+zonder `left` valt terug op zijn statische plaats, en die lag al rechts in
+de pil; de verschuiving kwam daar bovenop. Eén `left-0` erbij, in alle drie
+de schakelaars.
 
 ## De 112-knop die niet kon bellen
 
@@ -564,14 +689,30 @@ zonder simkaart doet die niets. Dat is de gevaarlijkste knop die je kan
 maken: iemand drukt erop in een echte noodsituatie en wacht op hulp die
 niet komt.
 
-De app kan niet zelf weten of een toestel kan bellen — de browser zegt dat
-niet. Dus vraagt ze het: **"Dit toestel kan telefoneren"** bij de
-instellingen, en **standaard staat het op nee**. Dat is de veilige kant op
-gokken: een eerlijke instructie op een toestel dat het wél kon, is minder
-erg dan een lege belofte op een toestel dat het niet kan. En het gewone
-geval is een tablet in de keuken.
+De app kan niet zien of er een simkaart in zit — de browser zegt dat niet.
+Ze kan wel zien of dit een **telefoon** is, en dat is genoeg, want een
+telefoon kan altijd bellen. Vandaar drie standen in plaats van twee, bij
+Instellingen → Bellen en 112:
 
-Staat het op nee, dan:
+| stand | waar staan de belknoppen |
+| --- | --- |
+| `telefoon` (standaard) | alleen op een telefoon |
+| `ja` | overal — voor een tablet mét simkaart |
+| `nee` | nergens |
+
+De middelste beslist per toestel, en dat is nodig: één instelling geldt voor
+alle toestellen van de persoon, dus voor de tablet in de living én voor haar
+telefoon. Een harde ja zou op die tablet een 112-knop tonen die niets doet.
+
+`isTelefoon()` mag zich maar in één richting vergissen: liever een telefoon
+die voor tablet doorgaat (dan staat er een instructie in plaats van een
+knop) dan omgekeerd. Daarom alleen de zekere gevallen — `userAgentData.mobile`
+waar het bestaat (een Android-tablet zegt daar `false`), anders iPhone, of
+Android met `Mobile` erin. Een iPad zegt "Macintosh" en valt dus af, wat
+precies de bedoeling is. Nagekeken tegen echte user agents van iPhone, iPad
+(beide vormen), Android-telefoon, Android-tablet en Windows.
+
+Staat het op nergens — of op alleen-op-een-telefoon, op een tablet — dan:
 
 - wordt de 112-knop een blok met wat familie daar invulde — waar de
   telefoon ligt, bij wie ze kan aanbellen. Concreet, want "bel 112" zonder

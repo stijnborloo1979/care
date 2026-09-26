@@ -16,6 +16,11 @@ const TABELLEN: { tabel: string; sleutels: string[] }[] = [
   { tabel: 'life_story', sleutels: ['stories'] },
   { tabel: 'care_log', sleutels: ['carelog', 'summary'] },
   { tabel: 'message', sleutels: ['inbox'] },
+  // Meldingen, en dit is de snelste weg die er is: binnen een seconde, zonder
+  // toestemming en zonder kosten. Pushmeldingen in de browser zijn op iPhone
+  // en op beheerde laptops vaak niet te krijgen; dit werkt altijd, zolang de
+  // app ergens open staat. De dashboardquery heet 'summary'.
+  { tabel: 'notification', sleutels: ['summary', 'push-status'] },
 ]
 
 export function useRealtime(householdId: string) {

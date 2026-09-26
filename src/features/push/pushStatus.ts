@@ -3,31 +3,112 @@ import { supabase } from '../../lib/supabase'
 /**
  * Waarom komt een melding niet aan?
  *
- * Push kan op drie plaatsen stilvallen, en alle drie doen ze dat zonder een
- * spoor: dit toestel gaf geen toestemming, het huishouden staat niet op
- * "ondersteund", of de edge function draait niet omdat pg_cron uit staat.
- * Dit haalt die drie op zodat het scherm kan zeggen wat eraan scheelt.
+ * Een melding heeft vier wegen naar familie, en elke weg kan stilvallen
+ * zonder een spoor:
+ *
+ *   - Realtime in de app: werkt altijd, maar alleen zolang de app open staat.
+ *   - Push in de browser: dit toestel gaf geen toestemming, of kan het niet
+ *     (iPhone in een tabblad, een beheerde laptop), of het huishouden staat
+ *     niet op "ondersteund", of push-notify draait niet omdat pg_cron uit
+ *     staat.
+ *   - WhatsApp of Telegram: niet ingesteld, of de secrets ontbreken.
+ *   - E-mail: staat uit voor dit account, of RESEND_API_KEY ontbreekt.
+ *
+ * Dit haalt op wat de database ervan weet, zodat het scherm kan zeggen wat
+ * eraan scheelt in plaats van niets te doen.
  */
+export type Kanaal = 'whatsapp' | 'telegram'
+
 export interface PushStatus {
-  /** Toestellen van familie die meldingen aan hebben staan. */
+  /** Toestellen van familie die pushmeldingen aan hebben staan. */
   toestellen: number
   /** Staat dít toestel daarbij? Toestemming is per toestel én per account. */
   eigen_toestel: boolean
   /** Laat het ondersteuningsniveau push toe? */
   niveau_ok: boolean
-  /** Meldingen van de laatste twee uur die nog niet verstuurd zijn. */
+  /** Meldingen van de laatste twee uur die nog niet gepusht zijn. */
   wachtend: number
+  /** Wil dit account dringende meldingen ook per e-mail? */
+  mail_aan: boolean
+  /** Dringende meldingen waarvoor voor mij nog een weg openstaat. */
+  wachtend_weg: number
+  /** Mijn eigen kanalen: { whatsapp: '+32...', telegram: '123' }. */
+  kanalen: Partial<Record<Kanaal, string>>
 }
 
 export async function getPushStatus(householdId: string): Promise<PushStatus | null> {
   const { data, error } = await supabase.rpc('push_status', { hh: householdId })
   if (error) throw error
-  return ((data ?? [])[0] ?? null) as PushStatus | null
+  return leesStatus((data ?? [])[0] as Record<string, unknown> | undefined)
 }
 
 /**
- * Een testmelding, langs precies dezelfde weg als een echte. Een test die
- * een andere weg neemt, bewijst niets.
+ * Apart van de query, zodat het te testen is zonder database.
+ *
+ * Wat hier binnenkomt hangt af van welke migratie er gedraaid is: 34 gaf vier
+ * kolommen, 35 zes, 36 zeven. Een ontbrekende kolom mag nooit als "staat uit"
+ * gelezen worden — dan waarschuwt het scherm voor iets wat er niet aan de
+ * hand is.
+ */
+export function leesStatus(rij: Record<string, unknown> | undefined): PushStatus | null {
+  if (!rij) return null
+  return {
+    toestellen: getal(rij.toestellen),
+    eigen_toestel: !!rij.eigen_toestel,
+    niveau_ok: !!rij.niveau_ok,
+    wachtend: getal(rij.wachtend),
+    // Ontbreekt de kolom, dan doen we alsof mail aan staat: dat is de
+    // standaard in de database, en een onterechte waarschuwing is erger dan
+    // geen.
+    mail_aan: rij.mail_aan === undefined ? true : !!rij.mail_aan,
+    // wachtend_weg heette wachtend_mail voor 36_kanalen.sql. Beide lezen,
+    // zodat het scherm ook werkt op een database waar die migratie nog niet
+    // gedraaid is.
+    wachtend_weg: getal(rij.wachtend_weg ?? rij.wachtend_mail),
+    kanalen: kanalen(rij.eigen_kanalen),
+  }
+}
+
+function getal(v: unknown): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : 0
+}
+
+function kanalen(v: unknown): Partial<Record<Kanaal, string>> {
+  if (!v || typeof v !== 'object') return {}
+  const uit: Partial<Record<Kanaal, string>> = {}
+  for (const soort of ['whatsapp', 'telegram'] as const) {
+    const adres = (v as Record<string, unknown>)[soort]
+    if (typeof adres === 'string' && adres) uit[soort] = adres
+  }
+  return uit
+}
+
+/** Dringende meldingen ook per e-mail, voor dit account. */
+export async function zetMail(aan: boolean) {
+  const { error } = await supabase.rpc('set_mail_alerts', { aan })
+  if (error) throw error
+}
+
+/**
+ * Een kanaal instellen, of met een leeg adres weer weghalen.
+ *
+ * Het nummer wordt in de database genormaliseerd, niet hier: dat is één
+ * plaats om na te kijken in plaats van twee die uit elkaar kunnen lopen.
+ * Komt er een fout terug, dan is het een leesbare zin die we tonen.
+ */
+export async function zetKanaal(householdId: string, soort: Kanaal, adres: string) {
+  const { error } = await supabase.rpc('set_alert_channel', {
+    hh: householdId,
+    soort,
+    adres,
+  })
+  if (error) throw error
+}
+
+/**
+ * Een testmelding, langs precies dezelfde weg als een echte — en langs álle
+ * wegen, want een test die maar de helft aflegt bewijst niet wat je wil
+ * weten.
  */
 export async function stuurTestmelding(householdId: string) {
   const { error } = await supabase.rpc('test_push', { hh: householdId })

@@ -191,7 +191,7 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
       className="mt-4 space-y-3 rounded-2xl bg-surface-soft p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="min-w-[10rem] flex-1">
+        <label className="min-w-[min(10rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Naam</span>
           <input
             value={naam}

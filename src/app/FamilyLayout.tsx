@@ -110,7 +110,7 @@ export default function FamilyLayout() {
                 to={n.to}
                 end={n.end}
                 className={({ isActive }) =>
-                  `flex min-h-[3.4rem] min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-xs font-semibold ${
+                  `flex min-h-[3.4rem] min-w-[min(4.5rem,100%)] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-xs font-semibold ${
                     isActive
                       ? "bg-accent-soft text-accent-ink"
                       : "text-ink-faint"

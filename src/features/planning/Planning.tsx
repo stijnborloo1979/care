@@ -181,7 +181,7 @@ function RoutineEditor({
       className="mt-4 space-y-3 rounded-2xl border border-line bg-surface-soft p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="min-w-[10rem] flex-1">
+        <label className="min-w-[min(10rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Naam</span>
           <input
             required
@@ -191,7 +191,7 @@ function RoutineEditor({
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
-        <label className="min-w-[12rem] flex-1">
+        <label className="min-w-[min(12rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Herhaling</span>
           <select
             value={rrule}

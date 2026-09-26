@@ -21,6 +21,32 @@ const ACCENTEN: { waarde: DisplayPrefs['accent']; label: string; staal: string }
   { waarde: 'warm', label: 'Warm bruin', staal: '#a5691f' },
 ]
 
+/**
+ * Waar de app mag bellen.
+ *
+ * De middelste staat bovenaan de logica maar in het midden van de lijst:
+ * het is de aanbevolen keuze, en tegelijk de enige die per toestel
+ * verschilt. Elke optie zegt wat de persoon straks ziet — niet wat de
+ * instelling heet — want dat is waar familie op beslist.
+ */
+const BELKEUZES: { waarde: DisplayPrefs['kanBellen']; label: string; onder: string }[] = [
+  {
+    waarde: 'telefoon',
+    label: 'Alleen op een telefoon (aanbevolen)',
+    onder: 'Op een telefoon staan de belknoppen en de knop 112. Op een tablet zonder simkaart niet, want daar zouden ze niets doen.',
+  },
+  {
+    waarde: 'ja',
+    label: 'Overal, ook op de tablet',
+    onder: 'Kies dit als de tablet een simkaart heeft. Probeer eerst één keer te bellen vanaf die tablet — lukt dat niet, zet het dan terug.',
+  },
+  {
+    waarde: 'nee',
+    label: 'Nergens',
+    onder: 'Geen belknoppen en geen 112. Familie blijft wel bereikbaar: ze vraagt met één knop om terugbellen.',
+  },
+]
+
 const SCHAAL: { waarde: DisplayPrefs['scale']; label: string }[] = [
   { waarde: '1', label: 'A' },
   { waarde: '1.15', label: 'A+' },
@@ -50,30 +76,48 @@ export default function Settings() {
       {/* Vlak onder de naam, want dit is de instelling met de grootste
           gevolgen op dit scherm: ze bepaalt of er een 112-knop staat. */}
       <section className="rounded-card bg-surface p-6 shadow-card">
-        <h2 className="text-lg font-bold">Bellen met dit toestel</h2>
+        <h2 className="text-lg font-bold">Bellen en 112</h2>
         <p className="mt-1 max-w-[62ch] text-ink-soft">
-          Een tablet zonder simkaart kan niet telefoneren. Staat dit op nee, dan toont het
-          Help-scherm van {voornaam} geen knop "112" — want die zou niets doen, en daar drukt iemand
-          op in een echte noodsituatie.
+          Een tablet zonder simkaart kan niet telefoneren. Staat hier "overal", dan krijgt {voornaam}{' '}
+          ook op die tablet een knop "112" — en daar drukt iemand op in een echte noodsituatie.
         </p>
 
-        <Rij
-          titel="Dit toestel kan telefoneren"
-          onder="Zet dit alleen aan bij een telefoon of een tablet met simkaart. Twijfel je? Probeer het uit op het toestel van de persoon."
-        >
-          <Schakelaar
-            aan={prefs.kanBellen}
-            label="Dit toestel kan telefoneren"
-            onClick={() => zet.mutate({ kanBellen: !prefs.kanBellen })}
-          />
-        </Rij>
+        <fieldset className="mt-4 min-w-0">
+          <legend className="font-semibold">Waar mag ze bellen vanuit de app?</legend>
+          <div className="mt-3 space-y-2">
+            {BELKEUZES.map((k) => (
+              <label
+                key={k.waarde}
+                className={`flex cursor-pointer gap-3 rounded-card border-[1.5px] p-4 ${
+                  prefs.kanBellen === k.waarde
+                    ? 'border-accent bg-accent-soft'
+                    : 'border-line bg-surface-soft'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="kanBellen"
+                  value={k.waarde}
+                  checked={prefs.kanBellen === k.waarde}
+                  onChange={() => zet.mutate({ kanBellen: k.waarde })}
+                  className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
+                />
+                <span className="min-w-0 break-words">
+                  <span className="block font-semibold">{k.label}</span>
+                  <span className="mt-0.5 block text-sm text-ink-soft">{k.onder}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
-        {!prefs.kanBellen ? (
+        {prefs.kanBellen !== 'ja' ? (
           <label className="mt-4 block">
             <span className="font-semibold">Wat moet ze doen bij nood?</span>
             <span className="mt-1 block text-sm text-ink-soft">
-              Dit staat op haar Help-scherm in plaats van de 112-knop. Wees heel concreet: waar de
-              telefoon ligt, bij wie ze kan aanbellen.
+              {prefs.kanBellen === 'telefoon'
+                ? 'Dit staat op haar Help-scherm op elk toestel dat niet kan bellen — de tablet dus. Wees heel concreet: waar de telefoon ligt, bij wie ze kan aanbellen.'
+                : 'Dit staat op haar Help-scherm in plaats van de 112-knop. Wees heel concreet: waar de telefoon ligt, bij wie ze kan aanbellen.'}
             </span>
             <textarea
               defaultValue={prefs.noodplan}
@@ -352,7 +396,7 @@ function Rij({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line py-4 last:border-none">
-      <div className="min-w-[12rem] flex-1">
+      <div className="min-w-[min(12rem,100%)] flex-1">
         <p className="font-semibold">{titel}</p>
         <p className="text-sm text-ink-soft">{onder}</p>
       </div>
@@ -381,7 +425,7 @@ function Schakelaar({
       }`}
     >
       <span
-        className={`absolute top-1 h-6 w-6 rounded-full bg-surface shadow-card transition-transform ${
+        className={`absolute left-0 top-1 h-6 w-6 rounded-full bg-surface shadow-card transition-transform ${
           aan ? 'translate-x-8' : 'translate-x-1'
         }`}
       />
@@ -458,19 +502,20 @@ function Meldingen({
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Meldingen op dit toestel</h2>
+      <h2 className="text-lg font-bold">Meldingen</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Een bericht op je gsm wanneer er iets afwijkt, bijvoorbeeld medicatie die om tien uur nog
-        niet bevestigd is.
+        niet bevestigd is. Kan deze browser dat niet, dan gaan de dringende berichten per e-mail —
+        dat staat hieronder.
       </p>
 
       <Rij
         titel="Meldingen"
         onder={
           status === 'onbeschikbaar'
-            ? 'Deze browser kan geen meldingen tonen. Op iPhone en iPad lukt het alleen als Thuis op het beginscherm staat.'
+            ? 'Deze browser kan geen meldingen tonen. Op iPhone en iPad lukt het alleen als Thuis op het beginscherm staat: deel-icoon, dan "Zet op beginscherm", en open Thuis daarna via dat icoon. Lukt dat niet, dan blijft de e-mail hieronder.'
             : status === 'geweigerd'
-              ? 'De browser houdt meldingen tegen. Zet ze weer aan bij de instellingen van de site.'
+              ? 'De browser houdt meldingen tegen. Zet ze weer aan bij de instellingen van de site. Tot dan blijft de e-mail hieronder.'
               : 'Geldt alleen voor dit toestel. Zet het ook aan op je andere toestellen.'
         }
       >

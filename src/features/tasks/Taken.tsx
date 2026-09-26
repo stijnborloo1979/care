@@ -300,7 +300,7 @@ function NieuweTaak({
           value={titel}
           onChange={(e) => setTitel(e.target.value)}
           placeholder="Boodschappen doen"
-          className="min-h-touch min-w-[14rem] flex-1 rounded-pill border border-line bg-surface-soft px-4"
+          className="min-h-touch min-w-[min(14rem,100%)] flex-1 rounded-pill border border-line bg-surface-soft px-4"
         />
         <button
           type="submit"

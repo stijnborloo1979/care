@@ -148,7 +148,7 @@ function NoteEditor({
       className="mt-3 space-y-3 rounded-2xl border border-line bg-surface p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="min-w-[9rem]">
+        <label className="min-w-[min(9rem,100%)]">
           <span className="text-sm font-semibold text-ink-soft">Categorie</span>
           <select
             value={category}
@@ -162,7 +162,7 @@ function NoteEditor({
             ))}
           </select>
         </label>
-        <label className="min-w-[10rem] flex-1">
+        <label className="min-w-[min(10rem,100%)] flex-1">
           <span className="text-sm font-semibold text-ink-soft">Waarover gaat het?</span>
           <input
             required

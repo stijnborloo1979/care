@@ -168,7 +168,7 @@ export default function Onboarding() {
                   setMensen(kopie)
                 }}
                 placeholder="Naam"
-                className="min-h-touch min-w-[7rem] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+                className="min-h-touch min-w-[min(7rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
               />
               <input
                 value={m.relation}
@@ -178,7 +178,7 @@ export default function Onboarding() {
                   setMensen(kopie)
                 }}
                 placeholder="Dochter"
-                className="min-h-touch min-w-[7rem] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+                className="min-h-touch min-w-[min(7rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
               />
               <input
                 value={m.phone}
@@ -189,7 +189,7 @@ export default function Onboarding() {
                 }}
                 placeholder="Telefoon"
                 inputMode="tel"
-                className="min-h-touch min-w-[7rem] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+                className="min-h-touch min-w-[min(7rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
               />
             </div>
           ))}
@@ -251,12 +251,12 @@ export default function Onboarding() {
               value={dingNaam}
               onChange={(e) => setDingNaam(e.target.value)}
               placeholder="Koffiezetapparaat"
-              className="min-h-touch min-w-[10rem] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+              className="min-h-touch min-w-[min(10rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             />
             <select
               value={dingKamer}
               onChange={(e) => setDingKamer(e.target.value)}
-              className="min-h-touch min-w-[9rem] rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+              className="min-h-touch min-w-[min(9rem,100%)] rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             >
               {kamers.map((k) => (
                 <option key={k}>{k}</option>

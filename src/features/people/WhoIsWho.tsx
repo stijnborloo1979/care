@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { huidigePrefs } from '../settings/useDisplayPrefs'
+import { huidigePrefs, magBellen } from '../settings/useDisplayPrefs'
 import BelKnop from './BelKnop'
 import Avatar from '../../components/Avatar'
 import { hhmm } from '../../lib/time'
@@ -120,7 +120,7 @@ export function PersonDetail() {
 
       {p.phone || p.profile_id ? (
         <div className="mt-5">
-          <BelKnop p={p} householdId={hh} kanBellen={huidigePrefs().kanBellen} />
+          <BelKnop p={p} householdId={hh} kanBellen={magBellen(huidigePrefs())} />
         </div>
       ) : null}
     </main>

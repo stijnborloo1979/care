@@ -247,7 +247,7 @@ function Blok({
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-[16rem] flex-1">
+        <div className="min-w-[min(16rem,100%)] flex-1">
           <h2 className="text-lg font-bold">{titel}</h2>
           <p className="mt-1 text-sm text-ink-soft">{onder}</p>
         </div>

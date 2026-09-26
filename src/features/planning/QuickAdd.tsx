@@ -69,7 +69,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
             setGelukt(null)
           }}
           placeholder="morgen 10u kapper"
-          className="min-h-touch min-w-[12rem] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
+          className="min-h-touch min-w-[min(12rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
         <DictateButton onTekst={(t) => setTekst(t.replace(/\.$/, ''))} />
         <button
