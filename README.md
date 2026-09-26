@@ -399,6 +399,44 @@ naar drie kolommen. Drie kolommen in een kolom van 36rem maakt elke foto
 zo'n 170 px breed, en dan is een kamer niet meer te herkennen — het enige
 waar die tegel voor dient.
 
+## "Dit ben ik"
+
+Wie naar het ziekenhuis of een woonzorgcentrum gaat, komt daar aan als een
+naam op een lijst. Het personeel weet op dag één niet wie haar dochter is,
+dat ze onrustig wordt rond vier uur, of dat muziek haar kalmeert. In het
+Verenigd Koninkrijk bestaat daar een papieren formulier voor dat overal
+gebruikt wordt, juist omdat die behoefte zo groot is.
+
+De app weet dat bijna allemaal al. `/dit-ben-ik` zet het op één blad:
+familie en contacten, waar ze vandaan komt (uit het levensboek), hoe haar
+dag thuis verloopt (uit de routines), wat ze graag heeft (uit de weetjes
+onder "voorkeuren"), en de medicatiemomenten.
+
+In de ik-vorm, bewust. Dit gaat over een mens, niet over een dossier.
+
+### Drie velden die nergens anders stonden
+
+`31_dit_ben_ik.sql` voegt `household.profiel` toe voor wat de app niet kon
+weten: hoe ze aangesproken wil worden, hoe je best met haar praat, wat
+helpt als ze onrustig is, en waar ze van overstuur raakt. Vrije tekst —
+wat iemand rustig maakt, laat zich niet aanvinken.
+
+Familie vult ze in op `/familie/wie`, veld per veld, met opslaan bij het
+verlaten van het vakje. In één keer doet niemand dit.
+
+Een leeg veld verdwijnt niet van het blad maar zegt dat het leeg is. Leest
+iemand "Als ik onrustig ben, helpt dit" en staat er niets, dan weet hij dat
+het niemand gevraagd is — in plaats van te denken dat er niets helpt.
+
+### Geen doseringen
+
+Er staan tijdstippen op, geen doseringen. Een blad dat familie thuis
+bijhoudt, hoort niet gebruikt te worden om medicatie toe te dienen;
+daarvoor is het schema van de huisarts of apotheek er, en een verouderde
+lijst in de handen van een verpleegkundige is gevaarlijker dan geen lijst.
+Dat ze gewend is om acht uur iets te krijgen, is zorgcontext en geen
+voorschrift — dat staat er dus wel, met die zin erbij.
+
 ## Bellen gaat één kant op
 
 `IncomingCall` — het stuk dat laat rinkelen en opneemt — hangt alleen in de

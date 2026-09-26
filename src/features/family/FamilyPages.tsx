@@ -5,6 +5,7 @@ import { sendPhotoMessage } from '../messages/messages'
 import ManageHomeMemory from '../home-memory/ManageHomeMemory'
 import ManageMemories from '../memories/ManageMemories'
 import ManagePeople from '../people/ManagePeople'
+import ProfielVelden from '../profile/ProfielVelden'
 import VoiceRecorder from '../messages/VoiceRecorder'
 import OpHaarScherm from '../messages/OpHaarScherm'
 import StartCall from '../calls/StartCall'
@@ -51,6 +52,7 @@ export function PeoplePage() {
         <p className="mt-1 text-ink-soft">Wie er is, en wie mee kan zorgen.</p>
       </header>
       <ManagePeople householdId={c.hh} />
+      <ProfielVelden />
       {c.role === 'admin' ? <InviteMember householdId={c.hh} personName={c.voornaam} /> : null}
     </div>
   )

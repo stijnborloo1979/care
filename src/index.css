@@ -476,6 +476,63 @@ body[data-scherm='persoon'] {
     color: #000000;
     font-size: 8.5pt;
   }
+
+  /* -------------------------------------------------------------
+     "Dit ben ik"
+     -------------------------------------------------------------
+     Dezelfde opmaak als het verslag, maar een maat groter. Dit blad
+     wordt gelezen door iemand die staat, aan een balie of aan een
+     bed, met een half oog. */
+  .ditbenik {
+    background: #ffffff;
+  }
+
+  .ditbenik main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .ditbenik,
+  .ditbenik p,
+  .ditbenik li,
+  .ditbenik dd,
+  .ditbenik dt,
+  .ditbenik span,
+  .ditbenik strong {
+    color: #000000;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  .ditbenik h1 { font-size: 22pt; }
+  .ditbenik h2 { font-size: 11.5pt; }
+
+  .ditbenik .kop {
+    border-bottom: 1px solid #000000;
+    padding-bottom: 2pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Randen tekenen in plaats van vullen: achtergronden worden bij het
+     afdrukken vaak weggelaten, een rand nooit. */
+  .ditbenik .kader {
+    border: 1.5pt solid #000000;
+    background: #ffffff;
+  }
+
+  .ditbenik section,
+  .ditbenik .heel-houden,
+  .ditbenik li {
+    break-inside: avoid;
+  }
+
+  .ditbenik footer {
+    border-top: 0.5pt solid #000000;
+    color: #000000;
+    font-size: 8.5pt;
+  }
 }
 
 :focus-visible {

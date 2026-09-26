@@ -55,6 +55,7 @@ const Boek = lazy(() => import("./features/stories/Boek"));
 const Analyse = lazy(() => import("./features/analyse/Analyse"));
 const Verslag = lazy(() => import("./features/analyse/Verslag"));
 const IndelingPagina = lazy(() => import("./features/layout/Indeling"));
+const DitBenIk = lazy(() => import("./features/profile/DitBenIk"));
 const VerhaalScherm = lazy(() => import("./features/stories/VerhaalScherm"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const Radio = lazy(() => import("./features/radio/Radio"));
@@ -210,6 +211,16 @@ if (!configuratieOk) {
                     element={
                       <Beveiligd>
                         <Verslag />
+                      </Beveiligd>
+                    }
+                  />
+                  {/* Ook buiten de familie-opmaak: dit blad gaat mee naar
+                      een balie, en daar hoort geen navigatie bij. */}
+                  <Route
+                    path="/dit-ben-ik"
+                    element={
+                      <Beveiligd>
+                        <DitBenIk />
                       </Beveiligd>
                     }
                   />
