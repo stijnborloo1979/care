@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { zetKanaal, type Kanaal, type PushStatus } from './pushStatus'
+import { telegramChats, zetKanaal, type Kanaal, type PushStatus } from './pushStatus'
 
 /**
  * Waar wil jij een dringend bericht krijgen?
@@ -24,7 +24,7 @@ const UITLEG: Record<Kanaal, { label: string; onder: string; plaats: string }> =
   },
   telegram: {
     label: 'Telegram',
-    onder: 'De chat-id die de bot je gaf nadat je hem "start" stuurde.',
+    onder: 'Stuur de bot eerst "start" in Telegram, en zoek dan hieronder je chat-id op.',
     plaats: '123456789',
   },
 }
@@ -76,6 +76,10 @@ function KanaalRij({
     onSuccess: opWijziging,
   })
 
+  // Een bot antwoordt niet uit zichzelf, dus zonder dit heeft niemand een
+  // manier om zijn chat-id te weten te komen.
+  const zoek = useMutation({ mutationFn: telegramChats })
+
   const u = UITLEG[soort]
   const gewijzigd = waarde.trim() !== huidig
 
@@ -110,6 +114,48 @@ function KanaalRij({
         <p role="alert" className="mt-2 text-sm text-alert">
           {bewaar.error instanceof Error ? bewaar.error.message : 'Dat lukte niet.'}
         </p>
+      ) : null}
+
+      {soort === 'telegram' ? (
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => zoek.mutate()}
+            disabled={zoek.isPending}
+            className="min-h-touch rounded-pill border border-line px-4 text-sm font-semibold disabled:opacity-60"
+          >
+            {zoek.isPending ? 'Zoeken…' : 'Zoek mijn chat-id'}
+          </button>
+
+          {zoek.data?.length ? (
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {zoek.data.map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => setWaarde(c.id)}
+                    className="min-h-touch rounded-pill border-[1.5px] border-accent bg-accent-soft px-4 text-sm font-semibold"
+                  >
+                    {c.naam} · {c.id}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {zoek.isSuccess && zoek.data.length === 0 ? (
+            <p className="mt-2 text-sm text-ink-soft">
+              Niemand gevonden. Stuur de bot eerst "start" in Telegram en probeer het opnieuw —
+              of TG_BOT_TOKEN ontbreekt nog bij de secrets in Supabase.
+            </p>
+          ) : null}
+
+          {zoek.isError ? (
+            <p role="alert" className="mt-2 text-sm text-alert">
+              Dat lukte niet. Draait push-notify al met de nieuwe code?
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {bewaar.isSuccess && !gewijzigd ? (

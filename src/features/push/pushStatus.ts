@@ -106,16 +106,55 @@ export async function zetKanaal(householdId: string, soort: Kanaal, adres: strin
 }
 
 /**
+ * Wie stuurde de Telegram-bot recent iets?
+ *
+ * Een bot antwoordt niet uit zichzelf, dus een familielid heeft geen enkele
+ * manier om zijn chat-id te weten te komen. Dit haalt op wie de bot de
+ * laatste 24 uur aanschreef, zodat het scherm kan zeggen "jij bent
+ * 123456789" in plaats van een handleiding te tonen.
+ */
+export async function telegramChats(): Promise<{ id: string; naam: string }[]> {
+  const { data, error } = await supabase.functions.invoke('push-notify', {
+    body: { actie: 'telegram-chats' },
+  })
+  if (error) throw error
+  const chats = (data as { chats?: unknown })?.chats
+  if (!Array.isArray(chats)) return []
+  return chats.filter(
+    (c): c is { id: string; naam: string } =>
+      !!c && typeof c.id === 'string' && typeof c.naam === 'string',
+  )
+}
+
+/**
  * Een testmelding, langs precies dezelfde weg als een echte — en langs álle
  * wegen, want een test die maar de helft aflegt bewijst niet wat je wil
  * weten.
  */
-export async function stuurTestmelding(householdId: string) {
+export async function stuurTestmelding(householdId: string): Promise<string[]> {
   const { error } = await supabase.rpc('test_push', { hh: householdId })
   if (error) throw error
   try {
-    await supabase.functions.invoke('push-notify')
+    const { data } = await supabase.functions.invoke('push-notify')
+    return redenen(data)
   } catch {
     // De cron vangt het op, als die draait.
+    return []
   }
+}
+
+/**
+ * Wat de wegen terugmeldden.
+ *
+ * Weigert Meta een sjabloon, dan staat de reden in het antwoord van de edge
+ * function — en die hoort op het scherm, niet in een logboek dat niemand
+ * opent. Bij het opzetten is dit het verschil tussen "het werkt niet" en
+ * "het sjabloon heet anders".
+ */
+function redenen(data: unknown): string[] {
+  const fouten = (data as { wegen_fouten?: unknown })?.wegen_fouten
+  if (!fouten || typeof fouten !== 'object') return []
+  return Object.entries(fouten as Record<string, unknown>)
+    .filter(([, v]) => typeof v === 'string' && v)
+    .map(([weg, v]) => `${weg}: ${v as string}`)
 }

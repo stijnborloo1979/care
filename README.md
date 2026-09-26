@@ -617,6 +617,52 @@ bijvoorbeeld `Thuis: {{1}}`, met de tekst van de melding erin. Secrets:
 nummers sturen, wat voor één familie genoeg is en de bedrijfsverificatie
 uitspaart.
 
+#### WhatsApp opzetten, stap voor stap
+
+Eenmalig werk van ongeveer een namiddag. Daarna nooit meer.
+
+1. **Een app maken.** `developers.facebook.com` → My Apps → Create App. Kies
+   de use case **"Connect with customers through WhatsApp"**. Je hebt een
+   Meta-account nodig; een bedrijfspagina niet.
+2. **Het testnummer nemen.** Onder WhatsApp → API Setup staat een gratis
+   testnummer van Meta, met een **Phone number ID** eronder. Dat ID is
+   `WA_PHONE_ID`. Het testnummer stuurt alleen naar nummers die je er zelf
+   bij zet — een handvol, in de praktijk vijf — en dat is genoeg voor één
+   gezin. Zo hoef je geen extra simkaart te zoeken en geen bedrijfsverificatie
+   te doorlopen.
+3. **Elk familielid toevoegen** bij "To", en elk van hen bevestigt de code die
+   Meta stuurt. Zonder die bevestiging weigert Meta het bericht.
+4. **Een blijvend token.** Het token op de API Setup-pagina vervalt na 24 uur.
+   Ga naar Business Settings → Users → **System Users** → Add, geef die
+   gebruiker toegang tot je WhatsApp-account en genereer een token met
+   `whatsapp_business_messaging` en `whatsapp_business_management`. Dat is
+   `WA_TOKEN`, en dat verloopt niet.
+5. **Een sjabloon.** WhatsApp → Message Templates → Create. Categorie
+   **Utility** (niet Marketing — een marketingtoon in een utility-sjabloon is
+   de meest voorkomende reden voor afkeuring). Taal Nederlands. Eén variabele
+   in de body:
+
+   ```
+   Thuis: {{1}}
+   ```
+
+   De naam die je kiest is `WA_TEMPLATE`. Goedkeuring duurt meestal minuten
+   tot een dag.
+6. **De secrets invullen** bij Edge Functions → Secrets: `WA_TOKEN`,
+   `WA_PHONE_ID`, `WA_TEMPLATE`. Staat je sjabloon in een andere taal dan
+   Nederlands, dan ook `WA_TEMPLATE_TAAL`.
+7. **Het nummer invullen** in de app, bij Instellingen → Meldingen, en op
+   "Stuur een testmelding" drukken.
+
+Weigert Meta het bericht, dan staat de reden onder die knop — letterlijk wat
+zij terugstuurden, bijvoorbeeld `400: Template name does not exist in the
+translation`. Dat is bewust: zonder die regel is opzetten giswerk, want een
+geweigerd bericht ziet er van buiten uit als een bericht dat niet aankomt.
+
+De veelvoorkomende redenen: het sjabloon heet anders dan `WA_TEMPLATE`, de
+taalcode klopt niet, het sjabloon is nog niet goedgekeurd, het nummer staat
+niet bij de toegestane ontvangers, of het token is dat van 24 uur.
+
 **Telegram** heeft alleen `TG_BOT_TOKEN` nodig. Een bot maak je bij
 @BotFather in Telegram zelf; die geeft het token. Het familielid stuurt de
 bot één keer `start` en drukt dan bij Meldingen op **"Zoek mijn chat-id"**.

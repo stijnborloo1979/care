@@ -66,12 +66,84 @@ interface AlertRij {
   person_name: string
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  )
+
+  // Eén kleine uitzondering op "deze functie verstuurt alleen": de app kan
+  // hier vragen welke chats de Telegram-bot recent aanschreven. Zonder dat
+  // heeft een familielid geen enkele manier om zijn chat-id te weten te
+  // komen — de bot antwoordt niet uit zichzelf.
+  if (await vraagtTelegramChats(req)) return json({ chats: await telegramChats() })
+
+  // Alle wegen, elk los van de andere. Eerst de kanalen, dan de push: stond
+  // dit omgekeerd, dan hield een lege pushlijst — het gewone geval bij
+  // iemand zonder toestemming — de mail en de WhatsApp tegen, en dat is
+  // precies de situatie waarvoor die bestaan.
+  const post = await bezorgen(supabase)
+  const push = await pushen(supabase)
+  return json({ ...push, ...post })
+})
+
+/** Komt er een verzoek om de Telegram-chats, of is dit een gewone ronde? */
+async function vraagtTelegramChats(req: Request): Promise<boolean> {
+  if (req.method !== 'POST') return false
+  try {
+    const body = await req.json()
+    return body?.actie === 'telegram-chats'
+  } catch {
+    // pg_cron stuurt geen body. Dat is de gewone ronde.
+    return false
+  }
+}
+
+/**
+ * Wie stuurde de bot recent iets?
+ *
+ * Telegram geeft een chat-id pas prijs wanneer iemand de bot aanschrijft.
+ * getUpdates geeft de laatste daarvan terug, zodat het scherm kan zeggen
+ * "jij bent 123456789" in plaats van het familielid met een handleiding op
+ * te zadelen.
+ *
+ * De lijst is kort van leven: Telegram bewaart updates 24 uur. Dat is
+ * precies genoeg — je vult dit één keer in.
+ */
+async function telegramChats(): Promise<{ id: string; naam: string }[]> {
+  const token = Deno.env.get('TG_BOT_TOKEN')
+  if (!token) return []
+  try {
+    const antwoord = await fetch(`https://api.telegram.org/bot${token}/getUpdates`)
+    if (!antwoord.ok) return []
+    const data = await antwoord.json()
+    const gezien = new Map<string, string>()
+    for (const u of (data?.result ?? []) as Record<string, any>[]) {
+      const chat = u?.message?.chat ?? u?.edited_message?.chat
+      if (!chat?.id) continue
+      const naam = [chat.first_name, chat.last_name].filter(Boolean).join(' ') ||
+        chat.title || chat.username || 'Onbekend'
+      gezien.set(String(chat.id), naam)
+    }
+    return [...gezien].map(([id, naam]) => ({ id, naam }))
+  } catch {
+    return []
+  }
+}
+
+/**
+ * De pushmeldingen naar de browsers.
+ *
+ * Ontbreken de VAPID-sleutels, dan slaat alleen dit over. Eerst stopte de
+ * hele functie hier met een 500, en dan kwamen de mail en de WhatsApp ook
+ * niet weg — terwijl die juist bestaan voor wie geen push heeft.
+ */
+async function pushen(
+  supabase: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
   const publiek = Deno.env.get('VAPID_PUBLIC_KEY')
   const prive = Deno.env.get('VAPID_PRIVATE_KEY')
-  if (!publiek || !prive) {
-    return new Response('VAPID-sleutels ontbreken', { status: 500 })
-  }
+  if (!publiek || !prive) return { push_uit: true }
 
   webpush.setVapidDetails(
     Deno.env.get('VAPID_SUBJECT') ?? 'mailto:thuis@example.be',
@@ -79,24 +151,11 @@ Deno.serve(async () => {
     prive,
   )
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  )
-
-  // Eerst de andere wegen, en los van de push. Stond dit erachter, dan hield
-  // een lege pushlijst — het gewone geval bij iemand zonder toestemming — de
-  // mail en de WhatsApp tegen, en dat is precies de situatie waarvoor die
-  // bestaan.
-  const post = await bezorgen(supabase)
-
   const { data, error } = await supabase.rpc('pending_pushes', { limiet: 200 })
-  if (error) return new Response(error.message, { status: 500 })
+  if (error) return { push_fout: error.message }
 
   const rijen = (data ?? []) as Rij[]
-  if (rijen.length === 0) {
-    return json({ verstuurd: 0, meldingen: 0, ...post })
-  }
+  if (rijen.length === 0) return { verstuurd: 0, meldingen: 0 }
 
   // Per melding tellen, niet per toestel: één melding gaat naar alle
   // toestellen van alle familieleden, en ze is pas bezorgd als ze overal
@@ -128,11 +187,9 @@ Deno.serve(async () => {
       verstuurd++
     } catch (e) {
       const code = (e as { statusCode?: number }).statusCode
-      // 404 en 410: deze browser bestaat niet meer. Opruimen, niet opnieuw
-      // proberen. Alle andere fouten: de melding blijft openstaan en gaat
-      // bij de volgende draai mee.
       // 404 en 410 tellen als bezorgd: dit toestel bestaat niet meer, dus
-      // wachten heeft geen zin. Alle andere fouten laten de melding open.
+      // wachten heeft geen zin. Alle andere fouten laten de melding open,
+      // zodat ze de volgende ronde meegaat.
       if (code === 404 || code === 410) {
         wegGooien.add(r.subscription_id)
         afvinken(gelukt, r.notification_id)
@@ -149,8 +206,8 @@ Deno.serve(async () => {
     await supabase.rpc('mark_pushed', { ids: klaar })
   }
 
-  return json({ verstuurd, meldingen: klaar.length, opgeruimd: wegGooien.size, ...post })
-})
+  return { verstuurd, meldingen: klaar.length, opgeruimd: wegGooien.size }
+}
 
 function afvinken(teller: Map<string, number>, id: string) {
   teller.set(id, (teller.get(id) ?? 0) + 1)
@@ -183,6 +240,11 @@ async function bezorgen(
   const uit: string[] = []
   const gelukt: AlertRij[] = []
   const geteld: Record<string, number> = {}
+  // De laatste fout per weg, om terug te geven. Zonder dit weigert Meta een
+  // sjabloon en zie je alleen dat er niets aankomt — en dan is opzetten
+  // giswerk. De reden staat in hun antwoord; die hoort niet weggegooid te
+  // worden.
+  const fouten: Record<string, string> = {}
 
   for (const r of rijen) {
     const weg = WEGEN[r.kind]
@@ -192,12 +254,16 @@ async function bezorgen(
       continue
     }
     try {
-      if (await weg.stuur(r)) {
+      const fout = await weg.stuur(r)
+      if (fout === null) {
         gelukt.push(r)
         geteld[r.kind] = (geteld[r.kind] ?? 0) + 1
+      } else {
+        fouten[r.kind] = fout
       }
-    } catch {
+    } catch (e) {
       // Blijft openstaan voor de volgende ronde.
+      fouten[r.kind] = e instanceof Error ? e.message : 'onbekende fout'
     }
   }
 
@@ -215,6 +281,7 @@ async function bezorgen(
     bezorgd: gelukt.length,
     per_weg: geteld,
     ...(uit.length > 0 ? { wegen_uit: uit } : {}),
+    ...(Object.keys(fouten).length > 0 ? { wegen_fouten: fouten } : {}),
   }
 }
 
@@ -226,7 +293,11 @@ async function bezorgen(
  */
 const WEGEN: Record<
   AlertRij['kind'],
-  { aan: () => boolean; stuur: (r: AlertRij) => Promise<boolean> }
+  {
+    aan: () => boolean
+    /** null als het gelukt is, anders de reden — die is bij opzetten alles waard. */
+    stuur: (r: AlertRij) => Promise<string | null>
+  }
 > = {
   mail: {
     aan: () => !!Deno.env.get('RESEND_API_KEY') && !!Deno.env.get('MAIL_FROM'),
@@ -271,7 +342,7 @@ const WEGEN: Record<
             </div>`,
         }),
       })
-      return antwoord.ok
+      return await reden(antwoord)
     },
   },
 
@@ -285,7 +356,9 @@ const WEGEN: Record<
       // dubbele spaties, vandaar het opschonen.
       const tekst = r.body.replace(/\s+/g, ' ').trim().slice(0, 900)
       const antwoord = await fetch(
-        `https://graph.facebook.com/v21.0/${Deno.env.get('WA_PHONE_ID')}/messages`,
+        // Meta laat een versie ongeveer twee jaar staan en zet ze dan uit.
+        // Instelbaar, zodat dat later een secret is en geen deploy.
+        `https://graph.facebook.com/${Deno.env.get('WA_VERSIE') ?? 'v23.0'}/${Deno.env.get('WA_PHONE_ID')}/messages`,
         {
           method: 'POST',
           headers: {
@@ -306,7 +379,7 @@ const WEGEN: Record<
           }),
         },
       )
-      return antwoord.ok
+      return await reden(antwoord)
     },
   },
 
@@ -325,11 +398,35 @@ const WEGEN: Record<
           }),
         },
       )
-      return antwoord.ok
+      return await reden(antwoord)
     },
   },
 }
 
+
+/**
+ * Waarom weigerde de andere kant?
+ *
+ * Meta en Resend zetten de reden in hun antwoord, en die is bij het opzetten
+ * het enige verschil tussen "het werkt niet" en "het sjabloon heet anders".
+ * Kort houden: dit komt in een scherm terecht, niet in een logboek.
+ */
+async function reden(antwoord: Response): Promise<string | null> {
+  if (antwoord.ok) return null
+  try {
+    const tekst = await antwoord.text()
+    try {
+      const j = JSON.parse(tekst)
+      const m = j?.error?.message ?? j?.description ?? j?.message
+      if (typeof m === 'string' && m) return `${antwoord.status}: ${m}`.slice(0, 300)
+    } catch {
+      // Geen JSON; dan de tekst zelf.
+    }
+    return `${antwoord.status}: ${tekst}`.slice(0, 300)
+  } catch {
+    return String(antwoord.status)
+  }
+}
 
 /** Geen HTML uit een tekstveld laten ontsnappen, ook al schrijft de app ze zelf. */
 function ontsnap(s: string): string {

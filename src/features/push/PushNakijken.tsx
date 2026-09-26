@@ -43,6 +43,7 @@ export default function PushNakijken({ householdId }: { householdId: string }) {
     },
   })
 
+
   if (!data) return null
 
   const problemen: string[] = []
@@ -138,11 +139,26 @@ export default function PushNakijken({ householdId }: { householdId: string }) {
         {test.isPending ? 'Bezig…' : 'Stuur een testmelding'}
       </button>
 
-      {verstuurd ? (
+      {verstuurd && test.data?.length === 0 ? (
         <p aria-live="polite" className="mt-2 text-sm text-ink-soft">
-          Verstuurd — als melding én als e-mail. Komt er binnen een minuut niets aan, dan staat
+          Verstuurd, langs elke weg die aan staat. Komt er binnen een minuut niets aan, dan staat
           hierboven waarschijnlijk al waarom.
         </p>
+      ) : null}
+
+      {/* De reden die Meta of Resend teruggaf. Bij het opzetten is dit het
+          verschil tussen een namiddag gissen en één regel aanpassen. */}
+      {test.data?.length ? (
+        <div aria-live="polite" className="mt-2 rounded-2xl border border-alert bg-surface p-3">
+          <p className="text-sm font-semibold">Een weg weigerde het bericht:</p>
+          <ul className="mt-1 space-y-1 text-sm text-ink-soft">
+            {test.data.map((f) => (
+              <li key={f} className="break-words font-mono text-[0.8em]">
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       {mail.isError ? (
