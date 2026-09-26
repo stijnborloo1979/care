@@ -617,11 +617,30 @@ bijvoorbeeld `Thuis: {{1}}`, met de tekst van de melding erin. Secrets:
 nummers sturen, wat voor één familie genoeg is en de bedrijfsverificatie
 uitspaart.
 
-**Telegram** heeft alleen `TG_BOT_TOKEN` nodig. Het familielid stuurt de bot
-één keer `start` en vult de chat-id in bij Meldingen.
+**Telegram** heeft alleen `TG_BOT_TOKEN` nodig. Een bot maak je bij
+@BotFather in Telegram zelf; die geeft het token. Het familielid stuurt de
+bot één keer `start` en drukt dan bij Meldingen op **"Zoek mijn chat-id"**.
+
+Die knop bestaat omdat een bot niet uit zichzelf antwoordt: zonder hem heeft
+een familielid geen enkele manier om zijn chat-id te weten te komen, en dan
+is het veld onbruikbaar. `push-notify` roept `getUpdates` aan en geeft terug
+wie de bot de laatste 24 uur aanschreef, met naam erbij, zodat er iets te
+kiezen valt in plaats van iets over te typen.
+
+Eén nuance: die lijst toont iedereen die de bot recent aanschreef, aan elk
+familielid dat op de knop drukt. Bij één bot per gezin is dat geen bezwaar —
+het zijn hun eigen namen — maar deel een bot dus niet over meerdere
+huishoudens heen.
 
 Ontbreekt een secret, dan slaat de functie die weg over en zegt het antwoord
 welke uit staan (`wegen_uit`). Niets breekt; er valt alleen een weg weg.
+
+Dat gold eerst níet voor de VAPID-sleutels: ontbraken die, dan stopte
+`push-notify` meteen met een 500 en kwam er helemaal niets weg — ook de mail
+en de WhatsApp niet, terwijl die juist bestaan voor wie geen push heeft. De
+push zit nu in een eigen functie die alleen zichzelf uitschakelt
+(`push_uit`). Dit is dezelfde fout als hierboven, een niveau hoger: één weg
+die stilvalt, mag de andere niet meeslepen.
 
 Het telefoonnummer wordt in de database genormaliseerd, niet in de app:
 `0475 12 34 56`, `0032 475/12.34.56` en `+32 (475) 12-34-56` worden alle drie
