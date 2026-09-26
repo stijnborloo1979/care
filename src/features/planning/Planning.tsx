@@ -28,7 +28,11 @@ export default function Planning() {
 
   const nuToepassen = useMutation({
     mutationFn: () => materialiseToday(hh),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['agenda', hh] }),
+    onSuccess: () => {
+      for (const k of ['agenda', 'summary', 'meds-today']) {
+        queryClient.invalidateQueries({ queryKey: [k, hh] })
+      }
+    },
   })
 
   return (
@@ -100,7 +104,8 @@ export default function Planning() {
       <div className="rounded-card border border-line bg-surface-soft p-4">
         <p className="text-sm text-ink-soft">
           Wijzigingen gelden vanaf morgen. Wil je ze vandaag al zien, zet de routines dan nu om.
-          Items die al in de agenda staan blijven ongemoeid.
+          Items die al in de agenda staan blijven ongemoeid. Dit zet ook de medicatiemomenten van
+          vandaag en morgen klaar.
         </p>
         <button
           onClick={() => nuToepassen.mutate()}

@@ -115,6 +115,10 @@ export default function Today({ householdId, personName, timezone }: Props) {
       </section>
     ) : null,
 
+    // Een lege dag verdween vroeger helemaal van het scherm. Dat is hoe
+    // een niet-draaiende nachtjob maandenlang onopgemerkt kon blijven:
+    // familie zag geen fout, alleen niets. Nu staat er wat er aan de hand
+    // is — voor haar rustig, en voor wie meekijkt herkenbaar.
     vandaag:
       events.length > 0 ? (
         <section aria-labelledby="vandaag">
@@ -133,7 +137,16 @@ export default function Today({ householdId, personName, timezone }: Props) {
             ))}
           </ol>
         </section>
-      ) : null,
+      ) : (
+        <section aria-labelledby="vandaag">
+          <h2 id="vandaag" className="text-base font-bold text-ink-faint">
+            {t('vandaag.vandaag')}
+          </h2>
+          <p className="mt-2 rounded-card bg-surface p-5 text-lg text-ink-soft shadow-card">
+            Er staat vandaag niets gepland.
+          </p>
+        </section>
+      ),
 
     berichten: <PersonInbox householdId={householdId} />,
 

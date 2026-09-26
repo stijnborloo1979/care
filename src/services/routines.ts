@@ -94,8 +94,12 @@ export async function deleteRoutine(id: string) {
 }
 
 /** Zet de routines van vandaag alsnog om in agenda-items. */
-export async function materialiseToday(householdId: string) {
-  const vandaag = new Date().toISOString().slice(0, 10)
-  const { error } = await supabase.rpc('materialise_day', { hh: householdId, on_day: vandaag })
-  if (error) throw error
-}
+/**
+ * Vervangen door zetDagKlaar() in services/dag.ts.
+ *
+ * Deze versie had twee gebreken die je pas merkt als je erop let: ze nam de
+ * datum in UTC (rond middernacht in de zomer is dat bij ons nog gisteren),
+ * en ze maakte geen medicatiemomenten aan — dus bleef het schema leeg ook
+ * nadat je de knop gedrukt had.
+ */
+export { zetDagKlaar as materialiseToday } from './dag'

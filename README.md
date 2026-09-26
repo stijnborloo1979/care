@@ -399,6 +399,45 @@ naar drie kolommen. Drie kolommen in een kolom van 36rem maakt elke foto
 zo'n 170 px breed, en dan is een kamer niet meer te herkennen — het enige
 waar die tegel voor dient.
 
+## De dag klaarzetten zonder op de nacht te wachten
+
+De agenda van de persoon wordt 's nachts gemaakt uit haar routines, door
+een job op pg_cron. Die moet je apart inschakelen. Doe je dat niet, dan
+gebeurt er nooit iets — en het faalt volkomen stil: haar tijdlijn blijft
+leeg, "Wat nu?" weet niets, en er is geen medicatiemoment om te
+bevestigen. Niets wijst naar de oorzaak; het lijkt of de app niets doet.
+
+Een app die alleen werkt als iemand een databasejob heeft ingesteld, is
+stuk. `32_dag_klaarzetten.sql` zet daar een vangnet onder:
+
+- **`dag_klaarzetten()`** materialiseert morgen altijd, en vandaag alleen
+  als die nog helemaal leeg is. Dat onderscheid is nodig: `materialise_day`
+  zegt in zijn eigen commentaar dat een verwijderd item bij een herhaling
+  terugkomt. Dat mag niet gebeuren omdat iemand toevallig het dashboard
+  opent. Staat de dag leeg, dan is er niets om terug te zetten.
+- Het zet ook de **medicatiemomenten** klaar. De oude knop "Vandaag
+  bijwerken" deed dat niet, dus bleef het schema leeg ook nadat je hem
+  gedrukt had.
+- `useDagKlaar()` roept het **één keer per dag** aan zodra familie de app
+  opent, met de datum in localStorage als slot. Mislukt het, dan gebeurt het
+  de volgende keer gewoon opnieuw.
+
+De oude `materialiseToday()` nam bovendien de datum in UTC. Rond
+middernacht in de zomer is dat bij ons nog gisteren.
+
+De nachtjob blijft het beste: die draait ook als niemand de app opent. Dit
+is wat eronder hangt.
+
+### Een lege dag verdwijnt niet meer
+
+Het blok "Vandaag" werd helemaal weggelaten als er geen items waren. Zo kon
+een niet-draaiende job maandenlang onopgemerkt blijven: familie zag geen
+fout, alleen niets. Nu staat er "Er staat vandaag niets gepland" — rustig
+genoeg voor haar, en herkenbaar voor wie meekijkt.
+
+Dat is dezelfde regel als elders in dit bestand: op het scherm van de
+persoon is terugvallen op iets zichtbaars altijd beter dan stil verdwijnen.
+
 ## "Dit ben ik"
 
 Wie naar het ziekenhuis of een woonzorgcentrum gaat, komt daar aan als een

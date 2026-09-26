@@ -2,6 +2,7 @@ import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { useHousehold } from "../features/household/useHousehold";
 import { useDisplayPrefs } from "../features/settings/useDisplayPrefs";
 import { useRealtime } from "../features/realtime/useRealtime";
+import { useDagKlaar } from "../services/dag";
 import InstallPrompt from "../features/install/InstallPrompt";
 import Icon, { type IconNaam } from "../components/Icon";
 import AccountBar from "./AccountBar";
@@ -30,6 +31,13 @@ export default function FamilyLayout() {
   const { household, isLoading } = useHousehold();
   useDisplayPrefs(household?.household_id ?? "");
   useRealtime(household?.household_id ?? "");
+  // Vangnet voor wie pg_cron niet aan heeft staan: zet de dag één keer per
+  // dag klaar zodra familie de app opent. Zonder dit blijft haar tijdlijn
+  // leeg en wijst niets naar de oorzaak.
+  useDagKlaar(
+    household?.household_id ?? "",
+    household?.role === "admin" || household?.role === "member",
+  );
 
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
 
