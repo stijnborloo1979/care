@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { redenen, uitgeschakeld } from './pushStatus.intern'
 
 /**
  * Waarom komt een melding niet aan?
@@ -131,12 +132,38 @@ export async function telegramChats(): Promise<{ id: string; naam: string }[]> {
  * wegen, want een test die maar de helft aflegt bewijst niet wat je wil
  * weten.
  */
-export async function stuurTestmelding(householdId: string) {
+export interface Testuitslag {
+  /** Wegen die de server helemaal niet kan gebruiken: hun secrets ontbreken. */
+  uit: string[]
+  /** Wegen die het probeerden en geweigerd werden, met de reden. */
+  fouten: string[]
+}
+
+export async function stuurTestmelding(householdId: string): Promise<Testuitslag> {
   const { error } = await supabase.rpc('test_push', { hh: householdId })
   if (error) throw error
   try {
-    await supabase.functions.invoke('push-notify')
+    const { data } = await supabase.functions.invoke('push-notify')
+    return { uit: uitgeschakeld(data), fouten: redenen(data) }
   } catch {
     // De cron vangt het op, als die draait.
+    return { uit: [], fouten: [] }
   }
 }
+
+/**
+ * Welke wegen de server niet eens kan proberen.
+ *
+ * Dit is het verschil tussen "de taak draait niet" en "de sleutel ontbreekt",
+ * en die twee vragen om iets heel anders. Zonder dit stuurde het scherm je
+ * naar pg_cron terwijl er gewoon geen RESEND_API_KEY stond.
+ */
+
+/**
+ * Wat de wegen terugmeldden.
+ *
+ * Weigert Meta een sjabloon, dan staat de reden in het antwoord van de edge
+ * function — en die hoort op het scherm, niet in een logboek dat niemand
+ * opent. Bij het opzetten is dit het verschil tussen "het werkt niet" en
+ * "het sjabloon heet anders".
+ */
