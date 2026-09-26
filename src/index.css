@@ -557,6 +557,20 @@ body[data-simple='true'] nav a {
   font-size: 1rem;
 }
 
+/* De onderbalk groeit niet onbeperkt mee met de tekstgrootte.
+   ---------------------------------------------------------------
+   Vijf labels moeten op een scherm van 360 px naast elkaar passen. Bij
+   extra grote tekst werd "Vandaag" 21 px breed per letter-reeks en schoof
+   het laatste item buiten beeld — dan zie je "Help" niet meer, en dat is
+   net het item dat er altijd moet zijn.
+
+   De iconen blijven wel groot, en de plaatsen veranderen nooit. Dat zijn
+   de dragers van deze navigatie; het woord eronder is de bevestiging. */
+.hoofdnav a {
+  font-size: min(0.95rem, 16px);
+  line-height: 1.2;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

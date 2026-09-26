@@ -287,7 +287,11 @@ function TimelineRow({
   const gedaan = status === 'done'
 
   return (
-    <li className="flex items-start gap-3 border-b border-line/70 py-3 last:border-none">
+    // flex-wrap, want bij grote tekst wordt "Ongedaan" een knop van 158 px.
+    // Met shrink-0 werd die dan gewoon buiten beeld geduwd, over de titel
+    // heen. Nu zakt hij naar de volgende regel — op dat scherm is dat ook
+    // een betere plek: een knop die de volle breedte krijgt, mis je niet.
+    <li className="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-line/70 py-3 last:border-none">
       <span className="w-14 shrink-0 pt-1 font-bold tabular-nums text-ink-soft">
         {hhmm(new Date(event.starts_at), timezone)}
       </span>
@@ -303,7 +307,7 @@ function TimelineRow({
         }`}
       />
 
-      <span className="min-w-0 flex-1">
+      <span className="min-w-[6rem] flex-1">
         <span className={`block text-lg font-semibold ${gedaan ? 'text-ink-faint line-through' : ''}`}>
           {event.emoji ? `${event.emoji} ` : ''}
           {event.title}
@@ -314,7 +318,7 @@ function TimelineRow({
 
       <button
         onClick={() => onToggle(event.id, !gedaan)}
-        className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
+        className="ml-auto min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold"
       >
         {gedaan ? 'Ongedaan' : 'Afvinken'}
       </button>

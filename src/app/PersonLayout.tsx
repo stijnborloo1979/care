@@ -110,7 +110,7 @@ export default function PersonLayout() {
 
       <nav
         aria-label="Hoofdnavigatie"
-        className="fixed inset-x-0 bottom-0 z-40 flex justify-around gap-1 border-t border-line bg-surface/90 px-2 pt-1 backdrop-blur-xl"
+        className="hoofdnav fixed inset-x-0 bottom-0 z-40 flex justify-around gap-1 border-t border-line bg-surface/90 px-2 pt-1 backdrop-blur-xl"
         style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
       >
         {NAV.map((n) => {
@@ -121,7 +121,7 @@ export default function PersonLayout() {
               key={n.to}
               to={n.to}
               aria-current={actief ? 'page' : undefined}
-              className={`flex min-h-[3.6rem] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-sm font-semibold ${
+              className={`flex min-h-[3.6rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-sm font-semibold ${
                 n.mic
                   ? 'bg-accent-ink text-white'
                   : actief

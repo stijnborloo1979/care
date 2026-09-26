@@ -401,6 +401,30 @@ waar die tegel voor dient.
 
 ## Op een telefoon
 
+### De tijdlijn en de onderbalk bij grote tekst
+
+Twee dingen die pas stukgaan als de tekstgrootte omhoog gaat, en dat is
+precies de stand waarin deze app gebruikt wordt.
+
+**De afvinkknop werd buiten beeld geduwd.** Bij `scale 1.5` is "Ongedaan"
+een knop van 158 px. Met `shrink-0` in een rij die niet mag afbreken, wordt
+zo'n knop niet kleiner maar naar buiten geschoven — over de titel heen. De
+rij breekt nu af (`flex-wrap`), en de knop zakt naar de volgende regel. Op
+dat scherm is dat ook een betere plek: een knop die bijna de hele breedte
+krijgt, mis je niet. Vanaf ongeveer 412 px past alles weer op één regel.
+
+**De onderbalk verloor zijn laatste item.** Vijf labels moeten op 360 px
+naast elkaar passen; bij extra grote tekst schoof "Help" eruit — net het
+item dat er altijd moet zijn. De labels groeien nu tot 16 px en niet verder
+(`.hoofdnav a`), en elk item mag krimpen (`min-w-0`). De iconen blijven
+groot en de plaatsen veranderen nooit: dat zijn de dragers van die
+navigatie, het woord eronder is de bevestiging.
+
+Gemeten op 360, 390 en 412 px bij `scale` 1, 1.3 en 1.5: nergens
+horizontale overloop, nergens iets buiten beeld.
+
+
+
 Twee soorten fouten, en het is de moeite ze uit elkaar te houden.
 
 **Een rij die niet wil wijken.** Overal in de familieschermen staat een
