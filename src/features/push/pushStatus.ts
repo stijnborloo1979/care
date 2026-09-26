@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { redenen, uitgeschakeld } from './pushStatus.intern'
 
 /**
  * Waarom komt een melding niet aan?
@@ -131,17 +132,56 @@ export async function telegramChats(): Promise<{ id: string; naam: string }[]> {
  * wegen, want een test die maar de helft aflegt bewijst niet wat je wil
  * weten.
  */
-export async function stuurTestmelding(householdId: string): Promise<string[]> {
+export interface Testuitslag {
+  /** Wegen die de server helemaal niet kan gebruiken: hun secrets ontbreken. */
+  uit: string[]
+  /** Wegen die het probeerden en geweigerd werden, met de reden. */
+  fouten: string[]
+}
+
+export async function stuurTestmelding(householdId: string): Promise<Testuitslag> {
   const { error } = await supabase.rpc('test_push', { hh: householdId })
   if (error) throw error
   try {
-    const { data } = await supabase.functions.invoke('push-notify')
-    return redenen(data)
+    const { data, error: invokeFout } = await supabase.functions.invoke('push-notify')
+    if (invokeFout) {
+      // Een 500 uit de functie draagt haar eigen uitleg mee; die is veel
+      // bruikbaarder dan "niet bereikbaar". Alleen als er niets in zit,
+      // vallen we terug op de algemene tekst.
+      const uitleg = (data as { error?: unknown })?.error
+      return {
+        uit: [],
+        fouten: [typeof uitleg === 'string' && uitleg ? `push-notify: ${uitleg}` : ONBEREIKBAAR],
+      }
+    }
+    return { uit: uitgeschakeld(data), fouten: redenen(data) }
   } catch {
-    // De cron vangt het op, als die draait.
-    return []
+    return { uit: [], fouten: [ONBEREIKBAAR] }
   }
 }
+
+/**
+ * De functie zelf is niet bereikbaar.
+ *
+ * Dit werd eerst stil weggeslikt, met als redenering: de melding staat al in
+ * de database en de cron pikt hem wel op. Dat klopt voor een melding uit de
+ * nacht, maar niet voor iemand die net op een testknop drukte en toekijkt.
+ * Die ziet dan niets gebeuren en weet niet of het aan hem of aan de app ligt.
+ *
+ * De meest voorkomende oorzaak is een adres dat niet overeenkomt met de naam:
+ * Supabase geeft een nieuwe functie een willekeurig adres, en dat verandert
+ * niet mee als je de titel aanpast.
+ */
+const ONBEREIKBAAR =
+  'push-notify is niet bereikbaar. Kijk in Supabase bij Edge Functions of het adres onder de titel eindigt op /push-notify — staat daar iets anders, dan roept de app een functie aan die niet bestaat.'
+
+/**
+ * Welke wegen de server niet eens kan proberen.
+ *
+ * Dit is het verschil tussen "de taak draait niet" en "de sleutel ontbreekt",
+ * en die twee vragen om iets heel anders. Zonder dit stuurde het scherm je
+ * naar pg_cron terwijl er gewoon geen RESEND_API_KEY stond.
+ */
 
 /**
  * Wat de wegen terugmeldden.
@@ -151,10 +191,3 @@ export async function stuurTestmelding(householdId: string): Promise<string[]> {
  * opent. Bij het opzetten is dit het verschil tussen "het werkt niet" en
  * "het sjabloon heet anders".
  */
-function redenen(data: unknown): string[] {
-  const fouten = (data as { wegen_fouten?: unknown })?.wegen_fouten
-  if (!fouten || typeof fouten !== 'object') return []
-  return Object.entries(fouten as Record<string, unknown>)
-    .filter(([, v]) => typeof v === 'string' && v)
-    .map(([weg, v]) => `${weg}: ${v as string}`)
-}

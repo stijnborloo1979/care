@@ -92,6 +92,17 @@ const CORS = {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
+  // Alles binnen één vangnet, want een onbehandelde fout geeft een kale 500
+  // zonder CORS-koppen — en dan ziet de browser opnieuw een CORS-fout en zoek
+  // je op de verkeerde plaats. Liever een 500 die zegt wat er misging.
+  try {
+    return await behandel(req)
+  } catch (e) {
+    return json({ error: e instanceof Error ? e.message : 'Onbekende fout' }, 500)
+  }
+})
+
+async function behandel(req: Request): Promise<Response> {
   // Zet "Verify JWT" UIT voor deze functie, en lees hieronder waarom dat
   // veilig is.
   if (!(await magBinnen(req))) {
@@ -116,7 +127,7 @@ Deno.serve(async (req) => {
   const post = await bezorgen(supabase)
   const push = await pushen(supabase)
   return json({ ...push, ...post })
-})
+}
 
 /**
  * Wie mag deze functie aanroepen?
@@ -149,12 +160,17 @@ async function magBinnen(req: Request): Promise<boolean> {
   if (service && token === service) return true
 
   try {
+    // Bewust met de service role en het token als argument, niet met de anon
+    // key in een client. Die anon key heet niet in elk project hetzelfde, en
+    // createClient() met een lege sleutel gooit meteen — wat de hele functie
+    // een 500 gaf, zonder CORS-koppen, en dus opnieuw als een CORS-fout in
+    // beeld kwam. getUser(token) laat Supabase het token nakijken en heeft
+    // verder niets nodig.
     const client = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: `Bearer ${token}` } } },
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
-    const { data, error } = await client.auth.getUser()
+    const { data, error } = await client.auth.getUser(token)
     return !error && !!data?.user
   } catch {
     return false
@@ -219,11 +235,17 @@ async function pushen(
   const prive = Deno.env.get('VAPID_PRIVATE_KEY')
   if (!publiek || !prive) return { push_uit: true }
 
-  webpush.setVapidDetails(
-    Deno.env.get('VAPID_SUBJECT') ?? 'mailto:thuis@example.be',
-    publiek,
-    prive,
-  )
+  try {
+    webpush.setVapidDetails(
+      Deno.env.get('VAPID_SUBJECT') ?? 'mailto:thuis@example.be',
+      publiek,
+      prive,
+    )
+  } catch (e) {
+    // Een verkeerd VAPID_SUBJECT (geen mailto: of https:) of een sleutel met
+    // een spatie erin gooit hier. Dat mag alleen de push kosten, niet de rest.
+    return { push_fout: e instanceof Error ? e.message : 'VAPID klopt niet' }
+  }
 
   const { data, error } = await supabase.rpc('pending_pushes', { limiet: 200 })
   if (error) return { push_fout: error.message }
@@ -449,9 +471,19 @@ const WEGEN: Record<
             template: {
               name: Deno.env.get('WA_TEMPLATE'),
               language: { code: Deno.env.get('WA_TEMPLATE_TAAL') ?? 'nl' },
-              components: [
-                { type: 'body', parameters: [{ type: 'text', text: tekst }] },
-              ],
+              // Een sjabloon zonder variabele mag geen components meegeven;
+              // Meta weigert het dan wegens "number of parameters does not
+              // match". Zet WA_MET_TEKST op 'nee' om eerst met Meta's eigen
+              // hello_world te bewijzen dat token, nummer en ontvanger
+              // kloppen — dan hoef je niet op sjabloongoedkeuring te wachten
+              // om te weten of de rest werkt.
+              ...(Deno.env.get('WA_MET_TEKST') === 'nee'
+                ? {}
+                : {
+                    components: [
+                      { type: 'body', parameters: [{ type: 'text', text: tekst }] },
+                    ],
+                  }),
             },
           }),
         },

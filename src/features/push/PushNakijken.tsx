@@ -18,6 +18,19 @@ import { getPushStatus, stuurTestmelding, zetMail } from './pushStatus'
  * laptops vaak niet te krijgen, en dan is e-mail niet het vangnet maar het
  * hele net.
  */
+/** Hoe een weg heet op het scherm, en welke sleutel hij nodig heeft. */
+const NAAM: Record<string, string> = {
+  mail: 'E-mail',
+  whatsapp: 'WhatsApp',
+  telegram: 'Telegram',
+}
+
+const SLEUTELS: Record<string, string> = {
+  mail: 'RESEND_API_KEY of MAIL_FROM',
+  whatsapp: 'WA_TOKEN, WA_PHONE_ID of WA_TEMPLATE',
+  telegram: 'TG_BOT_TOKEN',
+}
+
 export default function PushNakijken({ householdId }: { householdId: string }) {
   const queryClient = useQueryClient()
   const [verstuurd, setVerstuurd] = useState(false)
@@ -74,7 +87,7 @@ export default function PushNakijken({ householdId }: { householdId: string }) {
   if (data.wachtend_weg > 0 || (data.wachtend > 0 && data.toestellen > 0 && data.niveau_ok)) {
     const aantal = data.wachtend_weg > 0 ? data.wachtend_weg : data.wachtend
     problemen.push(
-      `Er ${aantal === 1 ? 'wacht 1 melding' : `wachten ${aantal} meldingen`} die niet verstuurd raken. De taak die dat doet (push-notify) draait niet: zet pg_cron aan in Supabase, bij Database → Extensions. Ontbreken de secrets voor een weg — RESEND_API_KEY voor mail, WA_TOKEN voor WhatsApp — dan blijft die weg ook openstaan.`,
+      `Er ${aantal === 1 ? 'wacht 1 melding' : `wachten ${aantal} meldingen`} die niet verstuurd ${aantal === 1 ? 'raakt' : 'raken'}. Druk op "Stuur een testmelding" hieronder: dan zegt de app welke weg het laat afweten, in plaats van dat je moet raden.`,
     )
   }
 
@@ -139,20 +152,39 @@ export default function PushNakijken({ householdId }: { householdId: string }) {
         {test.isPending ? 'Bezig…' : 'Stuur een testmelding'}
       </button>
 
-      {verstuurd && test.data?.length === 0 ? (
+      {verstuurd && test.data && test.data.uit.length === 0 && test.data.fouten.length === 0 ? (
         <p aria-live="polite" className="mt-2 text-sm text-ink-soft">
           Verstuurd, langs elke weg die aan staat. Komt er binnen een minuut niets aan, dan staat
           hierboven waarschijnlijk al waarom.
         </p>
       ) : null}
 
-      {/* De reden die Meta of Resend teruggaf. Bij het opzetten is dit het
-          verschil tussen een namiddag gissen en één regel aanpassen. */}
-      {test.data?.length ? (
+      {/* Twee verschillende dingen, die om iets heel anders vragen: een weg
+          die de server niet eens kan proberen (de sleutel ontbreekt), en een
+          weg die geprobeerd werd en geweigerd (het sjabloon klopt niet). Ze
+          door elkaar halen kost een namiddag. */}
+      {test.data?.uit.length ? (
+        <div aria-live="polite" className="mt-2 rounded-2xl border border-line-strong bg-surface p-3">
+          <p className="text-sm font-semibold">
+            {test.data.uit.length === 1 ? 'Deze weg staat uit' : 'Deze wegen staan uit'} bij de
+            server:
+          </p>
+          <ul className="mt-1 space-y-1 text-sm text-ink-soft">
+            {test.data.uit.map((w) => (
+              <li key={w}>
+                <span className="font-semibold">{NAAM[w] ?? w}</span> — {SLEUTELS[w] ?? 'de secrets'}{' '}
+                ontbreekt nog bij Edge Functions → Secrets in Supabase.
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {test.data?.fouten.length ? (
         <div aria-live="polite" className="mt-2 rounded-2xl border border-alert bg-surface p-3">
           <p className="text-sm font-semibold">Een weg weigerde het bericht:</p>
           <ul className="mt-1 space-y-1 text-sm text-ink-soft">
-            {test.data.map((f) => (
+            {test.data.fouten.map((f) => (
               <li key={f} className="break-words font-mono text-[0.8em]">
                 {f}
               </li>

@@ -63,3 +63,35 @@ describe('leesStatus', () => {
     expect([uit?.toestellen, uit?.wachtend, uit?.wachtend_weg]).toEqual([0, 0, 0])
   })
 })
+
+/**
+ * De twee soorten uitslag van een testmelding. Ze door elkaar halen stuurt
+ * iemand naar pg_cron terwijl er gewoon een sleutel ontbreekt — precies wat
+ * er gebeurde.
+ */
+describe('testuitslag', () => {
+  it('scheidt een uitgeschakelde weg van een geweigerd bericht', async () => {
+    const { uitgeschakeld, redenen } = await import('./pushStatus.intern')
+    const data = {
+      wegen_uit: ['mail', 'telegram'],
+      wegen_fouten: { whatsapp: '400: Template name does not exist' },
+    }
+    expect(uitgeschakeld(data)).toEqual(['mail', 'telegram'])
+    expect(redenen(data)).toEqual(['whatsapp: 400: Template name does not exist'])
+  })
+
+  it('geeft niets terug bij een geslaagde ronde', async () => {
+    const { uitgeschakeld, redenen } = await import('./pushStatus.intern')
+    for (const data of [{}, { bezorgd: 2 }, null, undefined, 'nee']) {
+      expect(uitgeschakeld(data)).toEqual([])
+      expect(redenen(data)).toEqual([])
+    }
+  })
+
+  it('negeert rommel in plaats van het te tonen', async () => {
+    const { uitgeschakeld, redenen } = await import('./pushStatus.intern')
+    expect(uitgeschakeld({ wegen_uit: 'mail' })).toEqual([])
+    expect(uitgeschakeld({ wegen_uit: [1, 'mail', null] })).toEqual(['mail'])
+    expect(redenen({ wegen_fouten: { whatsapp: 42, mail: '' } })).toEqual([])
+  })
+})
