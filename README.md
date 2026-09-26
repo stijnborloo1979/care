@@ -523,6 +523,40 @@ lijst in de handen van een verpleegkundige is gevaarlijker dan geen lijst.
 Dat ze gewend is om acht uur iets te krijgen, is zorgcontext en geen
 voorschrift — dat staat er dus wel, met die zin erbij.
 
+## Waarom een melding niet aankomt
+
+Push valt op drie plaatsen stil, en alle drie doen ze dat zonder een
+spoor. Wie dat niet weet, concludeert dat de app niet werkt.
+
+1. **Toestemming is per toestel én per account.** Meldingen aanzetten op de
+   tablet doet niets voor de telefoon van de dochter. Er is één rij per
+   toestel in `push_subscription`.
+2. **Alleen in de fase "ondersteund".** `pending_pushes()` filtert daarop.
+   Een bewuste keuze — in de fase "zelf" hoort familie niet ongevraagd
+   berichten te krijgen over iemand — maar wie hem niet kent, zoekt zich
+   blind.
+3. **`push-notify` moet draaien.** Die edge function hangt aan pg_cron, en
+   pg_cron moet je apart inschakelen. Zonder dat wordt er nooit iets
+   verstuurd, hoeveel toestellen er ook klaarstaan.
+
+`34_push_nakijken.sql` maakt die drie zichtbaar. Onder "Meldingen op dit
+toestel" staat nu welke stap er nog in de weg zit, in de volgorde waarin je
+ze moet oplossen, plus een knop om een testmelding te sturen — langs precies
+dezelfde weg als een echte, want een test die een andere weg neemt bewijst
+niets.
+
+### Niet op de cron wachten
+
+"Bel me eens" en "ik heb hulp nodig" roepen `push-notify` nu meteen zelf
+aan. De edge function laat "Verify JWT" aan staan, dus een ingelogd
+familielid mag haar aanroepen; ze stuurt alleen wat er al klaarstaat, dus
+dat is een duwtje en geen achterdeur. Mislukt het, dan gebeurt er niets
+ergs: de melding staat in de database en gaat mee met de volgende ronde —
+áls die er is.
+
+Voor een melding uit de nacht is vijf minuten wachten prima. Voor iemand
+die vraagt of je belt, niet.
+
 ## De 112-knop die niet kon bellen
 
 Op het Help-scherm stond "Noodnummer 112" als `tel:`-link. Op een tablet

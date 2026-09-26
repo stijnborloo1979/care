@@ -8,6 +8,7 @@ import ManageRadio from '../radio/ManageRadio'
 import { useLicht } from '../licht/lichtStore'
 import MijnGegevens from '../privacy/MijnGegevens'
 import { usePush } from '../push/usePush'
+import PushNakijken from '../push/PushNakijken'
 import { TALEN } from '../../lib/i18n'
 
 // De echte waarden staan in index.css; dit is alleen het bolletje in het
@@ -496,6 +497,10 @@ function Meldingen({
           {voornaam} beslist daarover bij Wie ziet wat.
         </p>
       ) : null}
+
+      {/* Push valt op drie plaatsen stil, en alle drie zonder een spoor.
+          Dit zegt welke. */}
+      <PushNakijken householdId={householdId} />
     </section>
   )
 }

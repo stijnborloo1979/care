@@ -43,6 +43,25 @@ export async function getCallStatus(callId: string): Promise<string | null> {
 }
 
 /**
+ * De edge function meteen aanporren.
+ *
+ * push-notify hangt normaal aan pg_cron en draait dan elke vijf minuten.
+ * Voor een melding uit de nacht is dat prima; voor "bel me eens" of "ik heb
+ * hulp nodig" is vijf minuten lang, en zonder pg_cron gebeurt het nooit.
+ *
+ * Mislukt het, dan gebeurt er niets ergs: de melding staat al in de
+ * database en gaat alsnog mee met de volgende ronde. Daarom geen
+ * foutafhandeling — dit is een duwtje, geen voorwaarde.
+ */
+async function duwPush() {
+  try {
+    await supabase.functions.invoke('push-notify')
+  } catch {
+    // Niet ingesteld of niet bereikbaar. De cron vangt het op.
+  }
+}
+
+/**
  * "Bel me eens."
  *
  * Bellen gaat in deze app maar één kant op: familie belt, de tablet rinkelt
@@ -56,6 +75,7 @@ export async function getCallStatus(callId: string): Promise<string | null> {
 export async function vraagGesprek(householdId: string) {
   const { error } = await supabase.rpc('vraag_gesprek', { hh: householdId })
   if (error) throw error
+  await duwPush()
 }
 
 /**
@@ -68,4 +88,5 @@ export async function vraagGesprek(householdId: string) {
 export async function vraagHulp(householdId: string) {
   const { error } = await supabase.rpc('vraag_hulp', { hh: householdId })
   if (error) throw error
+  await duwPush()
 }
