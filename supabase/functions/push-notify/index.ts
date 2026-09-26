@@ -1,5 +1,11 @@
 // Edge function: stuurt de meldingen door, langs elke weg die openstaat.
 //
+// LET OP bij het deployen: zet "Verify JWT" UIT voor deze functie. Met die
+// schakelaar aan weigert de poortwachter van Supabase het OPTIONS-verzoek van
+// de browser, want dat draagt geen token — en dan werkt geen enkele aanroep
+// vanuit de app. De controle gebeurt in de functie zelf (magBinnen), en is
+// daar even streng.
+//
 // De database maakt meldingen (public.notification); deze functie bezorgt
 // ze aan familie. Ze draait met de service role en mag dus niet publiek
 // aanroepbaar zijn: laat "Verify JWT" AAN. Ze wordt aangeroepen door
@@ -66,7 +72,32 @@ interface AlertRij {
   person_name: string
 }
 
+/**
+ * De browser vraagt eerst toestemming (een OPTIONS-verzoek) voor hij een
+ * POST doet. Kwam daar geen antwoord met deze koppen op, dan blokkeerde
+ * Chrome het echte verzoek en zag je alleen "net::ERR_FAILED" — terwijl de
+ * functie zelf niets verkeerd deed.
+ *
+ * Dit stond er niet in omdat push-notify oorspronkelijk alleen door pg_cron
+ * werd aangeroepen, en een cronjob vraagt niets vooraf. Sinds de app haar
+ * rechtstreeks aanroept — voor "bel me eens", voor de testmelding en voor de
+ * Telegram-chats — moet het er wel bij.
+ */
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+
+  // Zet "Verify JWT" UIT voor deze functie, en lees hieronder waarom dat
+  // veilig is.
+  if (!(await magBinnen(req))) {
+    return json({ error: 'Niet ingelogd' }, 401)
+  }
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -86,6 +117,49 @@ Deno.serve(async (req) => {
   const push = await pushen(supabase)
   return json({ ...push, ...post })
 })
+
+/**
+ * Wie mag deze functie aanroepen?
+ *
+ * "Verify JWT" moet hier UIT staan, en dat is geen slordigheid maar de enige
+ * werkbare keuze: met die schakelaar aan weigert de poortwachter van Supabase
+ * élk verzoek zonder Authorization-header — óók het OPTIONS-verzoek waarmee
+ * de browser vooraf toestemming vraagt. Een preflight stuurt nooit een token
+ * mee. Gevolg: de functie wordt nooit bereikt, de CORS-koppen hieronder komen
+ * niet aan bod, en Chrome zegt alleen "preflight does not have HTTP ok
+ * status". Dat heeft een avond gekost.
+ *
+ * De controle verhuist dus naar hier, waar ze net zo streng is:
+ *
+ *   - de service role (pg_cron, via pg_net) mag binnen;
+ *   - een ingelogde gebruiker mag binnen, gecontroleerd bij Supabase zelf;
+ *   - al de rest niet.
+ *
+ * Dat is geen verzwakking tegenover "Verify JWT": die schakelaar doet exact
+ * hetzelfde, alleen een laag hoger en zonder onderscheid voor OPTIONS.
+ */
+async function magBinnen(req: Request): Promise<boolean> {
+  const kop = req.headers.get('Authorization') ?? ''
+  const token = kop.replace(/^Bearer\s+/i, '').trim()
+  if (!token) return false
+
+  // De cron roept aan met de service role key. Die hoort niet naar
+  // auth.getUser(): het is geen gebruiker.
+  const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (service && token === service) return true
+
+  try {
+    const client = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } },
+    )
+    const { data, error } = await client.auth.getUser()
+    return !error && !!data?.user
+  } catch {
+    return false
+  }
+}
 
 /** Komt er een verzoek om de Telegram-chats, of is dit een gewone ronde? */
 async function vraagtTelegramChats(req: Request): Promise<boolean> {
@@ -355,6 +429,9 @@ const WEGEN: Record<
       // melding. WhatsApp weigert een variabele met een nieuwe regel of met
       // dubbele spaties, vandaar het opschonen.
       const tekst = r.body.replace(/\s+/g, ' ').trim().slice(0, 900)
+      // Meta wil E.164 zónder plusteken: 32475123456, niet +32475123456. In
+      // de database staat hij mét, want zo lezen mensen een nummer. Hier gaat
+      // hij eraf, en alleen hier.
       const antwoord = await fetch(
         // Meta laat een versie ongeveer twee jaar staan en zet ze dan uit.
         // Instelbaar, zodat dat later een secret is en geen deploy.
@@ -367,7 +444,7 @@ const WEGEN: Record<
           },
           body: JSON.stringify({
             messaging_product: 'whatsapp',
-            to: r.address,
+            to: r.address.replace(/^\+/, ''),
             type: 'template',
             template: {
               name: Deno.env.get('WA_TEMPLATE'),
@@ -437,8 +514,9 @@ function ontsnap(s: string): string {
     .replace(/"/g, '&quot;')
 }
 
-function json(body: unknown) {
+function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
-    headers: { 'Content-Type': 'application/json' },
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
   })
 }

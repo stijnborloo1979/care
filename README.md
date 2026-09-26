@@ -681,6 +681,38 @@ huishoudens heen.
 Ontbreekt een secret, dan slaat de functie die weg over en zegt het antwoord
 welke uit staan (`wegen_uit`). Niets breekt; er valt alleen een weg weg.
 
+### De blokkade die niets met de wegen te maken had
+
+Twee lagen, en de tweede was de echte.
+
+Voor geen van dit alles werkte, stond er iets veel simpelers in de weg:
+`push-notify` had geen CORS-koppen. De browser vraagt eerst toestemming — een
+`OPTIONS`-verzoek — voor hij een POST doet; kwam daar geen antwoord met de
+juiste koppen op, dan blokkeerde Chrome het echte verzoek en zag je in de
+console alleen `net::ERR_FAILED`.
+
+Het stond er niet in omdat `push-notify` oorspronkelijk alleen door pg_cron
+werd aangeroepen, en een cronjob vraagt niets vooraf. Sinds de app haar
+rechtstreeks aanroept — voor "bel me eens", voor de testmelding en voor de
+Telegram-chats — moet het er wel bij.
+
+Maar die koppen erbij zetten hielp niets, want ze werden nooit bereikt: **met
+"Verify JWT" aan weigert de poortwachter van Supabase élk verzoek zonder
+Authorization-header, en een preflight draagt er nooit een.** De browser krijgt
+dan `UNAUTHORIZED_NO_AUTH_HEADER` terug op zijn `OPTIONS`, wat geen "ok status"
+is, en de functie draait niet eens. Vandaar dat het beeld klopte — CORS-fout —
+terwijl de oorzaak een laag hoger zat.
+
+Daarom staat "Verify JWT" voor deze functie **uit**, en doet ze de controle
+zelf (`magBinnen`): de service role mag binnen (dat is pg_cron via pg_net), een
+ingelogde gebruiker mag binnen na navraag bij Supabase, en al de rest krijgt
+401 — mét CORS-koppen, zodat de app die fout kan lezen in plaats van erop stuk
+te lopen. Dat is geen verzwakking: de schakelaar doet hetzelfde, alleen zonder
+uitzondering voor OPTIONS.
+
+Dezelfde afweging staat al bij `pair-device` en `turn-credentials`, die om een
+andere reden ook zonder die schakelaar draaien.
+
 Dat gold eerst níet voor de VAPID-sleutels: ontbraken die, dan stopte
 `push-notify` meteen met een 500 en kwam er helemaal niets weg — ook de mail
 en de WhatsApp niet, terwijl die juist bestaan voor wie geen push heeft. De
