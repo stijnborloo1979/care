@@ -125,7 +125,11 @@ const NL: Woordenboek = {
   'hulp.kies': 'Kies wat je nodig hebt.',
   'hulp.bel': 'Bel {naam}',
   'hulp.vraagBel': 'Vraag of {naam} belt',
-  'hulp.gevraagd': '{naam} weet het. Ze belt je zo terug.',
+  // Bewust niet "{naam} weet het": de vraag gaat naar iedereen die
+  // meezorgt, niet naar die ene persoon — en of juist hij ze gezien heeft,
+  // weet de app niet. Een geruststelling die niet klopt, is erger dan geen.
+  // En niet "ze belt": dat maakt van elk familielid een vrouw.
+  'hulp.gevraagd': 'Je familie weet het. Ze bellen je zo terug.',
   'hulp.vraagBezig': 'Bezig…',
   'hulp.vraagMislukt': 'Dat lukte nu niet. Probeer het straks nog eens.',
   'hulp.waarBenIk': 'Waar ben ik?',
@@ -286,7 +290,7 @@ const FR: Woordenboek = {
   'hulp.kies': 'Choisissez ce dont vous avez besoin.',
   'hulp.bel': 'Appeler {naam}',
   'hulp.vraagBel': 'Demander à {naam} de rappeler',
-  'hulp.gevraagd': '{naam} est prévenu. On vous rappelle bientôt.',
+  'hulp.gevraagd': 'Votre famille est prévenue. On vous rappelle bientôt.',
   'hulp.vraagBezig': 'Un instant…',
   'hulp.vraagMislukt': "Cela n'a pas fonctionné. Réessayez plus tard.",
   'hulp.waarBenIk': 'Où suis-je ?',
@@ -435,7 +439,7 @@ const EN: Woordenboek = {
   'hulp.kies': 'Choose what you need.',
   'hulp.bel': 'Call {naam}',
   'hulp.vraagBel': 'Ask {naam} to call',
-  'hulp.gevraagd': '{naam} knows. They will call you back soon.',
+  'hulp.gevraagd': 'Your family knows. Someone will call you back soon.',
   'hulp.vraagBezig': 'One moment…',
   'hulp.vraagMislukt': 'That did not work. Please try again later.',
   'hulp.waarBenIk': 'Where am I?',

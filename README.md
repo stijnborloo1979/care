@@ -863,6 +863,25 @@ de indeling zich nu ook elke twee minuten opnieuw op — niet omdat het nodig
 is wanneer realtime werkt, maar omdat een tablet zijn websocket kan verliezen
 zonder het te merken.
 
+### "Jens weet het. Ze belt je zo terug."
+
+Twee fouten in één zin, en de eerste is de ergste: **de app beweerde iets wat
+ze niet weet**. Een vraag om terug te bellen gaat naar iedereen die meezorgt,
+niet naar die ene persoon wiens kaart werd aangetikt — en of juist hij ze
+gezien heeft, is nergens bekend. Voor iemand met geheugenproblemen is een
+geruststelling die niet klopt erger dan geen geruststelling. Nu staat er: "Je
+familie weet het. Ze bellen je zo terug."
+
+De tweede: "Ze belt" maakte van elk familielid een vrouw. En dat stond niet
+alleen daar. De app is rond Maria geschreven, en dat is overal in de teksten
+gekropen — "haar scherm", "Zo ziet haar scherm eruit", "Zo praat je best met
+haar". Bij een man klopt geen van die zinnen. Ze gebruiken nu de naam van de
+persoon (die de app toch heeft) of een neutrale vorm.
+
+Drie testen bewaken de belangrijkste zin, in alle drie de talen: hij noemt
+geen naam, hij veronderstelt geen geslacht, en hij blijft iets geruststellends
+zeggen.
+
 ### Geluid bij een melding
 
 Wat de app kan vragen en wat het toestel beslist, zijn twee verschillende

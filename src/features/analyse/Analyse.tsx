@@ -208,7 +208,7 @@ export default function Analyse() {
           <li>
             <strong>Hoe vaak dezelfde vraag terugkwam.</strong> Vragen aan de spraakassistent worden
             nergens bewaard. Dat zou een nieuwe registratie vragen, en meteen een gevoelige: je legt
-            dan vast wat {voornaam} vroeg. Dat hoort zichtbaar te zijn voor haar en uit te zetten.
+            dan vast wat {voornaam} vroeg. Dat hoort zichtbaar te zijn voor {voornaam} en uit te zetten.
           </li>
           <li>
             <strong>Slaap en schermtijd.</strong> De app registreert niet wanneer het scherm aan

@@ -52,3 +52,34 @@ describe('isTaal', () => {
     expect([undefined, null, '', 'de', 'NL', 0, {}, []].some(isTaal)).toBe(false)
   })
 })
+
+/**
+ * De app is rond één persoon geschreven — Maria — en dat is in de teksten
+ * gekropen. "Ze belt je zo terug" klopt niet wanneer de zoon belt, en
+ * "{naam} weet het" beweert iets dat de app niet weet: de vraag om terug te
+ * bellen gaat naar iedereen die meezorgt, niet naar die ene persoon.
+ *
+ * Deze test bewaakt die twee dingen op de plek waar het het meest telt: de
+ * geruststelling die iemand met geheugenproblemen te lezen krijgt.
+ */
+describe('de bevestiging na "vraag of iemand belt"', () => {
+  it('belooft niet dat één bepaalde persoon het gezien heeft', () => {
+    for (const taal of ['nl', 'fr', 'en'] as const) {
+      zetTaal(taal)
+      expect(t('hulp.gevraagd', { naam: 'Jens' })).not.toContain('Jens')
+    }
+  })
+
+  it('maakt van dat familielid geen vrouw', () => {
+    zetTaal('nl')
+    const zin = t('hulp.gevraagd', { naam: 'Jens' })
+    expect(zin).not.toMatch(/\bze belt\b/i)
+    expect(zin).not.toMatch(/\bhaar\b/i)
+    expect(zin).not.toMatch(/\bzij belt\b/i)
+  })
+
+  it('zegt wel iets geruststellends', () => {
+    zetTaal('nl')
+    expect(t('hulp.gevraagd', { naam: 'Jens' }).length).toBeGreaterThan(10)
+  })
+})

@@ -71,7 +71,7 @@ export default function Settings() {
       </header>
 
       {/* Bovenaan, want het gaat over de instelling die je zelf aangaat:
-          de rest van deze pagina gaat over haar scherm. */}
+          de rest van deze pagina gaat over het scherm van de persoon. */}
       <JouwNaam />
 
       {/* Vlak onder de naam, want dit is de instelling met de grootste
@@ -117,8 +117,8 @@ export default function Settings() {
             <span className="font-semibold">Wat moet ze doen bij nood?</span>
             <span className="mt-1 block text-sm text-ink-soft">
               {prefs.kanBellen === 'telefoon'
-                ? 'Dit staat op haar Help-scherm op elk toestel dat niet kan bellen — de tablet dus. Wees heel concreet: waar de telefoon ligt, bij wie ze kan aanbellen.'
-                : 'Dit staat op haar Help-scherm in plaats van de 112-knop. Wees heel concreet: waar de telefoon ligt, bij wie ze kan aanbellen.'}
+                ? `Dit staat op het Help-scherm van ${voornaam} op elk toestel dat niet kan bellen — de tablet dus. Wees heel concreet: waar de telefoon ligt, bij wie er aangebeld kan worden.`
+                : `Dit staat op het Help-scherm van ${voornaam} in plaats van de 112-knop. Wees heel concreet: waar de telefoon ligt, bij wie er aangebeld kan worden.`}
             </span>
             <textarea
               defaultValue={prefs.noodplan}

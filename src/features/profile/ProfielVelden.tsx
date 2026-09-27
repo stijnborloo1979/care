@@ -13,7 +13,7 @@ const VELDEN: { sleutel: keyof Profiel; label: string; onder: string; voorbeeld:
   },
   {
     sleutel: 'omgang',
-    label: 'Zo praat je best met haar',
+    label: 'Zo praat je best met deze persoon',
     onder: 'Wat jij vanzelf doet, weet een verpleegkundige op dag één niet.',
     voorbeeld: 'Traag praten, één vraag tegelijk. Ga links staan, daar hoort ze beter.',
   },
@@ -33,7 +33,7 @@ const VELDEN: { sleutel: keyof Profiel; label: string; onder: string; voorbeeld:
     sleutel: 'vrij',
     label: 'Nog iets dat ze moeten weten',
     onder: 'Wat hier niet in de vakjes past.',
-    voorbeeld: 'Ze slaapt met het licht aan. Haar bril ligt altijd links naast het bed.',
+    voorbeeld: 'Slaapt met het licht aan. De bril ligt altijd links naast het bed.',
   },
 ]
 
@@ -51,7 +51,7 @@ const VELDEN: { sleutel: keyof Profiel; label: string; onder: string; voorbeeld:
 export default function ProfielVelden() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
-  const voornaam = household?.person_name.split(' ')[0] ?? 'zij'
+  const voornaam = household?.person_name.split(' ')[0] ?? 'de persoon'
   const queryClient = useQueryClient()
 
   const { data } = useQuery({
@@ -80,7 +80,7 @@ export default function ProfielVelden() {
           <p className="mt-1 max-w-[62ch] text-sm text-ink-soft">
             Eén blad dat meegaat naar het ziekenhuis of het woonzorgcentrum. Daar is {voornaam} op
             dag één een naam op een lijst; dit maakt er een mens van. De rest — familie,
-            voorkeuren, haar dagindeling — haalt het blad uit wat hier al staat.
+            voorkeuren, de dagindeling — haalt het blad uit wat hier al staat.
           </p>
         </div>
 

@@ -34,7 +34,7 @@ export default function OpHaarScherm({ householdId, naam }: { householdId: strin
 
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-      <h2 className="text-lg font-bold">Staat nu op haar scherm</h2>
+      <h2 className="text-lg font-bold">Staat nu op het scherm</h2>
       <p className="mt-1 text-sm text-ink-soft">
         Alles verdwijnt na twee dagen vanzelf. Wil je het eerder weg, dan kan dat hier.
       </p>
@@ -82,7 +82,7 @@ export default function OpHaarScherm({ householdId, naam }: { householdId: strin
 
               <button
                 onClick={() => {
-                  if (confirm('Dit bericht weghalen? Het verdwijnt meteen van haar scherm.')) {
+                  if (confirm('Dit bericht weghalen? Het verdwijnt meteen van het scherm.')) {
                     weg.mutate(m)
                   }
                 }}

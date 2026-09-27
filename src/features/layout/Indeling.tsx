@@ -80,7 +80,7 @@ export default function Indeling() {
           <h1 className="text-2xl font-bold tracking-tight">Indeling</h1>
           <p className="mt-1 max-w-[52ch] text-ink-soft">
             Wat er op het dagscherm van {voornaam} staat, in welke volgorde en hoe groot. Het
-            verandert meteen op haar tablet; je hoeft die niet aan te raken.
+            verandert meteen op de tablet; je hoeft die niet aan te raken.
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export default function Indeling() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         {/* Het voorbeeld */}
         <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-          <h2 className="text-lg font-bold">Zo ziet haar scherm eruit</h2>
+          <h2 className="text-lg font-bold">Zo ziet het scherm van {voornaam} eruit</h2>
           <p className="mt-1 text-sm text-ink-soft">
             Tik een tegel om hem aan te passen.{' '}
             <Link to="/persoon" className="font-semibold underline underline-offset-4">

@@ -187,7 +187,7 @@ function PersonEditor({
         <input
           value={detail}
           onChange={(e) => setDetail(e.target.value)}
-          placeholder="Ze belt elke avond rond zeven uur."
+          placeholder="Belt elke avond rond zeven uur."
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
       </label>
