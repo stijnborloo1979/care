@@ -18,10 +18,19 @@ self.addEventListener('push', (event) => {
       body,
       icon: '/icon-192.png',
       badge: '/icon-192.png',
-      // Eén melding per soort: tien keer dezelfde waarschuwing op het
-      // vergrendelscherm helpt niemand.
+      // Eén regel per soort op het vergrendelscherm: tien keer dezelfde
+      // waarschuwing onder elkaar helpt niemand. De tag zorgt daarvoor —
+      // een nieuwe melding vervangt de vorige in plaats van erbij te komen.
       tag: data.level === 'alert' ? 'thuis-alert' : 'thuis-melding',
-      renotify: data.level === 'alert',
+      // Maar wel opnieuw laten merken, en dat is het verschil.
+      //
+      // Zonder renotify vervangt een tweede melding met dezelfde tag de
+      // eerste in stilte: geen geluid, geen trilling, geen banner. Wie twee
+      // keer vroeg of je belt, kreeg dus één keer een signaal en daarna
+      // niets meer — terwijl juist de tweede keer zegt dat het dringender
+      // wordt. Alleen bij 'info' en 'ok' blijft het stil: dat zijn berichten
+      // die mogen wachten tot je toch kijkt.
+      renotify: data.level === 'alert' || data.level === 'warn',
       data: { url: data.url || '/familie' },
     }),
   )

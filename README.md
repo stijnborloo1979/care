@@ -651,6 +651,14 @@ Eenmalig werk van ongeveer een namiddag. Daarna nooit meer.
 6. **De secrets invullen** bij Edge Functions → Secrets: `WA_TOKEN`,
    `WA_PHONE_ID`, `WA_TEMPLATE`. Staat je sjabloon in een andere taal dan
    Nederlands, dan ook `WA_TEMPLATE_TAAL`.
+
+   *Eerst de leiding bewijzen, dan het sjabloon?* Elke nieuwe app heeft een
+   goedgekeurd `hello_world` staan. Zet dan `WA_TEMPLATE=hello_world`,
+   `WA_TEMPLATE_TAAL=en_US` en `WA_MET_TEKST=nee`. Dat laatste laat de
+   variabele weg, want `hello_world` heeft er geen en Meta weigert een
+   sjabloon met te veel parameters. Komt dat bericht aan, dan weet je dat
+   token, nummer-ID en ontvanger kloppen, en is alleen je eigen sjabloon nog
+   over. Haal `WA_MET_TEKST` daarna weg.
 7. **Het nummer invullen** in de app, bij Instellingen → Meldingen, en op
    "Stuur een testmelding" drukken.
 
@@ -730,6 +738,20 @@ Een kanaal is van het familielid, niet van het huishouden: `alert_channel`
 heeft row level security op `profile_id = auth.uid()`, dus een broer kan het
 nummer van zijn zus niet opvragen of wijzigen. Nagegaan met een tweede
 databankrol, niet alleen door de policy te lezen.
+
+### De tweede keer drukken
+
+"De eerste keer komt er een melding, daarna niet meer." Dat was geen fout in
+het versturen maar in het tonen: de service worker geeft elke melding een
+`tag`, zodat er één regel op het vergrendelscherm staat in plaats van tien
+dezelfde onder elkaar. Alleen vervangt een volgende melding met dezelfde tag
+de vorige dan **in stilte** — geen geluid, geen trilling, geen banner.
+
+Wie twee keer vroeg of je belt, kreeg dus één signaal en daarna niets, terwijl
+juist die tweede keer zegt dat het dringender wordt. `renotify` staat nu aan
+voor `warn` en `alert`: de melding blijft één regel, maar laat zich elke keer
+opnieuw merken. `info` en `ok` blijven stil — die mogen wachten tot je toch
+kijkt.
 
 ### Eén melding, meerdere ontvangers
 
