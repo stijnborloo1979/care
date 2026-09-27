@@ -7,6 +7,24 @@ import HulpKnop from './HulpKnop'
 import { huidigePrefs, magBellen } from '../settings/useDisplayPrefs'
 
 /**
+ * Wie er op het Help-scherm past.
+ *
+ * Apart van het scherm, zodat de regel te testen is: hij bepaalt wie iemand
+ * in de war of ongerust te zien krijgt, en dat is te belangrijk om alleen
+ * met de ogen na te kijken.
+ */
+export function kiesBereikbaar<T extends { kind: string; phone?: string | null; profile_id?: string | null }>(
+  mensen: T[],
+  kanBellen: boolean,
+): T[] {
+  const familie = mensen.filter((p) => p.kind === 'family')
+  const anderen = kanBellen
+    ? mensen.filter((p) => p.kind !== 'family' && p.kind !== 'self' && !!p.phone)
+    : []
+  return [...familie, ...anderen].slice(0, 3)
+}
+
+/**
  * Eén scherm, grote knoppen, geen keuzes die uitleg nodig hebben.
  * Wie hier terechtkomt, is in de war of ongerust.
  */
@@ -19,11 +37,16 @@ export default function Help() {
   const bellenKan = magBellen(prefs)
   const hh = household?.household_id ?? ''
 
-  // Ook zonder telefoonnummer bereikbaar, zolang het familielid de app
-  // gebruikt: dan wordt het een vraag om terug te bellen.
-  const bellen = (people ?? [])
-    .filter((p) => (p.phone || p.profile_id) && p.kind !== 'self')
-    .slice(0, 3)
+  // Hoogstens drie namen, en dus mogen het alleen namen zijn die iets
+  // opleveren.
+  //
+  // Familie staat vooraan: die bereikt ze altijd, met of zonder
+  // telefoonnummer, want bij hen wordt het een vraag om terug te bellen.
+  // De huisarts of de verpleegster komen daarna, en alleen wanneer dit
+  // toestel echt kan bellen — anders is hun kaart een nummer dat niets doet,
+  // en dan neemt het een plaats in van iemand die wél te bereiken is. Ze
+  // blijven gewoon zichtbaar bij "Wie is wie?", waar ze thuishoren.
+  const bellen = kiesBereikbaar(people ?? [], bellenKan)
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">

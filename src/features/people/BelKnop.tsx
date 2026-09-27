@@ -52,10 +52,21 @@ export default function BelKnop({
     // belofte. Het nummer zelf is dan wél bruikbaar: iemand kan het
     // overtypen op een gewone telefoon.
     if (!kanBellen) {
+      // Zonder uitleg is dit een kaart die eruitziet als een knop en niets
+      // doet. Het nummer blijft staan — iemand kan het overtypen op een
+      // gewone telefoon — maar er staat bij waaróm er niets gebeurt, en het
+      // is geen knop meer.
       return (
-        <div className={stijl.replace('items-center', 'flex-col items-start justify-center')}>
+        <div
+          className={stijl
+            .replace('items-center', 'flex-col items-start justify-center')
+            .replace('border-line-strong', 'border-line')}
+        >
           <span>{p.name}</span>
           <span className="text-lg font-semibold tabular-nums text-ink-soft">{p.phone}</span>
+          <span className="text-base font-normal text-ink-faint">
+            Bellen kan niet met dit scherm.
+          </span>
         </div>
       )
     }

@@ -969,6 +969,18 @@ wachttijd twee minuten, want dat is dringender.
 Zij krijgt elke keer gewoon te horen dat het gelukt is: een "je hebt net al
 gevraagd" helpt niemand.
 
+**Alleen namen die iets opleveren.** Op het Help-scherm staan hoogstens drie
+mensen. De verpleegster stond er met alleen een telefoonnummer, op een tablet
+die niet kan bellen: een kaart die eruitziet als een knop en niets doet — en
+die de plaats innam van een familielid dat wél te bereiken was. Familie staat
+nu vooraan (bij hen wordt het altijd een vraag om terug te bellen), en de
+huisarts of de verpleegster komen er alleen bij wanneer dit toestel echt kan
+bellen. Ze blijven gewoon zichtbaar bij "Wie is wie?", waar ze thuishoren.
+
+Staat er toch een nummer zonder belknop — bij "Wie is wie?" bijvoorbeeld — dan
+staat er nu bij waarom: *"Bellen kan niet met dit scherm."* Het nummer blijft
+leesbaar, want iemand kan het overtypen op een gewone telefoon.
+
 Echt tweerichtingsverkeer (familie laten meeluisteren naar inkomende
 oproepen) is bewust níét gebouwd. Het voelt zoals mensen bellen verwachten,
 maar het faalt stil: belt zij en heeft niemand de app open, dan hoort ze
