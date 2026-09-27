@@ -23,6 +23,7 @@ export const SOORTEN: { waarde: EventKind; label: string; emoji: string }[] = [
   { waarde: 'meal', label: 'Maaltijd', emoji: '🍽️' },
   { waarde: 'med', label: 'Medicatie', emoji: '💊' },
   { waarde: 'routine', label: 'Routine', emoji: '🔁' },
+  { waarde: 'reminder', label: 'Herinnering', emoji: '🔔' },
   { waarde: 'other', label: 'Andere', emoji: '📌' },
 ]
 

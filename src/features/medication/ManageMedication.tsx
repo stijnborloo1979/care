@@ -20,7 +20,7 @@ import {
  * Het medicatieschema. Wat hier staat, verschijnt als herinnering op het
  * scherm van de persoon, en als "genomen / nog niet" in het dashboard.
  *
- * Thuis stelt geen diagnose en geeft geen medisch advies: het schema komt
+ * LifeAngle stelt geen diagnose en geeft geen medisch advies: het schema komt
  * van de huisarts of apotheker, deze app helpt alleen onthouden.
  */
 export default function ManageMedication() {
@@ -42,7 +42,7 @@ export default function ManageMedication() {
       <header>
         <h1 className="text-2xl font-bold tracking-tight">Medicatie</h1>
         <p className="mt-1 text-ink-soft">
-          Het schema zoals de huisarts of apotheker het voorschreef. Thuis herinnert eraan, maar
+          Het schema zoals de huisarts of apotheker het voorschreef. LifeAngle herinnert eraan, maar
           stelt geen diagnose en geeft geen medisch advies.
         </p>
       </header>

@@ -69,7 +69,7 @@ export default function PushNakijken({ householdId }: { householdId: string }) {
   const wegen = Object.keys(data.kanalen).length + (data.mail_aan ? 1 : 0)
   if (wegen === 0) {
     problemen.push(
-      'Je hebt geen enkele weg aan staan buiten de app zelf. Zet e-mail aan, of vul hieronder een WhatsApp-nummer in — anders zie je een dringend bericht alleen wanneer Thuis open staat.',
+      'Je hebt geen enkele weg aan staan buiten de app zelf. Zet e-mail aan, of vul hieronder een WhatsApp-nummer in — anders zie je een dringend bericht alleen wanneer LifeAngle open staat.',
     )
   }
   if (!data.eigen_toestel) {

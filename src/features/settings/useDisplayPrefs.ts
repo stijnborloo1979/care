@@ -51,6 +51,10 @@ export interface DisplayPrefs {
   kanBellen: Bellen
   /** Wat zij moet doen bij nood als dit toestel niet kan bellen. */
   noodplan: string
+  /** LifeAngle Voice: de naam van de assistent, zelf gekozen. Leeg = geen naam. */
+  assistentNaam: string
+  /** LifeAngle Voice: luisteren naar "Hallo <naam>" zolang het scherm open is. */
+  wekwoord: boolean
 }
 
 export const STANDAARD: DisplayPrefs = {
@@ -72,6 +76,10 @@ export const STANDAARD: DisplayPrefs = {
   nachtTot: 7,
   kanBellen: 'telefoon',
   noodplan: '',
+  assistentNaam: '',
+  // Standaard uit: continu luisteren stuurt in sommige browsers geluid naar
+  // de spraakdienst van de browser. Dat moet een bewuste keuze zijn.
+  wekwoord: false,
 }
 
 const LOKAAL = 'thuis.display'
@@ -115,6 +123,11 @@ export function volledig(ruw: unknown): DisplayPrefs {
   if (typeof ruwBellen === 'boolean') p.kanBellen = ruwBellen ? 'ja' : 'nee'
   else if (!BELLEN.includes(p.kanBellen)) p.kanBellen = STANDAARD.kanBellen
   if (typeof p.noodplan !== 'string') p.noodplan = ''
+  if (typeof p.assistentNaam !== 'string') p.assistentNaam = ''
+  p.assistentNaam = p.assistentNaam.trim().slice(0, 30)
+  if (typeof p.wekwoord !== 'boolean') p.wekwoord = false
+  // Zonder naam valt er niets te roepen.
+  if (!p.assistentNaam) p.wekwoord = false
   return p
 }
 

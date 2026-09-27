@@ -7,7 +7,7 @@ const NIVEAUS: { id: SupportLevel; titel: string; uitleg: string; ziet: string }
   {
     id: 'zelf',
     titel: 'Ik doe het zelf',
-    uitleg: 'Je gebruikt Thuis voor jezelf. Familie kan mee plannen, maar kijkt niet mee.',
+    uitleg: 'Je gebruikt LifeAngle voor jezelf. Familie kan mee plannen, maar kijkt niet mee.',
     ziet: 'Familie ziet de agenda. Niet je medicatie, logboek, notities of locatie. Geen meldingen.',
   },
   {

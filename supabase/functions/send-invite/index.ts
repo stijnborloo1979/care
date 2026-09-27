@@ -5,8 +5,8 @@
 //
 // Secrets (Dashboard -> Edge Functions -> Secrets):
 //   RESEND_API_KEY   sleutel van resend.com
-//   MAIL_FROM        bv. Thuis <hallo@jouwdomein.be>
-//   APP_URL          bv. https://thuis.netlify.app
+//   MAIL_FROM        bv. LifeAngle <hallo@jouwdomein.be>
+//   APP_URL          bv. https://lifeangle.pages.dev
 //
 // De client roept dit aan met de uitnodiging die create_invite() teruggaf.
 // De functie verstuurt alleen; ze maakt zelf geen uitnodigingen aan, zodat
@@ -63,10 +63,10 @@ Deno.serve(async (req) => {
         subject: `Je bent uitgenodigd om mee te zorgen voor ${persoon}`,
         html: `
           <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#221F1B">
-            <h1 style="font-size:22px;margin:0 0 12px">Thuis</h1>
+            <h1 style="font-size:22px;margin:0 0 12px">LifeAngle</h1>
             <p style="font-size:16px;line-height:1.5;margin:0 0 16px">
               Je bent uitgenodigd om mee te zorgen voor <strong>${persoon}</strong>.
-              Thuis helpt om te weten wat er vandaag gepland staat, wie er komt en
+              LifeAngle helpt om te weten wat er vandaag gepland staat, wie er komt en
               waar dingen liggen.
             </p>
             <p style="margin:24px 0">

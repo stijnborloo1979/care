@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
  */
 const BLOKKEN: { titel: string; tekst: string[] }[] = [
   {
-    titel: 'Wat Thuis bewaart',
+    titel: 'Wat LifeAngle bewaart',
     tekst: [
       'Je naam en e-mailadres, om in te loggen.',
       'Wat jij of je familie invult: de agenda, routines, mensen, dingen in huis, foto’s, verhalen, weetjes en berichten.',
@@ -66,7 +66,7 @@ export default function Privacy() {
       </Link>
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">Privacy</h1>
       <p className="mt-2 text-lg text-ink-soft">
-        Wat Thuis bewaart, waarom, en wat je ermee kan. In gewone taal.
+        Wat LifeAngle bewaart, waarom, en wat je ermee kan. In gewone taal.
       </p>
 
       <div className="mt-8 space-y-6">

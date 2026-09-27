@@ -46,7 +46,7 @@
 // Over WA_TEMPLATE: WhatsApp laat geen vrije tekst toe naar iemand die jou
 // niet in de laatste 24 uur berichtte. Het sjabloon moet één variabele
 // hebben ({{1}}), waar de tekst van de melding in komt. Bijvoorbeeld een
-// utility-sjabloon met als inhoud: "Thuis: {{1}}".
+// utility-sjabloon met als inhoud: "LifeAngle: {{1}}".
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
@@ -237,7 +237,7 @@ async function pushen(
 
   try {
     webpush.setVapidDetails(
-      Deno.env.get('VAPID_SUBJECT') ?? 'mailto:thuis@example.be',
+      Deno.env.get('VAPID_SUBJECT') ?? 'mailto:hallo@lifeangle.example',
       publiek,
       prive,
     )
@@ -431,13 +431,13 @@ const WEGEN: Record<
                   ? `<p style="margin:0 0 24px">
                        <a href="${app}/familie" style="background:#8A5A1E;color:#fff;
                           text-decoration:none;padding:14px 24px;border-radius:999px;
-                          font-weight:600;display:inline-block">Openen in Thuis</a>
+                          font-weight:600;display:inline-block">Openen in LifeAngle</a>
                      </p>`
                   : ''
               }
               <p style="font-size:13px;color:#8A8377;margin:0">
                 Je krijgt deze mail omdat pushmeldingen niet op elk toestel werken.
-                Uitzetten kan bij Instellingen in Thuis.
+                Uitzetten kan bij Instellingen in LifeAngle.
               </p>
             </div>`,
         }),

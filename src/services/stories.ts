@@ -11,18 +11,29 @@ export interface LifeStory {
   audio_seconds: number | null
   shared: boolean
   created_at: string
+  /** 'dagboek' voor LifeAngle Voice; ontbreekt vóór migratie 46. */
+  soort?: 'verhaal' | 'dagboek'
+  titel?: string | null
 }
 
 const BUCKET = 'messages'
 
-export async function getStories(householdId: string): Promise<LifeStory[]> {
+/**
+ * Met '*' in plaats van een kolomlijst: zo werkt dit ook op een database
+ * waar migratie 46 (soort, titel) nog niet gedraaid is.
+ */
+export async function getStories(
+  householdId: string,
+  soort?: 'verhaal' | 'dagboek',
+): Promise<LifeStory[]> {
   const { data, error } = await supabase
     .from('life_story')
-    .select('id, household_id, question, body, audio_path, audio_seconds, shared, created_at')
+    .select('*')
     .eq('household_id', householdId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as LifeStory[]
+  const alle = (data ?? []) as LifeStory[]
+  return soort ? alle.filter((s) => (s.soort ?? 'verhaal') === soort) : alle
 }
 
 export async function addStory(p: {
@@ -33,6 +44,8 @@ export async function addStory(p: {
   seconden?: number
   mimeType?: string
   delen: boolean
+  soort?: 'verhaal' | 'dagboek'
+  titel?: string
 }) {
   let audioPath: string | null = null
 
@@ -55,6 +68,9 @@ export async function addStory(p: {
     audio_seconds: p.seconden ?? null,
     shared: p.delen,
     created_by: user.user?.id,
+    // Alleen meesturen als het een dagboek is: zo blijft "Vertel eens"
+    // werken op een database zonder migratie 46.
+    ...(p.soort === 'dagboek' ? { soort: 'dagboek', titel: p.titel ?? null } : {}),
   })
 
   if (error) {

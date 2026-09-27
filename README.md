@@ -1,6 +1,7 @@
-# Thuis
+# LifeAngle
 
-Een digitaal geheugen voor de persoon, zijn woning en zijn familie.
+Een eenvoudige digitale assistent voor mensen die zo lang mogelijk zelfstandig
+willen blijven wonen, en voor hun familie. (Voorheen: Thuis.)
 
 - Het scherm van de persoon: wat moet ik nu doen, wie komt er, waar ligt iets.
 - Het familiescherm: planning, routines, medicatie, zorglogboek, documenten.
@@ -101,6 +102,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 27. `27_layout.sql` — de indeling van het dagscherm van de persoon, zodat
     familie zelf bepaalt welke blokken erop staan.
 
+(28 tot 45 staan in `supabase/`, in volgorde.)
+
+46. `46_voice.sql` — LifeAngle Voice: boodschappenlijst, herinneringen als
+    soort agenda-item, het gesproken dagboek, en de RPC's
+    `voice_add_event` en `voice_add_shopping` waarlangs spraakopdrachten
+    schrijven. Zie “LifeAngle Voice” hieronder.
+
 ## Inloggen
 
 `/login` toont drie deuren: wie zorgt, wie uitgenodigd werd, en de tablet
@@ -112,7 +120,7 @@ Zodat de mail een code bevat, pas je in Supabase het sjabloon aan:
 Authentication → Emails → Magic Link. Vervang de inhoud door:
 
 ```html
-<h2>Je code voor Thuis</h2>
+<h2>Je code voor LifeAngle</h2>
 <p style="font-size:32px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
 <p>Of klik op deze link: <a href="{{ .ConfirmationURL }}">inloggen</a></p>
 <p>De code is een uur geldig.</p>
@@ -122,6 +130,10 @@ Zonder `{{ .Token }}` in het sjabloon krijg je alleen een link en werkt
 het invullen van de code niet.
 
 ## Edge functions
+
+- `voice-intent` — LifeAngle Voice: begrijpt wat bedoeld wordt. Secrets:
+  `ANTHROPIC_API_KEY` of `OPENAI_API_KEY`, optioneel `AI_PROVIDER`, `AI_MODEL`.
+- `voice-transcribe` — optioneel, spraak naar tekst. Secret: `OPENAI_API_KEY`.
 
 In `supabase/functions/`. Aanmaken kan zonder CLI: Dashboard → Edge
 Functions → Deploy a new function → plak het bestand.
@@ -150,6 +162,86 @@ Functions → Deploy a new function → plak het bestand.
 - `ask` — beantwoordt een vraag uit de eigen gegevens. Secret:
   `OPENAI_API_KEY`. Vindt de zoektocht niets boven de drempel, dan wordt
   het model niet eens aangeroepen.
+
+## LifeAngle Voice
+
+De grote microfoonknop in het midden van de navigatie opent LifeAngle
+Voice over het huidige scherm. De persoon zegt gewoon wat nodig is:
+
+- “Morgen moet ik om twee uur naar de dokter.” → afspraak (eerst bevestigen)
+- “Herinner mij morgen om zes uur aan mijn medicatie.” → herinnering, op het uur zelf uitgesproken
+- “Ik moet nog melk en brood kopen.” → boodschappenlijst (`/boodschappen`)
+- “Ik wil iets vertellen.” → gesproken dagboek, met de originele opname
+- “Wat moet ik vandaag doen?”, “Wat staat er deze week?”, “Bel Els.”,
+  “Ik heb mijn medicatie genomen.”, “Zeg tegen Els dat ik thuis ben.”
+
+### Hoe het werkt
+
+```
+microfoon → spraakherkenning (browser, of voice-transcribe)
+          → AIIntentService → edge function voice-intent → AI-provider
+          → JSON  → valideer()  → gesprek (vragen / bevestigen)
+          → ActionEngine → RPC voice_add_event / voice_add_shopping / services
+          → tekst-naar-spraak
+```
+
+- **De AI bepaalt alleen wát bedoeld wordt.** Ze kiest een intent uit een
+  vaste lijst (`src/features/voice-assistant/intents.ts`) met parameters.
+  Ze voert niets uit en ziet geen agenda, medicatie of dagboek.
+- **`valideer()`** keurt elk antwoord: onbekende intents en velden
+  verdwijnen, datums en uren worden gecontroleerd, niets in het verleden,
+  en wat ontbreekt bepaalt de app (het model kan bevestigen verplichten,
+  nooit afschaffen).
+- **Niet gokken.** Ontbreekt de dag of het uur, dan vraagt LifeAngle
+  ernaar (“Welke dag bedoel je?”, “Hoe laat?”). Korte antwoorden en
+  “ja / nee / pas aan” worden in de app zelf herkend, zonder AI.
+- **Bevestigen** is per intent in te stellen (`INTENTS[…].bevestiging`).
+  Afspraken, herinneringen, berichten, bellen en medicatie: altijd.
+  Boodschappen en dagboek: meteen.
+- **De ActionEngine** heeft per intent één uitvoerder en schrijft alleen
+  via begrensde RPC's of bestaande services. Elke actie heeft een id:
+  twee keer op JA tikken maakt één afspraak (ook in de database, via
+  `voice_action`). Mislukt iets, dan zegt LifeAngle dat — nooit “gelukt”.
+- **Zonder AI** herkennen lokale regels (`lokaleRegels.ts`) de gewone
+  opdrachten nog steeds. Weten die het ook niet, dan zegt LifeAngle:
+  “Ik kan je vraag momenteel niet verwerken.”
+- Een nieuwe intent: regel in `intents.ts`, uitvoerder in
+  `actionEngine.ts`, naam in `supabase/functions/voice-intent`.
+
+### Installeren
+
+1. Draai `supabase/46_voice.sql` (boodschappen, dagboek, herinneringen,
+   de RPC's).
+2. Edge function `voice-intent` (Verify JWT aan). Secrets:
+   - `ANTHROPIC_API_KEY` en/of `OPENAI_API_KEY`
+   - optioneel `AI_PROVIDER` (`anthropic` of `openai`) en `AI_MODEL`
+3. Optioneel: edge function `voice-transcribe` (Verify JWT aan), secret
+   `OPENAI_API_KEY`. Nodig voor Firefox en om dagboekopnames achteraf uit
+   te schrijven als meeluisteren niet lukte.
+
+Geen sleutel in de frontend: de app praat alleen met de edge functions.
+
+### Instellingen
+
+Onder Instellingen → LifeAngle Voice:
+
+- **Naam van de assistent** — zelf te kiezen (“Anna”, “Sam”). LifeAngle
+  stelt zich dan zo voor.
+- **Luisteren naar “Hallo <naam>”** — standaard uit. Werkt in Chrome en
+  Edge zolang de app open staat; het geluid gaat dan voortdurend naar de
+  spraakdienst van de browser.
+
+### Dagboek en familie
+
+Dagboekfragmenten staan in `life_story` met `soort = 'dagboek'`, met de
+opname in de eigen stem. Familie ziet ze bij “Verhalen”, met afspelen. In
+de fase *zelf* worden ze niet gedeeld. Ze komen niet in het levensboek.
+
+### Tests
+
+`src/features/voice-assistant/voice.test.ts` dekt natuurlijke zinnen,
+ontbrekende informatie, verkeerde datum en tijd, ongeldige AI-uitvoer,
+AI- en spraakfouten, dubbele acties, annuleren, “nee” en “pas aan”.
 
 ## Tests
 
@@ -725,7 +817,7 @@ andere er.
 
 **WhatsApp** stuurt geen vrije tekst naar iemand die jou niet in de laatste
 24 uur berichtte, dus altijd een goedgekeurd sjabloon met één variabele —
-bijvoorbeeld `Thuis: {{1}}`, met de tekst van de melding erin. Secrets:
+bijvoorbeeld `LifeAngle: {{1}}`, met de tekst van de melding erin. Secrets:
 `WA_TOKEN`, `WA_PHONE_ID`, `WA_TEMPLATE` en eventueel `WA_TEMPLATE_TAAL`
 (standaard `nl`). Het gratis testnummer van Meta mag naar vijf opgegeven
 nummers sturen, wat voor één familie genoeg is en de bedrijfsverificatie
@@ -757,7 +849,7 @@ Eenmalig werk van ongeveer een namiddag. Daarna nooit meer.
    in de body:
 
    ```
-   Thuis: {{1}}
+   LifeAngle: {{1}}
    ```
 
    De naam die je kiest is `WA_TEMPLATE`. Goedkeuring duurt meestal minuten
@@ -1033,7 +1125,7 @@ het veld dat iemand ooit op `true` zet om iets anders op te lossen. En
 vanzelf verdwijnt terwijl je net even niet keek, is geen melding.
 
 **Komt er geen geluid, dan zit het bij het toestel.** Op Android: Instellingen
-→ Apps → Chrome (of Thuis, als je hem op je beginscherm zette) → Meldingen →
+→ Apps → Chrome (of LifeAngle, als je hem op je beginscherm zette) → Meldingen →
 zoek het kanaal van de site → Geluid. Ook Niet storen en de stille modus
 zetten het uit. Op iPhone gelden de meldingsinstellingen van de geïnstalleerde
 app.

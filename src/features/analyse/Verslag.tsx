@@ -73,7 +73,7 @@ export default function Verslag() {
             Periode {datum(a.van)} tot {datum(a.tot)} · afgedrukt op {vandaag}
           </p>
           <p className="text-ink-soft">
-            Samengesteld door familie via de app Thuis. Geen medisch document.
+            Samengesteld door familie via de app LifeAngle. Geen medisch document.
           </p>
         </header>
 
@@ -169,7 +169,7 @@ export default function Verslag() {
         </section>
 
         <footer className="mt-8 border-t border-line pt-3 text-sm text-ink-soft">
-          Thuis — een digitaal geheugen voor het dagelijkse leven. Dit verslag vervangt geen
+          LifeAngle — een digitaal geheugen voor het dagelijkse leven. Dit verslag vervangt geen
           professionele zorg.
         </footer>
       </main>

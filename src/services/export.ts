@@ -55,7 +55,7 @@ export async function exporteer(): Promise<Blob> {
 
   const inhoud = {
     uitleg:
-      'Alle gegevens die Thuis bewaart en die jij mag zien. Bestanden (foto’s, opnames, documenten) staan hier als pad in de opslag; de bestanden zelf download je in de app.',
+      'Alle gegevens die LifeAngle bewaart en die jij mag zien. Bestanden (foto’s, opnames, documenten) staan hier als pad in de opslag; de bestanden zelf download je in de app.',
     geexporteerd_op: new Date().toISOString(),
     gebruiker: { id: uid, email: gebruiker.user?.email },
     profiel,

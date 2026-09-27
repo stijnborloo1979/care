@@ -21,6 +21,7 @@ const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie/weetjes', label: 'Weetjes', icoon: 'weetjes' },
   { to: '/familie/berichten', label: 'Berichten', icoon: 'praten' },
   { to: '/familie/taken', label: 'Taken', icoon: 'taken' },
+  { to: '/familie/boodschappen', label: 'Boodschappen', icoon: 'boodschappen' },
   { to: '/familie/analyse', label: 'Analyse', icoon: 'dashboard' },
   { to: '/familie/indeling', label: 'Indeling', icoon: 'instellingen' },
   { to: '/familie/logboek', label: 'Zorglogboek', icoon: 'logboek' },
@@ -59,7 +60,7 @@ export default function FamilyLayout() {
         <aside className="hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
           <div className="pb-4">
             <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">
-              {household.is_self ? "Beheren" : "Thuis"}
+              {household.is_self ? "Beheren" : "LifeAngle"}
             </p>
             <AccountBar />
           </div>

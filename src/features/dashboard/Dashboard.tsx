@@ -104,7 +104,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
       {niveau === 'zelf' && !household?.is_self ? (
         <div className="rounded-[28px] bg-surface p-7 shadow-card">
           <p className="text-2xl font-extrabold tracking-tight">
-            {personName} gebruikt Thuis zelfstandig
+            {personName} gebruikt LifeAngle zelfstandig
           </p>
           <p className="mt-2 text-lg text-ink-soft">
             Je kan mee plannen en berichten sturen. Medicatie, het logboek en persoonlijke notities
@@ -256,7 +256,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           </ul>
         )}
         <p className="mt-4 text-sm text-ink-faint">
-          Thuis stelt geen diagnose en vervangt geen professionele zorg. Bij twijfel over medicatie:
+          LifeAngle stelt geen diagnose en vervangt geen professionele zorg. Bij twijfel over medicatie:
           bel de huisarts.
         </p>
       </section>

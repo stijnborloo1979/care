@@ -248,6 +248,43 @@ export default function Settings() {
       </section>
 
       <section className="rounded-card bg-surface p-6 shadow-card">
+        <h2 className="text-lg font-bold">LifeAngle Voice</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          Met de grote microfoonknop zegt {voornaam} gewoon wat nodig is: een afspraak, een
+          herinnering, boodschappen, of iets vertellen voor het dagboek. Belangrijke dingen worden
+          eerst bevestigd.
+        </p>
+
+        <Rij
+          titel="Naam van de assistent"
+          onder="Een naam die makkelijk uit te spreken is, bijvoorbeeld Anna of Sam. Leeg laten mag."
+        >
+          <input
+            type="text"
+            defaultValue={prefs.assistentNaam}
+            maxLength={30}
+            aria-label="Naam van de assistent"
+            className="min-h-touch w-48 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 text-lg"
+            onBlur={(e) => {
+              const nu = e.target.value.trim()
+              if (nu !== prefs.assistentNaam) zet.mutate({ assistentNaam: nu })
+            }}
+          />
+        </Rij>
+
+        <Rij
+          titel={prefs.assistentNaam ? `Luisteren naar “Hallo ${prefs.assistentNaam}”` : 'Luisteren naar “Hallo …”'}
+          onder="Dan hoeft niemand op de knop te tikken. Werkt alleen zolang de app open staat, en alleen in Chrome en Edge. Het geluid gaat dan voortdurend naar de spraakdienst van de browser — zet dit alleen aan als dat voor jullie in orde is."
+        >
+          <Schakelaar
+            aan={prefs.wekwoord}
+            label="Luisteren naar de naam"
+            onClick={() => zet.mutate({ wekwoord: !prefs.wekwoord })}
+          />
+        </Rij>
+      </section>
+
+      <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Taal</h2>
 
         <Rij
@@ -368,7 +405,7 @@ export default function Settings() {
       <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">Op het beginscherm zetten</h2>
         <p className="mt-1 text-sm text-ink-soft">
-          Op de tablet van {voornaam} hoort Thuis als app te staan, niet als tabblad in een browser.
+          Op de tablet van {voornaam} hoort LifeAngle als app te staan, niet als tabblad in een browser.
         </p>
         <Link
           to="/installeren"
@@ -521,7 +558,7 @@ function Meldingen({
         titel="Meldingen"
         onder={
           status === 'onbeschikbaar'
-            ? 'Deze browser kan geen meldingen tonen. Op iPhone en iPad lukt het alleen als Thuis op het beginscherm staat: deel-icoon, dan "Zet op beginscherm", en open Thuis daarna via dat icoon. Lukt dat niet, dan blijft de e-mail hieronder.'
+            ? 'Deze browser kan geen meldingen tonen. Op iPhone en iPad lukt het alleen als LifeAngle op het beginscherm staat: deel-icoon, dan "Zet op beginscherm", en open LifeAngle daarna via dat icoon. Lukt dat niet, dan blijft de e-mail hieronder.'
             : status === 'geweigerd'
               ? 'De browser houdt meldingen tegen. Zet ze weer aan bij de instellingen van de site. Tot dan blijft de e-mail hieronder.'
               : 'Geldt alleen voor dit toestel. Zet het ook aan op je andere toestellen.'
