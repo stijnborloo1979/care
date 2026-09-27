@@ -882,6 +882,24 @@ Drie testen bewaken de belangrijkste zin, in alle drie de talen: hij noemt
 geen naam, hij veronderstelt geen geslacht, en hij blijft iets geruststellends
 zeggen.
 
+### De schakelaar die aan stond en toch niets deed
+
+Op de pc kwam de push aan, op Android niet — terwijl de schakelaar daar aan
+stond en de database een rij had. Uit en weer aan zetten hielp niet.
+
+De oorzaak zat in `usePush`: bij het aanzetten werd een **bestaand** abonnement
+van de browser hergebruikt zonder te kijken of het nog bij de huidige
+VAPID-sleutel hoorde. Veranderen die sleutels — bij het opzetten, of ooit bij
+het vernieuwen — dan houdt de browser een abonnement dat op de oude sleutel
+getekend is. De pushdienst weigert dat, maar niet met "bestaat niet", dus het
+wordt ook nooit opgeruimd zoals een 404 of 410 dat wel wordt. Uit en weer aan
+pakte datzelfde abonnement er telkens opnieuw bij.
+
+Nu wordt de sleutel van het bestaande abonnement byte voor byte vergeleken met
+de huidige. Komt hij niet overeen, dan gaat het abonnement weg — bij de server
+én bij de browser — en wordt er een vers gemaakt. Kan de browser de sleutel
+niet teruggeven, dan schrijven we liever opnieuw in dan te blijven gokken.
+
 ### Geluid bij een melding
 
 Wat de app kan vragen en wat het toestel beslist, zijn twee verschillende

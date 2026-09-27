@@ -59,8 +59,26 @@ export function usePush(householdId: string) {
 
       const reg = await navigator.serviceWorker.ready
       const bestaand = await reg.pushManager.getSubscription()
+
+      // Een bestaand abonnement hergebruiken mag alleen als het nog bij
+      // dezelfde VAPID-sleutel hoort.
+      //
+      // Dat was hier fout, en op een vervelende manier: veranderen de
+      // sleutels — bij het opzetten, of ooit bij het vernieuwen — dan blijft
+      // de browser een abonnement bewaren dat op de oude sleutel getekend is.
+      // De pushdienst weigert dat, maar niet met "bestaat niet", dus het
+      // wordt ook nooit opgeruimd. De schakelaar staat dan op aan, de
+      // database heeft een rij, en er komt nooit iets binnen. Uit en weer
+      // aan zetten hielp niet, want dan pakte hij datzelfde abonnement er
+      // weer bij.
+      if (bestaand && !zelfdeSleutel(bestaand)) {
+        await supabase.rpc('delete_push_subscription', { ep: bestaand.endpoint })
+        await bestaand.unsubscribe()
+      }
+
+      const bruikbaar = bestaand && zelfdeSleutel(bestaand) ? bestaand : null
       const sub =
-        bestaand ??
+        bruikbaar ??
         (await reg.pushManager.subscribe({
           // Verplicht: elke push leidt tot een zichtbare melding. Stille
           // pushberichten laten browsers niet toe, en terecht.
@@ -105,6 +123,28 @@ export function usePush(householdId: string) {
   }, [])
 
   return { status, fout, aanzetten, uitzetten }
+}
+
+/**
+ * Hoort dit abonnement nog bij de sleutel die we nu gebruiken?
+ *
+ * De browser bewaart de sleutel waarmee hij het abonnement maakte. Komt die
+ * niet overeen, dan kan er nooit iets aankomen — hoe vaak je de schakelaar
+ * ook omzet.
+ */
+function zelfdeSleutel(sub: PushSubscription): boolean {
+  try {
+    const opties = sub.options?.applicationServerKey
+    if (!opties) return false
+    const nu = new Uint8Array(naarBytes(SLEUTEL!))
+    const had = new Uint8Array(opties as ArrayBuffer)
+    if (had.byteLength !== nu.byteLength) return false
+    return had.every((b, i) => b === nu[i])
+  } catch {
+    // Kan de browser het niet zeggen, dan liever opnieuw inschrijven dan
+    // blijven gokken.
+    return false
+  }
 }
 
 /** De VAPID-sleutel komt als base64url en moet als bytes naar de browser. */
