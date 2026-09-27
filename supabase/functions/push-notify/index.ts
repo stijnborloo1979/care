@@ -315,7 +315,7 @@ function afvinken(teller: Map<string, number>, id: string) {
  * Eén bericht per familielid per weg per melding. Geen bundeling: wie een
  * bericht krijgt met "3 meldingen", opent het later. Deze berichten komen
  * alleen bij iets dat niet kan wachten, en dat zijn er weinig — de database
- * houdt "bel me eens" tien minuten tegen en "ik heb hulp nodig" twee.
+ * houdt "bel me eens" drie minuten tegen en "ik heb hulp nodig" twee.
  *
  * Er wordt pas afgevinkt wat écht verstuurd is, per ontvanger en per weg.
  * Faalt WhatsApp bij Jan, dan blijft precies dat openstaan en gaat het de

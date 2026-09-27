@@ -950,11 +950,24 @@ knop.
   gok. Op een tablet werkt die niet, maar daar is deze app ook niet de weg
   naar de huisarts. 112 blijft om dezelfde reden staan zoals het is.
 
-**Hoogstens één melding per tien minuten.** Wie onzeker is drukt nog eens,
-en nog eens; twaalf meldingen maken van ongerustheid een alarm, en dan
-begint familie ze weg te klikken — precies de gewoonte die je nooit wil
-kweken. Zij krijgt elke keer gewoon te horen dat het gelukt is: een "je hebt
-net al gevraagd" helpt niemand.
+**Hoogstens één melding per drie minuten — maar nog eens vragen komt wél
+aan.** Dat was eerst tien minuten, en dat sloeg door. Maria vroeg of iemand
+belde, wachtte, er gebeurde niets, ze vroeg het vijf minuten later opnieuw —
+en dan kwam er niets meer. Op haar scherm stond wel dat het gelukt was. De
+redenering achter die tien minuten klopt voor de derde druk binnen een
+minuut; ze klopt niet voor iemand die het opnieuw vraagt omdát er niemand
+belde. Precies de vraag die het dringendst is, kwam niet aan.
+
+Sinds `39_nogmaals_vragen.sql` wordt een herhaling zichtbaar in plaats van
+weggegooid: *"Maria vraagt of je eens belt (3e keer)"*. Drukken binnen die
+drie minuten telt gewoon mee — de teller loopt op, en bij de eerstvolgende
+melding staat het er. Zo blijft het hoogstens één melding per drie minuten,
+maar zegt elke melding meer dan de vorige. Een reeks eindigt na een uur
+stilte; dan gaat het over iets anders. Voor "ik heb hulp nodig" is de
+wachttijd twee minuten, want dat is dringender.
+
+Zij krijgt elke keer gewoon te horen dat het gelukt is: een "je hebt net al
+gevraagd" helpt niemand.
 
 Echt tweerichtingsverkeer (familie laten meeluisteren naar inkomende
 oproepen) is bewust níét gebouwd. Het voelt zoals mensen bellen verwachten,
