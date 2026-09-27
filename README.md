@@ -765,11 +765,25 @@ nooit af — terwijl de kaart ernaast "alles genomen" zei. Vandaar de afstand in
 plaats van een venster: die vraagt niet dat familie twee schermen op elkaar
 afstemt.
 
-Het vinkje gaat alleen áán, nooit terug. Een vinkje dat vanzelf terugspringt
-is verwarrend, en iemand kan het item ook met de hand hebben afgevinkt. Zet
-familie een bevestiging ongedaan, dan blijft het agenda-item dus staan — de
-onschuldige kant van de twee, want de medicatiekaart blijft de waarheid over
-wat er werkelijk genomen is.
+En sinds `40_medicatie_ongedaan.sql` werkt het ook terug: zet zij "Medicatie
+nemen" weer op ongedaan, dan staan de bijbehorende medicijnen weer open.
+Anders zou de kaart ernaast blijven volhouden dat alles genomen is — dezelfde
+tegenspraak, in spiegelbeeld.
+
+Die twee richtingen zijn niet symmetrisch, en dat is met opzet:
+
+| handeling | gevolg |
+| --- | --- |
+| medicijn bevestigen | het item vinkt af |
+| medicijn ontbevestigen | het item blijft staan |
+| item ongedaan maken | de medicijnen staan weer open |
+| item met de hand afvinken | de medicatie blijft ongemoeid |
+
+Ongedaan maken is een uitspraak — "dit is niet gebeurd" — en die overnemen
+maakt van "genomen" weer "nog te nemen": de voorzichtige kant. Een vinkje
+zetten is dat niet: één tik op een algemeen agenda-item mag niet in het
+dossier komen te staan als "medicijn genomen". Dat is precies het soort
+bewering dat een app niet hoort te doen.
 
 ### De foto die traag op de tablet kwam
 
