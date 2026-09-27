@@ -274,7 +274,11 @@ async function pushen(
           titel: r.person_name,
           body: r.body,
           level: r.level,
-          url: '/familie',
+          // Het nummer van de melding mee, zodat het aantikken ervan telt als
+          // "gezien". Zonder dat loopt de teller van herhalingen eeuwig op:
+          // wie op de melding tikt en terugbelt, komt nooit langs de knop in
+          // het familiescherm die hem wegklikt.
+          url: `/familie?gezien=${r.notification_id}`,
         }),
         // Een melding die pas na een halve dag aankomt, klopt niet meer.
         { TTL: 3 * 3600, urgency: r.level === 'alert' ? 'high' : 'normal' },

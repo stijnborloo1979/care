@@ -3,6 +3,7 @@ import { useHousehold } from "../features/household/useHousehold";
 import { useDisplayPrefs } from "../features/settings/useDisplayPrefs";
 import { useRealtime } from "../features/realtime/useRealtime";
 import { useDagKlaar } from "../services/dag";
+import GezienUitLink from "../features/family/GezienUitLink";
 import InstallPrompt from "../features/install/InstallPrompt";
 import Icon, { type IconNaam } from "../components/Icon";
 import AccountBar from "./AccountBar";
@@ -45,6 +46,9 @@ export default function FamilyLayout() {
 
   return (
     <>
+      {/* Tikt iemand op een melding, dan komt hij hier binnen met het nummer
+          ervan in het adres. Dat telt als gezien. */}
+      <GezienUitLink />
       <InstallPrompt />
       <Licht />
 

@@ -1065,6 +1065,19 @@ maar zegt elke melding meer dan de vorige. Een reeks eindigt na een uur
 stilte; dan gaat het over iets anders. Voor "ik heb hulp nodig" is de
 wachttijd twee minuten, want dat is dringender.
 
+**Tikken op de melding telt als gezien.** De teller liep eerst alleen terug
+wanneer iemand de melding in het familiescherm met de hand wegklikte — en dat
+doet niemand die de melding op zijn telefoon ziet, meteen terugbelt en verder
+gaat. Het gevolg was een teller die eindeloos opliep: "18e keer" terwijl er al
+zes keer teruggebeld was, en dat is precies het verwijt dat dit niet mag
+worden.
+
+De melding draagt daarom haar eigen nummer mee in de link
+(`/familie?gezien=<id>`). Tikt iemand erop, dan is dat het signaal. Precieser
+dan "het familiescherm is geopend": alleen de melding waar werkelijk op getikt
+is, telt. De parameter verdwijnt meteen uit het adres, zodat verversen of een
+bladwijzer hem niet opnieuw afvuurt.
+
 **Gezien sluit de reeks af.** Klikt familie de melding weg, dan is die vraag
 opgevolgd. Vraagt zij daarna opnieuw, dan is dat een nieuwe vraag en geen
 derde herhaling: "(3e keer)" zou dan verwijten wat al beantwoord is, en dat is
