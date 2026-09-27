@@ -833,6 +833,30 @@ de indeling zich nu ook elke twee minuten opnieuw op — niet omdat het nodig
 is wanneer realtime werkt, maar omdat een tablet zijn websocket kan verliezen
 zonder het te merken.
 
+### Geluid bij een melding
+
+Wat de app kan vragen en wat het toestel beslist, zijn twee verschillende
+dingen. De webstandaard kent **geen eigen geluid** voor een melding: dat
+bepaalt het toestel, in zijn eigen meldingsinstellingen. Wat de service worker
+wel doet:
+
+| niveau | geluid | trillen | blijft staan |
+| --- | --- | --- | --- |
+| `alert` — "ik heb hulp nodig" | ja | lang patroon | ja, tot je hem wegklikt |
+| `warn` — "bel me eens" | ja | kort patroon | nee |
+| `info` en `ok` | nee | nee | nee |
+
+`silent: false` is de standaard, maar staat er nu expliciet: het is precies
+het veld dat iemand ooit op `true` zet om iets anders op te lossen. En
+`requireInteraction` bij een alert, want een melding die na vijf seconden
+vanzelf verdwijnt terwijl je net even niet keek, is geen melding.
+
+**Komt er geen geluid, dan zit het bij het toestel.** Op Android: Instellingen
+→ Apps → Chrome (of Thuis, als je hem op je beginscherm zette) → Meldingen →
+zoek het kanaal van de site → Geluid. Ook Niet storen en de stille modus
+zetten het uit. Op iPhone gelden de meldingsinstellingen van de geïnstalleerde
+app.
+
 ### De tweede keer drukken
 
 "De eerste keer komt er een melding, daarna niet meer." Dat was geen fout in
