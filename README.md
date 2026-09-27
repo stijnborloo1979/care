@@ -1078,6 +1078,14 @@ betekenen dat niemand het weet wanneer juist zij niet kan — maar nu staat
 erbij aan wie ze dacht. En de wachttijd geldt **per persoon**: twee keer
 hetzelfde binnen drie minuten blijft één melding, Els en dan Jan zijn er twee.
 
+De volgorde van uitrollen maakt niet uit, en dat is met opzet. De database
+houdt de oude vorm met één argument in leven, zodat een app die nog niet
+bijgewerkt is blijft werken. En de app valt terug op die oude aanroep wanneer
+de database een `PGRST202` geeft — de foutcode voor "die functie ken ik niet".
+Zonder dat gaf de knop een 404 en de melding "Dat lukte nu niet" zolang de SQL
+nog niet gedraaid was. Dat de gebruiker die volgorde moet bewaken, is geen
+eigenschap van een app maar een gebrek eraan.
+
 "Ik heb hulp nodig" blijft zonder naam. Wie om hulp vraagt, vraagt het aan
 iedereen; daar een naam aan hangen zou suggereren dat de anderen kunnen
 wachten.

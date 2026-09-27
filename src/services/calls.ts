@@ -80,8 +80,28 @@ export async function vraagGesprek(householdId: string, wie?: string) {
     hh: householdId,
     wie: wie ?? null,
   })
-  if (error) throw error
+
+  if (error) {
+    // Draait de database nog zonder 43_wie_ze_vroeg.sql, dan bestaat die vorm
+    // daar niet en geeft PostgREST een 404. Dan valt hij terug op de oude
+    // aanroep: liever een vraag zonder naam dan een knop die niets doet.
+    //
+    // Dit staat er omdat de volgorde van uitrollen anders uitmaakt, en dat is
+    // niets voor de gebruiker om te moeten weten. De database is de andere
+    // kant op al verdraagzaam: daar bestaat de vorm met één argument nog.
+    if (!ontbrekendeFunctie(error)) throw error
+    const terug = await supabase.rpc('vraag_gesprek', { hh: householdId })
+    if (terug.error) throw terug.error
+  }
+
   await duwPush()
+}
+
+/** Kent de database deze functievorm nog niet? */
+function ontbrekendeFunctie(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null
+  // PGRST202: "Could not find the function ... in the schema cache".
+  return e?.code === 'PGRST202' || (e?.message ?? '').includes('Could not find the function')
 }
 
 /**
