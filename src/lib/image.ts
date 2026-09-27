@@ -6,7 +6,12 @@
 export async function compressImage(file: File, maxSize = 1600, quality = 0.82): Promise<Blob> {
   if (!file.type.startsWith('image/')) return file
 
-  const bitmap = await createImageBitmap(file).catch(() => null)
+  // from-image is tegenwoordig de standaard, maar niet overal en niet altijd
+  // geweest. Staat hij op none, dan ligt een staande telefoonfoto plat: de
+  // draaiing zit in de EXIF en niet in de pixels. Expliciet is hier beter.
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(
+    () => createImageBitmap(file).catch(() => null),
+  )
   if (!bitmap) return file
 
   const schaal = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height))

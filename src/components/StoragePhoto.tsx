@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { signedUrl } from '../lib/storage'
+import { signedUrlCached, vergeetLink } from '../lib/storage'
 
 /**
  * Buckets zijn privé, dus elke foto heeft een tijdelijke link nodig.
@@ -30,6 +30,9 @@ export default function StoragePhoto({
   passend?: boolean
 }) {
   const [url, setUrl] = useState<string | null>(null)
+  // Eén hernieuwde poging bij een verlopen link, en niet meer: anders blijft
+  // een kapot pad in een lus hangen.
+  const [poging, setPoging] = useState(0)
 
   useEffect(() => {
     let weg = false
@@ -37,7 +40,7 @@ export default function StoragePhoto({
       setUrl(null)
       return
     }
-    signedUrl(bucket, path)
+    signedUrlCached(bucket, path)
       .then((u) => {
         if (!weg) setUrl(u)
       })
@@ -47,7 +50,7 @@ export default function StoragePhoto({
     return () => {
       weg = true
     }
-  }, [path, bucket])
+  }, [path, bucket, poging])
 
   // De foto ligt absoluut in het vlak, niet als roosteritem.
   //
@@ -67,6 +70,17 @@ export default function StoragePhoto({
         <img
           src={url}
           alt={alt}
+          // De browser mag hem overslaan tot hij in beeld komt, en het
+          // decoderen hoeft het scherm niet op te houden.
+          loading="lazy"
+          decoding="async"
+          onError={() => {
+            // Verlopen link: weggooien en één keer opnieuw laten maken.
+            if (path && poging === 0) {
+              vergeetLink(bucket, path)
+              setPoging(1)
+            }
+          }}
           className={`absolute inset-0 h-full w-full ${passend ? 'object-contain' : 'object-cover'}`}
         />
       ) : (

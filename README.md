@@ -739,6 +739,27 @@ heeft row level security op `profile_id = auth.uid()`, dus een broer kan het
 nummer van zijn zus niet opvragen of wijzigen. Nagegaan met een tweede
 databankrol, niet alleen door de policy te lezen.
 
+### De foto die traag op de tablet kwam
+
+Niet omdat de foto zwaar was — die wordt bij het uploaden al verkleind naar
+webp van hooguit 1600 pixels. Het zat in de link.
+
+Buckets zijn privé, dus elke foto krijgt een ondertekende link. Die is **elke
+keer anders**. En een ander adres betekent voor de browser een andere foto:
+de cache wordt niet geraakt en het bestand komt opnieuw over de lijn. Bij elk
+terugkeren naar het scherm dus opnieuw een ronde naar de server om een link
+te maken, en daarna opnieuw de download — met een emoji op de plaats van de
+foto zolang dat duurde.
+
+`signedUrlCached` bewaart de link nu en hergebruikt hem drie uur (de link
+zelf gaat vier uur mee, zodat een foto die halverwege laadt niet op een
+verlopen link stuit). Staan er tien foto's op één scherm, dan vragen die niet
+tien keer hetzelfde tegelijk op. Verloopt er toch een, dan gooit `<img>` bij
+zijn foutmelding die ene link weg en probeert één keer opnieuw.
+
+Bewust niet in localStorage bewaard: een link die zijn tijd uitzit hoort te
+verdwijnen wanneer de app sluit, niet als kapotte foto terug te komen.
+
 ### Een gewijzigde instelling die niet op de tablet kwam
 
 Familie zet het thema van donker naar licht, of voegt een blok toe aan het
