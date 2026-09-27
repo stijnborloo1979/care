@@ -746,44 +746,50 @@ stond in de tijdlijn "08:30 Medicatie nemen" nog open. Voor iemand met
 geheugenproblemen is dat geen schoonheidsfout: een openstaand vinkje betekent
 "dit moet nog", en het risico is dat ze haar medicatie een tweede keer neemt.
 
-`38_medicatie_afvinken.sql` laat een bevestiging de tijdlijn meenemen. Elke
-dosis van die dag hoort bij het medicatie-item dat er het dichtst bij ligt, en
-bij maar één; een item vinkt af zodra elke dosis die erbij hoort bevestigd is.
-Ligt een dosis meer dan vier uur van elk item af, dan hoort ze bij geen enkel
-item en houdt ze er ook geen tegen.
+**Het medicatieschema maakt zijn eigen items in de tijdlijn.** Dat is de derde
+en laatste vorm; de twee ervoor gokten, en gokken ging mis.
 
-Die vorm kwam uit de praktijk, niet uit het ontwerp — drie keer achter elkaar.
-De eerste regel was "alles van vóór dit tijdstip", en toen bleek dat een
-gemiste ochtenddosis het item van 20:00 's avonds openhield: opnieuw "dit moet
-nog" bij iets wat net gebeurd was. De tweede versie gaf elk item een vast
-venster, maar berekende die alleen over openstaande items, waardoor het venster
-van een nieuw item terugrekte tot het begin van de dag. De derde stuitte op het
-echte gebruik: het item "Medicatie nemen" komt uit de **routine** en het
-medicijn uit het **schema**, en die twee staan zelden op hetzelfde uur. Een
-item van 08:30 met een medicijn om 10:00 vond niets in zijn venster en vinkte
-nooit af — terwijl de kaart ernaast "alles genomen" zei. Vandaar de afstand in
-plaats van een venster: die vraagt niet dat familie twee schermen op elkaar
-afstemt.
+De eerste versie (`38`) koppelde een dosis aan het dichtstbijzijnde item in
+een venster, de tweede (`40`) op afstand. Beide stuitten op hetzelfde: het
+item "Medicatie nemen" kwam uit de **routine** en het medicijn uit het
+**schema**, en die twee wisten niets van elkaar. Bij Maria stond het item om
+08:30, Ibuprofen om 10:00 en Dafalgan om 14:00. De Ibuprofen werd aan dat ene
+item gekoppeld en vinkte het af — terwijl er om 14:00 nog iets moest. Het
+scherm zei "gedaan" bij iets dat nog te gebeuren stond, en dat is de ergste
+van alle fouten die deze app kan maken.
 
-En sinds `40_medicatie_ongedaan.sql` werkt het ook terug: zet zij "Medicatie
-nemen" weer op ongedaan, dan staan de bijbehorende medicijnen weer open.
-Anders zou de kaart ernaast blijven volhouden dat alles genomen is — dezelfde
-tegenspraak, in spiegelbeeld.
+Sinds `41_medicatie_gekoppeld.sql` is er niets meer te raden. Elk
+medicatiemoment krijgt zijn eigen item, met dat moment erin vastgelegd
+(`agenda_event.med_moment`):
 
-Die twee richtingen zijn niet symmetrisch, en dat is met opzet:
+- drie medicijnen om 08:00? **Eén** item, dat pas afvinkt als alle drie
+  bevestigd zijn.
+- momenten om 08:00 en om 14:00? Twee items, die los van elkaar afvinken.
+- een item zonder moment — met de hand gezet of uit een routine — vinkt nooit
+  vanzelf af. De app raadt niet langer waar het over gaat.
+
+Zodra er voor een dag een schema is, verdwijnt een nog niet afgevinkt
+"Medicatie nemen" dat niet aan een moment hangt: anders staan er twee kaarten
+voor hetzelfde en werkt er één niet. Wat al afgevinkt is blijft staan, want
+dat is geschiedenis. Staat dat item in een routine, haal het daar dan weg —
+anders komt het morgen terug en wordt het opnieuw opgeruimd.
+
+Ongedaan maken werkt terug: zet zij "Medicatie nemen" weer open, dan staan de
+medicijnen van dát moment weer open. De twee richtingen zijn met opzet niet
+symmetrisch:
 
 | handeling | gevolg |
 | --- | --- |
-| medicijn bevestigen | het item vinkt af |
+| medicijn bevestigen | het item vinkt af zodra álle medicijnen van dat moment bevestigd zijn |
 | medicijn ontbevestigen | het item blijft staan |
-| item ongedaan maken | de medicijnen staan weer open |
+| item ongedaan maken | de medicijnen van dat moment staan weer open |
 | item met de hand afvinken | de medicatie blijft ongemoeid |
 
 Ongedaan maken is een uitspraak — "dit is niet gebeurd" — en die overnemen
 maakt van "genomen" weer "nog te nemen": de voorzichtige kant. Een vinkje
-zetten is dat niet: één tik op een algemeen agenda-item mag niet in het
-dossier komen te staan als "medicijn genomen". Dat is precies het soort
-bewering dat een app niet hoort te doen.
+zetten is dat niet: één tik op een agenda-item mag niet in het dossier komen
+te staan als "medicijn genomen". Dat is precies het soort bewering dat een app
+niet hoort te doen — de dokter kijkt ernaar.
 
 ### De foto die traag op de tablet kwam
 
