@@ -1065,6 +1065,14 @@ maar zegt elke melding meer dan de vorige. Een reeks eindigt na een uur
 stilte; dan gaat het over iets anders. Voor "ik heb hulp nodig" is de
 wachttijd twee minuten, want dat is dringender.
 
+**Gezien sluit de reeks af.** Klikt familie de melding weg, dan is die vraag
+opgevolgd. Vraagt zij daarna opnieuw, dan is dat een nieuwe vraag en geen
+derde herhaling: "(3e keer)" zou dan verwijten wat al beantwoord is, en dat is
+precies het soort druk dat je niet wil leggen op familie die haar best doet.
+Weggeklikt zet de teller op nul en heft ook de wachttijd op — er is immers
+gereageerd. De uren stilte blijven gelden voor het geval niemand de melding
+ooit wegklikt (`42_gezien_sluit_de_reeks.sql`).
+
 Zij krijgt elke keer gewoon te horen dat het gelukt is: een "je hebt net al
 gevraagd" helpt niemand.
 
