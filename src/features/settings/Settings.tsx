@@ -7,6 +7,7 @@ import PairTablet from '../family/PairTablet'
 import ManageRadio from '../radio/ManageRadio'
 import { useLicht } from '../licht/lichtStore'
 import MijnGegevens from '../privacy/MijnGegevens'
+import Opslag from './Opslag'
 import { usePush } from '../push/usePush'
 import PushNakijken from '../push/PushNakijken'
 import { TALEN } from '../../lib/i18n'
@@ -379,6 +380,8 @@ export default function Settings() {
       <PairTablet householdId={hh} personName={voornaam} />
 
       <LocationSettings />
+
+      <Opslag />
 
       <MijnGegevens />
     </div>

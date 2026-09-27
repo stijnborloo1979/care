@@ -791,6 +791,36 @@ zetten is dat niet: één tik op een agenda-item mag niet in het dossier komen
 te staan als "medicijn genomen". Dat is precies het soort bewering dat een app
 niet hoort te doen — de dokter kijkt ernaar.
 
+### Een gigabyte op een telefoon
+
+De foto's waren niet de boosdoener: die worden bij het uploaden al verkleind
+naar webp van hooguit 1600 pixels, en er stond een grens van 200 stuks op de
+cache. Tweehonderd foto's is hooguit tachtig megabyte.
+
+Maar in diezelfde cache belandden ook de **ingesproken berichten en video's**
+uit de emmer `messages`, en die zijn honderd keer zwaarder. Een grens op het
+áántal bestanden zegt dan niets meer over de plaats die ze innemen. Vandaar
+nu een regel per soort:
+
+| wat | hoe | hoeveel |
+| --- | --- | --- |
+| foto's (`home-memory`, `meds`, `people`, `memories`) | eerst uit de cache | 150, dertig dagen |
+| berichten en verhalen (`messages`) | eerst uit de cache | 20, zeven dagen |
+| documenten | nooit bewaard | — |
+| API-antwoorden | eerst het netwerk | 60, één dag |
+
+Documenten blijven ongecached met opzet: een verzekeringspolis van tien
+megabyte hoort niet op het toestel te blijven staan voor iets dat twee keer
+per jaar geopend wordt. Alle bestandscaches hebben nu ook `purgeOnQuotaError`:
+loopt de opslag van het toestel vol, dan gooit de cache zichzelf leeg in plaats
+van de app te laten falen.
+
+En bij Instellingen staat een knop **"Bewaarde foto's opruimen"**, met de
+gebruikte ruimte ernaast. Die bestaat omdat de knop die Chrome zelf aanbiedt —
+"Gegevens verwijderen en rechten resetten" — veel meer doet dan opruimen: die
+wist ook de aanmelding en, op de tablet van de persoon, de koppeling met het
+huishouden. Dan staat er een leeg scherm waar niemand iets van begrijpt.
+
 ### De foto die traag op de tablet kwam
 
 Niet omdat de foto zwaar was — die wordt bij het uploaden al verkleind naar

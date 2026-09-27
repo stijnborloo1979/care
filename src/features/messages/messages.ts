@@ -73,7 +73,7 @@ export async function sendPhotoMessage(opts: {
   file: File
   body?: string
 }): Promise<void> {
-  const blob = await compressImage(opts.file)
+  const blob = await compressImage(opts.file, 1200)
   const ext = extensionForImage(blob.type)
   // Huishouden en kanaal als eerste twee padsegmenten: daar grijpen de
   // storage-policies op aan.

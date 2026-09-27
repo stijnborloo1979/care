@@ -150,7 +150,7 @@ export async function deleteItem(itemId: string) {
 }
 
 export async function uploadItemPhoto(householdId: string, itemId: string, file: File) {
-  const blob = await compressImage(file)
+  const blob = await compressImage(file, 1200)
   const ext = extensionForImage(blob.type)
   const path = `${householdId}/items/${itemId}/${crypto.randomUUID()}.${ext}`
 
@@ -194,7 +194,7 @@ export async function uploadStepPhoto(householdId: string, stepId: string, file:
  * is lastiger op te ruimen dan een foto die opnieuw gekozen moet worden.
  */
 async function bewaarFoto(map: string, file: File, tabel: string, id: string) {
-  const blob = await compressImage(file)
+  const blob = await compressImage(file, 1200)
   const ext = extensionForImage(blob.type)
   const path = `${map}/${crypto.randomUUID()}.${ext}`
 

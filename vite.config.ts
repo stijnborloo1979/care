@@ -42,15 +42,53 @@ export default defineConfig({
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
-            // Foto's uit Supabase Storage: eerst uit de cache, zodat het
-            // scherm van de persoon ook op een hikkende wifi blijft werken.
-            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/sign\/.*/i,
+            // Foto's: eerst uit de cache, zodat het scherm van de persoon ook
+            // op een hikkende wifi blijft werken. Alleen de emmers waar
+            // afbeeldingen in zitten — zie de regel hieronder voor waarom dat
+            // onderscheid er moet zijn.
+            urlPattern:
+              /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/sign\/(home-memory|meds|people|memories)\//i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'thuis-media',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              expiration: {
+                maxEntries: 150,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+                // Loopt de opslag van het toestel vol, dan gooit deze cache
+                // zichzelf leeg in plaats van de app te laten falen.
+                purgeOnQuotaError: true,
+              },
               cacheableResponse: { statuses: [0, 200] },
             },
+          },
+          {
+            // Berichten en verhalen: hier zit geluid en video in, en dat is
+            // honderd keer zwaarder dan een foto. Op één toestel liep de
+            // opslag zo naar een gigabyte: tweehonderd bewaarde bestanden
+            // zeggen niets over hoeveel plaats ze innemen wanneer het geen
+            // foto's zijn.
+            //
+            // Dus wel bewaren — ze moet een ingesproken bericht ook zonder
+            // wifi kunnen beluisteren — maar veel minder, en niet langer dan
+            // een week.
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/sign\/messages\//i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'thuis-berichten',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+                purgeOnQuotaError: true,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Documenten blijven ongecached. Een verzekeringspolis van tien
+            // megabyte hoort niet op het toestel te blijven staan, en ze wordt
+            // twee keer per jaar geopend.
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/sign\/documents\//i,
+            handler: 'NetworkOnly',
           },
           {
             // API-antwoorden nooit cache-first: verouderde medicatie is
