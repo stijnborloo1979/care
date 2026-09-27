@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { vraagGesprek } from '../../services/calls'
 import { t } from '../../lib/i18n'
 import type { PersonCard } from '../../services/people'
@@ -26,17 +27,28 @@ export default function BelKnop({
   p,
   householdId,
   kanBellen,
+  alleen = false,
 }: {
   p: PersonCard
   householdId: string
   /** Kan dit toestel echt telefoneren? Zo niet, dan wordt een nummer tekst. */
   kanBellen: boolean
+  /**
+   * Staat deze knop alleen op het scherm?
+   *
+   * Op het Help-scherm staan de andere familieleden er gewoon onder, dus daar
+   * is een verwijzing overbodig. Op de kaart van één persoon niet: daar zat ze
+   * na het vragen vast, en moest ze eerst terug — precies de weg die iemand
+   * met geheugenproblemen niet vindt.
+   */
+  alleen?: boolean
 }) {
-  const [gevraagd, setGevraagd] = useState(false)
+  // Hoe vaak ze het op dit scherm gevraagd heeft. Nul betekent: nog niet.
+  const [keer, setKeer] = useState(0)
 
   const vraag = useMutation({
     mutationFn: () => vraagGesprek(householdId),
-    onSuccess: () => setGevraagd(true),
+    onSuccess: () => setKeer((n) => n + 1),
   })
 
   const stijl =
@@ -81,17 +93,53 @@ export default function BelKnop({
     )
   }
 
-  if (gevraagd) {
+  if (keer > 0) {
+    // De geruststelling blijft de hoofdzaak; daaronder een rustige knop om
+    // het nog eens te vragen.
+    //
+    // Zonder die knop moest ze eerst weg van dit scherm en dan terug, en dat
+    // is precies wat iemand met geheugenproblemen niet vindt. Wachten duurt
+    // lang wanneer je niet zeker weet of het gelukt is, en dan is "nog eens
+    // vragen" een redelijke wens — geen last. De database houdt het tempo
+    // in de hand, niet dit scherm.
     return (
-      <p
-        aria-live="polite"
-        className="flex min-h-[5rem] items-center gap-4 rounded-card border-[1.5px] border-accent bg-accent-soft px-5 text-xl font-bold shadow-card"
-      >
-        <span className="text-3xl" aria-hidden="true">
-          ✓
-        </span>
-        {t('hulp.gevraagd', { naam: p.name })}
-      </p>
+      <div className="rounded-card border-[1.5px] border-accent bg-accent-soft px-5 py-4 shadow-card">
+        <p aria-live="polite" className="flex items-center gap-4 text-xl font-bold">
+          <span className="text-3xl" aria-hidden="true">
+            ✓
+          </span>
+          <span className="min-w-0">{t('hulp.gevraagd', { naam: p.name })}</span>
+        </p>
+
+        <button
+          onClick={() => vraag.mutate()}
+          disabled={vraag.isPending}
+          className="mt-3 min-h-touch rounded-pill border-[1.5px] border-accent px-5 text-lg font-semibold disabled:opacity-60"
+        >
+          {vraag.isPending ? t('hulp.vraagBezig') : t('hulp.nogEens')}
+        </button>
+
+        {keer > 1 ? (
+          <p aria-live="polite" className="mt-2 text-lg">
+            {t('hulp.nogEensGedaan')}
+          </p>
+        ) : null}
+
+        {vraag.isError ? (
+          <p role="alert" className="mt-2 text-lg font-semibold text-alert">
+            {t('hulp.vraagMislukt')}
+          </p>
+        ) : null}
+
+        {alleen ? (
+          <Link
+            to="/help"
+            className="mt-3 inline-flex min-h-touch items-center rounded-pill border-[1.5px] border-line-strong bg-surface px-5 text-lg font-semibold"
+          >
+            {t('hulp.iemandAnders')}
+          </Link>
+        ) : null}
+      </div>
     )
   }
 

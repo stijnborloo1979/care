@@ -120,7 +120,7 @@ export function PersonDetail() {
 
       {p.phone || p.profile_id ? (
         <div className="mt-5">
-          <BelKnop p={p} householdId={hh} kanBellen={magBellen(huidigePrefs())} />
+          <BelKnop p={p} householdId={hh} kanBellen={magBellen(huidigePrefs())} alleen />
         </div>
       ) : null}
     </main>

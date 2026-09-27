@@ -1065,6 +1065,17 @@ maar zegt elke melding meer dan de vorige. Een reeks eindigt na een uur
 stilte; dan gaat het over iets anders. Voor "ik heb hulp nodig" is de
 wachttijd twee minuten, want dat is dringender.
 
+**Na het vragen blijft ze niet vastzitten.** De bevestiging was een dood
+scherm: wilde ze het nog eens vragen, of iemand anders, dan moest ze eerst weg
+en dan terug — precies de weg die iemand met geheugenproblemen niet vindt.
+Onder de geruststelling staan nu twee rustige knoppen: **"Nog eens vragen"**
+en, wanneer de kaart alleen op het scherm staat, **"Iemand anders vragen"**.
+Op het Help-scherm staat die tweede er niet: de anderen staan er gewoon onder.
+
+Dat het tempo daarmee in háár handen ligt, is geen bezwaar — de database houdt
+het in de hand met de wachttijd en de teller, niet het scherm. Wachten duurt
+lang wanneer je niet zeker weet of het gelukt is.
+
 **Tikken op de melding telt als gezien.** De teller liep eerst alleen terug
 wanneer iemand de melding in het familiescherm met de hand wegklikte — en dat
 doet niemand die de melding op zijn telefoon ziet, meteen terugbelt en verder
