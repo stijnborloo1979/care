@@ -19,16 +19,19 @@
 --  Een agenda-item van het soort 'med' op tijdstip T is gedaan zodra er van
 --  die dag niets meer openstaat dat vóór T plus een half uur moest. Dus:
 --
---  Een agenda-item van het soort 'med' is gedaan zodra elke dosis uit zíjn
---  venster bevestigd is. Dat venster loopt van het einde van het vorige
---  medicatie-item tot een half uur na dit item. Dus:
+--  Elke dosis van die dag hoort bij het medicatie-item dat er het dichtst bij
+--  ligt, en bij maar één. Een item is gedaan zodra elke dosis die erbij hoort
+--  bevestigd is. Dus:
 --
+--    - een item van 08:30 en een medicijn om 10:00? Die horen bij elkaar.
+--      Het item uit de routine en het medicijn uit het schema staan zelden op
+--      precies hetzelfde uur, en daar mag het niet op stuklopen.
 --    - drie momenten op een dag? Het item van 08:30 vinkt af zodra de
 --      ochtenddosis bevestigd is, niet pas 's avonds.
---    - een medicijn dat om 08:45 moet en een item van 08:30? Dat halve uur
---      speling vangt dat op — een item dekt de doses tot kort erna.
 --    - een gemiste ochtenddosis? Die houdt de avond niet tegen. Elk item
 --      staat op zichzelf.
+--    - een dosis die meer dan vier uur van elk item af ligt, hoort bij geen
+--      enkel item en houdt er dus ook geen tegen.
 --
 --  Waarom alleen afvinken en nooit terugdraaien
 --  -------------------------------------------
@@ -64,52 +67,49 @@ begin
   dag_van := date_trunc('day', moment at time zone zone) at time zone zone;
   dag_tot := dag_van + interval '1 day';
 
-  with vensters as (
-    -- Elk medicatie-item krijgt zijn eigen venster: vanaf het einde van het
-    -- vorige item tot een half uur na dit item. Zo hoort elke dosis bij één
-    -- item, en houdt een gemiste ochtenddosis de avond niet tegen.
-    --
-    -- Dat laatste kwam uit de testen: met "alles van vóór dit tijdstip" bleef
-    -- het item van 20:00 openstaan omdat die van 08:30 niet genomen was. Dan
-    -- staat er 's avonds opnieuw "dit moet nog" bij iets wat net gebeurd is,
-    -- en dat is precies de verwarring die we wilden wegnemen.
-    -- Over álle medicatie-items van de dag, ook de al afgevinkte. Namen we
-    -- alleen de openstaande, dan rekte het venster van een nieuw item terug
-    -- tot het begin van de dag zodra de eerdere items al gedaan waren — en
-    -- dan hield een oude dosis het alsnog tegen. Ook dat kwam uit de testen.
-    select a.id,
-           a.done_at,
-           a.starts_at + interval '30 minutes' as tot,
-           coalesce(
-             lag(a.starts_at) over (order by a.starts_at) + interval '30 minutes',
-             dag_van
-           ) as vanaf
+  with items as (
+    select a.id, a.done_at, a.starts_at
       from public.agenda_event a
      where a.household_id = hh
        and a.kind = 'med'
        and a.starts_at >= dag_van
        and a.starts_at < dag_tot
   ),
+  -- Elke dosis hoort bij het item dat er het dichtst bij ligt, en bij maar
+  -- één item. Hoogstens vier uur ernaast: een dosis die daar verder van af
+  -- ligt, hoort bij geen enkel item en houdt er dus ook geen tegen.
+  --
+  -- Dit verving een vaste vensterindeling, en daar was een goede reden voor:
+  -- het item "Medicatie nemen" komt uit de routine en het medicijn uit het
+  -- schema, en die twee staan zelden op precies hetzelfde uur. Een item van
+  -- 08:30 met een medicijn om 10:00 vond zo niets in zijn venster en vinkte
+  -- nooit af — terwijl de medicatiekaart "alles genomen" zei.
+  doses as (
+    select m.id,
+           m.taken_at,
+           (select i.id
+              from items i
+             order by abs(extract(epoch from (i.starts_at - m.due_at))), i.starts_at
+             limit 1) as item_id,
+           (select min(abs(extract(epoch from (i.starts_at - m.due_at))))
+              from items i) as afstand
+      from public.medication_log m
+     where m.household_id = hh
+       and m.due_at >= dag_van
+       and m.due_at < dag_tot
+  ),
+  hoort_bij as (
+    select id, taken_at, item_id from doses
+     where item_id is not null and afstand <= 4 * 3600
+  ),
   klaar as (
-    select v.id
-      from vensters v
-     where v.done_at is null
-     -- Er moet iets te bevestigen zijn geweest: een item zonder enig
-     -- medicijn in zijn venster vinkt niet vanzelf af.
-     and exists (
-       select 1 from public.medication_log m
-        where m.household_id = hh
-          and m.due_at >= v.vanaf
-          and m.due_at < v.tot
-     )
-     -- En niets uit dat venster mag nog openstaan.
-     and not exists (
-       select 1 from public.medication_log m
-        where m.household_id = hh
-          and m.due_at >= v.vanaf
-          and m.due_at < v.tot
-          and m.taken_at is null
-     )
+    select i.id
+      from items i
+     where i.done_at is null
+       and exists (select 1 from hoort_bij d where d.item_id = i.id)
+       and not exists (
+         select 1 from hoort_bij d where d.item_id = i.id and d.taken_at is null
+       )
   )
   update public.agenda_event a
      set done_at = now()

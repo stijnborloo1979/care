@@ -746,18 +746,24 @@ stond in de tijdlijn "08:30 Medicatie nemen" nog open. Voor iemand met
 geheugenproblemen is dat geen schoonheidsfout: een openstaand vinkje betekent
 "dit moet nog", en het risico is dat ze haar medicatie een tweede keer neemt.
 
-`38_medicatie_afvinken.sql` laat een bevestiging de tijdlijn meenemen. Elk
-agenda-item van het soort `med` krijgt zijn eigen venster — van het einde van
-het vorige medicatie-item tot een half uur na dit item — en vinkt af zodra
-elke dosis uit dát venster bevestigd is.
+`38_medicatie_afvinken.sql` laat een bevestiging de tijdlijn meenemen. Elke
+dosis van die dag hoort bij het medicatie-item dat er het dichtst bij ligt, en
+bij maar één; een item vinkt af zodra elke dosis die erbij hoort bevestigd is.
+Ligt een dosis meer dan vier uur van elk item af, dan hoort ze bij geen enkel
+item en houdt ze er ook geen tegen.
 
-Die vorm kwam uit de testen, niet uit het ontwerp. De eerste regel was "alles
-van vóór dit tijdstip", en toen bleek dat een gemiste ochtenddosis het item
-van 20:00 's avonds openhield: opnieuw "dit moet nog" bij iets wat net
-gebeurd was. De tweede versie berekende de vensters alleen over openstaande
-items, en toen rekte het venster van een nieuw item terug tot het begin van de
-dag zodra de eerdere al gedaan waren. Beide keren was het de test die het
-zei.
+Die vorm kwam uit de praktijk, niet uit het ontwerp — drie keer achter elkaar.
+De eerste regel was "alles van vóór dit tijdstip", en toen bleek dat een
+gemiste ochtenddosis het item van 20:00 's avonds openhield: opnieuw "dit moet
+nog" bij iets wat net gebeurd was. De tweede versie gaf elk item een vast
+venster, maar berekende die alleen over openstaande items, waardoor het venster
+van een nieuw item terugrekte tot het begin van de dag. De derde stuitte op het
+echte gebruik: het item "Medicatie nemen" komt uit de **routine** en het
+medicijn uit het **schema**, en die twee staan zelden op hetzelfde uur. Een
+item van 08:30 met een medicijn om 10:00 vond niets in zijn venster en vinkte
+nooit af — terwijl de kaart ernaast "alles genomen" zei. Vandaar de afstand in
+plaats van een venster: die vraagt niet dat familie twee schermen op elkaar
+afstemt.
 
 Het vinkje gaat alleen áán, nooit terug. Een vinkje dat vanzelf terugspringt
 is verwarrend, en iemand kan het item ook met de hand hebben afgevinkt. Zet
