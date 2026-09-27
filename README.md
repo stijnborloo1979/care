@@ -1065,6 +1065,23 @@ maar zegt elke melding meer dan de vorige. Een reeks eindigt na een uur
 stilte; dan gaat het over iets anders. Voor "ik heb hulp nodig" is de
 wachttijd twee minuten, want dat is dringender.
 
+**Wie ze vroeg staat in de melding.** Op haar scherm kiest ze een naam —
+"Vraag of Els belt" — maar de melding zei alleen "Maria vraagt of je eens
+belt". De app gooide weg wat zij bedoelde, en dat had twee gevolgen: familie
+wist niet aan wie ze dacht, en de wachttijd van drie minuten hield ook een
+vraag aan iemand ánders tegen. Ze drukte op "Iemand anders vragen", koos Jan,
+en er gebeurde niets.
+
+Sinds `43_wie_ze_vroeg.sql` gaat de naam mee: *"Maria vraagt of Els belt."*
+Iedereen die meezorgt krijgt het bericht — alleen Els verwittigen zou
+betekenen dat niemand het weet wanneer juist zij niet kan — maar nu staat
+erbij aan wie ze dacht. En de wachttijd geldt **per persoon**: twee keer
+hetzelfde binnen drie minuten blijft één melding, Els en dan Jan zijn er twee.
+
+"Ik heb hulp nodig" blijft zonder naam. Wie om hulp vraagt, vraagt het aan
+iedereen; daar een naam aan hangen zou suggereren dat de anderen kunnen
+wachten.
+
 **Na het vragen blijft ze niet vastzitten.** De bevestiging was een dood
 scherm: wilde ze het nog eens vragen, of iemand anders, dan moest ze eerst weg
 en dan terug — precies de weg die iemand met geheugenproblemen niet vindt.

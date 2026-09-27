@@ -47,7 +47,7 @@ export default function BelKnop({
   const [keer, setKeer] = useState(0)
 
   const vraag = useMutation({
-    mutationFn: () => vraagGesprek(householdId),
+    mutationFn: () => vraagGesprek(householdId, p.name),
     onSuccess: () => setKeer((n) => n + 1),
   })
 

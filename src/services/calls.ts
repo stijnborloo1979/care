@@ -72,8 +72,14 @@ async function duwPush() {
  * krijgt altijd te horen dat het gelukt is: wie onzeker is drukt nog eens,
  * en "je hebt net al gevraagd" helpt dan niemand.
  */
-export async function vraagGesprek(householdId: string) {
-  const { error } = await supabase.rpc('vraag_gesprek', { hh: householdId })
+export async function vraagGesprek(householdId: string, wie?: string) {
+  // De naam gaat mee, want dat is wat zij bedoelde. Familie leest dan
+  // "Maria vraagt of Els belt" in plaats van een vraag zonder adres — en de
+  // wachttijd geldt per persoon, dus iemand anders vragen komt meteen door.
+  const { error } = await supabase.rpc('vraag_gesprek', {
+    hh: householdId,
+    wie: wie ?? null,
+  })
   if (error) throw error
   await duwPush()
 }
