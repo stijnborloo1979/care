@@ -739,6 +739,32 @@ heeft row level security op `profile_id = auth.uid()`, dus een broer kan het
 nummer van zijn zus niet opvragen of wijzigen. Nagegaan met een tweede
 databankrol, niet alleen door de policy te lezen.
 
+### Twee schermen die elkaar tegenspraken
+
+De medicatiekaart zei "Alles genomen voor vandaag", en drie centimeter lager
+stond in de tijdlijn "08:30 Medicatie nemen" nog open. Voor iemand met
+geheugenproblemen is dat geen schoonheidsfout: een openstaand vinkje betekent
+"dit moet nog", en het risico is dat ze haar medicatie een tweede keer neemt.
+
+`38_medicatie_afvinken.sql` laat een bevestiging de tijdlijn meenemen. Elk
+agenda-item van het soort `med` krijgt zijn eigen venster — van het einde van
+het vorige medicatie-item tot een half uur na dit item — en vinkt af zodra
+elke dosis uit dát venster bevestigd is.
+
+Die vorm kwam uit de testen, niet uit het ontwerp. De eerste regel was "alles
+van vóór dit tijdstip", en toen bleek dat een gemiste ochtenddosis het item
+van 20:00 's avonds openhield: opnieuw "dit moet nog" bij iets wat net
+gebeurd was. De tweede versie berekende de vensters alleen over openstaande
+items, en toen rekte het venster van een nieuw item terug tot het begin van de
+dag zodra de eerdere al gedaan waren. Beide keren was het de test die het
+zei.
+
+Het vinkje gaat alleen áán, nooit terug. Een vinkje dat vanzelf terugspringt
+is verwarrend, en iemand kan het item ook met de hand hebben afgevinkt. Zet
+familie een bevestiging ongedaan, dan blijft het agenda-item dus staan — de
+onschuldige kant van de twee, want de medicatiekaart blijft de waarheid over
+wat er werkelijk genomen is.
+
 ### De foto die traag op de tablet kwam
 
 Niet omdat de foto zwaar was — die wordt bij het uploaden al verkleind naar
