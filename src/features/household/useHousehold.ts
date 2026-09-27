@@ -19,6 +19,19 @@ export interface Household {
   support_level: SupportLevel
   requested_support_level: SupportLevel | null
   share_quick_notes: boolean
+  /**
+   * Onder welk huishouden de Home Memory valt. Meestal hetzelfde als
+   * household_id; anders staat de persoon bij iemand anders in huis en is
+   * er één keuken voor twee mensen.
+   *
+   * Bewust een tweede veld en niet in de plaats van household_id: alles
+   * wat van de persoon is — medicatie, agenda, herinneringen — blijft aan
+   * household_id hangen. Eén veld voor beide zou betekenen dat één
+   * vergeten plek medicatie van de verkeerde persoon oplevert.
+   */
+  home_id: string
+  /** Wiens huis het is, als het niet het eigen huis is. */
+  home_name: string | null
 }
 
 /**
@@ -51,7 +64,14 @@ export function useHouseholds() {
     queryFn: async (): Promise<Household[]> => {
       const { data, error } = await supabase.rpc('my_households')
       if (error) throw error
-      return (data ?? []) as Household[]
+      // home_id komt uit migratie 45. Zolang die nog niet gedraaid is, is
+      // het eigen huishouden het huis — dan werkt de app zoals voorheen in
+      // plaats van met een leeg Home Memory te blijven staan.
+      return ((data ?? []) as Household[]).map((h) => ({
+        ...h,
+        home_id: h.home_id ?? h.household_id,
+        home_name: h.home_name ?? null,
+      }))
     },
   })
 }

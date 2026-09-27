@@ -560,9 +560,82 @@ Dit scherm haalt daarom de week op voor **elk** huishouden waar je familie
 van bent, en zet ze naast elkaar per dag. Bij één persoon staat er geen naam
 boven de kaart — die zou op elke regel staan zonder iets toe te voegen.
 
-Wat nog niet gedeeld is: Home Memory. Twee mensen in hetzelfde huis hebben
-dezelfde keuken, en die moet je nu twee keer invullen. Dat is de volgende
-stap voor samenwonen.
+## Eén huis, twee mensen
+
+Twee mensen die samenwonen blijven twee huishoudens — zie hierboven. Maar ze
+hebben één keuken, en die stond tot `45_gedeeld_huis.sql` twee keer in de app.
+Twee keer de wasmachine fotograferen, twee keer de stappen intikken, en bij
+elke wijziging eraan denken dat het op twee plaatsen staat. Dat gaat mis, en
+dan leest de ene persoon een uitleg die niet meer klopt.
+
+`household.woont_bij` wijst naar het huishouden waar deze persoon in huis
+woont. `huis_van(hh)` is `coalesce(woont_bij, id)` en daarmee het huishouden
+waar de Home Memory onder valt. `my_households()` geeft dat mee als `home_id`,
+en de app gebruikt dat **alleen** voor Home Memory — medicatie, agenda,
+herinneringen en het zorglogboek blijven aan `household_id` hangen.
+
+Bewust twee velden en niet één: één veld voor beide zou betekenen dat één
+vergeten plek in de code medicatie van de verkeerde persoon oplevert.
+
+### Wat er gebeurt bij het samenvoegen
+
+Familie zet het aan bij Instellingen → Woont samen, en alleen een beheerder
+van **beide** huishoudens kan het. Anders hang je je persoon aan de keuken van
+iemand die daar niets van weet.
+
+De bestaande inhoud verhuist naar het huis:
+
+- Kamers met dezelfde naam worden één kamer — de keuken is de keuken.
+- Lege dubbele dingen verdwijnen: een "Oven" zonder foto, zonder stap en
+  zonder bewaarplaats naast een "Oven" die iemand heeft ingevuld, is een
+  restant van de onboarding.
+- Alles met inhoud blijft staan, ook als het dubbel is. Liever twee keer
+  "oven" op het scherm dan één keer een uitleg die iemand had ingetikt en die
+  weg is.
+- De kamers worden opnieuw genummerd, want twee reeksen `sort`-waarden door
+  elkaar geven een willekeurige volgorde — en juist die volgorde is waar de
+  persoon op navigeert.
+
+De RPC geeft terug wat er gebeurd is, en het scherm zegt het in één zin met de
+aantallen erbij. De enige vraag na zo'n knop is of er niets verdwenen is.
+
+### Wie mag meekijken
+
+De policies op `room`, `item` en `item_step` gebruiken `deelt_huis()` en
+`mag_huis_bewerken()` in plaats van `is_member()` en `auth_role()`. Ook de
+zorgverlener mag het huis lezen: dat hij weet hoe de wasmachine werkt, is
+juist het soort vraag waarvoor hij komt, en na een samenvoeging staan die
+stappen onder het andere huishouden.
+
+De bucket `home-memory` gaat mee, want anders verdwijnt de foto van de
+wasmachine terwijl de stappen er nog staan — het ergst mogelijke half
+werkende resultaat. `avatars`, `memories` en `documents` blijven per
+huishouden: dat zijn gezichten, het leven en papieren.
+
+`memory_note` en `memory_photo` blijven eveneens per persoon. "Els = dochter"
+en de trouwfoto's zijn van één iemand; de oven niet.
+
+### Eén niveau diep
+
+A woont bij B, en B woont nergens bij. Een ketting A→B→C zou betekenen dat je
+niet meer kan zien welk huis je aan het bewerken bent, en `zet_huisgenoot`
+laat het niet toe. Meerdere huishoudens in hetzelfde huis mag wél: drie mensen
+in een woning met één keuken is geen uitzondering maar juist de situatie waar
+dit voor bedoeld is.
+
+### Losmaken
+
+De inhoud blijft bij het huis staan; het huishouden dat losgemaakt wordt,
+begint met een leeg Home Memory. Dat staat er ook zo bij vóór je het bevestigt.
+Het alternatief — raden welke kamers "van wie" waren — levert twee halve
+huizen op.
+
+### De valkuil bij de controle
+
+`auth_role(hh) <> 'admin'` was fout: wie helemaal geen lid is krijgt `null`
+terug, en `null <> 'admin'` is `null`, geen waar. Een vreemde liep zo langs
+beide controles. Het moet `is distinct from` zijn. De test viel erover; zonder
+die test had het erin gezeten.
 
 ## Waarom een melding niet aankomt
 

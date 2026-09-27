@@ -15,7 +15,7 @@ export default function Talk() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
   const tz = household?.timezone ?? 'Europe/Brussels'
-  const { kennis } = useKennis(hh, tz)
+  const { kennis } = useKennis(hh, tz, household?.home_id ?? hh)
   const [antwoord, setAntwoord] = useState<Answer | null>(null)
   const [zoekt, setZoekt] = useState(false)
   const [bevestigd, setBevestigd] = useState(false)

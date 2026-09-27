@@ -8,7 +8,8 @@ import { t } from '../../lib/i18n'
 /** De plattegrond: elke kamer een grote tegel met hoeveel erin staat. */
 export default function RoomGrid() {
   const { household } = useHousehold()
-  const hh = household?.household_id ?? ''
+  // Het huis, niet het huishouden: wie samenwoont, deelt de keuken.
+  const hh = household?.home_id ?? household?.household_id ?? ''
   const { data: rooms, isLoading } = useRooms(hh)
   const { data: items } = useItems(hh)
 
@@ -79,7 +80,8 @@ const ROOSTER = 'grid grid-cols-2 gap-4 lg:grid-cols-3'
 export function RoomItems() {
   const { roomId = '' } = useParams()
   const { household } = useHousehold()
-  const hh = household?.household_id ?? ''
+  // Het huis, niet het huishouden: wie samenwoont, deelt de keuken.
+  const hh = household?.home_id ?? household?.household_id ?? ''
   const { data: rooms } = useRooms(hh)
   const { data: items, isLoading } = useItems(hh)
 

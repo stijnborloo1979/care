@@ -8,14 +8,24 @@ import { useRadio } from '../radio/radioStore'
 import { useAgenda } from '../today/useAgenda'
 import type { Kennis } from './answerEngine'
 
-/** Alles wat de antwoordmotor mag gebruiken. Niets anders. */
-export function useKennis(householdId: string, tz: string): { kennis: Kennis; isLoading: boolean } {
+/**
+ * Alles wat de antwoordmotor mag gebruiken. Niets anders.
+ *
+ * `homeId` staat apart van `householdId`: "hoe zet ik de wasmachine aan?"
+ * gaat over het huis, en dat huis kan gedeeld zijn met een huisgenoot. Al
+ * de rest — medicatie, agenda, familie — blijft van deze ene persoon.
+ */
+export function useKennis(
+  householdId: string,
+  tz: string,
+  homeId: string = householdId,
+): { kennis: Kennis; isLoading: boolean } {
   const agenda = useAgenda(householdId, tz)
 
   const items = useQuery({
-    queryKey: ['items', householdId],
-    queryFn: () => getItems(householdId),
-    enabled: !!householdId,
+    queryKey: ['items', homeId],
+    queryFn: () => getItems(homeId),
+    enabled: !!homeId,
     staleTime: 5 * 60_000,
   })
 

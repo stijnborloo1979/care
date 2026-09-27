@@ -21,6 +21,11 @@ function useContext() {
   const { session } = useAuth()
   return {
     hh: household?.household_id ?? '',
+    // Het huis staat los van het huishouden: twee mensen die samenwonen
+    // hebben één keuken maar elk hun eigen medicatie. Alleen Home Memory
+    // hoort bij huis.
+    huis: household?.home_id ?? household?.household_id ?? '',
+    huisVan: household?.home_name ?? null,
     voornaam: household?.person_name.split(' ')[0] ?? '',
     volledig: household?.person_name ?? '',
     tz: household?.timezone ?? 'Europe/Brussels',
@@ -68,8 +73,16 @@ export function HomeMemoryPage() {
         <p className="mt-1 text-ink-soft">
           Waar dingen liggen en hoe ze werken. Dit is het invulwerk dat het verschil maakt.
         </p>
+        {/* Wie in een gedeeld huis wijzigt, wijzigt het ook voor de ander.
+            Dat hoort te staan waar je aan het typen bent, niet alleen in de
+            instellingen waar je het één keer aangezet hebt. */}
+        {c.huisVan ? (
+          <p className="mt-2 font-semibold text-accent-ink">
+            Dit huis is gedeeld met {c.huisVan}. Wat je hier wijzigt, zien zij ook.
+          </p>
+        ) : null}
       </header>
-      <ManageHomeMemory householdId={c.hh} />
+      <ManageHomeMemory householdId={c.huis} />
     </div>
   )
 }

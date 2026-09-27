@@ -8,6 +8,7 @@ import ManageRadio from '../radio/ManageRadio'
 import { useLicht } from '../licht/lichtStore'
 import MijnGegevens from '../privacy/MijnGegevens'
 import Opslag from './Opslag'
+import SamenWonen from './SamenWonen'
 import { usePush } from '../push/usePush'
 import PushNakijken from '../push/PushNakijken'
 import { TALEN } from '../../lib/i18n'
@@ -281,6 +282,10 @@ export default function Settings() {
           />
         </Rij>
       </section>
+
+      {/* Boven de toestelinstellingen, want dit gaat over de woning en niet
+          over één tablet. */}
+      <SamenWonen hh={hh} />
 
       <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="text-lg font-bold">De vaste tablet</h2>
