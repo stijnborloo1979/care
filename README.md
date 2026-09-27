@@ -739,6 +739,27 @@ heeft row level security op `profile_id = auth.uid()`, dus een broer kan het
 nummer van zijn zus niet opvragen of wijzigen. Nagegaan met een tweede
 databankrol, niet alleen door de policy te lezen.
 
+### Een gewijzigde instelling die niet op de tablet kwam
+
+Familie zet het thema van donker naar licht, of voegt een blok toe aan het
+startscherm, en op de tablet gebeurt er niets — zelfs na verversen niet. Twee
+oorzaken die elkaar versterkten:
+
+1. **`household` stond niet in de realtime-publicatie.** Zowel `display_prefs`
+   als `home_layout` staan op die rij, dus de tablet kreeg geen enkel signaal
+   dat er iets veranderd was. `37_instellingen_live.sql` voegt die tabel toe.
+2. **Het filter heet daar anders.** Overal is het `household_id`; op
+   `household` zelf is het `id`. Dat verschil zat niet in `useRealtime`, en
+   filteren op een kolom die er niet is geeft geen fout — het geeft stilte,
+   en dat is het vervelendste soort.
+
+Daar kwam bij dat de app zo'n antwoord een minuut lang als vers beschouwt en
+pas opnieuw ophaalt bij het terugkeren naar het scherm. Een tablet in een
+standaard keert nooit terug: hij stáát daar. Daarom halen de instellingen en
+de indeling zich nu ook elke twee minuten opnieuw op — niet omdat het nodig
+is wanneer realtime werkt, maar omdat een tablet zijn websocket kan verliezen
+zonder het te merken.
+
 ### De tweede keer drukken
 
 "De eerste keer komt er een melding, daarna niet meer." Dat was geen fout in

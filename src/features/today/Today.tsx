@@ -60,6 +60,10 @@ export default function Today({ householdId, personName, timezone }: Props) {
     queryFn: () => getIndeling(householdId),
     enabled: !!householdId,
     staleTime: 60_000,
+    // Zelfde vangnet als bij de instellingen: een tablet in een standaard
+    // krijgt nooit focus, dus zonder dit bleef een nieuw blok onzichtbaar
+    // tot iemand de app opnieuw opende.
+    refetchInterval: 2 * 60_000,
     // Niet opnieuw proberen: ontbreekt de kolom nog, dan helpt herhalen
     // niet en vult het alleen de console. Zonder indeling toont dit scherm
     // gewoon de standaard.

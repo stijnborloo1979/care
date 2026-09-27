@@ -183,6 +183,13 @@ export function useDisplayPrefs(householdId: string) {
     queryKey: ['prefs', householdId],
     enabled: !!householdId,
     staleTime: 60_000,
+    // Vangnet voor de tablet in de standaard. Realtime brengt een wijziging
+    // normaal binnen een seconde, maar valt de websocket weg — wifi even
+    // kwijt, toestel in slaap — dan merkt hij dat niet altijd. Zonder deze
+    // regel bleef een gewijzigd thema daar staan tot iemand de app opnieuw
+    // opende, want een tablet die in een standaard staat keert nooit terug
+    // naar een scherm en krijgt dus nooit focus.
+    refetchInterval: 2 * 60_000,
     queryFn: async (): Promise<DisplayPrefs> => {
       const { data, error } = await supabase
         .from('household')
