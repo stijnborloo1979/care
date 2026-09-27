@@ -15,6 +15,7 @@ const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie/planning', label: 'Routines', icoon: 'planning' },
   { to: '/familie/medicatie', label: 'Medicatie', icoon: 'medicatie' },
   { to: '/familie/wie', label: 'Familie', icoon: 'wie' },
+  { to: '/familie/week', label: 'De week samen', icoon: 'wie' },
   { to: '/familie/huis', label: 'Home Memory', icoon: 'vandaag' },
   { to: '/familie/fotos', label: 'Herinneringen', icoon: 'fotos' },
   { to: '/familie/weetjes', label: 'Weetjes', icoon: 'weetjes' },

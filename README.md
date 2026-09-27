@@ -523,6 +523,47 @@ lijst in de handen van een verpleegkundige is gevaarlijker dan geen lijst.
 Dat ze gewend is om acht uur iets te krijgen, is zorgcontext en geen
 voorschrift — dat staat er dus wel, met die zin erbij.
 
+## De week samen
+
+De belofte van deze app is dat familie kan samenzorgen "zonder voortdurend te
+moeten bellen". Voor de persoon was dat opgelost — die ziet wie er komt.
+Tussen Els, Jan en Sofie onderling niet: wie gaat er donderdag langs, wie
+rijdt naar de dokter? Dat gesprek gebeurde nog altijd in een groepschat, of
+niet.
+
+`/familie/week` toont zeven dagen, en per dag wie er langsgaat bij wie. Het
+belangrijkste wat je erop ziet is niet wat er gepland staat maar wat er **níét**
+staat: een dag waarop niemand komt. Daarom staat dat er als een zin met een
+knop ernaast — "Niemand gepland · Ik ga langs" — en niet als een leeg vak.
+
+`44_wie_gaat_er_langs.sql` voegt daarvoor één ding toe dat ontbrak:
+`agenda_event.claimed_by`. Taken hadden al een `assignee`; agenda-items niet,
+dus een afspraak kon wel bestaan maar niemand kon zeggen "ik doe dat". Merk op
+dat dit niet hetzelfde is als `person_id`: dat zegt over wie het gaat ("bezoek
+van Els"), `claimed_by` wie van de familie het op zich neemt. Bij een bezoek
+vallen ze vaak samen; bij een doktersafspraak niet — die gaat over de persoon,
+en iemand anders rijdt.
+
+Je kan alleen jezelf inschrijven, en alleen je eigen toezegging terugnemen.
+Iets van een ander afnemen kan niet: dan laat je die ander in de
+veronderstelling dat het geregeld is.
+
+### Twee mensen die samenwonen
+
+Dat zijn twee huishoudens, en dat is met opzet. Hun medicatie, hun
+dagindeling en hun scherm mogen nooit door elkaar lopen — dat is precies het
+soort vergissing dat deze app niet mag maken. De app ondersteunt al meerdere
+huishoudens per familielid, met een wisselaar; wat ontbrak was een plek waar
+je ze samen ziet.
+
+Dit scherm haalt daarom de week op voor **elk** huishouden waar je familie
+van bent, en zet ze naast elkaar per dag. Bij één persoon staat er geen naam
+boven de kaart — die zou op elke regel staan zonder iets toe te voegen.
+
+Wat nog niet gedeeld is: Home Memory. Twee mensen in hetzelfde huis hebben
+dezelfde keuken, en die moet je nu twee keer invullen. Dat is de volgende
+stap voor samenwonen.
+
 ## Waarom een melding niet aankomt
 
 Push valt op drie plaatsen stil, en alle drie doen ze dat zonder een

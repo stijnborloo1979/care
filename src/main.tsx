@@ -58,6 +58,7 @@ const IndelingPagina = lazy(() => import("./features/layout/Indeling"));
 const DitBenIk = lazy(() => import("./features/profile/DitBenIk"));
 const VerhaalScherm = lazy(() => import("./features/stories/VerhaalScherm"));
 const Calendar = lazy(() => import("./features/calendar/Calendar"));
+const WeekSamen = lazy(() => import("./features/week/WeekSamen"));
 const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
 const ManageMedication = lazy(() => import("./features/medication/ManageMedication"));
@@ -234,6 +235,7 @@ if (!configuratieOk) {
                   >
                     <Route index element={<DashboardPage />} />
                     <Route path="kalender" element={<Calendar />} />
+                    <Route path="week" element={<WeekSamen />} />
               <Route path="medicatie" element={<ManageMedication />} />
               <Route path="planning" element={<Planning />} />
                     <Route path="wie" element={<PeoplePage />} />
