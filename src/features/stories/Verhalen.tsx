@@ -19,7 +19,7 @@ export default function Verhalen({ householdId, naam }: { householdId: string; n
     <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Verhalen van {naam}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Elke dag stelt de app {naam} één vraag over het eigen leven. Wat gedeeld wordt, staat hier.
+        Elke dag stelt de app {naam} één vraag over het eigen leven, en {naam} kan ook zelf iets vertellen in het dagboek. Wat gedeeld wordt, staat hier.
       </p>
 
       {(data ?? []).length > 0 ? (
@@ -73,7 +73,19 @@ function Verhaal({ verhaal, householdId }: { verhaal: LifeStory; householdId: st
 
   return (
     <li className="rounded-2xl bg-surface-soft p-4">
-      <p className="font-semibold">{verhaal.question}</p>
+      {verhaal.soort === 'dagboek' ? (
+        <p className="text-sm font-bold uppercase tracking-wide text-ink-faint">
+          Dagboek ·{' '}
+          {new Date(verhaal.created_at).toLocaleString('nl-BE', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </p>
+      ) : null}
+      <p className="font-semibold">{verhaal.soort === 'dagboek' ? verhaal.titel ?? verhaal.question : verhaal.question}</p>
       {verhaal.body ? <p className="mt-2 whitespace-pre-line text-ink-soft">{verhaal.body}</p> : null}
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {verhaal.audio_path ? (

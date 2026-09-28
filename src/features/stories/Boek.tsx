@@ -41,7 +41,8 @@ export default function Boek() {
     enabled: !!hh,
   })
 
-  const verhalen = useMemo(() => data ?? [], [data])
+  // Het levensboek is voor verhalen; dagboekfragmenten horen er niet in.
+  const verhalen = useMemo(() => (data ?? []).filter((v) => (v.soort ?? 'verhaal') === 'verhaal'), [data])
   const hoofdstukken = useMemo(() => inHoofdstukken(verhalen), [verhalen])
   const metGeluid = verhalen.filter((v) => v.audio_path)
 

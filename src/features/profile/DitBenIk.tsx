@@ -55,7 +55,7 @@ export default function DitBenIk() {
 
   // Eén of twee zinnen uit het levensverhaal. Niet alles: dit blad is geen
   // biografie, het is een handreiking.
-  const stukjes = (verhalen ?? []).filter((v) => v.body && v.body.trim().length > 0).slice(0, 3)
+  const stukjes = (verhalen ?? []).filter((v) => (v.soort ?? 'verhaal') === 'verhaal' && v.body && v.body.trim().length > 0).slice(0, 3)
 
   const vandaag = new Intl.DateTimeFormat(locale(), {
     day: 'numeric',
@@ -205,7 +205,7 @@ export default function DitBenIk() {
         ) : null}
 
         <footer className="mt-8 border-t border-line pt-3 text-sm">
-          Samengesteld door mijn familie op {vandaag}, via de app Thuis. Geen medisch dossier.
+          Samengesteld door mijn familie op {vandaag}, via de app LifeAngle. Geen medisch dossier.
         </footer>
       </main>
     </div>

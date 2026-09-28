@@ -25,7 +25,7 @@ export default function MijnGegevens() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `thuis-gegevens-${new Date().toISOString().slice(0, 10)}.json`
+      a.download = `lifeangle-gegevens-${new Date().toISOString().slice(0, 10)}.json`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) {
@@ -53,7 +53,7 @@ export default function MijnGegevens() {
     <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">Mijn gegevens</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Wat Thuis bewaart, waarom, en hoe lang, staat in de{' '}
+        Wat LifeAngle bewaart, waarom, en hoe lang, staat in de{' '}
         <Link to="/privacy" className="font-semibold text-accent-ink underline underline-offset-4">
           privacyverklaring
         </Link>

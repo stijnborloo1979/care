@@ -82,7 +82,11 @@ export function useProactiveSpeech(events: AgendaEvent[], tz: string) {
         }
 
         let zin: string | null = null
-        if (min > 0 && min <= VOORAF_MIN) {
+        if (e.kind === 'reminder') {
+          // Een herinnering ("medicatie om 18:00") hoort op het uur zelf,
+          // niet tien minuten vooraf.
+          if (min <= 0 && min > -15) zin = `Herinnering: ${e.title}.`
+        } else if (min > 0 && min <= VOORAF_MIN) {
           zin = `Over ${min} ${min === 1 ? 'minuut' : 'minuten'}: ${e.title}.`
         } else if (min <= 0 && min > -15) {
           // De app ging pas open na het begin: dan zeggen we het nu nog.
