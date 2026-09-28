@@ -108,6 +108,19 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     soort agenda-item, het gesproken dagboek, en de RPC's
     `voice_add_event` en `voice_add_shopping` waarlangs spraakopdrachten
     schrijven. Zie “LifeAngle Voice” hieronder.
+47. `47_security_hotfix.sql` — beveiligingsupdate. Achtergrondfuncties
+    (embeddings, nachtelijke taak, opruimen) zijn niet meer aanroepbaar
+    via de API; documentbestanden volgen de tabel `document`; een
+    dagboekopname volgt de deelkeuze van haar verhaal. Terugdraaien:
+    `supabase/rollback/47_security_hotfix.sql`.
+48. `48_permissions.sql` — de huidige toegangsregels opgeschreven als
+    data (`permission`, `role_permission`, `consent`). Verandert niets aan
+    wie wat mag.
+49. `49_can_legacy.sql` — `can_legacy()` en `my_access()`: dezelfde
+    regels als één functie. Verandert niets; de pariteitstest bewijst
+    dat ze overeenkomt met elke huidige policy.
+
+Voor 47 tot 49 staat een terugdraaiscript in `supabase/rollback/`.
 
 ## Inloggen
 
@@ -238,6 +251,24 @@ opname in de eigen stem. Familie ziet ze bij “Verhalen”, met afspelen. In
 de fase *zelf* worden ze niet gedeeld. Ze komen niet in het levensboek.
 
 ### Tests
+
+### Database
+
+`supabase/tests/run_local.sh` zet een lege PostgreSQL op met een kleine
+nabootsing van Supabase (`tests/supabase_shim.sql`: rollen, `auth.uid()`,
+storage, en de standaardrechten van Supabase), draait alle migraties in
+volgorde en daarna `10_rls_tests.sql` en elke `tests/test_*.sql`. Op GitHub
+gebeurt dat bij elke push (`.github/workflows/tests.yml`), samen met de
+Vitest-tests en de build. Je hoeft zelf niets te installeren.
+
+- `test_47_security.sql` — de lekken uit de audit zijn dicht, en
+  onboarding, familie en bewoner werken zoals voorheen.
+- `test_49_parity.sql` — 12.960 vergelijkingen tussen de huidige policies
+  en `can_legacy()`, over 10 soorten gebruikers, 8 huishoudens en alle
+  fasen. Eis: nul verschillen.
+
+### App
+
 
 `src/features/voice-assistant/voice.test.ts` dekt natuurlijke zinnen,
 ontbrekende informatie, verkeerde datum en tijd, ongeldige AI-uitvoer,
