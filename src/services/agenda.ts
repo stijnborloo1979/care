@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { localDateKey } from '../lib/time'
 
-export type EventKind = 'meal' | 'med' | 'visit' | 'appt' | 'routine' | 'other'
+export type EventKind = 'meal' | 'med' | 'visit' | 'appt' | 'routine' | 'other' | 'reminder'
 
 export interface AgendaEvent {
   id: string

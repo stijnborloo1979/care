@@ -15,6 +15,7 @@ import Help from "./features/people/Help";
 import WhatNow from "./features/today/WhatNow";
 import Talk from "./features/voice/Talk";
 import Notes from "./features/notes/Notes";
+import ShoppingList from "./features/shopping/ShoppingList";
 import InstallGuide from "./features/install/InstallGuide";
 import MemoryHome from "./features/home-memory/MemoryHome";
 import Photos from "./features/memories/Photos";
@@ -169,6 +170,7 @@ if (!configuratieOk) {
                     <Route path="/nu" element={<WhatNow />} />
                     <Route path="/praten" element={<Talk />} />
                     <Route path="/radio" element={<Radio />} />
+                    <Route path="/boodschappen" element={<ShoppingList />} />
               <Route path="/help" element={<Help />} />
               <Route
                 path="/delen"
@@ -245,6 +247,7 @@ if (!configuratieOk) {
                     <Route path="analyse" element={<Analyse />} />
                     <Route path="indeling" element={<IndelingPagina />} />
                     <Route path="taken" element={<Taken />} />
+                    <Route path="boodschappen" element={<ShoppingList familie />} />
                     <Route path="logboek" element={<CareLog />} />
                     <Route path="documenten" element={<Documents />} />
                     <Route path="weetjes" element={<ManageNotesPage />} />

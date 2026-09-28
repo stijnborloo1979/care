@@ -711,3 +711,28 @@ h3 {
     box-shadow: inset 0 0 70px 20px rgba(var(--licht), 0.45);
   }
 }
+
+/* ---------------------------------------------------------------------
+   LifeAngle Voice
+   Rustig: een zachte ring die ademt terwijl de microfoon open staat, en
+   een draaiend teken tijdens het verwerken. Wie minder beweging wil,
+   krijgt een vaste ring in plaats van een bewegende.
+   --------------------------------------------------------------------- */
+@keyframes voice-adem {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-ink) 35%, transparent); }
+  70% { box-shadow: 0 0 0 22px color-mix(in srgb, var(--accent-ink) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-ink) 0%, transparent); }
+}
+@keyframes voice-draai {
+  to { transform: rotate(360deg); }
+}
+.voice-luistert { animation: voice-adem 1.8s ease-out infinite; }
+.voice-draait { animation: voice-draai 1.2s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-luistert {
+    animation: none;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-ink) 30%, transparent);
+  }
+  .voice-draait { animation: none; }
+}
