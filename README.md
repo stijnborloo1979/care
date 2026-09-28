@@ -120,7 +120,16 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     regels als één functie. Verandert niets; de pariteitstest bewijst
     dat ze overeenkomt met elke huidige policy.
 
-Voor 47 tot 49 staat een terugdraaiscript in `supabase/rollback/`.
+50. `50_policies_groep1.sql` — 40 policies (agenda, routines, Wie is wie,
+    weetjes, foto's, radio, boodschappen, taken, meldingen, leden,
+    uitnodigingen) vragen `can_legacy()`. Verandert niets aan wie wat mag.
+51. `51_policies_groep2.sql` — de gevoelige tabellen (medicatie, logboek,
+    locatie, notities, verhalen, berichten, documenten, audit) en de
+    storage-policies. Verandert niets aan wie wat mag. Home Memory blijft
+    voorlopig op `deelt_huis()`.
+
+Voor 47 tot 51 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (51, 50, 49, 48, 47).
 
 ## Inloggen
 
@@ -266,6 +275,10 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_49_parity.sql` — 12.960 vergelijkingen tussen de huidige policies
   en `can_legacy()`, over 10 soorten gebruikers, 8 huishoudens en alle
   fasen. Eis: nul verschillen.
+- `test_51_policy_parity.sql` — meet voor elke omgezette tabel en bucket
+  wat 10 soorten gebruikers kunnen lezen, wijzigen, wissen en toevoegen,
+  met de nieuwe policies en daarna met de oude (via de rollback-scripts).
+  10.600 metingen, eis: identiek.
 
 ### App
 

@@ -225,8 +225,10 @@ returns void language sql as $$
   on conflict (stelsel, relation, permission_key) do update set needs_consent = excluded.needs_consent;
 $$;
 
+do $$
+begin
 -- is_member(): elke rol, ook via de organisatie
-select pg_temp.geef(
+perform pg_temp.geef(
   array['admin', 'member', 'caregiver', 'person', 'org_member'],
   array['household.read', 'agenda.read', 'people.read', 'routine.read', 'notes.read',
         'memories.read', 'medication.read', 'diary.read', 'call.read', 'location_setting.read',
@@ -234,47 +236,47 @@ select pg_temp.geef(
         'membership.read', 'consent.read', 'files.memories.read']);
 
 -- auth_role() in (admin, member)
-select pg_temp.geef(
+perform pg_temp.geef(
   array['admin', 'member', 'org_member'],
   array['agenda.write', 'people.write', 'routine.write', 'notes.write', 'memories.write',
         'medication.write', 'radio.write', 'task.manage', 'device.read',
         'notification_delivery.read', 'files.memories.write']);
 
 -- auth_role() = admin (een organisatie is nooit admin)
-select pg_temp.geef(
+perform pg_temp.geef(
   array['admin'],
   array['household.write', 'membership.manage', 'location_setting.write', 'care_log.delete',
         'diary.delete_any', 'quick_note.delete_any']);
 
 -- auth_role() in (admin, member, person)
-select pg_temp.geef(
+perform pg_temp.geef(
   array['admin', 'member', 'person', 'org_member'],
   array['diary.write', 'quick_note.write', 'shopping.write']);
 
 -- auth_role() in (admin, member, caregiver)
-select pg_temp.geef(array['admin', 'member', 'caregiver', 'org_member'], array['care_log.write']);
+perform pg_temp.geef(array['admin', 'member', 'caregiver', 'org_member'], array['care_log.write']);
 
 -- auth_role() = caregiver
-select pg_temp.geef(array['caregiver'], array['agenda.write_own']);
+perform pg_temp.geef(array['caregiver'], array['agenda.write_own']);
 
 -- family_role(): de organisatie telt niet mee
-select pg_temp.geef(array['admin', 'member'],
+perform pg_temp.geef(array['admin', 'member'],
   array['document.read', 'message.family.read', 'message.family.write', 'files.messages.family']);
-select pg_temp.geef(array['admin'],
+perform pg_temp.geef(array['admin'],
   array['document.write', 'audit.read', 'invitation.manage', 'message.moderate']);
-select pg_temp.geef(array['admin', 'member', 'person'],
+perform pg_temp.geef(array['admin', 'member', 'person'],
   array['message.resident.send', 'files.messages.read']);
-select pg_temp.geef(array['person'], array['message.resident.read']);
+perform pg_temp.geef(array['person'], array['message.resident.read']);
 
 -- mag_meekijken(): de persoon zelf en de tablet altijd, de rest met toestemming
-select pg_temp.geef(array['self', 'person'],
+perform pg_temp.geef(array['self', 'person'],
   array['care_log.read', 'medication_log.read', 'location.read']);
-select pg_temp.geef(array['admin', 'member', 'caregiver', 'org_member'],
+perform pg_temp.geef(array['admin', 'member', 'caregiver', 'org_member'],
   array['care_log.read', 'medication_log.read', 'location.read'], true);
 
 -- quick_note_read: zelf altijd; anderen als meekijken én notities gedeeld
-select pg_temp.geef(array['self'], array['quick_note.read']);
-select pg_temp.geef(array['admin', 'member', 'caregiver', 'org_member'],
+perform pg_temp.geef(array['self'], array['quick_note.read']);
+perform pg_temp.geef(array['admin', 'member', 'caregiver', 'org_member'],
   array['quick_note.read'], true);
 -- De tablet kijkt altijd mee (mag_meekijken), dus voor hem telt alleen of
 -- notities gedeeld worden.
@@ -282,6 +284,8 @@ insert into public.role_permission (stelsel, relation, permission_key, needs_con
 values ('legacy', 'person', 'quick_note.read', true, '{notities}')
 on conflict (stelsel, relation, permission_key) do update
   set needs_consent = true, consent_categories = excluded.consent_categories;
+end
+$$;
 
 
 -- ---------------------------------------------------------------------

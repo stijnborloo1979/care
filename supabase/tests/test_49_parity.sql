@@ -56,6 +56,20 @@ union all
 select k, 'public.mag_meekijken(hh)' from unnest(array[
   'care_log.read', 'medication_log.read', 'location.read']) k
 union all
+select k, 'public.is_member(hh)' from unnest(array['notification.update', 'push.subscribe', 'message.read_receipts']) k
+union all
+select k, 'public.auth_role(hh) in (''admin'', ''member'')' from unnest(array['shopping.delete_any', 'alert_channel.write', 'medication_log.write']) k
+union all
+select 'care_log.update_any', 'public.auth_role(hh) = ''admin'''
+union all
+select 'consent.history.read', 'public.is_self(hh) or public.family_role(hh) = ''admin'''
+union all
+select 'medication_history.read', 'public.mag_meekijken(hh)'
+union all
+select 'files.messages.write', 'public.family_role(hh) in (''admin'', ''member'', ''person'')'
+union all
+select 'files.messages.delete', 'public.family_role(hh) in (''admin'', ''member'')'
+union all
 select 'quick_note.read', 'public.is_self(hh) or (public.mag_meekijken(hh) and exists (select 1 from public.household h where h.id = hh and h.share_quick_notes))';
 
 create temp table t_hh (nr int primary key, id uuid);
