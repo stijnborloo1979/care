@@ -18,6 +18,10 @@ import { useLichtSignalen } from '../features/licht/useLichtSignalen'
 import { useWakeLock } from '../features/licht/useWakeLock'
 import { useKiosk } from '../features/kiosk/useKiosk'
 import Nachtscherm from '../features/kiosk/Nachtscherm'
+import VoiceButton from '../features/voice-assistant/VoiceButton'
+import VoiceOverlay from '../features/voice-assistant/VoiceOverlay'
+import { useVoice } from '../features/voice-assistant/voiceStore'
+import { useWekwoord } from '../features/voice-assistant/useWekwoord'
 
 // De labels als sleutel: de tekst komt uit het woordenboek, zodat deze
 // lijst niet per taal herschreven hoeft te worden.
@@ -25,8 +29,9 @@ const NAV: { to: string; label: string; icoon: IconNaam; mic?: boolean }[] = [
   { to: '/', label: 'nav.vandaag', icoon: 'vandaag' },
   { to: '/wie', label: 'nav.wie', icoon: 'wie' },
   // De microfoon staat in het midden en valt op: het is de weg terug
-  // wanneer iemand niet meer weet waar te kijken.
-  { to: '/praten', label: 'nav.praten', icoon: 'praten', mic: true },
+  // wanneer iemand niet meer weet waar te kijken. Hij opent LifeAngle
+  // Voice over het huidige scherm, in plaats van naar een pagina te gaan.
+  { to: '#voice', label: 'voice.knop', icoon: 'praten', mic: true },
   { to: '/memory', label: 'nav.inhuis', icoon: 'memory' },
   { to: '/help', label: 'nav.help', icoon: 'help' },
 ]
@@ -56,6 +61,12 @@ export default function PersonLayout() {
   // op de eigen telefoon, hoort niet teruggestuurd of gedimd te worden.
   const kiosk = prefs.kiosk && household?.role === 'person'
   useWakeLock(prefs.schermAan || kiosk)
+  const voice = useVoice()
+  useWekwoord({
+    actief: prefs.wekwoord && !voice.open && !!household,
+    naam: prefs.assistentNaam,
+    onWek: voice.openen,
+  })
   const { nachtscherm, wek } = useKiosk({
     actief: kiosk,
     tz,
@@ -108,12 +119,15 @@ export default function PersonLayout() {
 
       {nachtscherm ? <Nachtscherm tz={tz} onWek={wek} /> : null}
 
+      <VoiceOverlay />
+
       <nav
         aria-label="Hoofdnavigatie"
         className="hoofdnav fixed inset-x-0 bottom-0 z-40 flex justify-around gap-1 border-t border-line bg-surface/90 px-2 pt-1 backdrop-blur-xl"
         style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
       >
         {NAV.map((n) => {
+          if (n.mic) return <VoiceButton key={n.to} />
           const actief =
             n.to === '/' ? pathname === '/' || pathname === '/persoon' : pathname.startsWith(n.to)
           return (

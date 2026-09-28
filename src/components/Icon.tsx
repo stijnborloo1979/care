@@ -20,6 +20,7 @@ import {
   Users,
   Video,
   Volume2,
+  ShoppingCart,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -40,6 +41,7 @@ const ICONEN = {
   agenda: Calendar,
   medicatie: Pill,
   taken: ListChecks,
+  boodschappen: ShoppingCart,
   logboek: NotebookPen,
   documenten: FileText,
   fotos: Camera,

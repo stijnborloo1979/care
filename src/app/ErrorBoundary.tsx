@@ -19,7 +19,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(fout: Error) {
-    console.error('Thuis liep vast:', fout)
+    console.error('LifeAngle liep vast:', fout)
   }
 
   render() {
