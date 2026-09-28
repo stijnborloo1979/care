@@ -43,7 +43,7 @@ export default function InstallGuide() {
       </Link>
 
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">
-        Thuis op het beginscherm
+        LifeAngle op het beginscherm
       </h1>
       <p className="mt-2 text-lg text-ink-soft">
         Dan opent de app met een eigen icoon, zonder adresbalk, en blijft ze ingelogd. Ze werkt ook
@@ -97,7 +97,7 @@ export default function InstallGuide() {
             ['🔌', 'Laat de tablet in de lader staan, op een vaste plaats.'],
             ['🔒', 'Zet het schermslot uit, of gebruik een code die de familie kent.'],
             ['⏰', 'Zet het scherm op "nooit vergrendelen" zolang hij aan de lader hangt.'],
-            ['🖥️', 'Zet in Thuis bij Instellingen de kioskmodus aan. Dat kan ook van op afstand.'],
+            ['🖥️', 'Zet in LifeAngle bij Instellingen de kioskmodus aan. Dat kan ook van op afstand.'],
             ['🎤', 'Geef bij de eerste keer toestemming voor microfoon en camera.'],
             ['🔊', 'Zet het volume hoog genoeg om een inkomende oproep te horen.'],
           ].map(([em, tekst]) => (
@@ -170,7 +170,7 @@ const VASTZETTEN: { titel: string; wat: string; stappen: string[] }[] = [
     stappen: [
       'Instellingen → Toegankelijkheid → Begeleide toegang: zet het aan en kies een code.',
       'Instellingen → Beeldscherm en helderheid → Automatisch vergrendelen: Nooit.',
-      'Open Thuis vanaf het beginscherm en klik drie keer snel op de zij- of thuisknop.',
+      'Open LifeAngle vanaf het beginscherm en klik drie keer snel op de zij- of thuisknop.',
       'Tik op Start. Stoppen doe je weer met drie klikken en de code.',
     ],
   },
@@ -179,16 +179,16 @@ const VASTZETTEN: { titel: string; wat: string; stappen: string[] }[] = [
     wat: 'Ingebouwd en gratis. Goed genoeg voor de meeste mensen, maar wie weet hoe het werkt, krijgt het ongedaan.',
     stappen: [
       'Instellingen → Beveiliging → App vastzetten (soms onder Meer beveiligingsinstellingen): aanzetten, met ontgrendelen bij losmaken.',
-      'Open Thuis vanaf het beginscherm.',
-      'Open het overzicht van recente apps, tik op het pictogram van Thuis en kies Vastzetten.',
+      'Open LifeAngle vanaf het beginscherm.',
+      'Open het overzicht van recente apps, tik op het pictogram van LifeAngle en kies Vastzetten.',
     ],
   },
   {
     titel: 'Android: Fully Kiosk Browser',
-    wat: 'Een kleine eenmalige licentie per toestel, en de degelijkste keuze voor een tablet die jaren aan de muur hangt. Thuis start vanzelf na een stroomonderbreking, en de kioskmodus kan dan ook de echte helderheid regelen.',
+    wat: 'Een kleine eenmalige licentie per toestel, en de degelijkste keuze voor een tablet die jaren aan de muur hangt. LifeAngle start vanzelf na een stroomonderbreking, en de kioskmodus kan dan ook de echte helderheid regelen.',
     stappen: [
       'Installeer Fully Kiosk Browser uit de Play Store.',
-      'Zet het webadres van Thuis als Start URL.',
+      'Zet het webadres van LifeAngle als Start URL.',
       'Zet bij Advanced Web Settings de JavaScript Interface aan.',
       'Zet bij Device Management Keep Screen On en Launch on Boot aan.',
       'Zet Kiosk Mode aan en kies een code om eruit te gaan.',

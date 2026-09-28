@@ -56,10 +56,10 @@ function Deuren() {
         🏡
       </div>
       <h1 className="mt-6 text-[2.2rem] font-extrabold leading-tight tracking-tight">
-        Welkom bij Thuis
+        Welkom bij LifeAngle
       </h1>
       <p className="mt-2 text-lg text-ink-soft">
-        Een digitaal geheugen voor elke dag. Hoe kom je binnen?
+        Een eenvoudige assistent om zelfstandig te blijven wonen, samen met je familie. Hoe kom je binnen?
       </p>
 
       <div className="mt-8 space-y-3">
@@ -89,7 +89,7 @@ function Deuren() {
 
       <p className="mt-8 text-center text-sm text-ink-faint">
         <Link to="/privacy" className="underline underline-offset-4">
-          Wat Thuis met je gegevens doet
+          Wat LifeAngle met je gegevens doet
         </Link>
       </p>
     </>

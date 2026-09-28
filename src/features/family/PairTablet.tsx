@@ -47,7 +47,7 @@ export default function PairTablet({
         <h2 className="text-lg font-bold">Tablet koppelen</h2>
       </div>
       <p className="mt-3 text-sm text-ink-soft">
-        Open Thuis op de tablet van {personName}, kies <em>Dit is de tablet van de persoon</em>, en
+        Open LifeAngle op de tablet van {personName}, kies <em>Dit is de tablet van de persoon</em>, en
         tik daar deze code in. {personName} hoeft geen mail of wachtwoord te hebben.
       </p>
 

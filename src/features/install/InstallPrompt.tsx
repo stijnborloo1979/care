@@ -25,7 +25,7 @@ export default function InstallPrompt({ compact = false }: { compact?: boolean }
         compact ? 'py-1.5 text-sm' : 'py-2.5'
       }`}
     >
-      <span className="font-semibold">Zet Thuis op het beginscherm van dit toestel</span>
+      <span className="font-semibold">Zet LifeAngle op het beginscherm van dit toestel</span>
 
       {kanInstalleren ? (
         <button

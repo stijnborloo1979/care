@@ -84,7 +84,7 @@ export default function TabletPair() {
     <form onSubmit={koppel} className="rounded-card bg-surface p-6 shadow-lift">
       <h2 className="text-2xl font-bold tracking-tight">Tablet koppelen</h2>
       <p className="mt-2 text-ink-soft">
-        Open Thuis op je eigen telefoon, ga naar <strong>Instellingen → Tablet koppelen</strong>, en
+        Open LifeAngle op je eigen telefoon, ga naar <strong>Instellingen → Tablet koppelen</strong>, en
         tik de code hier in.
       </p>
 
