@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Thuis — digitaal geheugen',
-        short_name: 'Thuis',
-        description: 'Weten wat er nu moet gebeuren, wie er komt en waar dingen liggen.',
+        name: 'LifeAngle',
+        short_name: 'LifeAngle',
+        description: 'Een eenvoudige digitale assistent om langer zelfstandig te wonen, samen met je familie.',
         lang: 'nl-BE',
         start_url: '/',
         scope: '/',

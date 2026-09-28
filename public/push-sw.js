@@ -10,7 +10,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data ? event.data.text() : '' }
   }
 
-  const titel = data.titel || 'Thuis'
+  const titel = data.titel || 'LifeAngle'
   const body = data.body || 'Er is iets dat je aandacht vraagt.'
 
   event.waitUntil(
