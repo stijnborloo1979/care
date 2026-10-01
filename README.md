@@ -132,8 +132,14 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     afdeling en toewijzingen. Een trigger houdt het verblijf gelijk met
     `household.org_id`. Nog door geen enkele toegangsregel gebruikt.
 
-Voor 47 tot 52 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (52, 51, 50, 49, 48, 47).
+53. `53_org_zonder_inhoud.sql` — een organisatie (org admin, coördinator)
+    ziet geen persoonlijke inhoud van een bewoner meer, alleen de
+    bewonerslijst via `org_bewoners()`. Een medewerker met een actieve
+    toewijzing, of de team lead van de afdeling, krijgt de rechten van een
+    zorgverlener. Familie, bewoner, tablet en thuiszorg: ongewijzigd.
+
+Voor 47 tot 53 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (53, 52, 51, 50, 49, 48, 47).
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
 ## Inloggen
@@ -286,6 +292,9 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   10.600 metingen, eis: identiek.
 - `test_52_stays.sql` — koppelen opent een verblijf, loskoppelen sluit het
   samen met de toewijzingen, en wie welk verblijf ziet.
+- `test_53_org.sql` — org admin en coördinator zien geen inhoud; een
+  toegewezen medewerker en de team lead wel; ontslag, einde toewijzing en
+  vertrek nemen de toegang weg; familie en thuiszorg blijven gelijk.
 
 ### App
 
