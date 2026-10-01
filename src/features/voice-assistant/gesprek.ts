@@ -54,6 +54,8 @@ export interface Beurt {
   bellen?: { naam: string; nummer: string }
   link?: { naar: string; label: string }
   ververs?: string[]
+  /** Net bewaard dagboekfragment; de bewoner kan het nog privé zetten. */
+  dagboekId?: string
   /** Samenvatting van wat LifeAngle gaat doen, voor de bevestigingskaart. */
   samenvatting?: { intent: Gevalideerd['intent']; parameters: Params }
 }
@@ -135,7 +137,7 @@ async function voerUit(
 ): Promise<Beurt> {
   const u = await d.voerUit(v, actieId, audio)
   if (!u.gelukt) return beurt(RUST, u.zeg, 'mislukt')
-  return beurt(RUST, u.zeg, 'gelukt', { bellen: u.bellen, ververs: u.ververs })
+  return beurt(RUST, u.zeg, 'gelukt', { bellen: u.bellen, ververs: u.ververs, dagboekId: u.dagboekId })
 }
 
 function samen(v: Gevalideerd, erbij: Partial<Params>, d: GesprekDiensten): Gevalideerd {

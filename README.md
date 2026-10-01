@@ -128,8 +128,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     storage-policies. Verandert niets aan wie wat mag. Home Memory blijft
     voorlopig op `deelt_huis()`.
 
-Voor 47 tot 51 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (51, 50, 49, 48, 47).
+52. `52_stays.sql` — verblijven (`stay`), afdelingen, medewerkers per
+    afdeling en toewijzingen. Een trigger houdt het verblijf gelijk met
+    `household.org_id`. Nog door geen enkele toegangsregel gebruikt.
+
+Voor 47 tot 52 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (52, 51, 50, 49, 48, 47).
+50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
 ## Inloggen
 
@@ -279,6 +284,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   wat 10 soorten gebruikers kunnen lezen, wijzigen, wissen en toevoegen,
   met de nieuwe policies en daarna met de oude (via de rollback-scripts).
   10.600 metingen, eis: identiek.
+- `test_52_stays.sql` — koppelen opent een verblijf, loskoppelen sluit het
+  samen met de toewijzingen, en wie welk verblijf ziet.
 
 ### App
 

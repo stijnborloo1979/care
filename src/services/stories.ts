@@ -60,7 +60,10 @@ export async function addStory(p: {
   }
 
   const { data: user } = await supabase.auth.getUser()
+  // Het id terug, zodat de bewoner een fragment meteen privé kan zetten.
+  const id = crypto.randomUUID()
   const { error } = await supabase.from('life_story').insert({
+    id,
     household_id: p.householdId,
     question: p.vraag,
     body: p.tekst?.trim() || null,
@@ -77,6 +80,7 @@ export async function addStory(p: {
     if (audioPath) await supabase.storage.from(BUCKET).remove([audioPath])
     throw error
   }
+  return id
 }
 
 export async function setShared(id: string, shared: boolean) {

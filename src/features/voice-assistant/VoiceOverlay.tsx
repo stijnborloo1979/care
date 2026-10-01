@@ -162,6 +162,28 @@ export default function VoiceOverlay() {
           </Link>
         ) : null}
 
+        {b?.dagboekId && b.status === 'gelukt' && (v.fase === 'wacht' || v.fase === 'spreekt') ? (
+          v.prive === 'ja' ? (
+            <p className="mt-6 rounded-card bg-surface-soft p-4 text-lg font-semibold">
+              🔒 {t('voice.priveGedaan')}
+            </p>
+          ) : (
+            <div className="mt-6 w-full">
+              <p className="text-lg text-ink-soft">{t('voice.gedeeldUitleg')}</p>
+              <button
+                onClick={v.maakPrive}
+                disabled={v.prive === 'bezig'}
+                className="mt-3 flex min-h-[4rem] w-full items-center justify-center gap-2 rounded-card border-[1.5px] border-line-strong bg-surface text-xl font-bold disabled:opacity-60"
+              >
+                🔒 {t('voice.prive')}
+              </button>
+              {v.prive === 'fout' ? (
+                <p role="alert" className="mt-2 text-alert">{t('voice.priveFout')}</p>
+              ) : null}
+            </div>
+          )
+        ) : null}
+
         {b?.ververs?.includes('shopping') && v.fase === 'wacht' ? (
           <Link
             to="/boodschappen"
