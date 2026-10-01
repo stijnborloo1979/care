@@ -9,6 +9,7 @@ export default defineConfig({
       'https://esm.sh/@supabase/supabase-js@2': fileURLToPath(
         new URL('./supabase/functions/_test/supabase-stub.ts', import.meta.url),
       ),
+      'npm:web-push@3.6.7': fileURLToPath(new URL('./supabase/functions/_test/web-push-stub.ts', import.meta.url)),
     },
   },
   test: {

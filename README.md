@@ -158,8 +158,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     verhaal mag wissen. De app maakt eerst het verhaal en uploadt daarna.
     Oude opnames blijven in `messages`; de app leest beide.
 
-Voor 47 tot 56 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+57. `57_noodtoegang_melding.sql` — een noodtoegang gaat altijd als push
+    naar de familiebeheerder (ook in de fase "zelf"), en per mail naar de
+    org admin van de organisatie. Alle andere meldingen gaan zoals voorheen.
+    Zet ook de nieuwe `push-notify` op Supabase (onderwerp "Noodtoegang bij …").
+
+Voor 47 tot 57 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
@@ -332,6 +337,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   een gewist huishouden laat geen nieuwe regels achter.
 - `test_56_dagboek_opslag.sql` — wie opneemt, beluistert en wist in de
   bucket `diary`, privé zetten, en geen opname zonder verhaal.
+- `test_57_noodmelding.sql` — push en mail bij noodtoegang, en gewone
+  meldingen ongewijzigd.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
