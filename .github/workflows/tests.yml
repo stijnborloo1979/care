@@ -16,6 +16,7 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx vitest run --dir src
+      - run: npx vitest run --config vitest.functions.config.ts
       - run: npm run build
 
   database:
