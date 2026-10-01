@@ -26,7 +26,8 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const BUCKETS = ['avatars', 'home-memory', 'memories', 'documents', 'messages']
+// 'diary' bestaat vanaf migratie 56; een bucket die er niet is, wordt overgeslagen.
+const BUCKETS = ['avatars', 'home-memory', 'memories', 'documents', 'messages', 'diary']
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })

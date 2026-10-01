@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Play, Pause } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { deleteStory, getStories, storyAudioUrl, type LifeStory } from '../../services/stories'
+import { deleteStory, getStories, bucketVan, storyAudioUrl, type LifeStory } from '../../services/stories'
 
 /**
  * Wat de persoon vertelde, in zijn eigen stem. Voor familie misschien het
@@ -64,7 +64,7 @@ function Verhaal({ verhaal, householdId }: { verhaal: LifeStory; householdId: st
       setSpeelt(false)
       return
     }
-    const a = audio ?? new Audio(await storyAudioUrl(verhaal.audio_path!, verhaal.id))
+    const a = audio ?? new Audio(await storyAudioUrl(verhaal.audio_path!, verhaal.id, bucketVan(verhaal)))
     a.onended = () => setSpeelt(false)
     setAudio(a)
     await a.play()

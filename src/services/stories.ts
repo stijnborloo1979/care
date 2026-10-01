@@ -15,9 +15,27 @@ export interface LifeStory {
   /** 'dagboek' voor LifeAngle Voice; ontbreekt vóór migratie 46. */
   soort?: 'verhaal' | 'dagboek'
   titel?: string | null
+  /** Waar de opname staat; ontbreekt vóór migratie 56 (dan 'messages'). */
+  audio_bucket?: 'messages' | 'diary'
 }
 
+/** Vroeger: alle opnames in 'messages', map <hh>/verhalen/. */
 const BUCKET = 'messages'
+/** Vanaf migratie 56: een eigen bucket, pad <hh>/<bestand>. */
+const DIARY = 'diary'
+
+export function bucketVan(s: Pick<LifeStory, 'audio_bucket'>): string {
+  return s.audio_bucket === 'diary' ? DIARY : BUCKET
+}
+
+/** De database kent de kolom audio_bucket nog niet (migratie 56 niet gedraaid). */
+function zonderMigratie56(error: { code?: string; message?: string } | null): boolean {
+  return (
+    error?.code === 'PGRST204' ||
+    error?.code === '42703' ||
+    (error?.message ?? '').includes('audio_bucket')
+  )
+}
 
 /**
  * Met '*' in plaats van een kolomlijst: zo werkt dit ook op een database
@@ -48,37 +66,58 @@ export async function addStory(p: {
   soort?: 'verhaal' | 'dagboek'
   titel?: string
 }) {
-  let audioPath: string | null = null
-
-  if (p.blob && p.mimeType) {
-    // Het tweede padsegment is 'verhalen', niet 'family': daardoor mag de
-    // persoon hier zelf schrijven, en blijven zorgverleners buiten.
-    audioPath = `${p.householdId}/verhalen/${crypto.randomUUID()}.${extensionFor(p.mimeType)}`
-    const { error } = await supabase.storage
-      .from(BUCKET)
-      .upload(audioPath, p.blob, { contentType: p.mimeType })
-    if (error) throw error
-  }
-
   const { data: user } = await supabase.auth.getUser()
   // Het id terug, zodat de bewoner een fragment meteen privé kan zetten.
   const id = crypto.randomUUID()
-  const { error } = await supabase.from('life_story').insert({
+  const rij = {
     id,
     household_id: p.householdId,
     question: p.vraag,
     body: p.tekst?.trim() || null,
-    audio_path: audioPath,
     audio_seconds: p.seconden ?? null,
     shared: p.delen,
     created_by: user.user?.id,
     // Alleen meesturen als het een dagboek is: zo blijft "Vertel eens"
     // werken op een database zonder migratie 46.
     ...(p.soort === 'dagboek' ? { soort: 'dagboek', titel: p.titel ?? null } : {}),
-  })
+  }
 
+  const heeftOpname = !!(p.blob && p.mimeType)
+  if (!heeftOpname) {
+    const { error } = await supabase.from('life_story').insert({ ...rij, audio_path: null })
+    if (error) throw error
+    return id
+  }
+
+  // Vanaf 56: eerst het verhaal, dan de opname in de eigen bucket. De
+  // opslag laat een opname alleen toe bij een verhaal dat al bestaat.
+  const nieuwPad = `${p.householdId}/${crypto.randomUUID()}.${extensionFor(p.mimeType!)}`
+  const { error: rijFout } = await supabase
+    .from('life_story')
+    .insert({ ...rij, audio_path: nieuwPad, audio_bucket: 'diary' })
+  if (!rijFout) {
+    const { error: upFout } = await supabase.storage
+      .from(DIARY)
+      .upload(nieuwPad, p.blob!, { contentType: p.mimeType })
+    if (upFout) {
+      await supabase.from('life_story').delete().eq('id', id)
+      throw upFout
+    }
+    return id
+  }
+  if (!zonderMigratie56(rijFout)) throw rijFout
+
+  // Zonder 56: zoals vroeger, eerst de opname in 'messages', dan het verhaal.
+  // Het tweede padsegment is 'verhalen', niet 'family': daardoor mag de
+  // persoon hier zelf schrijven, en blijven zorgverleners buiten.
+  const oudPad = `${p.householdId}/verhalen/${crypto.randomUUID()}.${extensionFor(p.mimeType!)}`
+  const { error: upFout } = await supabase.storage
+    .from(BUCKET)
+    .upload(oudPad, p.blob!, { contentType: p.mimeType })
+  if (upFout) throw upFout
+  const { error } = await supabase.from('life_story').insert({ ...rij, audio_path: oudPad })
   if (error) {
-    if (audioPath) await supabase.storage.from(BUCKET).remove([audioPath])
+    await supabase.storage.from(BUCKET).remove([oudPad])
     throw error
   }
   return id
@@ -90,7 +129,7 @@ export async function setShared(id: string, shared: boolean) {
 }
 
 export async function deleteStory(s: LifeStory) {
-  if (s.audio_path) await supabase.storage.from(BUCKET).remove([s.audio_path])
+  if (s.audio_path) await supabase.storage.from(bucketVan(s)).remove([s.audio_path])
   const { error } = await supabase.from('life_story').delete().eq('id', s.id)
   if (error) throw error
 }
@@ -100,7 +139,7 @@ export async function deleteStory(s: LifeStory) {
  * database, zodat het gelogd wordt wanneer iemand anders dan de bewoner
  * luistert (migratie 55). Zonder die migratie: zoals vroeger.
  */
-export async function storyAudioUrl(path: string, verhaalId?: string) {
+export async function storyAudioUrl(path: string, verhaalId?: string, bucket: string = BUCKET) {
   if (verhaalId) {
     const { data, error } = await supabase.rpc('open_verhaal_opname', { verhaal: verhaalId })
     if (error) {
@@ -109,5 +148,5 @@ export async function storyAudioUrl(path: string, verhaalId?: string) {
       path = data as string
     }
   }
-  return signedUrl(BUCKET, path)
+  return signedUrl(bucket, path)
 }

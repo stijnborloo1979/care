@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { getStories, storyAudioUrl, type LifeStory } from '../../services/stories'
+import { getStories, bucketVan, storyAudioUrl, type LifeStory } from '../../services/stories'
 import { getPhotos, type MemoryPhoto } from '../../services/memories'
 import { useHousehold } from '../household/useHousehold'
 import { hoofdstukVanFoto, inHoofdstukken, type Hoofdstuk } from './hoofdstukken'
@@ -229,7 +229,7 @@ function LuisterAlles({ verhalen }: { verhalen: LifeStory[] }) {
     if (!pad) return stop()
 
     try {
-      const url = await storyAudioUrl(pad, verhalen[index]?.id)
+      const url = await storyAudioUrl(pad, verhalen[index]?.id, bucketVan(verhalen[index]))
       audio.current?.pause()
       const speler = new Audio(url)
       audio.current = speler

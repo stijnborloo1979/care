@@ -152,8 +152,15 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     leest alles van zijn huishouden; de org admin alleen wat over zijn
     organisatie gaat. De app valt terug op de oude weg zolang 55 er niet is.
 
-Voor 47 tot 55 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (55, 54, 53, 52, 51, 50, 49, 48, 47).
+56. `56_dagboek_opslag.sql` — nieuwe opnames van verhalen en dagboek gaan
+    naar een eigen bucket `diary` (pad `<hh>/<bestand>`). Beluisteren mag
+    wie het verhaal ziet en vandaag opnames mag horen; wissen wie het
+    verhaal mag wissen. De app maakt eerst het verhaal en uploadt daarna.
+    Oude opnames blijven in `messages`; de app leest beide.
+
+Voor 47 tot 56 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
 ## Inloggen
@@ -315,6 +322,10 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_55_audit.sql` — inzages gelogd (één keer per venster), de bewoner
   zelf niet, wie de log leest, niemand schrijft of wist rechtstreeks, en
   een gewist huishouden laat geen nieuwe regels achter.
+- `test_56_dagboek_opslag.sql` — wie opneemt, beluistert en wist in de
+  bucket `diary`, privé zetten, en geen opname zonder verhaal.
+
+De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
 ### App
 
