@@ -123,8 +123,9 @@ select pg_temp.gelijk('inzage: alleen voorkeuren, niet de andere notities', (sel
 select pg_temp.gelijk('inzage: logboek', (select jsonb_array_length(j -> 'logboek') from t_inzage), 1);
 select pg_temp.gelijk('inzage: contactpersoon met telefoon',
   (select count(*) from t_inzage, jsonb_array_elements(j -> 'contacten') x where x ->> 'telefoon' = '+32470000000'), 1);
+-- 'zorgnotities' komt erbij vanaf 59
 select pg_temp.gelijk('inzage: geen verhalen, documenten, locatie of medicatie',
-  (select count(*) from t_inzage, jsonb_object_keys(j) k where k not in ('noodtoegang', 'bewoner', 'voorkeuren', 'agenda', 'logboek', 'contacten')), 0);
+  (select count(*) from t_inzage, jsonb_object_keys(j) k where k not in ('noodtoegang', 'bewoner', 'voorkeuren', 'agenda', 'logboek', 'zorgnotities', 'contacten')), 0);
 select public.nood_inzage(pg_temp.id('nood1'));
 select pg_temp.gelijk('log: start en twee inzages', (select count(*) from public.emergency_access_log where access_id = pg_temp.id('nood1')), 3);
 

@@ -169,8 +169,15 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     zonder abonnement (vandaag iedereen) geldt alles. De plannen zijn
     voorbeelden.
 
-Voor 47 tot 58 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+59. `59_zorg.sql` — LifeAngle Care: zorgnotities (alleen het toegewezen
+    team schrijft en leest; familie en bewoner zien enkel wat "voor familie"
+    is; nooit aan te passen of te wissen via de app; bewaartermijn bij
+    vertrek), overdracht per afdeling, activiteiten en deelname. Noodtoegang
+    toont ook de zorgnotities van de laatste 24 uur.
+
+Voor 47 tot 59 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
@@ -347,6 +354,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   meldingen ongewijzigd.
 - `test_58_abonnementen.sql` — trial, past due, opzeggen, pilot, Home
   pauzeert tijdens een verblijf, actieve bewoners per dag, wie wat ziet.
+- `test_59_zorg.sql` — zorgnotities, overdracht en activiteiten per rol,
+  vertrek, bewaartermijn en opruimen.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
