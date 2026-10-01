@@ -138,8 +138,15 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     toewijzing, of de team lead van de afdeling, krijgt de rechten van een
     zorgverlener. Familie, bewoner, tablet en thuiszorg: ongewijzigd.
 
-Voor 47 tot 53 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (53, 52, 51, 50, 49, 48, 47).
+54. `54_noodtoegang.sql` — een team lead kan bij een bewoner van zijn
+    organisatie 4 uur noodtoegang starten (`start_noodtoegang`), met reden,
+    hoogstens 3 keer per 24 uur. De gegevens komen alleen via
+    `nood_inzage()` (naam, voorkeuren, agenda, logboek van 24 uur,
+    contacten), en elke inzage wordt gelogd. De familiebeheerder krijgt
+    meteen een melding. Geen enkele bestaande toegangsregel verandert.
+
+Voor 47 tot 54 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (54, 53, 52, 51, 50, 49, 48, 47).
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
 ## Inloggen
@@ -295,6 +302,9 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_53_org.sql` — org admin en coördinator zien geen inhoud; een
   toegewezen medewerker en de team lead wel; ontslag, einde toewijzing en
   vertrek nemen de toegang weg; familie en thuiszorg blijven gelijk.
+- `test_54_noodtoegang.sql` — wie mag starten, de vaste leesset, de log,
+  de melding, stoppen, de grens van 3 per dag, verlopen na 4 uur en
+  vertrek uit het WZC.
 
 ### App
 
