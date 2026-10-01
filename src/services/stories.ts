@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { signedUrl } from '../lib/storage'
+import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
 import { extensionFor } from '../features/messages/useVoiceRecorder'
 
 export interface LifeStory {
@@ -94,6 +95,19 @@ export async function deleteStory(s: LifeStory) {
   if (error) throw error
 }
 
-export function storyAudioUrl(path: string) {
+/**
+ * Een opname afspelen. Met het id van het verhaal loopt dat via de
+ * database, zodat het gelogd wordt wanneer iemand anders dan de bewoner
+ * luistert (migratie 55). Zonder die migratie: zoals vroeger.
+ */
+export async function storyAudioUrl(path: string, verhaalId?: string) {
+  if (verhaalId) {
+    const { data, error } = await supabase.rpc('open_verhaal_opname', { verhaal: verhaalId })
+    if (error) {
+      if (!ontbrekendeFunctie(error)) throw error
+    } else if (data) {
+      path = data as string
+    }
+  }
   return signedUrl(BUCKET, path)
 }

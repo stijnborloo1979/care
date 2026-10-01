@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { signedUrl } from '../lib/storage'
+import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
 
 export type DocCategory = 'identiteit' | 'verzekering' | 'medisch' | 'afspraken' | 'belangrijk'
 
@@ -84,6 +85,18 @@ export async function deleteDocument(doc: DocumentRow) {
   if (error) throw error
 }
 
-export async function openDocument(path: string) {
+/**
+ * Openen via de database, zodat de familiebeheerder kan zien wie welk
+ * document opende (migratie 55). Zonder die migratie: zoals vroeger.
+ */
+export async function openDocument(doc: Pick<DocumentRow, 'id' | 'storage_path'>) {
+  let path = doc.storage_path
+  const { data, error } = await supabase.rpc('open_document', { doc: doc.id })
+  if (error) {
+    if (!ontbrekendeFunctie(error)) throw error
+  } else {
+    path = (data as string | null) ?? path
+  }
+  if (!path) throw new Error('Dit document heeft geen bestand')
   return signedUrl(BUCKET, path, 300)
 }

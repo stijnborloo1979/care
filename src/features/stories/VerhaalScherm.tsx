@@ -44,7 +44,7 @@ export default function VerhaalScherm() {
           <h1 className="text-2xl font-bold text-ink-soft">{verhaal.question}</h1>
 
           {verhaal.audio_path ? (
-            <Speler pad={verhaal.audio_path} seconden={verhaal.audio_seconds} />
+            <Speler id={verhaal.id} pad={verhaal.audio_path} seconden={verhaal.audio_seconds} />
           ) : null}
 
           {verhaal.body ? (
@@ -56,7 +56,7 @@ export default function VerhaalScherm() {
   )
 }
 
-function Speler({ pad, seconden }: { pad: string; seconden: number | null }) {
+function Speler({ id, pad, seconden }: { id: string; pad: string; seconden: number | null }) {
   const [speelt, setSpeelt] = useState(false)
   const [bezig, setBezig] = useState(false)
   const audio = useRef<HTMLAudioElement | null>(null)
@@ -72,7 +72,7 @@ function Speler({ pad, seconden }: { pad: string; seconden: number | null }) {
 
     setBezig(true)
     try {
-      const url = await storyAudioUrl(pad)
+      const url = await storyAudioUrl(pad, id)
       const speler = new Audio(url)
       audio.current = speler
       speler.onended = () => setSpeelt(false)

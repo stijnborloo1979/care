@@ -229,7 +229,7 @@ function LuisterAlles({ verhalen }: { verhalen: LifeStory[] }) {
     if (!pad) return stop()
 
     try {
-      const url = await storyAudioUrl(pad)
+      const url = await storyAudioUrl(pad, verhalen[index]?.id)
       audio.current?.pause()
       const speler = new Audio(url)
       audio.current = speler

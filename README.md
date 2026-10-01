@@ -145,8 +145,15 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     contacten), en elke inzage wordt gelogd. De familiebeheerder krijgt
     meteen een melding. Geen enkele bestaande toegangsregel verandert.
 
-Voor 47 tot 54 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (54, 53, 52, 51, 50, 49, 48, 47).
+55. `55_leesaudit.sql` — de log houdt nu ook bij wie een document opende
+    (`open_document`), een opname beluisterde (`open_verhaal_opname`) of
+    de locatie bekeek (`last_location`), behalve de bewoner zelf. Plus
+    wijzigingen in verblijf, toewijzing en medewerkers. De familiebeheerder
+    leest alles van zijn huishouden; de org admin alleen wat over zijn
+    organisatie gaat. De app valt terug op de oude weg zolang 55 er niet is.
+
+Voor 47 tot 55 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (55, 54, 53, 52, 51, 50, 49, 48, 47).
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
 ## Inloggen
@@ -305,6 +312,9 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_54_noodtoegang.sql` — wie mag starten, de vaste leesset, de log,
   de melding, stoppen, de grens van 3 per dag, verlopen na 4 uur en
   vertrek uit het WZC.
+- `test_55_audit.sql` — inzages gelogd (één keer per venster), de bewoner
+  zelf niet, wie de log leest, niemand schrijft of wist rechtstreeks, en
+  een gewist huishouden laat geen nieuwe regels achter.
 
 ### App
 

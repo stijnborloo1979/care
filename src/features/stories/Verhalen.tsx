@@ -64,7 +64,7 @@ function Verhaal({ verhaal, householdId }: { verhaal: LifeStory; householdId: st
       setSpeelt(false)
       return
     }
-    const a = audio ?? new Audio(await storyAudioUrl(verhaal.audio_path!))
+    const a = audio ?? new Audio(await storyAudioUrl(verhaal.audio_path!, verhaal.id))
     a.onended = () => setSpeelt(false)
     setAudio(a)
     await a.play()
