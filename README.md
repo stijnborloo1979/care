@@ -163,8 +163,14 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     org admin van de organisatie. Alle andere meldingen gaan zoals voorheen.
     Zet ook de nieuwe `push-notify` op Supabase (onderwerp "Noodtoegang bij …").
 
-Voor 47 tot 57 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+58. `58_abonnementen.sql` — plannen, abonnementen (Home per huishouden,
+    Care per organisatie) en wat ze ontgrendelen, plus de telling van
+    actieve bewoners per dag. **Schaduwmodus**: niets wordt afgedwongen;
+    zonder abonnement (vandaag iedereen) geldt alles. De plannen zijn
+    voorbeelden.
+
+Voor 47 tot 58 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
@@ -339,6 +345,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   bucket `diary`, privé zetten, en geen opname zonder verhaal.
 - `test_57_noodmelding.sql` — push en mail bij noodtoegang, en gewone
   meldingen ongewijzigd.
+- `test_58_abonnementen.sql` — trial, past due, opzeggen, pilot, Home
+  pauzeert tijdens een verblijf, actieve bewoners per dag, wie wat ziet.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
