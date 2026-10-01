@@ -145,8 +145,17 @@ export async function storyAudioUrl(path: string, verhaalId?: string, bucket: st
     if (error) {
       if (!ontbrekendeFunctie(error)) throw error
     } else if (data) {
+      // Het pad van de database is het actuele, ook als de opname intussen
+      // verhuisd is en deze lijst nog de oude rij toont. Daarom ook de
+      // bucket uit het pad afleiden: <hh>/<bestand> staat in 'diary',
+      // <hh>/verhalen/<bestand> in 'messages'.
       path = data as string
+      bucket = bucketVoorPad(path)
     }
   }
   return signedUrl(bucket, path)
+}
+
+export function bucketVoorPad(pad: string): string {
+  return pad.split('/').length === 2 ? DIARY : BUCKET
 }

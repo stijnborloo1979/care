@@ -60,23 +60,30 @@ describe('openDocument', () => {
 describe('storyAudioUrl', () => {
   it('met een id: via de database', async () => {
     const { storyAudioUrl } = await import('./stories')
-    rpcAntwoord = { data: 'verhalen/x.webm', error: null }
-    await storyAudioUrl('verhalen/x.webm', 'v-1')
+    rpcAntwoord = { data: 'hh/verhalen/x.webm', error: null }
+    await storyAudioUrl('hh/verhalen/x.webm', 'v-1')
     expect(rpcOproepen).toEqual([{ naam: 'open_verhaal_opname', args: { verhaal: 'v-1' } }])
-    expect(getekend).toEqual(['messages/verhalen/x.webm'])
+    expect(getekend).toEqual(['messages/hh/verhalen/x.webm'])
+  })
+
+  it('verhuisd intussen: de database wint, ook over de bucket', async () => {
+    const { storyAudioUrl } = await import('./stories')
+    rpcAntwoord = { data: 'hh/x.webm', error: null }
+    await storyAudioUrl('hh/verhalen/x.webm', 'v-1', 'messages')
+    expect(getekend).toEqual(['diary/hh/x.webm'])
   })
 
   it('zonder migratie: zoals vroeger', async () => {
     const { storyAudioUrl } = await import('./stories')
     rpcAntwoord = { data: null, error: { code: '42883', message: 'function does not exist' } }
-    await storyAudioUrl('verhalen/x.webm', 'v-1')
-    expect(getekend).toEqual(['messages/verhalen/x.webm'])
+    await storyAudioUrl('hh/verhalen/x.webm', 'v-1')
+    expect(getekend).toEqual(['messages/hh/verhalen/x.webm'])
   })
 
   it('weigert de database, dan geen link', async () => {
     const { storyAudioUrl } = await import('./stories')
     rpcAntwoord = { data: null, error: { code: '42501', message: 'Verhaal niet gevonden' } }
-    await expect(storyAudioUrl('verhalen/x.webm', 'v-1')).rejects.toBeTruthy()
+    await expect(storyAudioUrl('hh/verhalen/x.webm', 'v-1')).rejects.toBeTruthy()
     expect(getekend).toEqual([])
   })
 })

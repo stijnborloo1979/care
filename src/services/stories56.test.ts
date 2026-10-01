@@ -102,6 +102,12 @@ describe('afspelen en wissen kiezen de juiste bucket', () => {
     expect(bucketVan({})).toBe('messages')
   })
 
+  it('bucketVoorPad: het pad zegt waar de opname staat', async () => {
+    const { bucketVoorPad } = await import('./stories')
+    expect(bucketVoorPad('hh/a.webm')).toBe('diary')
+    expect(bucketVoorPad('hh/verhalen/a.webm')).toBe('messages')
+  })
+
   it('deleteStory wist in diary', async () => {
     const { deleteStory } = await import('./stories')
     await deleteStory({

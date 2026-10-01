@@ -213,6 +213,14 @@ Functions → Deploy a new function → plak het bestand.
   `VITE_VAPID_PUBLIC_KEY` naar de app. Verify JWT aan laten.
 - `cleanup-storage` — wist spraakberichten en foto's die nergens meer bij
   horen. Plan elke nacht in, na `run_nightly()`. Verify JWT aan laten.
+  Raakt de map `verhalen/` (opnames van verhalen en dagboek) nooit aan.
+- `verhuis-opnames` — verhuist oude opnames van `messages/<hh>/verhalen/`
+  naar de bucket `diary` (na migratie 56). Eenmalig, met de service role;
+  Verify JWT aan laten. Body `{}` is een proef die niets verandert;
+  `{"uitvoeren": true}` verhuist (25 per keer, herhaal tot `nog_te_doen`
+  0 is). Het oude bestand blijft staan tot `{"opruimen": true}` (proef)
+  en `{"opruimen": true, "uitvoeren": true}`: dat wist alleen oude
+  bestanden met een kopie van dezelfde grootte in `diary`.
 - `ask` — beantwoordt een vraag uit de eigen gegevens. Secret:
   `OPENAI_API_KEY`. Vindt de zoektocht niets boven de drempel, dan wordt
   het model niet eens aangeroepen.
