@@ -391,11 +391,50 @@ export async function haalVanAfdeling(rij: string) {
   if (error) throw error
 }
 
-export async function nodigUit(org: string, email: string, rol: OrgRol): Promise<string> {
+export async function nodigUit(org: string, email: string, rol: OrgRol): Promise<{ link: string; gemaild: boolean }> {
   const { data, error } = await supabase.rpc('nodig_medewerker_uit', { org, adres: email.trim(), rol })
   if (error) throw error
-  const rij = Array.isArray(data) ? data[0] : data
-  return `${window.location.origin}/zorg/uitnodiging?token=${(rij as { token: string }).token}`
+  const rij = (Array.isArray(data) ? data[0] : data) as { id: string; token: string }
+  const link = `${window.location.origin}/zorg/uitnodiging?token=${rij.token}`
+  // De mail mag mislukken (geen mailsleutel ingesteld): de link staat er hoe dan ook.
+  let gemaild = false
+  try {
+    const { error: mailFout } = await supabase.functions.invoke('send-invite', { body: { org_invite_id: rij.id } })
+    gemaild = !mailFout
+  } catch {
+    gemaild = false
+  }
+  return { link, gemaild }
+}
+
+// ---- Bewaartermijn (61) -------------------------------------------------
+
+export const BEWAAR_OPTIES = [6, 12, 24, 36, 60, 120]
+
+export async function bewaartermijn(org: string): Promise<number | null> {
+  const { data, error } = await supabase.rpc('bewaartermijn', { org })
+  if (error) {
+    if (ontbrekendeFunctie(error)) return null
+    throw error
+  }
+  return (data as number | null) ?? null
+}
+
+export async function bewaartermijnGevolg(org: string, maanden: number): Promise<number> {
+  const { data, error } = await supabase.rpc('bewaartermijn_gevolg', { org, maanden })
+  if (error) throw error
+  return (data as number) ?? 0
+}
+
+export async function zetBewaartermijn(org: string, maanden: number): Promise<number> {
+  const { data, error } = await supabase.rpc('zet_bewaartermijn', { org, maanden })
+  if (error) throw error
+  return (data as number) ?? 0
+}
+
+export function termijnTekst(maanden: number): string {
+  if (maanden % 12 === 0) return maanden === 12 ? '1 jaar' : `${maanden / 12} jaar`
+  return `${maanden} maanden`
 }
 
 export async function toewijzingen(org: string) {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
+import { Archive, Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
 import { useOrganisatie } from './useOrganisatie'
 import {
   ROLNAAM,
@@ -14,6 +14,11 @@ import {
   nieuweAfdeling,
   nieuweKoppelcode,
   nodigUit,
+  BEWAAR_OPTIES,
+  bewaartermijn,
+  bewaartermijnGevolg,
+  termijnTekst,
+  zetBewaartermijn,
   noodtoegangenVanOrg,
   stopToewijzing,
   toewijzingen,
@@ -43,6 +48,7 @@ export default function Beheer() {
       <Toewijzingen orgId={orgId} />
       {isBeheerder ? <Medewerkers orgId={orgId} /> : null}
       {isBeheerder ? <Afdelingen orgId={orgId} /> : null}
+      <Bewaartermijn orgId={orgId} isBeheerder={isBeheerder} />
       {isBeheerder ? <Telling orgId={orgId} /> : null}
       {isBeheerder ? <Noodtoegangen orgId={orgId} /> : null}
     </div>
@@ -265,11 +271,13 @@ function Medewerkers({ orgId }: { orgId: string }) {
   const [email, setEmail] = useState('')
   const [rol, setRol] = useState<OrgRol>('caregiver')
   const [link, setLink] = useState<string | null>(null)
+  const [gemaild, setGemaild] = useState(false)
   const [gekopieerd, setGekopieerd] = useState(false)
   const uitnodigen = useMutation({
     mutationFn: () => nodigUit(orgId, email, rol),
-    onSuccess: (l) => {
-      setLink(l)
+    onSuccess: (r) => {
+      setLink(r.link)
+      setGemaild(r.gemaild)
       setEmail('')
     },
   })
@@ -363,7 +371,10 @@ function Medewerkers({ orgId }: { orgId: string }) {
         {link ? (
           <div className="mt-3 rounded-2xl bg-surface-soft p-3">
             <p className="text-sm text-ink-soft">
-              Stuur deze link naar de medewerker. Hij werkt alleen voor wie inlogt met dat e-mailadres, 14 dagen lang.
+              {gemaild
+                ? 'De uitnodiging is gemaild. Je kan de link ook zelf doorsturen.'
+                : 'Stuur deze link naar de medewerker.'}{' '}
+              Hij werkt alleen voor wie inlogt met dat e-mailadres, 14 dagen lang.
             </p>
             <p className="mt-1 break-all font-mono text-sm">{link}</p>
             <button
@@ -475,6 +486,65 @@ function Noodtoegangen({ orgId }: { orgId: string }) {
           )
         })}
       </ul>
+    </Kaart>
+  )
+}
+
+function Bewaartermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean }) {
+  const queryClient = useQueryClient()
+  const termijn = useQuery({ queryKey: ['zorg', 'bewaartermijn', orgId], queryFn: () => bewaartermijn(orgId) })
+  const [melding, setMelding] = useState<string | null>(null)
+  const zet = useMutation({
+    mutationFn: async (maanden: number) => {
+      const gevolg = await bewaartermijnGevolg(orgId, maanden)
+      if (
+        gevolg > 0 &&
+        !confirm(
+          `Met ${termijnTekst(maanden)} worden ${gevolg} ${gevolg === 1 ? 'notitie' : 'notities'} van bewoners die lang geleden vertrokken binnen de week gewist. Doorgaan?`,
+        )
+      )
+        return null
+      await zetBewaartermijn(orgId, maanden)
+      return maanden
+    },
+    onSuccess: (m) => {
+      if (m === null) return
+      setMelding(`Bewaard: ${termijnTekst(m)}.`)
+      queryClient.invalidateQueries({ queryKey: ['zorg', 'bewaartermijn', orgId] })
+    },
+  })
+  if (termijn.data == null) return null
+
+  return (
+    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> Bewaartermijn zorgnotities</>}>
+      <p className="text-ink-soft">
+        Zolang een bewoner hier woont, blijven de zorgnotities bewaard. Na het vertrek worden ze na deze termijn
+        automatisch gewist. De termijn geldt ook voor wie al vertrokken is, gerekend vanaf het vertrek.
+      </p>
+      {isBeheerder ? (
+        <label className="mt-3 block max-w-xs">
+          <span className={label}>Bewaren na vertrek</span>
+          <select
+            value={termijn.data}
+            disabled={zet.isPending}
+            onChange={(e) => {
+              setMelding(null)
+              zet.mutate(Number(e.target.value))
+            }}
+            className={veld}
+          >
+            {BEWAAR_OPTIES.map((m) => (
+              <option key={m} value={m}>
+                {termijnTekst(m)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <p className="mt-3 text-lg font-semibold">{termijnTekst(termijn.data)} na vertrek</p>
+      )}
+      {melding ? <p className="mt-2 text-sm font-semibold text-accent-ink">{melding}</p> : null}
+      <Fout fout={zet.error} />
     </Kaart>
   )
 }

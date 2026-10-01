@@ -179,8 +179,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     (familie koppelt zelf), medewerkers uitnodigen, mijn bewoners,
     collega's, toewijzen en verblijf. Geen bestaande regel verandert.
 
-Voor 47 tot 60 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+61. `61_bewaartermijn.sql` — bewaartermijn van zorgnotities per WZC
+    (standaard 2 jaar, 6 maanden tot 10 jaar), in te stellen bij Beheer.
+    De opruiming draait elke nacht om 03:20 als pg_cron aan staat.
+
+Voor 47 tot 61 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -327,8 +331,9 @@ Voor wie in een woonzorgcentrum werkt, onder `/zorg`. Vereist migraties 52 tot 6
 
 1. **Registreren** — `/zorg/nieuw` (ook via de onboarding: "Ik registreer een
    woonzorgcentrum"). Wie registreert, wordt beheerder.
-2. **Medewerkers** — Beheer → Medewerker uitnodigen. Je krijgt een link die
-   alleen werkt voor wie inlogt met dat e-mailadres. Zet ze daarna op een
+2. **Medewerkers** — Beheer → Medewerker uitnodigen. De uitnodiging wordt
+   gemaild (via `send-invite`, als de mail ingesteld is) en je krijgt ook
+   de link. Die werkt alleen voor wie inlogt met dat e-mailadres. Zet ze daarna op een
    afdeling, eventueel als team lead.
 3. **Bewoners** — de familiebeheerder koppelt zelf, bij "Wie ziet wat", met
    de koppelcode die Beheer toont. Een WZC kan nooit zelf een bewoner toevoegen.
@@ -382,6 +387,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   vertrek, bewaartermijn en opruimen.
 - `test_60_personeel.sql` — registreren, koppelen met code, uitnodigen,
   toewijzen, verblijf, wie wat ziet.
+- `test_61_bewaartermijn.sql` — termijn per WZC, wie hem zet, gevolg van
+  een kortere termijn, opruimen.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
