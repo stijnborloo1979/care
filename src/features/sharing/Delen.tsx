@@ -3,6 +3,7 @@ import { Eye, EyeOff, ShieldCheck, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useHousehold, type SupportLevel } from '../household/useHousehold'
 import WieBekeek from './WieBekeek'
+import WzcKoppeling from './WzcKoppeling'
 
 const NIVEAUS: { id: SupportLevel; titel: string; uitleg: string; ziet: string }[] = [
   {
@@ -284,6 +285,8 @@ export default function Delen() {
           ))}
         </ul>
       </section>
+
+      <WzcKoppeling hh={hh} voornaam={voornaam} isBeheerder={isBeheerder} />
 
       <WieBekeek hh={hh} voornaam={voornaam} isBeheerder={isBeheerder} ikBenHet={ikBenHet} />
     </div>

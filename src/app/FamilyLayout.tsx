@@ -8,6 +8,7 @@ import InstallPrompt from "../features/install/InstallPrompt";
 import Icon, { type IconNaam } from "../components/Icon";
 import AccountBar from "./AccountBar";
 import Licht from "../features/licht/Licht";
+import { useOrganisaties } from "../features/zorg/useOrganisatie";
 
 const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
   { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
@@ -32,6 +33,7 @@ const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
 
 export default function FamilyLayout() {
   const { household, isLoading } = useHousehold();
+  const organisaties = useOrganisaties();
   useDisplayPrefs(household?.household_id ?? "");
   useRealtime(household?.household_id ?? "");
   // Vangnet voor wie pg_cron niet aan heeft staan: zet de dag één keer per
@@ -92,6 +94,14 @@ export default function FamilyLayout() {
             >
               Scherm van {household.person_name.split(" ")[0]}
             </NavLink>
+            {(organisaties.data ?? []).length > 0 ? (
+              <NavLink
+                to="/zorg"
+                className="block font-semibold text-accent-ink underline underline-offset-4"
+              >
+                Naar het woonzorgcentrum
+              </NavLink>
+            ) : null}
           </div>
         </aside>
 

@@ -72,6 +72,16 @@ const Onboarding = lazy(() => import("./features/onboarding/Onboarding"));
 const Planning = lazy(() => import("./features/planning/Planning"));
 const CareLog = lazy(() => import("./features/care-log/CareLog"));
 const Documents = lazy(() => import("./features/documents/Documents"));
+// LifeAngle Care: alleen wie in een woonzorgcentrum werkt, laadt dit.
+const ZorgLayout = lazy(() => import("./app/ZorgLayout"));
+const ZorgBewoners = lazy(() => import("./features/zorg/Bewoners"));
+const ZorgBewoner = lazy(() => import("./features/zorg/Bewoner"));
+const ZorgOverdracht = lazy(() => import("./features/zorg/Overdracht"));
+const ZorgActiviteiten = lazy(() => import("./features/zorg/Activiteiten"));
+const ZorgBeheer = lazy(() => import("./features/zorg/Beheer"));
+const NieuweOrganisatie = lazy(() => import("./features/zorg/NieuweOrganisatie"));
+const ZorgUitnodiging = lazy(() => import("./features/zorg/Uitnodiging"));
+import { useOrganisaties } from "./features/zorg/useOrganisatie";
 import { useHousehold } from "./features/household/useHousehold";
 import { configuratieOk } from "./lib/supabase";
 import ErrorBoundary from "./app/ErrorBoundary";
@@ -91,7 +101,10 @@ function Beveiligd({ children }: { children: React.ReactNode }) {
 /** De rol bepaalt het scherm: 'person' komt nooit in de familie-interface. */
 function Start() {
   const { household, all, isLoading } = useHousehold();
-  if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  const organisaties = useOrganisaties();
+  if (isLoading || organisaties.isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  // Wie geen familie heeft maar in een woonzorgcentrum werkt, gaat naar dat scherm.
+  if (all.length === 0 && (organisaties.data ?? []).length > 0) return <Navigate to="/zorg" replace />;
   // Wie nergens bij hoort, is nieuw: meteen naar de onboarding.
   if (all.length === 0) return <Navigate to="/start" replace />;
   // Het scherm hangt af van wie je bent, niet van je rol: wie de app zelf
@@ -147,6 +160,29 @@ if (!configuratieOk) {
                   <Route path="/login/*" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
                   <Route path="/uitnodiging" element={<AcceptInvite />} />
+                  <Route path="/zorg/uitnodiging" element={<ZorgUitnodiging />} />
+                  <Route
+                    path="/zorg/nieuw"
+                    element={
+                      <Beveiligd>
+                        <NieuweOrganisatie />
+                      </Beveiligd>
+                    }
+                  />
+                  <Route
+                    path="/zorg"
+                    element={
+                      <Beveiligd>
+                        <ZorgLayout />
+                      </Beveiligd>
+                    }
+                  >
+                    <Route index element={<ZorgBewoners />} />
+                    <Route path="bewoner/:hh" element={<ZorgBewoner />} />
+                    <Route path="overdracht" element={<ZorgOverdracht />} />
+                    <Route path="activiteiten" element={<ZorgActiviteiten />} />
+                    <Route path="beheer" element={<ZorgBeheer />} />
+                  </Route>
                   <Route path="/installeren" element={<InstallGuide />} />
                   <Route
                     path="/start"

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   STANDAARD_KAMERS,
@@ -318,6 +318,15 @@ export default function Onboarding() {
           {busy ? 'Bezig…' : laatste ? 'Klaar' : 'Verder'}
         </button>
       </div>
+
+      {stap === 0 ? (
+        <Link
+          to="/zorg/nieuw"
+          className="mt-6 block text-center font-semibold text-ink-faint underline underline-offset-4"
+        >
+          Ik registreer een woonzorgcentrum
+        </Link>
+      ) : null}
 
       {!laatste && stap > 1 ? (
         <button

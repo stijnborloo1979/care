@@ -321,7 +321,27 @@ Dagboekfragmenten staan in `life_story` met `soort = 'dagboek'`, met de
 opname in de eigen stem. Familie ziet ze bij “Verhalen”, met afspelen. In
 de fase *zelf* worden ze niet gedeeld. Ze komen niet in het levensboek.
 
-### Tests
+### LifeAngle Care (woonzorgcentrum)
+
+Voor wie in een woonzorgcentrum werkt, onder `/zorg`. Vereist migraties 52 tot 60.
+
+1. **Registreren** — `/zorg/nieuw` (ook via de onboarding: "Ik registreer een
+   woonzorgcentrum"). Wie registreert, wordt beheerder.
+2. **Medewerkers** — Beheer → Medewerker uitnodigen. Je krijgt een link die
+   alleen werkt voor wie inlogt met dat e-mailadres. Zet ze daarna op een
+   afdeling, eventueel als team lead.
+3. **Bewoners** — de familiebeheerder koppelt zelf, bij "Wie ziet wat", met
+   de koppelcode die Beheer toont. Een WZC kan nooit zelf een bewoner toevoegen.
+4. **Toewijzen** — Beheer → Bewoners: wie voor wie zorgt, afdeling en kamer.
+
+Schermen: **Bewoners** (mijn bewoners; met zorgnotities, agenda van vandaag
+en contactpersonen), **Overdracht** per afdeling, **Activiteiten** met
+inschrijven en aanwezigheid, en **Beheer**. Een team lead kan bij een
+bewoner die hij niet volgt **noodtoegang** starten (4 uur, met reden; de
+familie krijgt bericht). Wie zowel familie heeft als in een WZC werkt,
+wisselt via de link onderaan de zijbalk.
+
+## Tests
 
 ### Database
 
