@@ -11,6 +11,7 @@ import { mag, useAccess } from "../core/access/useAccess";
 import AccountBar from "./AccountBar";
 import Licht from "../features/licht/Licht";
 import { useOrganisaties } from "../features/zorg/useOrganisatie";
+import ZorgToegang from "../features/zorg/ZorgToegang";
 
 
 
@@ -95,6 +96,8 @@ export default function FamilyLayout() {
             <div className="mb-4 lg:hidden">
               <AccountBar />
             </div>
+            {/* Een open uitnodiging van een woonzorgcentrum: hier, niet alleen in de mail. */}
+            <ZorgToegang vorm="kaart" />
             <Outlet />
           </div>
 

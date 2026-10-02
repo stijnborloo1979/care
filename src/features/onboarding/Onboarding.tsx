@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
+import ZorgToegang from '../zorg/ZorgToegang'
 import {
   STANDAARD_KAMERS,
   STANDAARD_OCHTEND,
@@ -286,6 +287,7 @@ export default function Onboarding() {
 
   return (
     <main className="mx-auto max-w-[34rem] px-5 py-10">
+      {stap === 0 ? <ZorgToegang vorm="kaart" /> : null}
       <div className="flex gap-1.5">
         {stappen.map((_, i) => (
           <span

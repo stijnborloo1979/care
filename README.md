@@ -204,9 +204,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 66. `66_null_rolcontrole.sql` — elf oudere functies weigerden niet wie
     geen relatie had met het huishouden (`null not in (...)` is geen true).
     Nu NULL-veilig; de rest van elke functie is ongewijzigd.
+67. `67_uitnodigingen_in_app.sql` — wie inlogt met een uitgenodigd
+    e-mailadres, ziet de uitnodiging van het woonzorgcentrum ook in de app
+    en aanvaardt ze daar. Zelfde controles als de link; het token wordt
+    nooit getoond.
 
-Voor 47 tot 66 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 67 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -419,6 +423,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_64_opruimen.sql` — omgeleide functies uit 03, zorgteam voor familie.
 - `test_65_review.sql` — elk lek uit de review; zakt zonder 65.
 - `test_66_null_rolcontrole.sql` — een vreemde roept elke functie aan; zakt zonder 66.
+- `test_67_uitnodigingen_in_app.sql` — alleen het juiste e-mailadres ziet en aanvaardt een uitnodiging.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

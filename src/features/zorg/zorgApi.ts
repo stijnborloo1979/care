@@ -484,6 +484,24 @@ export async function aanvaardUitnodiging(token: string): Promise<string> {
   return data as string
 }
 
+export interface OpenUitnodiging {
+  id: string
+  organisatie: string
+  rol: OrgRol
+  verloopt: string
+}
+
+/** Open uitnodigingen voor het e-mailadres waarmee je bent ingelogd (67). */
+export function mijnUitnodigingen(): Promise<OpenUitnodiging[]> {
+  return rpcLijst<OpenUitnodiging>('mijn_org_uitnodigingen')
+}
+
+export async function aanvaardInApp(id: string): Promise<string> {
+  const { data, error } = await supabase.rpc('aanvaard_org_uitnodiging_id', { uitnodiging: id })
+  if (error) throw error
+  return data as string
+}
+
 // ---- Familie: koppelen ------------------------------------------------
 
 export async function mijnWzc(hh: string) {
