@@ -69,13 +69,19 @@ select pg_temp.als('fa');
 delete from storage.objects where name = (select v from t_pad where k = 'els');
 select pg_temp.gelijk('familiebeheerder wist', (select count(*) from storage.objects where name = (select v from t_pad where k = 'els')), 0::bigint);
 
--- Een foto waar geen bezoek meer naar wijst, mag weg
+-- Een foto waar (nog) geen bezoek naar wijst
 reset role;
-insert into storage.objects (bucket_id, name) select 'memories', v from t_pad where k = 'els';
+insert into storage.objects (bucket_id, name, owner) select 'memories', v, pg_temp.id('els') from t_pad where k = 'els';
 update public.visit_log set photo_path = null where visitor_name = 'Els';
 set local role authenticated;
 select pg_temp.als('jan');
 delete from storage.objects where name = (select v from t_pad where k = 'els');
-select pg_temp.gelijk('een verweesde bezoekfoto mag weg', (select count(*) from storage.objects where name = (select v from t_pad where k = 'els')), 0::bigint);
+select pg_temp.gelijk('net geplaatst door een ander: Jan wist niet', (select count(*) from storage.objects where name = (select v from t_pad where k = 'els')), 1::bigint);
+reset role;
+update storage.objects set created_at = now() - interval '2 hours' where name = (select v from t_pad where k = 'els');
+set local role authenticated;
+select pg_temp.als('jan');
+delete from storage.objects where name = (select v from t_pad where k = 'els');
+select pg_temp.gelijk('na een uur mag een verweesde bezoekfoto weg', (select count(*) from storage.objects where name = (select v from t_pad where k = 'els')), 0::bigint);
 
 rollback;

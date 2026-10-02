@@ -9,6 +9,6 @@ do $$ begin
       using (bucket_id = 'memories' and public.can_legacy(((storage.foldername(name))[1])::uuid, 'files.memories.write'))$pol$;
   end if;
 end $$;
-drop function if exists public.mag_bezoekfoto_wissen(text);
+drop function if exists public.mag_bezoekfoto_wissen(text, uuid, timestamptz);
 drop function if exists public.mag_bezoekfoto_plaatsen(text);
 drop function if exists public.bezoek_van_pad(text);

@@ -6,6 +6,7 @@ import { aandachtspunten, cijfers } from './overzicht'
 import { MedewerkerActies, OpenUitnodigingen } from './BeheerTeam'
 import VerblijfBeeindigen from './VerblijfBeeindigen'
 import { Afdelingen, Organisatie } from './BeheerOrganisatie'
+import SysteemControle from '../systeem/SysteemControle'
 import { useOrganisatie } from './useOrganisatie'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -69,6 +70,7 @@ export default function Beheer() {
       <TeamberichtTermijn orgId={orgId} isBeheerder={isBeheerder} />
       {isBeheerder ? <Telling orgId={orgId} /> : null}
       {isBeheerder ? <Noodtoegangen orgId={orgId} /> : null}
+      {isBeheerder ? <SysteemControle /> : null}
     </div>
   )
 }

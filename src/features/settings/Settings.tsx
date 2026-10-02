@@ -1,3 +1,4 @@
+import SysteemControle from '../systeem/SysteemControle'
 import { useDisplayPrefs, type DisplayPrefs } from './useDisplayPrefs'
 import JouwNaam from './JouwNaam'
 import { useHousehold } from '../household/useHousehold'
@@ -424,6 +425,8 @@ export default function Settings() {
       <LocationSettings />
 
       <Opslag />
+
+      {household?.role === 'admin' ? <SysteemControle /> : null}
 
       <MijnGegevens />
     </div>

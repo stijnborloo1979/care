@@ -14,8 +14,9 @@
 --  VOORGESTELD in de map <huishouden>/bezoek/ geldt meer:
 --               plaatsen  alleen bij een eigen bezoek van de laatste 24 uur
 --                         (het pad begint met de id van dat bezoek, 74)
---               wissen    als geen bezoek nog naar de foto wijst, of als het
---                         jouw bezoek is, of als je familiebeheerder bent
+--               wissen    als het jouw bezoek is of je familiebeheerder bent;
+--                         een foto zonder bezoek: wie ze plaatste, of na
+--                         een uur iedereen die foto's mag beheren
 --             Buiten die map verandert er niets.
 --  RISICO     laag: alleen de map bezoek, die nieuw is in 74.
 -- =====================================================================
@@ -62,24 +63,33 @@ as $$
        and v.created_at > now() - interval '24 hours');
 $$;
 
-create or replace function public.mag_bezoekfoto_wissen(pad text)
+-- Wissen mag als het jouw bezoek is of je familiebeheerder bent. Een foto
+-- waar (nog) geen bezoek naar wijst: alleen door wie ze plaatste, of als ze
+-- ouder is dan een uur. Zo kan niemand een foto wissen in de seconde
+-- tussen het uploaden en het koppelen aan het bezoek.
+create or replace function public.mag_bezoekfoto_wissen(pad text, eigenaar uuid, gemaakt timestamptz)
 returns boolean
 language sql
 stable
 security definer
 set search_path = public
 as $$
-  select not exists (select 1 from public.visit_log v where v.photo_path = pad)
-      or exists (select 1 from public.visit_log v
-                  where v.photo_path = pad
-                    and (v.author_id = auth.uid() or public.family_role(v.household_id) = 'admin'));
+  select case
+    when exists (select 1 from public.visit_log v where v.photo_path = pad) then
+      exists (select 1 from public.visit_log v
+               where v.photo_path = pad
+                 and (v.author_id = auth.uid() or public.family_role(v.household_id) = 'admin'))
+    else
+      eigenaar = auth.uid() or coalesce(gemaakt, now()) < now() - interval '1 hour'
+        or public.family_role(split_part(pad, '/', 1)::uuid) = 'admin'
+  end;
 $$;
 
 revoke execute on function public.mag_bezoekfoto_plaatsen(text) from public, anon;
-revoke execute on function public.mag_bezoekfoto_wissen(text) from public, anon;
+revoke execute on function public.mag_bezoekfoto_wissen(text, uuid, timestamptz) from public, anon;
 grant execute on function public.bezoek_van_pad(text) to authenticated, service_role;
 grant execute on function public.mag_bezoekfoto_plaatsen(text) to authenticated;
-grant execute on function public.mag_bezoekfoto_wissen(text) to authenticated;
+grant execute on function public.mag_bezoekfoto_wissen(text, uuid, timestamptz) to authenticated;
 
 do $$ begin
   if to_regclass('storage.objects') is null then
@@ -94,6 +104,6 @@ do $$ begin
     execute $pol$create policy memories_delete on storage.objects for delete
       using (bucket_id = 'memories'
         and public.can_legacy(((storage.foldername(name))[1])::uuid, 'files.memories.write')
-        and ((storage.foldername(name))[2] is distinct from 'bezoek' or public.mag_bezoekfoto_wissen(name)))$pol$;
+        and ((storage.foldername(name))[2] is distinct from 'bezoek' or public.mag_bezoekfoto_wissen(name, owner, created_at)))$pol$;
   end if;
 end $$;
