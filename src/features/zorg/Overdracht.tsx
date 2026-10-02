@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
+import OpenVragen from './OpenVragen'
 import { DIENSTEN, dienstDatum, huidigeDienst, medewerkers, nieuweOverdracht, overdrachten, type Dienst } from './zorgApi'
 import { Fout, Kaart, Kop, Laden, Leeg, knop, label, tekstvak, uur } from './ui'
 
@@ -76,6 +77,8 @@ export default function Overdracht() {
         titel="Overdracht"
         uitleg="Wat de volgende dienst moet weten. Een overdracht wordt na een tijd automatisch gewist; wat blijvend belangrijk is, schrijf je in een zorgnotitie."
       />
+
+      <OpenVragen orgId={org.org_id} />
 
       {afdelingen.length > 1 ? (
         <div role="tablist" aria-label="Afdeling" className="flex flex-wrap gap-2">

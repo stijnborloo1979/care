@@ -6,6 +6,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
 import { useOrganisatie } from '../features/zorg/useOrganisatie'
 import { ROLNAAM } from '../features/zorg/zorgApi'
+import { useOngezien } from '../features/zorg/OpenVragen'
 
 /**
  * Het scherm voor wie in een woonzorgcentrum werkt. Los van het
@@ -17,12 +18,14 @@ export default function ZorgLayout() {
   const { session, signOut } = useAuth()
   const { all: huishoudens } = useHousehold()
   const [open, setOpen] = useState(false)
+  const ongezien = useOngezien()
+  const vragen = Object.values(ongezien.data ?? {}).reduce((a, b) => a + b, 0)
 
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
   if (!org) return <Navigate to="/zorg/nieuw" replace />
 
-  const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon }[] = [
-    { to: '/zorg', end: true, label: 'Bewoners', icoon: Users },
+  const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon; teller?: number }[] = [
+    { to: '/zorg', end: true, label: 'Bewoners', icoon: Users, teller: vragen },
     { to: '/zorg/overdracht', label: 'Overdracht', icoon: ClipboardList },
     { to: '/zorg/team', label: 'Team', icoon: MessagesSquare },
     { to: '/zorg/activiteiten', label: 'Activiteiten', icoon: CalendarDays },
@@ -122,7 +125,13 @@ export default function ZorgLayout() {
               }
             >
               <n.icoon size={19} strokeWidth={1.75} aria-hidden="true" />
-              {n.label}
+              <span className="flex-1">{n.label}</span>
+              {n.teller ? (
+                <span className="rounded-pill bg-alert px-2 py-0.5 text-xs font-bold text-white">
+                  {n.teller}
+                  <span className="sr-only"> open {n.teller === 1 ? 'vraag' : 'vragen'}</span>
+                </span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
@@ -150,7 +159,15 @@ export default function ZorgLayout() {
                 }`
               }
             >
-              <n.icoon size={20} strokeWidth={1.75} aria-hidden="true" />
+              <span className="relative">
+                <n.icoon size={20} strokeWidth={1.75} aria-hidden="true" />
+                {n.teller ? (
+                  <span className="absolute -right-2.5 -top-1.5 min-w-[1.1rem] rounded-pill bg-alert px-1 text-center text-[0.65rem] font-bold leading-[1.1rem] text-white">
+                    {n.teller}
+                    <span className="sr-only"> open {n.teller === 1 ? 'vraag' : 'vragen'}</span>
+                  </span>
+                ) : null}
+              </span>
               {n.label}
             </NavLink>
           ))}

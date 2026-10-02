@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ongezien } from './bewonerBerichten'
+import { useOngezien } from './OpenVragen'
 import { ChevronRight, Search, TriangleAlert } from 'lucide-react'
 import { alleBewoners, mijnBewoners, type Bewoner } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
@@ -24,7 +24,7 @@ export default function Bewoners() {
   const mijn = useQuery({ queryKey: ['zorg', 'mijn-bewoners', orgId], enabled: !!orgId, queryFn: () => mijnBewoners(orgId) })
   const alle = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], enabled: !!orgId, queryFn: () => alleBewoners(orgId) })
   // Nieuwe vragen van bewoners (68): de database toont alleen die van mijn bewoners.
-  const nieuw = useQuery({ queryKey: ['zorg', 'ongezien'], queryFn: ongezien, refetchInterval: 60_000 })
+  const nieuw = useOngezien()
 
   const mijnIds = new Set((mijn.data ?? []).map((b) => b.household_id))
   const past = (b: Bewoner) =>
