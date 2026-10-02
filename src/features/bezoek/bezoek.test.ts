@@ -65,6 +65,19 @@ describe('de spraakassistent', () => {
     const a = beantwoord('Wie komt er vandaag?', { ...kennis, bezoeken: [b('1', 'Els', '2026-10-01T15:00:00+02:00')] }, NU)
     expect(a.regels).toContain('Els was hier gistermiddag.')
   })
+  it('"Wanneer was Els hier?" gaat alleen over Els', () => {
+    const a = beantwoord('Wanneer was Els hier?', { ...kennis, bezoeken: [b('1', 'Jan', '2026-10-02T09:00:00+02:00'), b('2', 'Els', '2026-10-01T15:00:00+02:00', 'Koffie.')] }, NU)
+    expect(a.titel).toBe('Els was hier gistermiddag.')
+    expect(a.regels).toEqual(['Koffie.'])
+  })
+  it('en zegt eerlijk als Els er niet bij staat', () => {
+    const a = beantwoord('Wanneer was Els hier?', {
+      ...kennis,
+      people: [{ id: 'p1', household_id: 'hh', profile_id: null, name: 'Els', relation: 'Dochter', description: null, detail: null, phone: null, emoji: null, color: null, photo_path: null, kind: 'family', sort: 1 }],
+      bezoeken: [b('1', 'Jan', '2026-10-02T09:00:00+02:00')],
+    }, NU)
+    expect(a.titel).toMatch(/geen bezoek van Els/)
+  })
   it('in het Frans', () => {
     zetTaal('fr')
     const a = beantwoord('Personne ne vient jamais', { ...kennis, bezoeken: [b('1', 'Els', '2026-10-02T09:00:00+02:00')] }, NU)

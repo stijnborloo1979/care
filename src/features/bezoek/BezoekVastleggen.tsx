@@ -18,6 +18,13 @@ import { hhmm, localDateKey, plusDagen, zonedToUtc } from '../../lib/time'
 
 type Moment = 'nu' | 'vandaag' | 'gisteren'
 
+function foutTekstBezoek(e: unknown): string {
+  const code = (e as { code?: string } | null)?.code
+  if (code === 'PGRST205' || code === '42P01') return 'Het bezoekboek staat nog niet aan. Vraag de beheerder om de update te installeren.'
+  if (e && typeof e === 'object' && 'message' in e) return String((e as { message: unknown }).message)
+  return 'Het bezoek kon niet bewaard worden.'
+}
+
 /** Het moment van het bezoek, als echte tijd. Pure functie, getest. */
 export function momentNaarTijd(m: Moment, uur: string, tz: string, nu: Date = new Date()): Date {
   if (m === 'nu') return nu
@@ -76,10 +83,8 @@ export default function BezoekVastleggen({
   const [foto, setFoto] = useState<File | null>(null)
   const [voorbeeld, setVoorbeeld] = useState<string | null>(null)
   const [klaar, setKlaar] = useState<string | null>(null)
+  const [zonderFoto, setZonderFoto] = useState(false)
 
-  useEffect(() => {
-    if (open && mijnKaart && !kaart && !naam) setKaart(mijnKaart.id)
-  }, [open, mijnKaart, kaart, naam])
 
   useEffect(() => {
     if (!foto) {
@@ -104,11 +109,22 @@ export default function BezoekVastleggen({
         wanneer,
         auteur: ik,
       })
-      if (foto) await uploadBezoekFoto(householdId, id, foto)
-      return bezoekZin({ visitor_name: gekozenNaam, visited_at: wanneer.toISOString() }, timezone)
+      // Het bezoek staat er al. Mislukt de foto, dan blijft het bezoek
+      // bewaard; opnieuw "Bewaren" zou het anders twee keer vastleggen.
+      let zonderFoto = false
+      if (foto) {
+        try {
+          await uploadBezoekFoto(householdId, id, foto)
+        } catch {
+          zonderFoto = true
+        }
+      }
+      const zin = bezoekZin({ visitor_name: gekozenNaam, visited_at: wanneer.toISOString() }, timezone)
+      return { zin, zonderFoto }
     },
-    onSuccess: (zin) => {
+    onSuccess: ({ zin, zonderFoto }) => {
       setKlaar(zin)
+      setZonderFoto(zonderFoto)
       setOpen(false)
       setNotitie('')
       setFoto(null)
@@ -145,6 +161,11 @@ export default function BezoekVastleggen({
             onClick={() => {
               setOpen(true)
               setKlaar(null)
+              // Eén keer bij het openen: wie zelf een kaart heeft, staat al gekozen.
+              if (mijnKaart) {
+                setKaart(mijnKaart.id)
+                setNaam('')
+              }
             }}
             className="min-h-touch shrink-0 rounded-pill bg-accent-ink px-5 font-semibold text-white"
           >
@@ -158,6 +179,7 @@ export default function BezoekVastleggen({
           <Check size={20} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>
             Bewaard. {personName} ziet op het scherm: <strong>“{klaar}”</strong>
+            {zonderFoto ? ' De foto kon niet mee; het bezoek staat er wel.' : null}
           </span>
         </p>
       ) : null}
@@ -308,7 +330,7 @@ export default function BezoekVastleggen({
           </div>
           {bewaar.error ? (
             <p role="alert" className="text-sm text-alert">
-              {bewaar.error instanceof Error ? bewaar.error.message : 'Het bezoek kon niet bewaard worden.'}
+              {foutTekstBezoek(bewaar.error)}
             </p>
           ) : null}
         </form>

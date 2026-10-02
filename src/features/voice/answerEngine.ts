@@ -312,7 +312,17 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
 
   // wie was er / er komt nooit iemand: alleen wat in het bezoekboek staat
   if (P.wasEr.test(v)) {
-    const geweest = (k.bezoeken ?? []).slice(0, 4)
+    // "Wanneer was Els hier?": alleen over Els, en eerlijk als ze er niet bij staat.
+    const alle = k.bezoeken ?? []
+    const persoon = vindPersoon(vraag, k.people)
+    const naam =
+      persoon?.name ?? alle.map((b) => b.visitor_name).find((n) => v.includes(normaliseer(n)))
+    if (naam) {
+      const van = alle.filter((b) => normaliseer(b.visitor_name) === normaliseer(naam))
+      if (van.length === 0) return { vraag, titel: t('ass.geenBezoekVan', { naam }), regels: [t('ass.vraagFamilie')] }
+      return { vraag, titel: bezoekZin(van[0], k.tz, nu), regels: van[0].note ? [van[0].note] : [] }
+    }
+    const geweest = alle.slice(0, 4)
     if (geweest.length > 0) {
       return {
         vraag,

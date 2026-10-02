@@ -224,9 +224,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     er niemand meer verblijft.
 73. `73_zelfkaart.sql` — vanuit de app maakt niemand zichzelf "de persoon"
     van een huishouden (kaart van het soort self).
+74. `74_bezoekboek.sql` — "Wie was er hier?": familie en het zorgteam leggen
+    een bezoek vast (wie, wanneer, één zin, eventueel een foto). De persoon
+    ziet het op de tablet onder "Nu", en de spraakassistent antwoordt ermee
+    op "er komt nooit iemand".
 
-Voor 47 tot 73 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 74 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -446,6 +450,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_71_verblijf_beeindigen.sql` — alleen beheerder of coördinator; team verliest toegang, familie krijgt een melding.
 - `test_72_afdelingen.sql` — archiveren alleen leeg en via de functie; niemand op een gearchiveerde afdeling.
 - `test_73_zelfkaart.sql` — een familielid wordt niet "zelf"; zakt zonder 73.
+- `test_74_bezoekboek.sql` — wie mag vastleggen, lezen, aanpassen en wissen; geen tijd- of fotopadtrucs.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

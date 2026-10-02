@@ -65,7 +65,7 @@ export default function BezoekOpTablet({ householdId, timezone }: { householdId:
           </div>
           <button
             onClick={() => spreek([zin, laatste.note, ...rest.slice(0, 3).map((b) => bezoekZin(b, timezone))].filter(Boolean).join(' '))}
-            aria-label="Voorlezen"
+            aria-label={t('bezoek.voorlezen')}
             className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent-soft text-accent-ink"
           >
             <Volume2 size={22} strokeWidth={1.75} aria-hidden="true" />

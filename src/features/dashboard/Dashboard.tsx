@@ -90,6 +90,12 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
 
   const t = toestandVan(data, now)
   const niveau = household?.support_level ?? 'ondersteund'
+  // Wie er langskwam: voor de persoon die het vergeet, en voor familie die
+  // wil weten wie er deze week was. Op elk ondersteuningsniveau, zoals de
+  // agenda; onder de toestand, die blijft het eerste wat je ziet.
+  const bezoek = !household?.is_self ? (
+    <BezoekVastleggen householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
+  ) : null
 
   return (
     <div className="space-y-6">
@@ -101,13 +107,6 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           {personName} — {dateLine(now, timezone)}
         </p>
       </header>
-
-      {/* Wie er langskwam: voor de persoon die het vergeet, en voor familie
-          die wil weten wie er deze week was. Op elk ondersteuningsniveau,
-          zoals de agenda. */}
-      {!household?.is_self ? (
-        <BezoekVastleggen householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
-      ) : null}
 
       {niveau === 'zelf' && !household?.is_self ? (
         <div className="rounded-[28px] bg-surface p-7 shadow-card">
@@ -126,6 +125,8 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           </Link>
         </div>
       ) : null}
+
+      {niveau === 'zelf' && !household?.is_self ? bezoek : null}
 
       {niveau !== 'zelf' || household?.is_self ? (
       <>
@@ -154,6 +155,8 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         <p className="mt-3 text-3xl font-extrabold leading-tight tracking-tight">{t.titel}</p>
         <p className="mt-1 text-lg text-ink-soft">{t.onder}</p>
       </div>
+
+      {bezoek}
 
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-card bg-surface p-6 shadow-card">
