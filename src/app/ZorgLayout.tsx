@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
-import { Building2, CalendarDays, ChevronDown, ClipboardList, LogOut, Settings2, Users } from 'lucide-react'
+import { Building2, CalendarDays, ChevronDown, ClipboardList, LogOut, MessagesSquare, Settings2, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
@@ -24,6 +24,7 @@ export default function ZorgLayout() {
   const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon }[] = [
     { to: '/zorg', end: true, label: 'Bewoners', icoon: Users },
     { to: '/zorg/overdracht', label: 'Overdracht', icoon: ClipboardList },
+    { to: '/zorg/team', label: 'Team', icoon: MessagesSquare },
     { to: '/zorg/activiteiten', label: 'Activiteiten', icoon: CalendarDays },
     ...(beheert ? [{ to: '/zorg/beheer', label: 'Beheer', icoon: Settings2 }] : []),
   ]

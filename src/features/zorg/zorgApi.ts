@@ -541,3 +541,62 @@ export async function zetOverdrachtTermijn(org: string, dagen: number) {
   const { error } = await supabase.rpc('zet_overdracht_termijn', { org, dagen })
   if (error) throw error
 }
+
+// ---- Teamberichten (63) ---------------------------------------------------
+
+export interface Teambericht {
+  id: string
+  department_id: string
+  body: string
+  author_id: string | null
+  created_at: string
+}
+
+export async function teamberichten(afdeling: string): Promise<Teambericht[]> {
+  const { data, error } = await supabase
+    .from('team_message')
+    .select('id, department_id, body, author_id, created_at')
+    .eq('department_id', afdeling)
+    .order('created_at', { ascending: false })
+    .limit(100)
+  if (error) {
+    if (error.code === '42P01' || error.code === 'PGRST205') return []
+    throw error
+  }
+  return ((data ?? []) as Teambericht[]).reverse()
+}
+
+export async function stuurTeambericht(afdeling: string, body: string, ik: string) {
+  const { error } = await supabase.from('team_message').insert({ department_id: afdeling, body: body.trim(), author_id: ik })
+  if (error) throw error
+}
+
+export async function wisTeambericht(id: string) {
+  const { error } = await supabase.from('team_message').delete().eq('id', id)
+  if (error) throw error
+}
+
+/** Een eigen bericht mag nog weg binnen 10 minuten (zelfde regel als de database). */
+export function nogWisbaar(created_at: string, nu = Date.now()): boolean {
+  return nu - new Date(created_at).getTime() < 10 * 60_000
+}
+
+export async function teamberichtTermijn(org: string): Promise<number | null> {
+  const { data, error } = await supabase.rpc('teambericht_termijn', { org })
+  if (error) {
+    if (ontbrekendeFunctie(error)) return null
+    throw error
+  }
+  return (data as number | null) ?? null
+}
+
+export async function teamberichtTermijnGevolg(org: string, dagen: number): Promise<number> {
+  const { data, error } = await supabase.rpc('teambericht_termijn_gevolg', { org, dagen })
+  if (error) throw error
+  return (data as number) ?? 0
+}
+
+export async function zetTeamberichtTermijn(org: string, dagen: number) {
+  const { error } = await supabase.rpc('zet_teambericht_termijn', { org, dagen })
+  if (error) throw error
+}

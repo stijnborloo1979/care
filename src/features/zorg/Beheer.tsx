@@ -24,6 +24,9 @@ import {
   overdrachtTermijn,
   overdrachtTermijnGevolg,
   zetOverdrachtTermijn,
+  teamberichtTermijn,
+  teamberichtTermijnGevolg,
+  zetTeamberichtTermijn,
   noodtoegangenVanOrg,
   stopToewijzing,
   toewijzingen,
@@ -55,6 +58,7 @@ export default function Beheer() {
       {isBeheerder ? <Afdelingen orgId={orgId} /> : null}
       <Bewaartermijn orgId={orgId} isBeheerder={isBeheerder} />
       <OverdrachtTermijn orgId={orgId} isBeheerder={isBeheerder} />
+      <TeamberichtTermijn orgId={orgId} isBeheerder={isBeheerder} />
       {isBeheerder ? <Telling orgId={orgId} /> : null}
       {isBeheerder ? <Noodtoegangen orgId={orgId} /> : null}
     </div>
@@ -586,6 +590,57 @@ function OverdrachtTermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder:
         Een overdracht gaat over een dienst. Ze wordt elke nacht gewist zodra ze ouder is dan deze termijn. Wat blijvend
         belangrijk is over een bewoner, hoort in een zorgnotitie.
       </p>
+      {isBeheerder ? (
+        <label className="mt-3 block max-w-xs">
+          <span className={label}>Bewaren</span>
+          <select
+            value={termijn.data}
+            disabled={zet.isPending}
+            onChange={(e) => {
+              setMelding(null)
+              zet.mutate(Number(e.target.value))
+            }}
+            className={veld}
+          >
+            {OVERDRACHT_OPTIES.map((d) => (
+              <option key={d} value={d}>
+                {dagenTekst(d)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <p className="mt-3 text-lg font-semibold">{dagenTekst(termijn.data)}</p>
+      )}
+      {melding ? <p className="mt-2 text-sm font-semibold text-accent-ink">{melding}</p> : null}
+      <Fout fout={zet.error} />
+    </Kaart>
+  )
+}
+
+function TeamberichtTermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean }) {
+  const queryClient = useQueryClient()
+  const termijn = useQuery({ queryKey: ['zorg', 'team-termijn', orgId], queryFn: () => teamberichtTermijn(orgId) })
+  const [melding, setMelding] = useState<string | null>(null)
+  const zet = useMutation({
+    mutationFn: async (dagen: number) => {
+      const gevolg = await teamberichtTermijnGevolg(orgId, dagen)
+      if (gevolg > 0 && !confirm(`Met ${dagenTekst(dagen)} verdwijnen vannacht ${gevolg} oudere teamberichten. Doorgaan?`))
+        return null
+      await zetTeamberichtTermijn(orgId, dagen)
+      return dagen
+    },
+    onSuccess: (d) => {
+      if (d === null) return
+      setMelding(`Bewaard: ${dagenTekst(d)}.`)
+      queryClient.invalidateQueries({ queryKey: ['zorg', 'team-termijn', orgId] })
+    },
+  })
+  if (termijn.data == null) return null
+
+  return (
+    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> Bewaartermijn teamberichten</>}>
+      <p className="text-ink-soft">Teamberichten worden elke nacht gewist zodra ze ouder zijn dan deze termijn.</p>
       {isBeheerder ? (
         <label className="mt-3 block max-w-xs">
           <span className={label}>Bewaren</span>

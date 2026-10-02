@@ -187,8 +187,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     (standaard 30 dagen, 1 week tot 1 jaar), in te stellen bij Beheer.
     Opruimen elke nacht om 03:25 als pg_cron aan staat.
 
-Voor 47 tot 62 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+63. `63_teamberichten.sql` — korte berichten per afdeling, alleen voor wie
+    er werkt, live. Eigen bericht wissen kan binnen 10 minuten. Bewaartermijn
+    per WZC (standaard 30 dagen), opruimen elke nacht om 03:30.
+
+Voor 47 tot 63 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -344,7 +348,8 @@ Voor wie in een woonzorgcentrum werkt, onder `/zorg`. Vereist migraties 52 tot 6
 4. **Toewijzen** — Beheer → Bewoners: wie voor wie zorgt, afdeling en kamer.
 
 Schermen: **Bewoners** (mijn bewoners; met zorgnotities, agenda van vandaag
-en contactpersonen), **Overdracht** per afdeling, **Activiteiten** met
+en contactpersonen), **Overdracht** per afdeling, **Team** (berichten per
+afdeling), **Activiteiten** met
 inschrijven en aanwezigheid, en **Beheer**. Een team lead kan bij een
 bewoner die hij niet volgt **noodtoegang** starten (4 uur, met reden; de
 familie krijgt bericht). Wie zowel familie heeft als in een WZC werkt,
@@ -395,6 +400,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   een kortere termijn, opruimen.
 - `test_62_overdracht_bewaren.sql` — termijn van de overdracht per WZC,
   gevolg en opruimen.
+- `test_63_teamberichten.sql` — wie leest en schrijft, wissen binnen 10
+  minuten, tijd van de server, bewaartermijn.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

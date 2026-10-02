@@ -36,3 +36,12 @@ describe('dagenTekst', () => {
     expect(dagenTekst(365)).toBe('1 jaar')
   })
 })
+
+describe('nogWisbaar', () => {
+  it('binnen 10 minuten', async () => {
+    const { nogWisbaar } = await import('./zorgApi')
+    const nu = Date.parse('2026-10-02T10:00:00Z')
+    expect(nogWisbaar('2026-10-02T09:55:00Z', nu)).toBe(true)
+    expect(nogWisbaar('2026-10-02T09:49:00Z', nu)).toBe(false)
+  })
+})
