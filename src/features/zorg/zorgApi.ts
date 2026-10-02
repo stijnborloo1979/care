@@ -600,3 +600,9 @@ export async function zetTeamberichtTermijn(org: string, dagen: number) {
   const { error } = await supabase.rpc('zet_teambericht_termijn', { org, dagen })
   if (error) throw error
 }
+
+// ---- Wie volgt mijn familielid (64) -----------------------------------------
+
+export async function zorgteam(hh: string) {
+  return rpcLijst<{ naam: string; rol: 'toegewezen' | 'team lead'; sinds: string }>('zorgteam', { hh })
+}

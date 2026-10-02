@@ -191,8 +191,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     er werkt, live. Eigen bericht wissen kan binnen 10 minuten. Bewaartermijn
     per WZC (standaard 30 dagen), opruimen elke nacht om 03:30.
 
-Voor 47 tot 63 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+64. `64_opruimen.sql` — `org_oversees()` weg (door niets meer gebruikt);
+    `assign_caregiver`/`unassign_caregiver` (03) lopen nu via de toewijzing
+    van 60; `zorgteam(hh)`: familie en bewoner zien wie van het WZC volgt.
+
+Voor 47 tot 64 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -402,6 +406,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   gevolg en opruimen.
 - `test_63_teamberichten.sql` — wie leest en schrijft, wissen binnen 10
   minuten, tijd van de server, bewaartermijn.
+- `test_64_opruimen.sql` — omgeleide functies uit 03, zorgteam voor familie.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

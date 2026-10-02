@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2 } from 'lucide-react'
-import { CATEGORIEEN, koppelMetWzc, mijnWzc, ontkoppelWzc, zorgnotities } from '../zorg/zorgApi'
+import { CATEGORIEEN, koppelMetWzc, mijnWzc, ontkoppelWzc, zorgnotities, zorgteam } from '../zorg/zorgApi'
 
 /**
  * Een woonzorgcentrum koppelen gebeurt altijd door de familie, met een
@@ -15,6 +15,7 @@ export default function WzcKoppeling({ hh, voornaam, isBeheerder }: { hh: string
     enabled: !!hh && !!wzc.data,
     queryFn: () => zorgnotities(hh),
   })
+  const team = useQuery({ queryKey: ['wzc-team', hh], enabled: !!hh && !!wzc.data, queryFn: () => zorgteam(hh) })
   const [code, setCode] = useState('')
   const ververs = () => {
     queryClient.invalidateQueries({ queryKey: ['wzc', hh] })
@@ -47,6 +48,19 @@ export default function WzcKoppeling({ hh, voornaam, isBeheerder }: { hh: string
             Wat zij voor de familie bedoelen, staat hieronder. De directie of beheerder van het woonzorgcentrum ziet geen
             persoonlijke gegevens. Dagboek, documenten en locatie blijven bij de familie.
           </p>
+          {(team.data ?? []).length > 0 ? (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Wie volgt {voornaam}</h3>
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {(team.data ?? []).map((m, i) => (
+                  <li key={i} className="rounded-pill bg-surface-soft px-3 py-1.5">
+                    <span className="font-semibold">{m.naam}</span>
+                    <span className="text-sm text-ink-soft"> · {m.rol === 'team lead' ? 'team lead van de afdeling' : 'toegewezen'}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {(notities.data ?? []).length > 0 ? (
             <div className="mt-4">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Van het zorgteam</h3>
