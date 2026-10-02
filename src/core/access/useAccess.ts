@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 
@@ -22,30 +23,48 @@ export interface Access {
 
 const ONBEKEND: Access = { bekend: false, relations: [], permissions: [], can: () => false }
 
+/** Wat in de cache staat: alleen gewone gegevens, geen functies. */
+interface AccessData {
+  bekend: boolean
+  relations: string[]
+  permissions: string[]
+}
+
+/**
+ * De query-cache wordt in de browser bewaard (JSON). Een functie overleeft
+ * dat niet: na herladen ontbrak `can`, en de app liep vast. Daarom bewaren
+ * we alleen de lijsten en maken we `can` hier telkens opnieuw.
+ */
+export function maakAccess(d: Partial<AccessData> | null | undefined): Access {
+  if (!d || !d.bekend) return ONBEKEND
+  const permissions = Array.isArray(d.permissions) ? d.permissions : []
+  const set = new Set(permissions)
+  return {
+    bekend: true,
+    relations: Array.isArray(d.relations) ? d.relations : [],
+    permissions,
+    can: (p) => set.has(p),
+  }
+}
+
 export function useAccess(householdId: string | null | undefined): Access & { isLoading: boolean } {
   const q = useQuery({
     queryKey: ['access', householdId],
     enabled: !!householdId,
     staleTime: 5 * 60_000,
     retry: false,
-    queryFn: async (): Promise<Access> => {
+    queryFn: async (): Promise<AccessData> => {
       const { data, error } = await supabase.rpc('my_access', { hh: householdId })
       // PGRST202: de functie bestaat (nog) niet. Geen fout voor de gebruiker.
-      if (error) return ONBEKEND
+      if (error) return { bekend: false, relations: [], permissions: [] }
       const rij = (Array.isArray(data) ? data[0] : data) as
         | { relations: string[] | null; permissions: string[] | null }
         | null
-      const permissions = rij?.permissions ?? []
-      const set = new Set(permissions)
-      return {
-        bekend: true,
-        relations: rij?.relations ?? [],
-        permissions,
-        can: (p) => set.has(p),
-      }
+      return { bekend: true, relations: rij?.relations ?? [], permissions: rij?.permissions ?? [] }
     },
   })
-  return { ...(q.data ?? ONBEKEND), isLoading: q.isLoading }
+  const access = useMemo(() => maakAccess(q.data), [q.data])
+  return { ...access, isLoading: q.isLoading }
 }
 
 /**
@@ -59,5 +78,6 @@ export function useMag(householdId: string | null | undefined, permissie: string
 }
 
 export function mag(a: Pick<Access, 'bekend' | 'can'>, permissie: string, terugval: boolean): boolean {
-  return a.bekend ? a.can(permissie) : terugval
+  if (!a.bekend || typeof a.can !== 'function') return terugval
+  return a.can(permissie)
 }
