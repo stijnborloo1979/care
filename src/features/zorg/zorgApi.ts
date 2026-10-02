@@ -450,6 +450,35 @@ export async function openOrgUitnodigingen(org: string): Promise<{ id: string; e
   return (data ?? []) as { id: string; email: string; expires_at: string }[]
 }
 
+// ---- Medewerkers beheren (70) ------------------------------------------
+
+export async function zetMedewerkerRol(org: string, profiel: string, rol: OrgRol): Promise<void> {
+  const { error } = await supabase.from('org_membership').update({ role: rol }).eq('org_id', org).eq('profile_id', profiel)
+  if (error) throw error
+}
+
+export async function zetMedewerkerActief(org: string, profiel: string, actief: boolean): Promise<void> {
+  const { error } = await supabase.from('org_membership').update({ active: actief }).eq('org_id', org).eq('profile_id', profiel)
+  if (error) throw error
+}
+
+export async function trekUitnodigingIn(id: string): Promise<void> {
+  const { error } = await supabase.rpc('trek_uitnodiging_in', { uitnodiging: id })
+  if (error) throw error
+}
+
+/** 14 nieuwe dagen, en de mail opnieuw. De mail mag mislukken: de link blijft dezelfde. */
+export async function stuurUitnodigingOpnieuw(id: string): Promise<{ gemaild: boolean }> {
+  const { error } = await supabase.rpc('verleng_uitnodiging', { uitnodiging: id })
+  if (error) throw error
+  try {
+    const { error: mailFout } = await supabase.functions.invoke('send-invite', { body: { org_invite_id: id } })
+    return { gemaild: !mailFout }
+  } catch {
+    return { gemaild: false }
+  }
+}
+
 export async function toewijzingen(org: string) {
   const { data, error } = await supabase
     .from('care_assignment')

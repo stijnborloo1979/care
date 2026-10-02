@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, CircleCheck, Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
 import { aandachtspunten, cijfers } from './overzicht'
+import { MedewerkerActies, OpenUitnodigingen } from './BeheerTeam'
 import { useOrganisatie } from './useOrganisatie'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -59,6 +60,7 @@ export default function Beheer() {
       <Koppelcode orgId={orgId} isBeheerder={isBeheerder} />
       <Toewijzingen orgId={orgId} />
       {isBeheerder ? <Medewerkers orgId={orgId} /> : null}
+      {isBeheerder ? <OpenUitnodigingen orgId={orgId} /> : null}
       {isBeheerder ? <Afdelingen orgId={orgId} /> : null}
       <Bewaartermijn orgId={orgId} isBeheerder={isBeheerder} />
       <OverdrachtTermijn orgId={orgId} isBeheerder={isBeheerder} />
@@ -428,6 +430,7 @@ function Medewerkers({ orgId }: { orgId: string }) {
                 </select>
               ) : null}
             </div>
+            <MedewerkerActies orgId={orgId} m={m} />
           </li>
         ))}
       </ul>
