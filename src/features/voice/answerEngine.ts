@@ -8,6 +8,7 @@ import { hhmm, localDateKey } from '../../lib/time'
 import { locale, t, taal } from '../../lib/i18n'
 import { patronen } from './patronen'
 import { whatNow } from '../today/whatNow'
+import { bezoekZin, type Bezoek } from '../../services/bezoek'
 
 export interface Answer {
   vraag: string
@@ -33,6 +34,8 @@ export interface Kennis {
   onthouden?: QuickNote[]
   /** De medicatiemomenten van vandaag. */
   medicatie?: MedMoment[]
+  /** Wie er de laatste dagen op bezoek was, nieuwste eerst (74). */
+  bezoeken?: Bezoek[]
   /** De gekozen radiozenders, favoriet eerst. */
   zenders?: { id: string; name: string }[]
   tz: string
@@ -307,19 +310,36 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
     }
   }
 
+  // wie was er / er komt nooit iemand: alleen wat in het bezoekboek staat
+  if (P.wasEr.test(v)) {
+    const geweest = (k.bezoeken ?? []).slice(0, 4)
+    if (geweest.length > 0) {
+      return {
+        vraag,
+        titel: bezoekZin(geweest[0], k.tz, nu),
+        regels: geweest.slice(1).map((b) => bezoekZin(b, k.tz, nu)),
+      }
+    }
+    return { vraag, titel: t('ass.geenBezoekGenoteerd'), regels: [t('ass.vraagFamilie')] }
+  }
+
   // wie komt er
   if (P.wieKomt.test(v)) {
     const bezoek = k.events.filter((e) => e.person_id)
+    // Wie er onlangs was, zegt ook iets: "niemand komt" is dan niet waar.
+    const laatste = (k.bezoeken ?? [])[0]
+    const ook = laatste ? [bezoekZin(laatste, k.tz, nu)] : []
     if (bezoek.length > 0) {
       return {
         vraag,
         titel: t('vandaag.vandaag'),
-        regels: bezoek.map((e) =>
-          t('ass.staatGepland', { wat: e.title, tijd: hhmm(new Date(e.starts_at), k.tz) }),
-        ),
+        regels: [
+          ...bezoek.map((e) => t('ass.staatGepland', { wat: e.title, tijd: hhmm(new Date(e.starts_at), k.tz) })),
+          ...ook,
+        ],
       }
     }
-    return { vraag, titel: t('ass.niemandLangs'), regels: [] }
+    return { vraag, titel: t('ass.niemandLangs'), regels: ook }
   }
 
   // wanneer komt X

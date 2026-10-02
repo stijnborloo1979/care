@@ -6,6 +6,7 @@ import { useNow } from '../today/useAgenda'
 import Icon from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import { useHousehold } from '../household/useHousehold'
+import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 
 interface Props {
   householdId: string
@@ -100,6 +101,13 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           {personName} — {dateLine(now, timezone)}
         </p>
       </header>
+
+      {/* Wie er langskwam: voor de persoon die het vergeet, en voor familie
+          die wil weten wie er deze week was. Op elk ondersteuningsniveau,
+          zoals de agenda. */}
+      {!household?.is_self ? (
+        <BezoekVastleggen householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
+      ) : null}
 
       {niveau === 'zelf' && !household?.is_self ? (
         <div className="rounded-[28px] bg-surface p-7 shadow-card">

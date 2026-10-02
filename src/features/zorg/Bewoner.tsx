@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Eye, Phone, TriangleAlert, Users } from 'lucide-react
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import BerichtenVanBewoner from './BerichtenVanBewoner'
+import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 import {
   CATEGORIEEN,
   agendaVandaag,
@@ -104,6 +105,7 @@ function Dossier({ hh, orgId, naam }: { hh: string; orgId: string; naam: string 
         <Notities hh={hh} orgId={orgId} />
       </div>
       <div className="space-y-6">
+        <BezoekVastleggen householdId={hh} personName={naam} timezone="Europe/Brussels" vorm="zorgteam" />
         <Kaart titel="Vandaag">
           {agenda.isLoading ? <Laden /> : null}
           {agenda.data && agenda.data.length === 0 ? <Leeg>Niets gepland vandaag.</Leeg> : null}

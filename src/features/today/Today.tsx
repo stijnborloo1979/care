@@ -7,6 +7,7 @@ import { STATUS_LABEL, statusOf, whatNow } from './whatNow'
 import { useAgenda, useMarkDone, useNow } from './useAgenda'
 import PersonInbox from '../messages/PersonInbox'
 import ZorgteamKaart from '../zorg/ZorgteamKaart'
+import BezoekOpTablet from '../bezoek/BezoekOpTablet'
 import Icon, { type IconNaam } from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import OnthoudDit from '../memory/OnthoudDit'
@@ -97,6 +98,9 @@ export default function Today({ householdId, personName, timezone }: Props) {
               onDone={(id) => markDone.mutate({ id, done: true })}
             />
           )}
+          {/* Wie er vandaag of gisteren was: onder "nu", omdat "nu" altijd
+              op het scherm staat. Zonder bezoek staat hier niets. */}
+          <BezoekOpTablet householdId={householdId} timezone={timezone} />
         </div>
       </section>
     ),

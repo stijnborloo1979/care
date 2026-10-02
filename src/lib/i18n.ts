@@ -67,6 +67,17 @@ export function taalVanToestel(): Taal {
 type Woordenboek = Record<string, string>
 
 const NL: Woordenboek = {
+  'bezoek.titel': 'Wie was er hier?',
+  'bezoek.wasHier': '{naam} was hier {wanneer}.',
+  'bezoek.morgen': 'vanmorgen',
+  'bezoek.middag': 'vanmiddag',
+  'bezoek.avond': 'vanavond',
+  'bezoek.gisterenmorgen': 'gisterenmorgen',
+  'bezoek.gisterenmiddag': 'gistermiddag',
+  'bezoek.gisterenavond': 'gisteravond',
+  'bezoek.op': 'op {dag}',
+  'ass.wieWasEr': 'Wie was er de laatste dagen?',
+  'ass.geenBezoekGenoteerd': 'Er staat deze week geen bezoek genoteerd.',
   // Navigatie
   'nav.vandaag': 'Vandaag',
   'nav.wie': 'Wie?',
@@ -310,6 +321,17 @@ const NL: Woordenboek = {
 }
 
 const FR: Woordenboek = {
+  'bezoek.titel': 'Qui est venu ?',
+  'bezoek.wasHier': '{naam} est venu(e) {wanneer}.',
+  'bezoek.morgen': 'ce matin',
+  'bezoek.middag': 'cet après-midi',
+  'bezoek.avond': 'ce soir',
+  'bezoek.gisterenmorgen': 'hier matin',
+  'bezoek.gisterenmiddag': 'hier après-midi',
+  'bezoek.gisterenavond': 'hier soir',
+  'bezoek.op': '{dag}',
+  'ass.wieWasEr': 'Qui est venu ces derniers jours ?',
+  'ass.geenBezoekGenoteerd': 'Aucune visite notée cette semaine.',
   'nav.vandaag': "Aujourd'hui",
   'nav.wie': 'Qui ?',
   'nav.praten': 'Parler',
@@ -475,6 +497,17 @@ const FR: Woordenboek = {
 }
 
 const EN: Woordenboek = {
+  'bezoek.titel': 'Who came by?',
+  'bezoek.wasHier': '{naam} was here {wanneer}.',
+  'bezoek.morgen': 'this morning',
+  'bezoek.middag': 'this afternoon',
+  'bezoek.avond': 'this evening',
+  'bezoek.gisterenmorgen': 'yesterday morning',
+  'bezoek.gisterenmiddag': 'yesterday afternoon',
+  'bezoek.gisterenavond': 'yesterday evening',
+  'bezoek.op': 'on {dag}',
+  'ass.wieWasEr': 'Who came by recently?',
+  'ass.geenBezoekGenoteerd': 'No visits noted this week.',
   'nav.vandaag': 'Today',
   'nav.wie': 'Who?',
   'nav.praten': 'Talk',
