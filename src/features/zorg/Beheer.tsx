@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, CircleCheck, Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
 import { aandachtspunten, cijfers } from './overzicht'
 import { MedewerkerActies, OpenUitnodigingen } from './BeheerTeam'
+import VerblijfBeeindigen from './VerblijfBeeindigen'
 import { useOrganisatie } from './useOrganisatie'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -251,6 +252,7 @@ function Toewijzingen({ orgId }: { orgId: string }) {
                   <p className="text-lg font-semibold">{b.naam}</p>
                   <Verblijf bewoner={b} afdelingen={afd.data ?? []} orgId={orgId} />
                 </div>
+                <VerblijfBeeindigen orgId={orgId} hh={b.household_id} naam={b.naam.split(' ')[0]} />
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {mijnToe.map((t) => (

@@ -479,6 +479,14 @@ export async function stuurUitnodigingOpnieuw(id: string): Promise<{ gemaild: bo
   }
 }
 
+export type EindReden = 'verhuisd' | 'overleden' | 'andere'
+
+/** Het WZC sluit het verblijf af (71): het team verliest toegang, de familie houdt alles. */
+export async function beeindigVerblijf(hh: string, reden: EindReden): Promise<void> {
+  const { error } = await supabase.rpc('beeindig_verblijf', { hh, reden })
+  if (error) throw error
+}
+
 export async function toewijzingen(org: string) {
   const { data, error } = await supabase
     .from('care_assignment')
