@@ -5,6 +5,7 @@ import { Archive, CircleCheck, Copy, KeyRound, TriangleAlert, UserPlus, X } from
 import { aandachtspunten, cijfers } from './overzicht'
 import { MedewerkerActies, OpenUitnodigingen } from './BeheerTeam'
 import VerblijfBeeindigen from './VerblijfBeeindigen'
+import { Afdelingen, Organisatie } from './BeheerOrganisatie'
 import { useOrganisatie } from './useOrganisatie'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -15,7 +16,6 @@ import {
   haalVanAfdeling,
   koppelcode,
   medewerkers,
-  nieuweAfdeling,
   nieuweKoppelcode,
   nodigUit,
   BEWAAR_OPTIES,
@@ -63,6 +63,7 @@ export default function Beheer() {
       {isBeheerder ? <Medewerkers orgId={orgId} /> : null}
       {isBeheerder ? <OpenUitnodigingen orgId={orgId} /> : null}
       {isBeheerder ? <Afdelingen orgId={orgId} /> : null}
+      {isBeheerder ? <Organisatie orgId={orgId} /> : null}
       <Bewaartermijn orgId={orgId} isBeheerder={isBeheerder} />
       <OverdrachtTermijn orgId={orgId} isBeheerder={isBeheerder} />
       <TeamberichtTermijn orgId={orgId} isBeheerder={isBeheerder} />
@@ -488,47 +489,6 @@ function Medewerkers({ orgId }: { orgId: string }) {
           </div>
         ) : null}
       </form>
-    </Kaart>
-  )
-}
-
-function Afdelingen({ orgId }: { orgId: string }) {
-  const queryClient = useQueryClient()
-  const afd = useQuery({ queryKey: ['zorg', 'afdelingen', orgId], queryFn: () => haalAfdelingen(orgId) })
-  const [naam, setNaam] = useState('')
-  const maak = useMutation({
-    mutationFn: () => nieuweAfdeling(orgId, naam),
-    onSuccess: () => {
-      setNaam('')
-      queryClient.invalidateQueries({ queryKey: ['zorg', 'afdelingen', orgId] })
-    },
-  })
-  return (
-    <Kaart titel="Afdelingen">
-      <div className="flex flex-wrap gap-2">
-        {(afd.data ?? []).map((a) => (
-          <span key={a.id} className="rounded-pill bg-surface-soft px-3 py-1.5 font-semibold">
-            {a.name}
-          </span>
-        ))}
-        {afd.data && afd.data.length === 0 ? <Leeg>Nog geen afdelingen.</Leeg> : null}
-      </div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (naam.trim()) maak.mutate()
-        }}
-        className="mt-3 flex flex-wrap items-end gap-2"
-      >
-        <label className="min-w-[12rem] flex-1">
-          <span className={label}>Nieuwe afdeling</span>
-          <input maxLength={80} value={naam} onChange={(e) => setNaam(e.target.value)} placeholder="De Eik" className={veld} />
-        </label>
-        <button type="submit" disabled={!naam.trim() || maak.isPending} className={knop}>
-          Toevoegen
-        </button>
-      </form>
-      <Fout fout={maak.error} />
     </Kaart>
   )
 }

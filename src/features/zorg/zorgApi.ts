@@ -367,10 +367,64 @@ export async function noodtoegangenVanOrg(org: string) {
 
 export const medewerkers = (org: string) => rpcLijst<Medewerker>('org_medewerkers', { org })
 
+export interface AfdelingRij {
+  id: string
+  name: string
+  archived_at: string | null
+}
+
+/** Alle afdelingen, ook gearchiveerde (72). Zonder 72: geen archief, zoals voorheen. */
+export async function alleAfdelingen(org: string): Promise<AfdelingRij[]> {
+  const met = await supabase.from('department').select('id, name, archived_at').eq('org_id', org).order('name')
+  if (!met.error) return (met.data ?? []) as AfdelingRij[]
+  const zonder = await supabase.from('department').select('id, name').eq('org_id', org).order('name')
+  if (zonder.error) return []
+  return ((zonder.data ?? []) as { id: string; name: string }[]).map((a) => ({ ...a, archived_at: null }))
+}
+
+/** De afdelingen waar iemand kan verblijven of werken: niet gearchiveerd. */
 export async function afdelingen(org: string): Promise<{ id: string; name: string }[]> {
-  const { data, error } = await supabase.from('department').select('id, name').eq('org_id', org).order('name')
-  if (error) return []
-  return (data ?? []) as { id: string; name: string }[]
+  return (await alleAfdelingen(org)).filter((a) => !a.archived_at).map(({ id, name }) => ({ id, name }))
+}
+
+export async function hernoemAfdeling(id: string, naam: string): Promise<void> {
+  const { data, error } = await supabase.from('department').update({ name: naam.trim() }).eq('id', id).select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan een afdeling hernoemen.')
+}
+
+export async function archiveerAfdeling(id: string): Promise<void> {
+  const { error } = await supabase.rpc('archiveer_afdeling', { afdeling: id })
+  if (error) throw error
+}
+
+export async function herstelAfdeling(id: string): Promise<void> {
+  const { error } = await supabase.rpc('herstel_afdeling', { afdeling: id })
+  if (error) throw error
+}
+
+// ---- Organisatie (65: alleen deze kolommen) --------------------------
+
+export interface OrgGegevens {
+  name: string
+  contact_email: string | null
+  vat_number: string | null
+}
+
+export async function orgGegevens(org: string): Promise<OrgGegevens | null> {
+  const { data, error } = await supabase.from('organisation').select('name, contact_email, vat_number').eq('id', org).maybeSingle()
+  if (error) return null
+  return data as OrgGegevens | null
+}
+
+export async function zetOrgGegevens(org: string, g: OrgGegevens): Promise<void> {
+  const { data, error } = await supabase
+    .from('organisation')
+    .update({ name: g.name.trim(), contact_email: g.contact_email?.trim() || null, vat_number: g.vat_number?.trim() || null })
+    .eq('id', org)
+    .select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan de gegevens aanpassen.')
 }
 
 export async function nieuweAfdeling(org: string, naam: string) {
