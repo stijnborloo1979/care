@@ -43,6 +43,7 @@ export const NAV: NavItem[] = [
  * 49 niet gedraaid, of nog aan het laden — dan alles, zoals voorheen.
  */
 export function zichtbareNav(nav: NavItem[], toegang: { bekend: boolean; can: (p: string) => boolean }): NavItem[] {
-  if (!toegang.bekend) return nav
+  // Zonder werkende `can` (oude cache): alles tonen, nooit vastlopen.
+  if (!toegang.bekend || typeof toegang.can !== 'function') return nav
   return nav.filter((n) => !n.perm || n.perm.some((p) => toegang.can(p)))
 }
