@@ -19,6 +19,11 @@ import {
   bewaartermijnGevolg,
   termijnTekst,
   zetBewaartermijn,
+  OVERDRACHT_OPTIES,
+  dagenTekst,
+  overdrachtTermijn,
+  overdrachtTermijnGevolg,
+  zetOverdrachtTermijn,
   noodtoegangenVanOrg,
   stopToewijzing,
   toewijzingen,
@@ -49,6 +54,7 @@ export default function Beheer() {
       {isBeheerder ? <Medewerkers orgId={orgId} /> : null}
       {isBeheerder ? <Afdelingen orgId={orgId} /> : null}
       <Bewaartermijn orgId={orgId} isBeheerder={isBeheerder} />
+      <OverdrachtTermijn orgId={orgId} isBeheerder={isBeheerder} />
       {isBeheerder ? <Telling orgId={orgId} /> : null}
       {isBeheerder ? <Noodtoegangen orgId={orgId} /> : null}
     </div>
@@ -542,6 +548,65 @@ function Bewaartermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boo
         </label>
       ) : (
         <p className="mt-3 text-lg font-semibold">{termijnTekst(termijn.data)} na vertrek</p>
+      )}
+      {melding ? <p className="mt-2 text-sm font-semibold text-accent-ink">{melding}</p> : null}
+      <Fout fout={zet.error} />
+    </Kaart>
+  )
+}
+
+function OverdrachtTermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean }) {
+  const queryClient = useQueryClient()
+  const termijn = useQuery({ queryKey: ['zorg', 'overdracht-termijn', orgId], queryFn: () => overdrachtTermijn(orgId) })
+  const [melding, setMelding] = useState<string | null>(null)
+  const zet = useMutation({
+    mutationFn: async (dagen: number) => {
+      const gevolg = await overdrachtTermijnGevolg(orgId, dagen)
+      if (
+        gevolg > 0 &&
+        !confirm(
+          `Met ${dagenTekst(dagen)} verdwijnen vannacht ${gevolg} ${gevolg === 1 ? 'oudere overdracht' : 'oudere overdrachten'}. Doorgaan?`,
+        )
+      )
+        return null
+      await zetOverdrachtTermijn(orgId, dagen)
+      return dagen
+    },
+    onSuccess: (d) => {
+      if (d === null) return
+      setMelding(`Bewaard: ${dagenTekst(d)}.`)
+      queryClient.invalidateQueries({ queryKey: ['zorg', 'overdracht-termijn', orgId] })
+    },
+  })
+  if (termijn.data == null) return null
+
+  return (
+    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> Bewaartermijn overdracht</>}>
+      <p className="text-ink-soft">
+        Een overdracht gaat over een dienst. Ze wordt elke nacht gewist zodra ze ouder is dan deze termijn. Wat blijvend
+        belangrijk is over een bewoner, hoort in een zorgnotitie.
+      </p>
+      {isBeheerder ? (
+        <label className="mt-3 block max-w-xs">
+          <span className={label}>Bewaren</span>
+          <select
+            value={termijn.data}
+            disabled={zet.isPending}
+            onChange={(e) => {
+              setMelding(null)
+              zet.mutate(Number(e.target.value))
+            }}
+            className={veld}
+          >
+            {OVERDRACHT_OPTIES.map((d) => (
+              <option key={d} value={d}>
+                {dagenTekst(d)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <p className="mt-3 text-lg font-semibold">{dagenTekst(termijn.data)}</p>
       )}
       {melding ? <p className="mt-2 text-sm font-semibold text-accent-ink">{melding}</p> : null}
       <Fout fout={zet.error} />

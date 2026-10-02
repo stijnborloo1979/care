@@ -183,8 +183,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     (standaard 2 jaar, 6 maanden tot 10 jaar), in te stellen bij Beheer.
     De opruiming draait elke nacht om 03:20 als pg_cron aan staat.
 
-Voor 47 tot 61 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+62. `62_overdracht_bewaren.sql` — bewaartermijn van de overdracht per WZC
+    (standaard 30 dagen, 1 week tot 1 jaar), in te stellen bij Beheer.
+    Opruimen elke nacht om 03:25 als pg_cron aan staat.
+
+Voor 47 tot 62 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -389,6 +393,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   toewijzen, verblijf, wie wat ziet.
 - `test_61_bewaartermijn.sql` — termijn per WZC, wie hem zet, gevolg van
   een kortere termijn, opruimen.
+- `test_62_overdracht_bewaren.sql` — termijn van de overdracht per WZC,
+  gevolg en opruimen.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

@@ -72,7 +72,10 @@ export default function Overdracht() {
 
   return (
     <div className="space-y-6">
-      <Kop titel="Overdracht" uitleg="Wat de volgende dienst moet weten." />
+      <Kop
+        titel="Overdracht"
+        uitleg="Wat de volgende dienst moet weten. Een overdracht wordt na een tijd automatisch gewist; wat blijvend belangrijk is, schrijf je in een zorgnotitie."
+      />
 
       {afdelingen.length > 1 ? (
         <div role="tablist" aria-label="Afdeling" className="flex flex-wrap gap-2">

@@ -510,3 +510,34 @@ export const ROLNAAM: Record<OrgRol, string> = {
   coordinator: 'Coördinator',
   caregiver: 'Zorgmedewerker',
 }
+
+// ---- Bewaartermijn overdracht (62) ---------------------------------------
+
+export const OVERDRACHT_OPTIES = [7, 14, 30, 60, 90, 180, 365]
+
+export function dagenTekst(dagen: number): string {
+  if (dagen === 7) return '1 week'
+  if (dagen === 14) return '2 weken'
+  if (dagen === 365) return '1 jaar'
+  return `${dagen} dagen`
+}
+
+export async function overdrachtTermijn(org: string): Promise<number | null> {
+  const { data, error } = await supabase.rpc('overdracht_termijn', { org })
+  if (error) {
+    if (ontbrekendeFunctie(error)) return null
+    throw error
+  }
+  return (data as number | null) ?? null
+}
+
+export async function overdrachtTermijnGevolg(org: string, dagen: number): Promise<number> {
+  const { data, error } = await supabase.rpc('overdracht_termijn_gevolg', { org, dagen })
+  if (error) throw error
+  return (data as number) ?? 0
+}
+
+export async function zetOverdrachtTermijn(org: string, dagen: number) {
+  const { error } = await supabase.rpc('zet_overdracht_termijn', { org, dagen })
+  if (error) throw error
+}

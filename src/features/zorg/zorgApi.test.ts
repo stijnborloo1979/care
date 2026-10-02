@@ -26,3 +26,13 @@ describe('termijnTekst', () => {
     expect(termijnTekst(120)).toBe('10 jaar')
   })
 })
+
+describe('dagenTekst', () => {
+  it('in gewone taal', async () => {
+    const { dagenTekst } = await import('./zorgApi')
+    expect(dagenTekst(7)).toBe('1 week')
+    expect(dagenTekst(14)).toBe('2 weken')
+    expect(dagenTekst(30)).toBe('30 dagen')
+    expect(dagenTekst(365)).toBe('1 jaar')
+  })
+})
