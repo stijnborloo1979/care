@@ -201,8 +201,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     wijst niet meer toe, de koppelcode is alleen via de functies leesbaar,
     en raden is beperkt tot 10 pogingen per uur.
 
-Voor 47 tot 65 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+66. `66_null_rolcontrole.sql` — elf oudere functies weigerden niet wie
+    geen relatie had met het huishouden (`null not in (...)` is geen true).
+    Nu NULL-veilig; de rest van elke functie is ongewijzigd.
+
+Voor 47 tot 66 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -414,6 +418,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
   minuten, tijd van de server, bewaartermijn.
 - `test_64_opruimen.sql` — omgeleide functies uit 03, zorgteam voor familie.
 - `test_65_review.sql` — elk lek uit de review; zakt zonder 65.
+- `test_66_null_rolcontrole.sql` — een vreemde roept elke functie aan; zakt zonder 66.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
