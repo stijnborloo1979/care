@@ -320,7 +320,8 @@ function Medewerkers({ orgId }: { orgId: string }) {
                   </button>
                 </span>
               ))}
-              {m.actief && (afd.data ?? []).length > 0 ? (
+              {/* Een beheerder staat nooit op een afdeling: hij ziet geen inhoud (J4). */}
+              {m.actief && m.rol !== 'org_admin' && (afd.data ?? []).length > 0 ? (
                 <select
                   value=""
                   onChange={(e) => {

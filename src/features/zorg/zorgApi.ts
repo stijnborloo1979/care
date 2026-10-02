@@ -494,9 +494,15 @@ export async function mijnWzc(hh: string) {
   return rijen[0] ?? null
 }
 
+export const ONBEKENDE_CODE =
+  'Deze code kennen we niet. Kijk ze na of vraag ze opnieuw aan het woonzorgcentrum.'
+
 export async function koppelMetWzc(hh: string, code: string): Promise<string> {
   const { data, error } = await supabase.rpc('koppel_met_wzc', { hh, code })
   if (error) throw error
+  // Vanaf 65 geeft een onbekende code geen fout maar niets terug (zodat de
+  // poging geteld wordt).
+  if (!data) throw new Error(ONBEKENDE_CODE)
   return data as string
 }
 

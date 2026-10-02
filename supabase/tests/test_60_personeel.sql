@@ -32,6 +32,19 @@ begin
   if kreeg is distinct from verwacht then raise exception 'GEZAKT: % — verwacht %, kreeg %', wat, verwacht, kreeg; end if;
   raise notice 'ok: %', wat;
 end $$;
+-- Koppelt niet: een fout, of (vanaf 65) null zonder koppeling.
+create function pg_temp.koppelt_niet(wat text, hh uuid, code text) returns void language plpgsql as $$
+declare
+  uit text;
+begin
+  begin
+    uit := public.koppel_met_wzc(hh, code);
+  exception when others then
+    raise notice 'ok: % (geweigerd: %)', wat, sqlerrm; return;
+  end;
+  if uit is not null then raise exception 'GEZAKT: % — koppelde toch (%)', wat, uit; end if;
+  raise notice 'ok: % (geen koppeling)', wat;
+end $$;
 create function pg_temp.geweigerd(wat text, sql text) returns void language plpgsql as $$
 begin
   begin execute sql;
@@ -52,7 +65,7 @@ select pg_temp.als('fm');
 select pg_temp.geweigerd('familielid (geen beheerder) koppelt niet',
   format('select public.koppel_met_wzc(%L::uuid, %L)', pg_temp.id('hh'), pg_temp.tekst('code')));
 select pg_temp.als('fa');
-select pg_temp.geweigerd('verkeerde code', format('select public.koppel_met_wzc(%L::uuid, ''ZZZZZZZZ'')', pg_temp.id('hh')));
+select pg_temp.koppelt_niet('verkeerde code', pg_temp.id('hh'), 'ZZZZZZZZ');
 select pg_temp.gelijk('familiebeheerder koppelt met de code',
   public.koppel_met_wzc(pg_temp.id('hh'), lower(substr(pg_temp.tekst('code'), 1, 4)) || ' ' || substr(pg_temp.tekst('code'), 5)), 'WZC De Linde');
 select pg_temp.gelijk('familie ziet de naam van het WZC', (select naam from public.mijn_wzc(pg_temp.id('hh'))), 'WZC De Linde');
@@ -143,8 +156,7 @@ insert into public.membership (household_id, profile_id, role)
   select id, pg_temp.id('x'), 'admin' from public.household where person_name = 'Jos';
 set local role authenticated;
 select pg_temp.als('x');
-select pg_temp.geweigerd('de oude code werkt niet meer',
-  format('select public.koppel_met_wzc((select id from public.household where person_name = ''Jos''), %L)', pg_temp.tekst('code')));
+select pg_temp.koppelt_niet('de oude code werkt niet meer', (select id from public.household where person_name = 'Jos'), pg_temp.tekst('code'));
 reset role;
 
 select pg_temp.gelijk('anon kan geen enkele van deze functies',
