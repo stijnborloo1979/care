@@ -62,6 +62,7 @@ const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const WeekSamen = lazy(() => import("./features/week/WeekSamen"));
 const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
+const Prijzen = lazy(() => import("./features/prijzen/Prijzen"));
 const ManageMedication = lazy(() => import("./features/medication/ManageMedication"));
 const ManageNotesPage = lazy(() =>
   import("./features/family/FamilyPages").then((m) => ({
@@ -161,6 +162,7 @@ if (!configuratieOk) {
                 <Routes>
                   <Route path="/login/*" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/prijzen" element={<Prijzen />} />
                   <Route path="/uitnodiging" element={<AcceptInvite />} />
                   <Route path="/zorg/uitnodiging" element={<ZorgUitnodiging />} />
                   <Route

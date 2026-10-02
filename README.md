@@ -234,9 +234,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 76. `76_systeemcontrole.sql` — toont in Instellingen (familiebeheerder) en
     Beheer (WZC-beheerder) welke updates van de database nog ontbreken.
     Kan op elk moment gedraaid worden; het kijkt alleen.
+77. `77_prijzen.sql` — prijzen bij de plannen (een voorstel, nog niets
+    afgedwongen) en `publieke_prijzen()` voor de prijspagina `/prijzen`.
+    Een prijs aanpassen: `update public.plan set prijs_maand_cent = 1099
+    where id = 'home';` in de SQL-editor.
 
-Voor 47 tot 76 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 77 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -459,6 +463,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_74_bezoekboek.sql` — wie mag vastleggen, lezen, aanpassen en wissen; geen tijd- of fotopadtrucs.
 - `test_75_bezoekfotos.sql` — niemand plaatst of wist een bezoekfoto van een ander; de rest van memories blijft zoals voorheen.
 - `test_76_systeemcontrole.sql` — na alle migraties ontbreekt niets; een weggehaalde kolom wordt gezien.
+- `test_77_prijzen.sql` — prijzen zichtbaar zonder inloggen, de tabel zelf niet; een eigen prijs blijft staan.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

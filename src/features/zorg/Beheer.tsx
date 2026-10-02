@@ -7,6 +7,7 @@ import { MedewerkerActies, OpenUitnodigingen } from './BeheerTeam'
 import VerblijfBeeindigen from './VerblijfBeeindigen'
 import { Afdelingen, Organisatie } from './BeheerOrganisatie'
 import SysteemControle from '../systeem/SysteemControle'
+import JouwAbonnement from '../prijzen/JouwAbonnement'
 import { useOrganisatie } from './useOrganisatie'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -70,6 +71,7 @@ export default function Beheer() {
       <TeamberichtTermijn orgId={orgId} isBeheerder={isBeheerder} />
       {isBeheerder ? <Telling orgId={orgId} /> : null}
       {isBeheerder ? <Noodtoegangen orgId={orgId} /> : null}
+      {isBeheerder ? <Abonnement orgId={orgId} /> : null}
       {isBeheerder ? <SysteemControle /> : null}
     </div>
   )
@@ -197,6 +199,13 @@ function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean
       )}
     </Kaart>
   )
+}
+
+// ---------------------------------------------------------------------
+
+function Abonnement({ orgId }: { orgId: string }) {
+  const bewoners = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], queryFn: () => alleBewoners(orgId) })
+  return <JouwAbonnement soort="org_id" id={orgId} bewoners={bewoners.data?.length} />
 }
 
 // ---------------------------------------------------------------------

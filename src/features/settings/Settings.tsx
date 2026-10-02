@@ -1,3 +1,4 @@
+import JouwAbonnement from '../prijzen/JouwAbonnement'
 import SysteemControle from '../systeem/SysteemControle'
 import { useDisplayPrefs, type DisplayPrefs } from './useDisplayPrefs'
 import JouwNaam from './JouwNaam'
@@ -425,6 +426,8 @@ export default function Settings() {
       <LocationSettings />
 
       <Opslag />
+
+      {household?.role === 'admin' ? <JouwAbonnement soort="household_id" id={hh} /> : null}
 
       {household?.role === 'admin' ? <SysteemControle /> : null}
 

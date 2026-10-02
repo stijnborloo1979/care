@@ -85,7 +85,8 @@ as $$
     (73, 'functie', 'zelfkaart_controle', 'Zelfkaart'),
     (74, 'tabel', 'visit_log', 'Bezoekboek'),
     (75, 'functie', 'mag_bezoekfoto_plaatsen', 'Bezoekfoto''s'),
-    (76, 'functie', 'systeem_controle', 'Systeemcontrole')
+    (76, 'functie', 'systeem_controle', 'Systeemcontrole'),
+    (77, 'functie', 'publieke_prijzen', 'Prijzen')
   )
   select k.nr, k.label,
     case k.soort
