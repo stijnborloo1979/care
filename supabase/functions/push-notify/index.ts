@@ -309,6 +309,17 @@ async function pushen(
   return { verstuurd, meldingen: klaar.length, opgeruimd: wegGooien.size }
 }
 
+/** Een melding van een noodtoegang (54) begint altijd zo. */
+export function isNoodtoegang(r: Pick<AlertRij, 'body'>): boolean {
+  return r.body.startsWith('Noodtoegang:')
+}
+
+/** Het onderwerp van de mail. Een noodtoegang is geen hulpvraag van de persoon. */
+export function onderwerp(r: Pick<AlertRij, 'body' | 'level' | 'person_name'>): string {
+  if (isNoodtoegang(r)) return `Noodtoegang bij ${r.person_name}`
+  return r.level === 'alert' ? `${r.person_name} heeft hulp nodig` : `Bericht over ${r.person_name}`
+}
+
 function afvinken(teller: Map<string, number>, id: string) {
   teller.set(id, (teller.get(id) ?? 0) + 1)
 }
@@ -413,7 +424,7 @@ const WEGEN: Record<
         body: JSON.stringify({
           from: Deno.env.get('MAIL_FROM'),
           to: r.address,
-          subject: dringend ? `${r.person_name} heeft hulp nodig` : `Bericht over ${r.person_name}`,
+          subject: onderwerp(r),
           html: `
             <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#221F1B">
               <p style="font-size:20px;line-height:1.4;margin:0 0 16px;font-weight:600">
@@ -429,7 +440,7 @@ const WEGEN: Record<
               ${
                 app
                   ? `<p style="margin:0 0 24px">
-                       <a href="${app}/familie" style="background:#8A5A1E;color:#fff;
+                       <a href="${app}${isNoodtoegang(r) ? '/familie/delen' : '/familie'}" style="background:#8A5A1E;color:#fff;
                           text-decoration:none;padding:14px 24px;border-radius:999px;
                           font-weight:600;display:inline-block">Openen in LifeAngle</a>
                      </p>`

@@ -45,7 +45,7 @@ export default function Documents() {
 
   async function open(doc: DocumentRow) {
     if (!doc.storage_path) return
-    const url = await openDocument(doc.storage_path)
+    const url = await openDocument(doc)
     window.open(url, '_blank', 'noopener')
   }
 

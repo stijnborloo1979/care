@@ -1,3 +1,4 @@
+import { useMag } from '../../core/access/useAccess'
 import { useState } from 'react'
 import Dashboard from '../dashboard/Dashboard'
 import FotoKiezer from '../../components/FotoKiezer'
@@ -49,6 +50,7 @@ export function DashboardPage() {
 
 export function PeoplePage() {
   const c = useContext()
+  const magUitnodigen = useMag(c.hh, 'invitation.manage', c.role === 'admin')
   if (!c.hh) return null
   return (
     <div className="space-y-6">
@@ -58,7 +60,7 @@ export function PeoplePage() {
       </header>
       <ManagePeople householdId={c.hh} />
       <ProfielVelden />
-      {c.role === 'admin' ? <InviteMember householdId={c.hh} personName={c.voornaam} /> : null}
+      {magUitnodigen ? <InviteMember householdId={c.hh} personName={c.voornaam} /> : null}
     </div>
   )
 }

@@ -40,7 +40,7 @@ export interface Diensten {
     tekst?: string
     audio?: { blob: Blob; mimeType: string; seconden: number }
     delen: boolean
-  }): Promise<void>
+  }): Promise<string | void>
   stuurBericht(p: { householdId: string; tekst: string }): Promise<void>
   bevestigMedicatie(ids: string[]): Promise<void>
 }
@@ -62,7 +62,14 @@ export interface ActieContext {
 }
 
 export type Uitkomst =
-  | { gelukt: true; zeg: string; bellen?: { naam: string; nummer: string }; ververs?: string[] }
+  | {
+      gelukt: true
+      zeg: string
+      bellen?: { naam: string; nummer: string }
+      ververs?: string[]
+      /** Het bewaarde dagboekfragment, zodat de bewoner het privé kan zetten. */
+      dagboekId?: string
+    }
   | { gelukt: false; zeg: string }
 
 type Uitvoerder = (v: Gevalideerd, ctx: ActieContext, actieId: string) => Promise<Uitkomst>
@@ -138,26 +145,26 @@ export function maakUitvoerders(d: Diensten): Partial<Record<IntentNaam, Uitvoer
 
     async add_diary_entry(v, ctx) {
       const tekst = v.parameters.text!
-      await d.bewaarDagboek({
+      const id = await d.bewaarDagboek({
         householdId: ctx.householdId,
         titel: dagboekTitel(tekst, ctx.nu),
         tekst,
         delen: ctx.dagboekDelen,
       })
-      return { gelukt: true, zeg: t('voice.gedaan.dagboek'), ververs: ['stories'] }
+      return { gelukt: true, zeg: t('voice.gedaan.dagboek'), ververs: ['stories'], dagboekId: id || undefined }
     },
 
     async record_voice_diary(_v, ctx) {
       if (!ctx.audio) return { gelukt: false, zeg: t('voice.actieMislukt') }
       const tekst = ctx.audio.transcript?.trim() || undefined
-      await d.bewaarDagboek({
+      const id = await d.bewaarDagboek({
         householdId: ctx.householdId,
         titel: dagboekTitel(tekst, ctx.nu),
         tekst,
         audio: ctx.audio,
         delen: ctx.dagboekDelen,
       })
-      return { gelukt: true, zeg: t('voice.gedaan.dagboek'), ververs: ['stories'] }
+      return { gelukt: true, zeg: t('voice.gedaan.dagboek'), ververs: ['stories'], dagboekId: id || undefined }
     },
 
     async send_family_message(v, ctx) {

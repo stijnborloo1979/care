@@ -5,33 +5,20 @@ import { useRealtime } from "../features/realtime/useRealtime";
 import { useDagKlaar } from "../services/dag";
 import GezienUitLink from "../features/family/GezienUitLink";
 import InstallPrompt from "../features/install/InstallPrompt";
-import Icon, { type IconNaam } from "../components/Icon";
+import Icon from "../components/Icon";
+import { NAV, zichtbareNav } from "./navigatie";
+import { mag, useAccess } from "../core/access/useAccess";
 import AccountBar from "./AccountBar";
 import Licht from "../features/licht/Licht";
+import { useOrganisaties } from "../features/zorg/useOrganisatie";
 
-const NAV: { to: string; end?: boolean; label: string; icoon: IconNaam }[] = [
-  { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
-  { to: '/familie/kalender', label: 'Kalender', icoon: 'agenda' },
-  { to: '/familie/planning', label: 'Routines', icoon: 'planning' },
-  { to: '/familie/medicatie', label: 'Medicatie', icoon: 'medicatie' },
-  { to: '/familie/wie', label: 'Familie', icoon: 'wie' },
-  { to: '/familie/week', label: 'De week samen', icoon: 'wie' },
-  { to: '/familie/huis', label: 'Home Memory', icoon: 'vandaag' },
-  { to: '/familie/fotos', label: 'Herinneringen', icoon: 'fotos' },
-  { to: '/familie/weetjes', label: 'Weetjes', icoon: 'weetjes' },
-  { to: '/familie/berichten', label: 'Berichten', icoon: 'praten' },
-  { to: '/familie/taken', label: 'Taken', icoon: 'taken' },
-  { to: '/familie/boodschappen', label: 'Boodschappen', icoon: 'boodschappen' },
-  { to: '/familie/analyse', label: 'Analyse', icoon: 'dashboard' },
-  { to: '/familie/indeling', label: 'Indeling', icoon: 'instellingen' },
-  { to: '/familie/logboek', label: 'Zorglogboek', icoon: 'logboek' },
-  { to: '/familie/documenten', label: 'Documenten', icoon: 'documenten' },
-  { to: '/familie/delen', label: 'Wie ziet wat', icoon: 'wie' },
-  { to: '/familie/instellingen', label: 'Instellingen', icoon: 'instellingen' },
-];
+
 
 export default function FamilyLayout() {
   const { household, isLoading } = useHousehold();
+  const organisaties = useOrganisaties();
+  const toegang = useAccess(household?.household_id);
+  const nav = zichtbareNav(NAV, toegang);
   useDisplayPrefs(household?.household_id ?? "");
   useRealtime(household?.household_id ?? "");
   // Vangnet voor wie pg_cron niet aan heeft staan: zet de dag één keer per
@@ -39,7 +26,7 @@ export default function FamilyLayout() {
   // leeg en wijst niets naar de oorzaak.
   useDagKlaar(
     household?.household_id ?? "",
-    household?.role === "admin" || household?.role === "member",
+    mag(toegang, "agenda.write", household?.role === "admin" || household?.role === "member"),
   );
 
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
@@ -66,7 +53,7 @@ export default function FamilyLayout() {
           </div>
 
           <nav aria-label="Hoofdnavigatie" className="space-y-0.5">
-            {NAV.map((n) => (
+            {nav.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
@@ -92,6 +79,14 @@ export default function FamilyLayout() {
             >
               Scherm van {household.person_name.split(" ")[0]}
             </NavLink>
+            {(organisaties.data ?? []).length > 0 ? (
+              <NavLink
+                to="/zorg"
+                className="block font-semibold text-accent-ink underline underline-offset-4"
+              >
+                Naar het woonzorgcentrum
+              </NavLink>
+            ) : null}
           </div>
         </aside>
 
@@ -110,7 +105,7 @@ export default function FamilyLayout() {
               paddingBottom: "calc(0.4rem + env(safe-area-inset-bottom, 0px))",
             }}
           >
-            {NAV.map((n) => (
+            {nav.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}

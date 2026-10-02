@@ -120,7 +120,96 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     regels als één functie. Verandert niets; de pariteitstest bewijst
     dat ze overeenkomt met elke huidige policy.
 
-Voor 47 tot 49 staat een terugdraaiscript in `supabase/rollback/`.
+50. `50_policies_groep1.sql` — 40 policies (agenda, routines, Wie is wie,
+    weetjes, foto's, radio, boodschappen, taken, meldingen, leden,
+    uitnodigingen) vragen `can_legacy()`. Verandert niets aan wie wat mag.
+51. `51_policies_groep2.sql` — de gevoelige tabellen (medicatie, logboek,
+    locatie, notities, verhalen, berichten, documenten, audit) en de
+    storage-policies. Verandert niets aan wie wat mag. Home Memory blijft
+    voorlopig op `deelt_huis()`.
+
+52. `52_stays.sql` — verblijven (`stay`), afdelingen, medewerkers per
+    afdeling en toewijzingen. Een trigger houdt het verblijf gelijk met
+    `household.org_id`. Nog door geen enkele toegangsregel gebruikt.
+
+53. `53_org_zonder_inhoud.sql` — een organisatie (org admin, coördinator)
+    ziet geen persoonlijke inhoud van een bewoner meer, alleen de
+    bewonerslijst via `org_bewoners()`. Een medewerker met een actieve
+    toewijzing, of de team lead van de afdeling, krijgt de rechten van een
+    zorgverlener. Familie, bewoner, tablet en thuiszorg: ongewijzigd.
+
+54. `54_noodtoegang.sql` — een team lead kan bij een bewoner van zijn
+    organisatie 4 uur noodtoegang starten (`start_noodtoegang`), met reden,
+    hoogstens 3 keer per 24 uur. De gegevens komen alleen via
+    `nood_inzage()` (naam, voorkeuren, agenda, logboek van 24 uur,
+    contacten), en elke inzage wordt gelogd. De familiebeheerder krijgt
+    meteen een melding. Geen enkele bestaande toegangsregel verandert.
+
+55. `55_leesaudit.sql` — de log houdt nu ook bij wie een document opende
+    (`open_document`), een opname beluisterde (`open_verhaal_opname`) of
+    de locatie bekeek (`last_location`), behalve de bewoner zelf. Plus
+    wijzigingen in verblijf, toewijzing en medewerkers. De familiebeheerder
+    leest alles van zijn huishouden; de org admin alleen wat over zijn
+    organisatie gaat. De app valt terug op de oude weg zolang 55 er niet is.
+
+56. `56_dagboek_opslag.sql` — nieuwe opnames van verhalen en dagboek gaan
+    naar een eigen bucket `diary` (pad `<hh>/<bestand>`). Beluisteren mag
+    wie het verhaal ziet en vandaag opnames mag horen; wissen wie het
+    verhaal mag wissen. De app maakt eerst het verhaal en uploadt daarna.
+    Oude opnames blijven in `messages`; de app leest beide.
+
+57. `57_noodtoegang_melding.sql` — een noodtoegang gaat altijd als push
+    naar de familiebeheerder (ook in de fase "zelf"), en per mail naar de
+    org admin van de organisatie. Alle andere meldingen gaan zoals voorheen.
+    Zet ook de nieuwe `push-notify` op Supabase (onderwerp "Noodtoegang bij …").
+
+58. `58_abonnementen.sql` — plannen, abonnementen (Home per huishouden,
+    Care per organisatie) en wat ze ontgrendelen, plus de telling van
+    actieve bewoners per dag. **Schaduwmodus**: niets wordt afgedwongen;
+    zonder abonnement (vandaag iedereen) geldt alles. De plannen zijn
+    voorbeelden.
+
+59. `59_zorg.sql` — LifeAngle Care: zorgnotities (alleen het toegewezen
+    team schrijft en leest; familie en bewoner zien enkel wat "voor familie"
+    is; nooit aan te passen of te wissen via de app; bewaartermijn bij
+    vertrek), overdracht per afdeling, activiteiten en deelname. Noodtoegang
+    toont ook de zorgnotities van de laatste 24 uur.
+
+60. `60_personeel.sql` — functies voor de schermen van een WZC: koppelcode
+    (familie koppelt zelf), medewerkers uitnodigen, mijn bewoners,
+    collega's, toewijzen en verblijf. Geen bestaande regel verandert.
+
+61. `61_bewaartermijn.sql` — bewaartermijn van zorgnotities per WZC
+    (standaard 2 jaar, 6 maanden tot 10 jaar), in te stellen bij Beheer.
+    De opruiming draait elke nacht om 03:20 als pg_cron aan staat.
+
+62. `62_overdracht_bewaren.sql` — bewaartermijn van de overdracht per WZC
+    (standaard 30 dagen, 1 week tot 1 jaar), in te stellen bij Beheer.
+    Opruimen elke nacht om 03:25 als pg_cron aan staat.
+
+63. `63_teamberichten.sql` — korte berichten per afdeling, alleen voor wie
+    er werkt, live. Eigen bericht wissen kan binnen 10 minuten. Bewaartermijn
+    per WZC (standaard 30 dagen), opruimen elke nacht om 03:30.
+
+64. `64_opruimen.sql` — `org_oversees()` weg (door niets meer gebruikt);
+    `assign_caregiver`/`unassign_caregiver` (03) lopen nu via de toewijzing
+    van 60; `zorgteam(hh)`: familie en bewoner zien wie van het WZC volgt.
+
+65. `65_review_herstel.sql` — herstellingen na een onafhankelijke review:
+    een org admin kan zichzelf niet meer op een afdeling zetten (en zo
+    inhoud zien), niemand past zijn eigen rol aan, een team lead uit dienst
+    wijst niet meer toe, de koppelcode is alleen via de functies leesbaar,
+    en raden is beperkt tot 10 pogingen per uur.
+
+66. `66_null_rolcontrole.sql` — elf oudere functies weigerden niet wie
+    geen relatie had met het huishouden (`null not in (...)` is geen true).
+    Nu NULL-veilig; de rest van elke functie is ongewijzigd.
+
+Voor 47 tot 66 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
+Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
+50 en 51 slaan een tabel over die in jouw project niet bestaat.
 
 ## Inloggen
 
@@ -172,6 +261,14 @@ Functions → Deploy a new function → plak het bestand.
   `VITE_VAPID_PUBLIC_KEY` naar de app. Verify JWT aan laten.
 - `cleanup-storage` — wist spraakberichten en foto's die nergens meer bij
   horen. Plan elke nacht in, na `run_nightly()`. Verify JWT aan laten.
+  Raakt de map `verhalen/` (opnames van verhalen en dagboek) nooit aan.
+- `verhuis-opnames` — verhuist oude opnames van `messages/<hh>/verhalen/`
+  naar de bucket `diary` (na migratie 56). Eenmalig, met de service role;
+  Verify JWT aan laten. Body `{}` is een proef die niets verandert;
+  `{"uitvoeren": true}` verhuist (25 per keer, herhaal tot `nog_te_doen`
+  0 is). Het oude bestand blijft staan tot `{"opruimen": true}` (proef)
+  en `{"opruimen": true, "uitvoeren": true}`: dat wist alleen oude
+  bestanden met een kopie van dezelfde grootte in `diary`.
 - `ask` — beantwoordt een vraag uit de eigen gegevens. Secret:
   `OPENAI_API_KEY`. Vindt de zoektocht niets boven de drempel, dan wordt
   het model niet eens aangeroepen.
@@ -250,7 +347,29 @@ Dagboekfragmenten staan in `life_story` met `soort = 'dagboek'`, met de
 opname in de eigen stem. Familie ziet ze bij “Verhalen”, met afspelen. In
 de fase *zelf* worden ze niet gedeeld. Ze komen niet in het levensboek.
 
-### Tests
+### LifeAngle Care (woonzorgcentrum)
+
+Voor wie in een woonzorgcentrum werkt, onder `/zorg`. Vereist migraties 52 tot 60.
+
+1. **Registreren** — `/zorg/nieuw` (ook via de onboarding: "Ik registreer een
+   woonzorgcentrum"). Wie registreert, wordt beheerder.
+2. **Medewerkers** — Beheer → Medewerker uitnodigen. De uitnodiging wordt
+   gemaild (via `send-invite`, als de mail ingesteld is) en je krijgt ook
+   de link. Die werkt alleen voor wie inlogt met dat e-mailadres. Zet ze daarna op een
+   afdeling, eventueel als team lead.
+3. **Bewoners** — de familiebeheerder koppelt zelf, bij "Wie ziet wat", met
+   de koppelcode die Beheer toont. Een WZC kan nooit zelf een bewoner toevoegen.
+4. **Toewijzen** — Beheer → Bewoners: wie voor wie zorgt, afdeling en kamer.
+
+Schermen: **Bewoners** (mijn bewoners; met zorgnotities, agenda van vandaag
+en contactpersonen), **Overdracht** per afdeling, **Team** (berichten per
+afdeling), **Activiteiten** met
+inschrijven en aanwezigheid, en **Beheer**. Een team lead kan bij een
+bewoner die hij niet volgt **noodtoegang** starten (4 uur, met reden; de
+familie krijgt bericht). Wie zowel familie heeft als in een WZC werkt,
+wisselt via de link onderaan de zijbalk.
+
+## Tests
 
 ### Database
 
@@ -266,6 +385,42 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_49_parity.sql` — 12.960 vergelijkingen tussen de huidige policies
   en `can_legacy()`, over 10 soorten gebruikers, 8 huishoudens en alle
   fasen. Eis: nul verschillen.
+- `test_51_policy_parity.sql` — meet voor elke omgezette tabel en bucket
+  wat 10 soorten gebruikers kunnen lezen, wijzigen, wissen en toevoegen,
+  met de nieuwe policies en daarna met de oude (via de rollback-scripts).
+  10.600 metingen, eis: identiek.
+- `test_52_stays.sql` — koppelen opent een verblijf, loskoppelen sluit het
+  samen met de toewijzingen, en wie welk verblijf ziet.
+- `test_53_org.sql` — org admin en coördinator zien geen inhoud; een
+  toegewezen medewerker en de team lead wel; ontslag, einde toewijzing en
+  vertrek nemen de toegang weg; familie en thuiszorg blijven gelijk.
+- `test_54_noodtoegang.sql` — wie mag starten, de vaste leesset, de log,
+  de melding, stoppen, de grens van 3 per dag, verlopen na 4 uur en
+  vertrek uit het WZC.
+- `test_55_audit.sql` — inzages gelogd (één keer per venster), de bewoner
+  zelf niet, wie de log leest, niemand schrijft of wist rechtstreeks, en
+  een gewist huishouden laat geen nieuwe regels achter.
+- `test_56_dagboek_opslag.sql` — wie opneemt, beluistert en wist in de
+  bucket `diary`, privé zetten, en geen opname zonder verhaal.
+- `test_57_noodmelding.sql` — push en mail bij noodtoegang, en gewone
+  meldingen ongewijzigd.
+- `test_58_abonnementen.sql` — trial, past due, opzeggen, pilot, Home
+  pauzeert tijdens een verblijf, actieve bewoners per dag, wie wat ziet.
+- `test_59_zorg.sql` — zorgnotities, overdracht en activiteiten per rol,
+  vertrek, bewaartermijn en opruimen.
+- `test_60_personeel.sql` — registreren, koppelen met code, uitnodigen,
+  toewijzen, verblijf, wie wat ziet.
+- `test_61_bewaartermijn.sql` — termijn per WZC, wie hem zet, gevolg van
+  een kortere termijn, opruimen.
+- `test_62_overdracht_bewaren.sql` — termijn van de overdracht per WZC,
+  gevolg en opruimen.
+- `test_63_teamberichten.sql` — wie leest en schrijft, wissen binnen 10
+  minuten, tijd van de server, bewaartermijn.
+- `test_64_opruimen.sql` — omgeleide functies uit 03, zorgteam voor familie.
+- `test_65_review.sql` — elk lek uit de review; zakt zonder 65.
+- `test_66_null_rolcontrole.sql` — een vreemde roept elke functie aan; zakt zonder 66.
+
+De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
 ### App
 

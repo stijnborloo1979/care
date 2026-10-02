@@ -2,6 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, EyeOff, ShieldCheck, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useHousehold, type SupportLevel } from '../household/useHousehold'
+import { useMag } from '../../core/access/useAccess'
+import WieBekeek from './WieBekeek'
+import WzcKoppeling from './WzcKoppeling'
 
 const NIVEAUS: { id: SupportLevel; titel: string; uitleg: string; ziet: string }[] = [
   {
@@ -43,7 +46,8 @@ export default function Delen() {
   const queryClient = useQueryClient()
   const hh = household?.household_id ?? ''
   const ikBenHet = !!household?.is_self
-  const isBeheerder = household?.role === 'admin'
+  // Leden beheren = beheerder. De database zegt het, de rol is de terugval.
+  const isBeheerder = useMag(household?.household_id, 'membership.manage', household?.role === 'admin')
 
   const { data: leden } = useQuery({
     queryKey: ['members', hh],
@@ -283,6 +287,10 @@ export default function Delen() {
           ))}
         </ul>
       </section>
+
+      <WzcKoppeling hh={hh} voornaam={voornaam} isBeheerder={isBeheerder} />
+
+      <WieBekeek hh={hh} voornaam={voornaam} isBeheerder={isBeheerder} ikBenHet={ikBenHet} />
     </div>
   )
 }

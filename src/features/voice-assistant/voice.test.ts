@@ -349,7 +349,7 @@ describe('gesprek', () => {
   })
 
   it('dagboek: opnemen, dan bewaren met audio', async () => {
-    const diensten = nepDiensten()
+    const diensten = nepDiensten({ bewaarDagboek: vi.fn(async () => 'verhaal-1') })
     const d = gesprek(diensten)
     const b1 = await verwerk(RUST, { soort: 'tekst', tekst: 'Ik wil iets vertellen.' }, d)
     expect(b1.status).toBe('dagboek')
@@ -365,6 +365,9 @@ describe('gesprek', () => {
     expect(arg.audio.blob).toBe(blob)
     expect(arg.tekst).toContain('markt')
     expect(arg.titel).toBe('Vandaag ben ik met mijn dochter naar…')
+    // standaard gedeeld met familie; het id komt terug zodat de bewoner het privé kan zetten
+    expect(arg.delen).toBe(true)
+    expect(b2.dagboekId).toBe('verhaal-1')
   })
 
   it('spraak mislukt: de vraag blijft staan', async () => {

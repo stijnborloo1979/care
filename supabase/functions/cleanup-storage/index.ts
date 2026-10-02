@@ -37,23 +37,20 @@ Deno.serve(async () => {
     if (m.photo_path) inGebruik.add(m.photo_path)
   }
 
-  const grens = Date.now() - MARGE_MS
-  const wezen: string[] = []
-
-  // Het pad is <huishouden>/<kanaal>/<bestand>, dus twee niveaus mappen.
-  for (const hh of await mappen(supabase, '')) {
-    for (const kanaal of await mappen(supabase, hh)) {
-      const prefix = `${hh}/${kanaal}`
-      for (const bestand of await bestanden(supabase, prefix)) {
-        const pad = `${prefix}/${bestand.name}`
-        if (inGebruik.has(pad)) continue
-        const gemaakt = Date.parse(bestand.created_at ?? '')
-        if (Number.isFinite(gemaakt) && gemaakt > grens) continue
-        wezen.push(pad)
-        if (wezen.length >= PER_KEER) break
-      }
-    }
+  // Opnames van verhalen en het dagboek staan in dezelfde bucket, onder
+  // <huishouden>/verhalen/. Ze horen bij life_story, niet bij een bericht,
+  // en mogen hier nooit gewist worden. Lukt het niet om ze op te halen,
+  // dan wordt er niets gewist.
+  const { data: verhalen, error: verhaalFout } = await supabase
+    .from('life_story')
+    .select('audio_path')
+    .not('audio_path', 'is', null)
+  if (verhaalFout) return new Response(verhaalFout.message, { status: 500 })
+  for (const v of verhalen ?? []) {
+    if (v.audio_path) inGebruik.add(v.audio_path)
   }
+
+  const wezen = await zoekWezen((prefix) => lijst(supabase, prefix), inGebruik, Date.now() - MARGE_MS, PER_KEER)
 
   if (wezen.length === 0) return json({ gewist: 0 })
 
@@ -64,10 +61,47 @@ Deno.serve(async () => {
 })
 
 type Client = ReturnType<typeof createClient>
+
 interface Item {
   name: string
   id: string | null
   created_at?: string
+}
+
+/** De map met opnames van verhalen en het dagboek: wordt nooit opgeruimd. */
+const BESCHERMD = 'verhalen'
+
+/**
+ * Het pad is <huishouden>/<kanaal>/<bestand>. Een bestand mag weg als het
+ * niet in gebruik is, ouder is dan de grens, en niet in de map 'verhalen'
+ * staat. Een map heeft geen id: zo onderscheidt de storage-API ze van
+ * bestanden.
+ */
+export async function zoekWezen(
+  lijst: (prefix: string) => Promise<Item[]>,
+  inGebruik: Set<string>,
+  grens: number,
+  perKeer: number,
+): Promise<string[]> {
+  const mappen = async (p: string) => (await lijst(p)).filter((i) => i.id === null).map((i) => i.name)
+  const bestanden = async (p: string) => (await lijst(p)).filter((i) => i.id !== null)
+
+  const wezen: string[] = []
+  for (const hh of await mappen('')) {
+    for (const kanaal of await mappen(hh)) {
+      if (kanaal === BESCHERMD) continue
+      const prefix = `${hh}/${kanaal}`
+      for (const bestand of await bestanden(prefix)) {
+        const pad = `${prefix}/${bestand.name}`
+        if (inGebruik.has(pad)) continue
+        const gemaakt = Date.parse(bestand.created_at ?? '')
+        if (Number.isFinite(gemaakt) && gemaakt > grens) continue
+        wezen.push(pad)
+        if (wezen.length >= perKeer) return wezen
+      }
+    }
+  }
+  return wezen
 }
 
 async function lijst(supabase: Client, prefix: string): Promise<Item[]> {
@@ -77,14 +111,6 @@ async function lijst(supabase: Client, prefix: string): Promise<Item[]> {
   return (data ?? []) as Item[]
 }
 
-// Een map heeft geen id: zo onderscheidt de storage-API ze van bestanden.
-async function mappen(supabase: Client, prefix: string): Promise<string[]> {
-  return (await lijst(supabase, prefix)).filter((i) => i.id === null).map((i) => i.name)
-}
-
-async function bestanden(supabase: Client, prefix: string): Promise<Item[]> {
-  return (await lijst(supabase, prefix)).filter((i) => i.id !== null)
-}
 
 function json(body: unknown) {
   return new Response(JSON.stringify(body), {

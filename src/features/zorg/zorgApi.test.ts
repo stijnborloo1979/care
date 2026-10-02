@@ -1,0 +1,47 @@
+import { describe, expect, it } from 'vitest'
+import { dienstDatum, huidigeDienst } from './zorgApi'
+
+describe('dienst', () => {
+  it('vroeg, laat en nacht', () => {
+    expect(huidigeDienst(new Date(2026, 9, 1, 7, 0))).toBe('vroeg')
+    expect(huidigeDienst(new Date(2026, 9, 1, 14, 59))).toBe('vroeg')
+    expect(huidigeDienst(new Date(2026, 9, 1, 15, 0))).toBe('laat')
+    expect(huidigeDienst(new Date(2026, 9, 1, 22, 0))).toBe('nacht')
+    expect(huidigeDienst(new Date(2026, 9, 2, 3, 0))).toBe('nacht')
+  })
+
+  it('een nacht na middernacht hoort bij de vorige dag', () => {
+    expect(dienstDatum(new Date(2026, 9, 2, 3, 0))).toBe('2026-10-01')
+    expect(dienstDatum(new Date(2026, 9, 2, 7, 0))).toBe('2026-10-02')
+    expect(dienstDatum(new Date(2026, 0, 1, 2, 0))).toBe('2025-12-31')
+  })
+})
+
+describe('termijnTekst', () => {
+  it('in jaren waar het kan', async () => {
+    const { termijnTekst } = await import('./zorgApi')
+    expect(termijnTekst(6)).toBe('6 maanden')
+    expect(termijnTekst(12)).toBe('1 jaar')
+    expect(termijnTekst(24)).toBe('2 jaar')
+    expect(termijnTekst(120)).toBe('10 jaar')
+  })
+})
+
+describe('dagenTekst', () => {
+  it('in gewone taal', async () => {
+    const { dagenTekst } = await import('./zorgApi')
+    expect(dagenTekst(7)).toBe('1 week')
+    expect(dagenTekst(14)).toBe('2 weken')
+    expect(dagenTekst(30)).toBe('30 dagen')
+    expect(dagenTekst(365)).toBe('1 jaar')
+  })
+})
+
+describe('nogWisbaar', () => {
+  it('binnen 10 minuten', async () => {
+    const { nogWisbaar } = await import('./zorgApi')
+    const nu = Date.parse('2026-10-02T10:00:00Z')
+    expect(nogWisbaar('2026-10-02T09:55:00Z', nu)).toBe(true)
+    expect(nogWisbaar('2026-10-02T09:49:00Z', nu)).toBe(false)
+  })
+})

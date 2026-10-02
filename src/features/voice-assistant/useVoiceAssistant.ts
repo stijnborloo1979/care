@@ -7,7 +7,7 @@ import { useHousehold } from '../household/useHousehold'
 import { huidigePrefs, magBellen } from '../settings/useDisplayPrefs'
 import { useKennis } from '../voice/useKennis'
 import { beantwoord as regelAntwoord } from '../voice/answerEngine'
-import { addStory } from '../../services/stories'
+import { addStory, setShared } from '../../services/stories'
 import { sendTextMessage } from '../messages/messages'
 import { confirmMoments } from '../../services/medsToday'
 import { addShoppingItems } from '../../services/shopping'
@@ -94,7 +94,7 @@ export function useVoiceAssistant() {
 
   const actieContext = useCallback((): ActieContext => {
     const k = kennisRef.current
-    const { hh, tz, household } = hhRef.current
+    const { hh, tz } = hhRef.current
     return {
       householdId: hh,
       tz,
@@ -104,8 +104,9 @@ export function useVoiceAssistant() {
         .map((p) => ({ naam: p.name, telefoon: p.phone })),
       medicatie: (k.medicatie ?? []).map((m) => ({ id: m.id, due_at: m.due_at, taken_at: m.taken_at })),
       magBellen: magBellen(huidigePrefs()),
-      // In de fase "zelf" kijkt familie niet mee; het dagboek dan ook niet.
-      dagboekDelen: household?.support_level !== 'zelf',
+      // Verhalen zijn standaard gedeeld met familie, in elke fase. De
+      // bewoner kan een fragment daarna nog privé zetten.
+      dagboekDelen: true,
     }
   }, [])
 
@@ -296,7 +297,8 @@ export function useVoiceAssistant() {
     if (fase !== 'wacht' || !beurt) return
     if (beurt.status !== 'gelukt' && beurt.status !== 'geannuleerd') return
     if (beurt.bellen || beurt.regels?.length) return
-    const id = window.setTimeout(sluiten, 6000)
+    // Na een dagboekfragment langer open: de bewoner kan het nog privé zetten.
+    const id = window.setTimeout(sluiten, beurt.dagboekId ? 20000 : 6000)
     return () => window.clearTimeout(id)
   }, [fase, beurt, sluiten])
 
@@ -325,9 +327,27 @@ export function useVoiceAssistant() {
     void luisterNu()
   }, [fase, luisterNu])
 
+  const [prive, setPrive] = useState<'nee' | 'bezig' | 'ja' | 'fout'>('nee')
+  useEffect(() => setPrive('nee'), [beurt])
+
+  const maakPrive = useCallback(async () => {
+    if (!beurt?.dagboekId) return
+    setPrive('bezig')
+    try {
+      await setShared(beurt.dagboekId, false)
+      setPrive('ja')
+      queryClient.invalidateQueries({ queryKey: ['stories'] })
+      void zeg(t('voice.priveGedaan'))
+    } catch {
+      setPrive('fout')
+    }
+  }, [beurt, queryClient])
+
   return {
     open,
     sluiten,
+    prive,
+    maakPrive,
     fase,
     beurt,
     gehoord,
