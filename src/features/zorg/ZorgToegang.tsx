@@ -4,6 +4,7 @@ import { Building2 } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisaties } from './useOrganisatie'
 import { aanvaardInApp, mijnUitnodigingen, ROLNAAM } from './zorgApi'
+import { foutTekst } from './ui'
 
 export function useOpenUitnodigingen() {
   const { session } = useAuth()
@@ -39,7 +40,7 @@ export default function ZorgToegang({ vorm, onKlaar }: { vorm: 'menu' | 'kaart';
 
   const open = uitnodigingen.data ?? []
   const lid = (organisaties.data ?? []).length > 0
-  const fout = aanvaard.error ? (aanvaard.error as Error).message : null
+  const fout = aanvaard.error ? foutTekst(aanvaard.error) : null
 
   if (vorm === 'kaart') {
     if (open.length === 0) return null

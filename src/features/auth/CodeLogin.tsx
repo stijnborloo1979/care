@@ -38,6 +38,8 @@ export default function CodeLogin({
     if (b.includes('Token has expired') || b.includes('invalid'))
       return 'Deze code klopt niet of is verlopen. Vraag een nieuwe aan.'
     if (b.includes('Invalid login')) return 'Dat e-mailadres of wachtwoord klopt niet.'
+    if (b.includes('Error sending'))
+      return 'De mail kon niet verstuurd worden. Probeer het straks opnieuw, of log in met een wachtwoord.'
     return b
   }
 

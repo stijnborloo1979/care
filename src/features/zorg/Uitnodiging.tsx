@@ -9,7 +9,7 @@ import { Fout, knop } from './ui'
 export default function Uitnodiging() {
   const [params] = useSearchParams()
   const token = params.get('token') ?? ''
-  const { session, loading } = useAuth()
+  const { session, loading, signOut } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -27,6 +27,10 @@ export default function Uitnodiging() {
   })
 
   if (loading) return <p className="p-6 text-ink-soft">Even geduld…</p>
+
+  // Ingelogd met een ander adres dan de uitnodiging: meteen zeggen, niet pas na de klik.
+  const ikBen = session?.user.email?.toLowerCase() ?? ''
+  const verkeerdAdres = !!preview.data && !!ikBen && preview.data.email.toLowerCase() !== ikBen
 
   return (
     <main className="mx-auto max-w-[32rem] px-5 py-10">
@@ -56,6 +60,16 @@ export default function Uitnodiging() {
               <p role="alert" className="mt-4 rounded-2xl border border-alert bg-surface-soft p-3 text-alert">
                 Deze uitnodiging is {preview.data.status}. Vraag je beheerder om een nieuwe.
               </p>
+            ) : verkeerdAdres ? (
+              <div className="mt-4 rounded-2xl border border-line bg-surface-soft p-4">
+                <p>
+                  Deze uitnodiging is voor <strong className="break-all">{preview.data.email}</strong>. Je bent nu
+                  ingelogd als <strong className="break-all">{session.user.email}</strong>.
+                </p>
+                <button onClick={() => signOut()} className={`${knop} mt-4 w-full`}>
+                  Uitloggen en inloggen met {preview.data.email}
+                </button>
+              </div>
             ) : (
               <button onClick={() => aanvaard.mutate()} disabled={aanvaard.isPending} className={`${knop} mt-6 w-full`}>
                 {aanvaard.isPending ? 'Bezig…' : 'Uitnodiging aanvaarden'}
