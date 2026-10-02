@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, LogOut } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
+import ZorgToegang from '../features/zorg/ZorgToegang'
 
 const ROL: Record<string, string> = {
   admin: 'familiebeheerder',
@@ -73,6 +74,8 @@ export default function AccountBar() {
               <div className="my-2 h-px bg-line" />
             </>
           ) : null}
+
+          {household.role !== 'person' ? <ZorgToegang vorm="menu" onKlaar={() => setOpen(false)} /> : null}
 
           <p className="truncate px-2 py-1 text-xs text-ink-faint">{session.user.email}</p>
           <button
