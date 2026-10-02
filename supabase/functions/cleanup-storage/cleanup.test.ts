@@ -14,6 +14,9 @@ let boom: Record<string, Item[]>
 let berichten: { audio_path: string | null; photo_path: string | null }[]
 let verhalen: { audio_path: string }[]
 let verhaalFout: { message: string } | null
+let fotoBoom: Record<string, Item[]>
+let bezoeken: { photo_path: string }[] | null
+let gewistFoto: string[]
 let gewist: string[]
 let handler: () => Promise<Response>
 
@@ -31,6 +34,14 @@ beforeEach(async () => {
   verhalen = [{ audio_path: 'hh1/verhalen/verhaal.webm' }]
   verhaalFout = null
   gewist = []
+  fotoBoom = {
+    '': [map('hh1')],
+    hh1: [map('bezoek'), map('photos')],
+    'hh1/bezoek': [bestand('v1-a.jpg'), bestand('v2-wees.jpg'), bestand('v3-vers.jpg', NIEUW)],
+    'hh1/photos': [bestand('herinnering.jpg')],
+  }
+  bezoeken = [{ photo_path: 'hh1/bezoek/v1-a.jpg' }]
+  gewistFoto = []
 
   const g = globalThis as Record<string, unknown>
   g.Deno = {
@@ -44,13 +55,15 @@ beforeEach(async () => {
       select: () =>
         tabel === 'message'
           ? Promise.resolve({ data: berichten, error: null })
-          : { not: () => Promise.resolve({ data: verhaalFout ? null : verhalen, error: verhaalFout }) },
+          : tabel === 'visit_log'
+            ? { not: () => Promise.resolve(bezoeken ? { data: bezoeken, error: null } : { data: null, error: { code: '42P01', message: 'geen tabel' } }) }
+            : { not: () => Promise.resolve({ data: verhaalFout ? null : verhalen, error: verhaalFout }) },
     }),
     storage: {
-      from: () => ({
-        list: async (prefix: string) => ({ data: boom[prefix] ?? [] }),
+      from: (bucket: string) => ({
+        list: async (prefix: string) => ({ data: (bucket === 'memories' ? fotoBoom : boom)[prefix] ?? [] }),
         remove: async (paden: string[]) => {
-          gewist.push(...paden)
+          ;(bucket === 'memories' ? gewistFoto : gewist).push(...paden)
           return { error: null }
         },
       }),
@@ -65,7 +78,7 @@ beforeEach(async () => {
 describe('cleanup-storage', () => {
   it('wist alleen een oud bestand zonder bericht', async () => {
     const r = await handler()
-    expect(await r.json()).toEqual({ gewist: 1 })
+    expect(await r.json()).toEqual({ gewist: 1, bezoekfotos: 1 })
     expect(gewist).toEqual(['hh1/family/wees.webm'])
   })
 
@@ -79,5 +92,17 @@ describe('cleanup-storage', () => {
     const r = await handler()
     expect(r.status).toBe(500)
     expect(gewist).toEqual([])
+  })
+
+  it('ruimt alleen een oude bezoekfoto zonder bezoek op, niets anders in memories', async () => {
+    await handler()
+    expect(gewistFoto).toEqual(['hh1/bezoek/v2-wees.jpg'])
+  })
+
+  it('zonder tabel visit_log (74 niet gedraaid) wist het niets in memories', async () => {
+    bezoeken = null
+    const r = await handler()
+    expect(gewistFoto).toEqual([])
+    expect((await r.json()).bezoekfotos).toBe(0)
   })
 })

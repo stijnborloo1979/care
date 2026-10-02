@@ -52,13 +52,69 @@ Deno.serve(async () => {
 
   const wezen = await zoekWezen((prefix) => lijst(supabase, prefix), inGebruik, Date.now() - MARGE_MS, PER_KEER)
 
-  if (wezen.length === 0) return json({ gewist: 0 })
+  if (wezen.length > 0) {
+    const { error: wisError } = await supabase.storage.from(BUCKET).remove(wezen)
+    if (wisError) return new Response(wisError.message, { status: 500 })
+  }
 
-  const { error: wisError } = await supabase.storage.from(BUCKET).remove(wezen)
-  if (wisError) return new Response(wisError.message, { status: 500 })
+  // Tweede ronde: foto's van bezoeken (74) die bij geen bezoek meer horen,
+  // bv. wanneer de familiebeheerder het bezoek van een ander wiste. Alleen
+  // in <huishouden>/bezoek/ van de bucket memories; niets anders daar.
+  const bezoekfotos = await ruimBezoekfotosOp(supabase)
 
-  return json({ gewist: wezen.length })
+  return json({ gewist: wezen.length, bezoekfotos })
 })
+
+const FOTO_BUCKET = 'memories'
+
+async function ruimBezoekfotosOp(supabase: Client): Promise<number> {
+  const { data, error } = await supabase
+    .from('visit_log')
+    .select('photo_path')
+    .not('photo_path', 'is', null)
+  // Tabel nog niet aangemaakt, of niet op te halen: dan wist deze ronde niets.
+  if (error || !data) return 0
+  const inGebruik = new Set<string>()
+  for (const r of data as { photo_path?: string | null }[]) if (r.photo_path) inGebruik.add(r.photo_path)
+  const wezen = await zoekBezoekWezen(
+    (prefix) => lijstIn(supabase, FOTO_BUCKET, prefix),
+    inGebruik,
+    Date.now() - MARGE_MS,
+    PER_KEER,
+  )
+  if (wezen.length === 0) return 0
+  const { error: wisError } = await supabase.storage.from(FOTO_BUCKET).remove(wezen)
+  return wisError ? 0 : wezen.length
+}
+
+/** Alleen <huishouden>/bezoek/<bestand>: oud, en geen bezoek dat ernaar wijst. */
+export async function zoekBezoekWezen(
+  lijst: (prefix: string) => Promise<Item[]>,
+  inGebruik: Set<string>,
+  grens: number,
+  perKeer: number,
+): Promise<string[]> {
+  const wezen: string[] = []
+  for (const hh of (await lijst('')).filter((i) => i.id === null).map((i) => i.name)) {
+    const prefix = `${hh}/bezoek`
+    for (const bestand of (await lijst(prefix)).filter((i) => i.id !== null)) {
+      const pad = `${prefix}/${bestand.name}`
+      if (inGebruik.has(pad)) continue
+      const gemaakt = Date.parse(bestand.created_at ?? '')
+      if (!Number.isFinite(gemaakt) || gemaakt > grens) continue
+      wezen.push(pad)
+      if (wezen.length >= perKeer) return wezen
+    }
+  }
+  return wezen
+}
+
+async function lijstIn(supabase: Client, bucket: string, prefix: string): Promise<Item[]> {
+  const { data } = await supabase.storage
+    .from(bucket)
+    .list(prefix, { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
+  return (data ?? []) as Item[]
+}
 
 type Client = ReturnType<typeof createClient>
 

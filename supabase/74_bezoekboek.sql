@@ -48,7 +48,9 @@ create table if not exists public.visit_log (
   visited_at    timestamptz not null default now(),
   author_id     uuid references public.profile (id) on delete set null default auth.uid(),
   created_at    timestamptz not null default now(),
-  constraint visit_log_foto_pad check (photo_path is null or photo_path like household_id::text || '/bezoek/%')
+  -- De foto hoort bij dit bezoek: <huishouden>/bezoek/<id van dit bezoek>-…
+  -- Zo kan een bezoek nooit naar de foto van een ander bezoek wijzen.
+  constraint visit_log_foto_pad check (photo_path is null or photo_path like household_id::text || '/bezoek/' || id::text || '-%')
 );
 create index if not exists visit_log_hh_idx on public.visit_log (household_id, visited_at desc);
 

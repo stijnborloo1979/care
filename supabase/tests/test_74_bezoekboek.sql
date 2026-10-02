@@ -95,7 +95,9 @@ select pg_temp.als('x');    select pg_temp.gelijk('vreemde ziet niets', pg_temp.
 
 -- 3. Aanpassen en wissen
 select pg_temp.als('lid');
-update public.visit_log set photo_path = pg_temp.id('hh')::text || '/bezoek/foto.jpg' where visitor_name = 'Els';
+update public.visit_log set photo_path = household_id::text || '/bezoek/' || id::text || '-foto.jpg' where visitor_name = 'Els';
+select pg_temp.geweigerd('geen foto van een ander bezoek',
+  format('update public.visit_log set photo_path = %L where visitor_name = ''Els''', pg_temp.id('hh')::text || '/bezoek/' || gen_random_uuid()::text || '-x.jpg'));
 select pg_temp.gelijk('schrijver voegt een foto toe', (select photo_path is not null from public.visit_log where visitor_name = 'Els'), true);
 update public.visit_log set note = 'gewijzigd' where visitor_name = 'De kapster';
 select pg_temp.gelijk('een ander past niets aan', (select note from public.visit_log where visitor_name = 'De kapster'), 'Haar geknipt.'::text);
