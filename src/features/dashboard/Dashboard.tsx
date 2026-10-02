@@ -183,7 +183,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
             <ul className="mt-3 space-y-2">
               {data.log.slice(0, 6).map((l) => (
                 <li key={l.id} className="flex items-baseline gap-3">
-                  <span className="w-12 shrink-0 font-bold tabular-nums text-ink-soft">
+                  <span className="w-14 shrink-0 whitespace-nowrap font-bold tabular-nums text-ink-soft">
                     {hhmm(new Date(l.occurred_at), timezone)}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -243,7 +243,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
                   key={m.id}
                   className="flex flex-wrap items-center gap-3 border-b border-line py-2 last:border-none"
                 >
-                  <span className="w-12 shrink-0 font-bold tabular-nums text-ink-soft">
+                  <span className="w-14 shrink-0 whitespace-nowrap font-bold tabular-nums text-ink-soft">
                     {hhmm(new Date(m.due_at), timezone)}
                   </span>
                   <span className="min-w-0 flex-1">

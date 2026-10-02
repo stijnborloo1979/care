@@ -55,6 +55,25 @@ export async function getStories(
   return soort ? alle.filter((s) => (s.soort ?? 'verhaal') === soort) : alle
 }
 
+/**
+ * Alleen verhalen, geen dagboek, en dat al in de database: wat niet nodig
+ * is, komt het toestel ook niet binnen. Zonder kolom soort (vóór 46) zijn
+ * alle rijen verhalen.
+ */
+export async function getVerhalenAlleen(householdId: string): Promise<LifeStory[]> {
+  const { data, error } = await supabase
+    .from('life_story')
+    .select('*')
+    .eq('household_id', householdId)
+    .eq('soort', 'verhaal')
+    .order('created_at', { ascending: false })
+  if (error) {
+    if (error.code === '42703' || /soort/.test(error.message ?? '')) return getStories(householdId, 'verhaal')
+    throw error
+  }
+  return (data ?? []) as LifeStory[]
+}
+
 export async function addStory(p: {
   householdId: string
   vraag: string

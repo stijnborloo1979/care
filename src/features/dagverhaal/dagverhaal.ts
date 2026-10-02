@@ -9,7 +9,20 @@ import { hhmm, localDateKey } from '../../lib/time'
  * geen medische duiding.
  */
 
-const AUTOMATISCH = /afgevinkt|bevestigd|opengezet|gekoppeld|koppeling|verblijf/i
+const AUTOMATISCH =
+  /afgevinkt|bevestigd|opengezet|gekoppeld|koppel|verblijf|lid toegevoegd|nieuw lid|uitgenodigd|toegewezen|zorgverlener|locatie|noodtoegang/i
+// Het dagverhaal wordt doorgestuurd: medicatie komt er nooit bij naam in.
+const MEDISCH = /pil|medic|medicijn|tablet|druppel|capsule|\bmg\b|siroop|zalf|inspuiting|insuline/i
+
+function zonderMedicatie(tekst: string, namen: string[]): boolean {
+  const t = tekst.toLowerCase()
+  return !MEDISCH.test(t) && !namen.some((n) => n && t.includes(n))
+}
+
+/** Hoofdletter weg aan het begin, de rest blijft: "Met Jan" → "met Jan". */
+function kleinBegin(s: string): string {
+  return s.charAt(0).toLowerCase() + s.slice(1)
+}
 
 function lijstje(woorden: string[]): string {
   if (woorden.length <= 1) return woorden.join('')
@@ -21,23 +34,35 @@ function dagdeel(iso: string, tz: string): string {
   return u < 12 ? 'in de voormiddag' : u < 18 ? 'in de namiddag' : "'s avonds"
 }
 
+export interface Dagverhaal {
+  /** Om te lezen én door te sturen: alleen wat de app zelf vaststelt. */
+  zinnen: string[]
+  /** Wat familie of zorgverleners zelf schreven: vrije tekst, dus niet doorgestuurd. */
+  logboek: string[]
+}
+
 export function dagverhaal(input: {
   naam: string
   summary: Summary
   bezoeken: Bezoek[]
   tz: string
   nu?: Date
-}): string[] {
+}): Dagverhaal {
   const { naam, summary, tz } = input
   const nu = input.nu ?? new Date()
   const vandaag = localDateKey(nu, tz)
   const zinnen: string[] = []
+  const medNamen = [...new Set(summary.meds.map((m) => m.name.toLowerCase().split(' ')[0]))].filter((n) => n.length > 2)
 
   // Wat er gepland stond en wat al afgevinkt is. Geen kale cijfers: welke dingen.
-  const gepland = summary.events.filter((e) => localDateKey(new Date(e.starts_at), tz) === vandaag)
+  // Medicatiemomenten uit de agenda komen er niet bij naam in; die staan
+  // hieronder als "bevestigd of niet".
+  const gepland = summary.events.filter(
+    (e) => localDateKey(new Date(e.starts_at), tz) === vandaag && e.kind !== 'med' && zonderMedicatie(e.title, medNamen),
+  )
   const gedaan = gepland.filter((e) => e.done_at)
   if (gedaan.length > 0) {
-    const titels = gedaan.slice(0, 3).map((e) => e.title.toLowerCase())
+    const titels = gedaan.slice(0, 3).map((e) => kleinBegin(e.title))
     const rest = gedaan.length - titels.length
     zinnen.push(
       `${naam} vinkte vandaag ${lijstje(titels)} af${rest > 0 ? `, en nog ${rest} ander${rest === 1 ? '' : 'e'}` : ''}.`,
@@ -49,7 +74,7 @@ export function dagverhaal(input: {
   // Bezoek: wie, wanneer en wat ze deden.
   const bezoekVandaag = input.bezoeken.filter((b) => localDateKey(new Date(b.visited_at), tz) === vandaag)
   for (const b of bezoekVandaag.slice(0, 3)) {
-    zinnen.push(`${b.visitor_name} was op bezoek ${dagdeel(b.visited_at, tz)}${b.note ? `: ${b.note.replace(/\.$/, '').toLowerCase()}` : ''}.`)
+    zinnen.push(`${b.visitor_name} was op bezoek ${dagdeel(b.visited_at, tz)}.`)
   }
 
   // Medicatie: alleen of het bevestigd is. Wat ze neemt, staat er niet.
@@ -63,18 +88,24 @@ export function dagverhaal(input: {
       )
   }
 
-  // Wat familie of zorgverleners zelf in het logboek schreven.
-  const notities = summary.log
-    .filter((l) => (l.source === 'family' || l.source === 'caregiver') && !AUTOMATISCH.test(l.title))
-    .slice(0, 2)
-  for (const l of notities) {
-    zinnen.push(`In het logboek: ${l.title.replace(/\.$/, '')}${l.note ? ` — ${l.note.replace(/\.$/, '')}` : ''}.`)
-  }
+  // Wat familie of zorgverleners zelf in het logboek schreven. Vrije tekst
+  // kan alles bevatten (ook een medicijn); daarom apart en nooit doorgestuurd.
+  const logboek = summary.log
+    .filter(
+      (l) =>
+        (l.source === 'family' || l.source === 'caregiver') &&
+        !AUTOMATISCH.test(l.title) &&
+        zonderMedicatie(`${l.title} ${l.note ?? ''}`, medNamen),
+    )
+    .slice(0, 3)
+    .map((l) => `${l.title.replace(/\.$/, '')}${l.note ? ` — ${l.note.replace(/\.$/, '')}` : ''}.`)
+  for (const b of bezoekVandaag.slice(0, 3))
+    if (b.note?.trim() && zonderMedicatie(b.note, medNamen)) logboek.push(`${b.visitor_name}: ${b.note.replace(/\.$/, '')}.`)
 
   // Wat er nog komt.
   const straks = gepland.find((e) => !e.done_at && new Date(e.starts_at) > nu)
-  if (straks) zinnen.push(`Nog op de planning: ${straks.title.toLowerCase()} om ${hhmm(new Date(straks.starts_at), tz)}.`)
+  if (straks) zinnen.push(`Nog op de planning: ${kleinBegin(straks.title)} om ${hhmm(new Date(straks.starts_at), tz)}.`)
 
   if (zinnen.length === 0) zinnen.push(`Over vandaag staat er nog niets in de app.`)
-  return zinnen
+  return { zinnen, logboek }
 }

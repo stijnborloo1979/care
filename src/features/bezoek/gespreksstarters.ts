@@ -30,7 +30,7 @@ export function gespreksstarters(fotos: MemoryPhoto[], verhalen: LifeStory[], da
       foto: f.photo_path,
     })
   }
-  const verteld = verhalen.filter((v) => (v.soort ?? 'verhaal') === 'verhaal' && (v.body?.trim() || v.audio_path))
+  const verteld = verhalen.filter((v) => (v.soort ?? 'verhaal') === 'verhaal' && v.shared !== false && (v.body?.trim() || v.audio_path))
   if (verteld.length > 0) {
     const v = verteld[hash(`v${dag}`) % verteld.length]
     uit.push({ sleutel: `v${v.id}`, tekst: `${naam} vertelde over "${v.question}". Vraag er eens meer over.` })

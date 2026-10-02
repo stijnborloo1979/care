@@ -51,14 +51,21 @@ beforeEach(async () => {
     },
   }
   g.__maakClient = () => ({
-    from: (tabel: string) => ({
-      select: () =>
+    from: (tabel: string) => {
+      const bron = (): { data: unknown[] | null; error: unknown } =>
         tabel === 'message'
-          ? Promise.resolve({ data: berichten, error: null })
+          ? { data: berichten, error: null }
           : tabel === 'visit_log'
-            ? { not: () => Promise.resolve(bezoeken ? { data: bezoeken, error: null } : { data: null, error: { code: '42P01', message: 'geen tabel' } }) }
-            : { not: () => Promise.resolve({ data: verhaalFout ? null : verhalen, error: verhaalFout }) },
-    }),
+            ? bezoeken ? { data: bezoeken, error: null } : { data: null, error: { code: '42P01', message: 'geen tabel' } }
+            : verhaalFout ? { data: null, error: verhaalFout } : { data: verhalen, error: null }
+      const keten: Record<string, unknown> = {}
+      for (const m of ['select', 'not', 'order']) keten[m] = () => keten
+      keten.range = async (van: number, tot: number) => {
+        const r = bron()
+        return r.data ? { data: r.data.slice(van, tot + 1), error: null } : r
+      }
+      return keten
+    },
     storage: {
       from: (bucket: string) => ({
         list: async (prefix: string) => ({ data: (bucket === 'memories' ? fotoBoom : boom)[prefix] ?? [] }),
@@ -104,5 +111,15 @@ describe('cleanup-storage', () => {
     const r = await handler()
     expect(gewistFoto).toEqual([])
     expect((await r.json()).bezoekfotos).toBe(0)
+  })
+
+  it('kent alle berichten, ook voorbij de eerste 1000 rijen', async () => {
+    berichten = [
+      ...Array.from({ length: 1500 }, (_, i) => ({ audio_path: `hh1/family/x${i}.webm`, photo_path: null })),
+      { audio_path: 'hh1/family/wees.webm', photo_path: null },
+    ]
+    await handler()
+    // wees.webm staat pas op rij 1501 en blijft; bericht.webm hoort nu bij niets.
+    expect(gewist).toEqual(['hh1/family/bericht.webm'])
   })
 })

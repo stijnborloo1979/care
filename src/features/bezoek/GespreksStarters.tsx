@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 import { MessagesSquare } from 'lucide-react'
 import StoragePhoto from '../../components/StoragePhoto'
 import { getPhotos } from '../../services/memories'
-import { getStories } from '../../services/stories'
+import { getVerhalenAlleen } from '../../services/stories'
 import { localDateKey } from '../../lib/time'
 import { gespreksstarters } from './gespreksstarters'
 
 /** "Om over te praten": voor wie langsgaat en niet goed weet waarover. */
 export default function GespreksStarters({ householdId, personName, timezone }: { householdId: string; personName: string; timezone: string }) {
   const fotos = useQuery({ queryKey: ['photos', householdId], queryFn: () => getPhotos(householdId), enabled: !!householdId, retry: false })
-  const verhalen = useQuery({ queryKey: ['stories', householdId], queryFn: () => getStories(householdId), enabled: !!householdId, retry: false })
+  const verhalen = useQuery({ queryKey: ['verhalen-alleen', householdId], queryFn: () => getVerhalenAlleen(householdId), enabled: !!householdId, retry: false })
   const lijst = gespreksstarters(fotos.data ?? [], verhalen.data ?? [], localDateKey(new Date(), timezone), personName)
   if (lijst.length === 0) return null
   return (

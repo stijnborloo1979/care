@@ -24,7 +24,7 @@ export default function DagVerhaal({
     retry: false,
   })
   const [gedeeld, setGedeeld] = useState(false)
-  const zinnen = dagverhaal({ naam: personName, summary, bezoeken: bezoeken.data ?? [], tz: timezone })
+  const { zinnen, logboek } = dagverhaal({ naam: personName, summary, bezoeken: bezoeken.data ?? [], tz: timezone })
   const tekst = `De dag van ${personName}\n\n${zinnen.join('\n')}`
 
   async function deel() {
@@ -56,6 +56,17 @@ export default function DagVerhaal({
           <p key={i}>{z}</p>
         ))}
       </div>
+      {logboek.length > 0 ? (
+        <div className="mt-4 rounded-2xl bg-surface-soft p-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Zelf geschreven vandaag</h3>
+          <ul className="mt-1 space-y-1">
+            {logboek.map((l, i) => (
+              <li key={i}>{l}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-ink-faint">Dit wordt niet mee doorgestuurd.</p>
+        </div>
+      ) : null}
       <p className="mt-3 text-sm text-ink-faint">Alleen wat in de app staat. Geen beoordeling van de gezondheid.</p>
     </section>
   )

@@ -28,6 +28,12 @@ begin
 end
 $$;
 
+-- Wie 74 al draaide vóór de strengere regel: die regel hier opnieuw zetten.
+-- Een foto hoort bij zijn eigen bezoek: <hh>/bezoek/<id van dat bezoek>-…
+alter table public.visit_log drop constraint if exists visit_log_foto_pad;
+alter table public.visit_log add constraint visit_log_foto_pad
+  check (photo_path is null or photo_path like household_id::text || '/bezoek/' || id::text || '-%');
+
 -- Het bezoek waar een pad bij hoort: <hh>/bezoek/<36 tekens id>-…
 create or replace function public.bezoek_van_pad(pad text)
 returns uuid

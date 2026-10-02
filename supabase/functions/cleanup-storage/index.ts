@@ -24,11 +24,12 @@ Deno.serve(async () => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  // Alles wat nog in gebruik is. Paden zijn kort en het aantal berichten
-  // blijft klein; één keer ophalen volstaat.
-  const { data: berichten, error } = await supabase
-    .from('message')
-    .select('audio_path, photo_path')
+  // Alles wat nog in gebruik is, in blokken: Supabase geeft hoogstens
+  // 1000 rijen per vraag terug. Wie maar het eerste blok kent, zou de rest
+  // voor wezen houden en wissen.
+  const { data: berichten, error } = await alleRijen<{ audio_path: string | null; photo_path: string | null }>(
+    (van, tot) => supabase.from('message').select('id, audio_path, photo_path').order('id').range(van, tot),
+  )
   if (error) return new Response(error.message, { status: 500 })
 
   const inGebruik = new Set<string>()
@@ -41,10 +42,9 @@ Deno.serve(async () => {
   // <huishouden>/verhalen/. Ze horen bij life_story, niet bij een bericht,
   // en mogen hier nooit gewist worden. Lukt het niet om ze op te halen,
   // dan wordt er niets gewist.
-  const { data: verhalen, error: verhaalFout } = await supabase
-    .from('life_story')
-    .select('audio_path')
-    .not('audio_path', 'is', null)
+  const { data: verhalen, error: verhaalFout } = await alleRijen<{ audio_path: string | null }>((van, tot) =>
+    supabase.from('life_story').select('id, audio_path').not('audio_path', 'is', null).order('id').range(van, tot),
+  )
   if (verhaalFout) return new Response(verhaalFout.message, { status: 500 })
   for (const v of verhalen ?? []) {
     if (v.audio_path) inGebruik.add(v.audio_path)
@@ -66,14 +66,29 @@ Deno.serve(async () => {
 })
 
 const FOTO_BUCKET = 'memories'
+const BLOK = 1000
+
+type Fout = { message: string } | null
+
+/** Haalt alle rijen op, blok per blok, tot een blok niet meer vol is. */
+export async function alleRijen<T>(
+  blok: (van: number, tot: number) => PromiseLike<{ data: unknown[] | null; error: Fout }>,
+): Promise<{ data: T[]; error: Fout }> {
+  const alle: T[] = []
+  for (let van = 0; ; van += BLOK) {
+    const { data, error } = await blok(van, van + BLOK - 1)
+    if (error) return { data: [], error }
+    alle.push(...((data ?? []) as T[]))
+    if (!data || data.length < BLOK) return { data: alle, error: null }
+  }
+}
 
 async function ruimBezoekfotosOp(supabase: Client): Promise<number> {
-  const { data, error } = await supabase
-    .from('visit_log')
-    .select('photo_path')
-    .not('photo_path', 'is', null)
+  const { data, error } = await alleRijen<{ photo_path: string | null }>((van, tot) =>
+    supabase.from('visit_log').select('id, photo_path').not('photo_path', 'is', null).order('id').range(van, tot),
+  )
   // Tabel nog niet aangemaakt, of niet op te halen: dan wist deze ronde niets.
-  if (error || !data) return 0
+  if (error) return 0
   const inGebruik = new Set<string>()
   for (const r of data as { photo_path?: string | null }[]) if (r.photo_path) inGebruik.add(r.photo_path)
   const wezen = await zoekBezoekWezen(

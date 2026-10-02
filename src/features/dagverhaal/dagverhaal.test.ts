@@ -17,11 +17,12 @@ describe('dagverhaal', () => {
       summary: { ...leeg, events: [ev('1', '08:00', 'Ontbijt', true), ev('2', '10:00', 'Wandeling', true), ev('3', '18:00', 'Avondeten')] },
       bezoeken: [{ id: 'b', household_id: 'hh', visitor_name: 'Els', visitor_card: null, note: 'Samen koffie gedronken.', photo_path: null, visited_at: '2026-10-02T15:00:00+02:00', author_id: null, created_at: '' }],
     })
-    expect(z).toEqual([
+    expect(z.zinnen).toEqual([
       'Rita vinkte vandaag ontbijt en wandeling af.',
-      'Els was op bezoek in de namiddag: samen koffie gedronken.',
+      'Els was op bezoek in de namiddag.',
       'Nog op de planning: avondeten om 18:00.',
     ])
+    expect(z.logboek).toEqual(['Els: Samen koffie gedronken.'])
   })
   it('medicatie: alleen of het bevestigd is, nooit wat', () => {
     const z = dagverhaal({
@@ -32,8 +33,8 @@ describe('dagverhaal', () => {
         { id: 'm3', name: 'X', dose: null, due_at: '2026-10-02T20:00:00+02:00', taken_at: null },
       ] },
     })
-    expect(z).toEqual(['De medicatie van 14:00 is nog niet bevestigd.'])
-    expect(z.join(' ')).not.toMatch(/Dafalgan/)
+    expect(z.zinnen).toEqual(['De medicatie van 14:00 is nog niet bevestigd.'])
+    expect(z.zinnen.join(' ')).not.toMatch(/Dafalgan/)
   })
   it('automatische logboekregels komen er niet in, eigen notities wel', () => {
     const z = dagverhaal({
@@ -44,9 +45,29 @@ describe('dagverhaal', () => {
         { id: 'l3', occurred_at: '2026-10-02T12:00:00+02:00', title: 'Samen gewandeld', note: 'Vandaag wat vermoeid.', source: 'family' },
       ] },
     })
-    expect(z).toEqual(['In het logboek: Samen gewandeld — Vandaag wat vermoeid.'])
+    expect(z.logboek).toEqual(['Samen gewandeld — Vandaag wat vermoeid.'])
+    expect(z.zinnen).toEqual(['Over vandaag staat er nog niets in de app.'])
+  })
+  it('geen medicatie bij naam, ook niet via de agenda, het logboek of een bezoek', () => {
+    const z = dagverhaal({
+      naam: 'Rita', tz: TZ, nu: NU,
+      summary: {
+        ...leeg,
+        events: [{ ...ev('1', '08:00', 'Dafalgan 1g', true), kind: 'med' as const }, ev('2', '09:00', 'Ontbijt', true)],
+        meds: [{ id: 'm', name: 'Dafalgan bruis', dose: null, due_at: '2026-10-02T08:00:00+02:00', taken_at: '2026-10-02T08:05:00+02:00' }],
+        log: [{ id: 'l', occurred_at: '2026-10-02T12:00:00+02:00', title: 'Ibuprofen gegeven', note: null, source: 'family' },
+              { id: 'l2', occurred_at: '2026-10-02T12:30:00+02:00', title: 'Nieuw lid toegevoegd: jan', note: null, source: 'family' }],
+      },
+      bezoeken: [{ id: 'b', household_id: 'hh', visitor_name: 'Els', visitor_card: null, note: 'Dafalgan gegeven', photo_path: null, visited_at: '2026-10-02T15:00:00+02:00', author_id: null, created_at: '' }],
+    })
+    // Wat doorgestuurd wordt, noemt nooit een medicijn of een lid.
+    expect(z.zinnen.join(' ')).not.toMatch(/dafalgan|ibuprofen|lid/i)
+    expect(z.zinnen).toContain('Els was op bezoek in de namiddag.')
+    expect(z.zinnen).toContain('Alle medicatie tot nu toe is bevestigd.')
+    // Vrije tekst blijft in de app; ook daar geen gepland medicijn of automatische regel.
+    expect(z.logboek.join(' ')).not.toMatch(/dafalgan|lid/i)
   })
   it('een lege dag zegt dat eerlijk', () => {
-    expect(dagverhaal({ naam: 'Rita', tz: TZ, nu: NU, bezoeken: [], summary: leeg })).toEqual(['Over vandaag staat er nog niets in de app.'])
+    expect(dagverhaal({ naam: 'Rita', tz: TZ, nu: NU, bezoeken: [], summary: leeg }).zinnen).toEqual(['Over vandaag staat er nog niets in de app.'])
   })
 })

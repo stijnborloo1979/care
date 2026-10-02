@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react'
 import { getProfiel } from '../../services/profiel'
 import { getPeople } from '../../services/people'
 import { getNotes } from '../../services/notes'
-import { getStories } from '../../services/stories'
+import { getVerhalenAlleen } from '../../services/stories'
 import { Kaart } from './ui'
 
 /**
@@ -17,7 +17,7 @@ export default function DitBenIkKaart({ hh, naam }: { hh: string; naam: string }
   const profiel = useQuery({ ...opt, queryKey: ['zorg', 'profiel', hh], queryFn: () => getProfiel(hh) })
   const mensen = useQuery({ ...opt, queryKey: ['zorg', 'mensen', hh], queryFn: () => getPeople(hh) })
   const weetjes = useQuery({ ...opt, queryKey: ['zorg', 'weetjes', hh], queryFn: () => getNotes(hh) })
-  const verhalen = useQuery({ ...opt, queryKey: ['zorg', 'verhalen', hh], queryFn: () => getStories(hh, 'verhaal') })
+  const verhalen = useQuery({ ...opt, queryKey: ['zorg', 'verhalen', hh], queryFn: () => getVerhalenAlleen(hh) })
 
   const p = profiel.data
   const familie = (mensen.data ?? []).filter((m) => m.kind === 'family' && m.name)
