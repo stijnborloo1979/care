@@ -20,7 +20,11 @@ export function useOrganisaties() {
   return useQuery({
     queryKey: ['organisaties', session?.user.id],
     enabled: !!session,
-    staleTime: 60_000,
+    // Zoals bij de huishoudens: bij elke start opnieuw vragen. Een lege
+    // lijst uit de bewaarde cache stuurde een medewerker anders naar de
+    // onboarding voor families.
+    staleTime: 0,
+    refetchOnMount: 'always',
     queryFn: mijnOrganisaties,
   })
 }
@@ -49,4 +53,11 @@ export function useOrganisatie(): OrgContext {
     beheert: !!org && (org.rol === 'org_admin' || org.rol === 'coordinator'),
     isBeheerder: org?.rol === 'org_admin',
   }
+}
+
+/** Leeg uit de cache telt niet als antwoord zolang een nieuwe vraag onderweg is. */
+export function useOrganisatiesKlaar() {
+  const q = useOrganisaties()
+  const lijst = q.data ?? []
+  return { lijst, isLoading: q.isLoading || (q.isFetching && lijst.length === 0) }
 }
