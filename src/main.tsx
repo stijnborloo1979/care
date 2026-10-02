@@ -83,7 +83,7 @@ const ZorgTeam = lazy(() => import("./features/zorg/Team"));
 const NieuweOrganisatie = lazy(() => import("./features/zorg/NieuweOrganisatie"));
 const ZorgUitnodiging = lazy(() => import("./features/zorg/Uitnodiging"));
 const Account = lazy(() => import("./features/auth/Account"));
-import { useOrganisaties } from "./features/zorg/useOrganisatie";
+import { useOrganisatiesKlaar } from "./features/zorg/useOrganisatie";
 import { useHousehold } from "./features/household/useHousehold";
 import { configuratieOk } from "./lib/supabase";
 import ErrorBoundary from "./app/ErrorBoundary";
@@ -103,10 +103,10 @@ function Beveiligd({ children }: { children: React.ReactNode }) {
 /** De rol bepaalt het scherm: 'person' komt nooit in de familie-interface. */
 function Start() {
   const { household, all, isLoading } = useHousehold();
-  const organisaties = useOrganisaties();
+  const organisaties = useOrganisatiesKlaar();
   if (isLoading || organisaties.isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
   // Wie geen familie heeft maar in een woonzorgcentrum werkt, gaat naar dat scherm.
-  if (all.length === 0 && (organisaties.data ?? []).length > 0) return <Navigate to="/zorg" replace />;
+  if (all.length === 0 && organisaties.lijst.length > 0) return <Navigate to="/zorg" replace />;
   // Wie nergens bij hoort, is nieuw: meteen naar de onboarding.
   if (all.length === 0) return <Navigate to="/start" replace />;
   // Het scherm hangt af van wie je bent, niet van je rol: wie de app zelf
