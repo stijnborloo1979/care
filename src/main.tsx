@@ -82,6 +82,7 @@ const ZorgBeheer = lazy(() => import("./features/zorg/Beheer"));
 const ZorgTeam = lazy(() => import("./features/zorg/Team"));
 const NieuweOrganisatie = lazy(() => import("./features/zorg/NieuweOrganisatie"));
 const ZorgUitnodiging = lazy(() => import("./features/zorg/Uitnodiging"));
+const Account = lazy(() => import("./features/auth/Account"));
 import { useOrganisatiesKlaar } from "./features/zorg/useOrganisatie";
 import { useHousehold } from "./features/household/useHousehold";
 import { configuratieOk } from "./lib/supabase";
@@ -162,6 +163,14 @@ if (!configuratieOk) {
             <Route path="/privacy" element={<Privacy />} />
                   <Route path="/uitnodiging" element={<AcceptInvite />} />
                   <Route path="/zorg/uitnodiging" element={<ZorgUitnodiging />} />
+                  <Route
+                    path="/account"
+                    element={
+                      <Beveiligd>
+                        <Account />
+                      </Beveiligd>
+                    }
+                  />
                   <Route
                     path="/zorg/nieuw"
                     element={

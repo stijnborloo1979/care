@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
-import { Building2, CalendarDays, ChevronDown, ClipboardList, LogOut, MessagesSquare, Settings2, Users } from 'lucide-react'
+import { Building2, CalendarDays, ChevronDown, ClipboardList, KeyRound, LogOut, MessagesSquare, Settings2, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
@@ -84,6 +84,14 @@ export default function ZorgLayout() {
             </NavLink>
           ) : null}
           <p className="truncate px-2 py-1 text-xs text-ink-faint">{ik}</p>
+          <NavLink
+            to="/account"
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft"
+          >
+            <KeyRound size={16} strokeWidth={1.75} aria-hidden="true" />
+            Mijn account en wachtwoord
+          </NavLink>
           <button
             onClick={signOut}
             className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft"

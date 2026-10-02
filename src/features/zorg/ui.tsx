@@ -39,11 +39,19 @@ export function Leeg({ children }: { children: ReactNode }) {
   return <p className="rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">{children}</p>
 }
 
+/** Een fout van Supabase is een gewoon object met een message, geen Error. */
+export function foutTekst(fout: unknown): string {
+  if (fout instanceof Error) return fout.message
+  if (fout && typeof fout === 'object' && typeof (fout as { message?: unknown }).message === 'string')
+    return (fout as { message: string }).message
+  return typeof fout === 'string' ? fout : 'Er ging iets mis. Probeer het opnieuw.'
+}
+
 export function Fout({ fout }: { fout: unknown }) {
   if (!fout) return null
   return (
     <p role="alert" className="mt-3 rounded-2xl border border-alert bg-surface-soft p-3 text-sm text-alert">
-      {fout instanceof Error ? fout.message : String(fout)}
+      {foutTekst(fout)}
     </p>
   )
 }

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
 import { useOrganisatie } from './useOrganisatie'
+import { useAuth } from '../auth/AuthProvider'
 import {
   ROLNAAM,
   actieveBewoners,
@@ -130,7 +131,9 @@ function Toewijzingen({ orgId }: { orgId: string }) {
   const stoppen = useMutation({ mutationFn: stopToewijzing, onSuccess: ververs })
 
   const namen = Object.fromEntries((team.data ?? []).map((m) => [m.profile_id, m.naam]))
-  const zorgers = (team.data ?? []).filter((m) => m.actief && m.rol !== 'org_admin')
+  // Jezelf toewijzen kan niet (53): dan ook niet aanbieden.
+  const ik = useAuth().session?.user.id
+  const zorgers = (team.data ?? []).filter((m) => m.actief && m.rol !== 'org_admin' && m.profile_id !== ik)
   const lijst = (bewoners.data ?? []).filter(
     (b) => !zoek || `${b.naam} ${b.afdeling ?? ''} ${b.kamer ?? ''}`.toLowerCase().includes(zoek.toLowerCase()),
   )
