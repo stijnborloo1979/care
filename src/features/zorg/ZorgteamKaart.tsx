@@ -4,7 +4,7 @@ import { Check, CheckCheck, HeartHandshake, Volume2 } from 'lucide-react'
 import DictateButton from '../../components/DictateButton'
 import { spreek } from '../voice/useSpeech'
 import { hhmm } from '../../lib/time'
-import { berichtenVan, draden, lopendVerblijf, stuurAanZorgteam } from './bewonerBerichten'
+import { berichtenVan, draden, isBewoner, lopendVerblijf, stuurAanZorgteam } from './bewonerBerichten'
 import { foutTekst } from './ui'
 
 /**
@@ -24,9 +24,17 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
     staleTime: 10 * 60_000,
     retry: false,
   })
+  // Familie die het scherm van de persoon bekijkt, stuurt niets in zijn naam.
+  const bewoner = useQuery({
+    queryKey: ['is-bewoner', householdId],
+    enabled: !!verblijf.data,
+    queryFn: () => isBewoner(householdId),
+    staleTime: 10 * 60_000,
+    retry: false,
+  })
   const berichten = useQuery({
     queryKey: ['bewoner-berichten', householdId],
-    enabled: !!verblijf.data,
+    enabled: !!verblijf.data && bewoner.data === true,
     queryFn: () => berichtenVan(householdId, 20),
     // Een tablet krijgt geen focus: zo verschijnt een antwoord vanzelf.
     refetchInterval: 60_000,
@@ -41,7 +49,7 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
     },
   })
 
-  if (!verblijf.data) return null
+  if (!verblijf.data || bewoner.data !== true) return null
   const lijst = draden(berichten.data ?? []).slice(0, 3)
 
   return (

@@ -24,7 +24,7 @@ export default function Bewoners() {
   const mijn = useQuery({ queryKey: ['zorg', 'mijn-bewoners', orgId], enabled: !!orgId, queryFn: () => mijnBewoners(orgId) })
   const alle = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], enabled: !!orgId, queryFn: () => alleBewoners(orgId) })
   // Nieuwe vragen van bewoners (68): de database toont alleen die van mijn bewoners.
-  const nieuw = useOngezien()
+  const nieuw = useOngezien(orgId)
 
   const mijnIds = new Set((mijn.data ?? []).map((b) => b.household_id))
   const past = (b: Bewoner) =>

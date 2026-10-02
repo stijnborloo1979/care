@@ -18,8 +18,7 @@ export default function ZorgLayout() {
   const { session, signOut } = useAuth()
   const { all: huishoudens } = useHousehold()
   const [open, setOpen] = useState(false)
-  const ongezien = useOngezien()
-  const vragen = Object.values(ongezien.data ?? {}).reduce((a, b) => a + b, 0)
+  const vragen = useOngezien(org?.org_id).totaal
 
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
   if (!org) return <Navigate to="/zorg/nieuw" replace />

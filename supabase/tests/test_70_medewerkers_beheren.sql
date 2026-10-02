@@ -62,6 +62,19 @@ select pg_temp.als('tl');  select pg_temp.gelijk('team lead die beheerder werd: 
 select pg_temp.als('c1');  select pg_temp.gelijk('toegewezene die beheerder werd: geen toegang meer', public.toegewezen(pg_temp.id('hh')), false);
 select pg_temp.als('c1');  select pg_temp.gelijk('als beheerder mag hij wel toewijzen, zonder inhoud', public.mag_toewijzen(pg_temp.id('hh')), true);
 
+-- Een beheerder die zijn oude toewijzing zelf heropent, krijgt geen toegang
+select pg_temp.als('tl');
+update public.care_assignment set valid_until = null where profile_id = pg_temp.id('c1');
+update public.department_staff set valid_until = null where profile_id = pg_temp.id('tl');
+select pg_temp.gelijk('heropende afdelingsplaats geeft een beheerder geen toegang', public.toegewezen(pg_temp.id('hh')), false);
+select pg_temp.gelijk('en geen team lead-recht', public.is_team_lead_van(pg_temp.id('org')), false);
+select pg_temp.als('c1');
+select pg_temp.gelijk('heropende toewijzing geeft een beheerder geen toegang', public.toegewezen(pg_temp.id('hh')), false);
+reset role;
+update public.care_assignment set valid_until = now() where profile_id = pg_temp.id('c1') and valid_until is null;
+update public.department_staff set valid_until = now() where profile_id = pg_temp.id('tl') and valid_until is null;
+set local role authenticated;
+
 -- Terug medewerker: de toegang komt niet vanzelf terug
 select pg_temp.als('oa');
 update public.org_membership set role = 'caregiver' where profile_id = pg_temp.id('c1') and org_id = pg_temp.id('org');

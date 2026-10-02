@@ -24,6 +24,13 @@ export async function lopendVerblijf(hh: string): Promise<string | null> {
   return (data as string | null) ?? null
 }
 
+/** Ben ik de bewoner zelf (tablet of wie de app zelf gebruikt)? Familie in de voorvertoning niet. */
+export async function isBewoner(hh: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_bewoner', { hh })
+  if (error) return false
+  return data === true
+}
+
 export async function berichtenVan(hh: string, aantal = 30): Promise<BewonerBericht[]> {
   const { data, error } = await supabase
     .from('resident_message')

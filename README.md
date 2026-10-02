@@ -212,9 +212,21 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     zijn zorgteam (toegewezen medewerkers en team lead). Het team ziet het
     in de app, markeert het als gezien en kan kort antwoorden. Beheer en
     familie zien niets. Bewaard volgens de bewaartermijn van het WZC.
+    Draai 68 samen met 73.
+69. `69_anon_dicht.sql` — negen hulpfuncties niet meer uitvoerbaar zonder
+    in te loggen (onder meer het ondersteuningsniveau van een huishouden).
+70. `70_medewerkers_beheren.sql` — wie beheerder wordt of uit dienst gaat,
+    verliest meteen afdeling en toewijzingen; toegang hangt nu ook aan de
+    rol. Uitnodigingen intrekken en verlengen.
+71. `71_verblijf_beeindigen.sql` — het WZC sluit een verblijf af (verhuisd,
+    overleden, andere). Het team verliest toegang; de familie houdt alles.
+72. `72_afdelingen.sql` — afdelingen archiveren en terugzetten, alleen als
+    er niemand meer verblijft.
+73. `73_zelfkaart.sql` — vanuit de app maakt niemand zichzelf "de persoon"
+    van een huishouden (kaart van het soort self).
 
-Voor 47 tot 68 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 73 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -429,6 +441,11 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_66_null_rolcontrole.sql` — een vreemde roept elke functie aan; zakt zonder 66.
 - `test_67_uitnodigingen_in_app.sql` — alleen het juiste e-mailadres ziet en aanvaardt een uitnodiging.
 - `test_68_bericht_zorgteam.sql` — alleen de bewoner stuurt, alleen zijn zorgteam leest en antwoordt; zakt met een ruimere leesregel.
+- `test_69_anon_dicht.sql` — de negen functies zijn dicht voor anon, open voor ingelogden.
+- `test_70_medewerkers_beheren.sql` — een team lead of toegewezene die beheerder wordt, ziet niets meer, ook niet na zelf heropenen; zakt zonder 70.
+- `test_71_verblijf_beeindigen.sql` — alleen beheerder of coördinator; team verliest toegang, familie krijgt een melding.
+- `test_72_afdelingen.sql` — archiveren alleen leeg en via de functie; niemand op een gearchiveerde afdeling.
+- `test_73_zelfkaart.sql` — een familielid wordt niet "zelf"; zakt zonder 73.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

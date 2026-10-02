@@ -73,6 +73,12 @@ select pg_temp.geweigerd('geen bewoner naar een gearchiveerde afdeling',
 select pg_temp.geweigerd('geen medewerker op een gearchiveerde afdeling',
   format('insert into public.department_staff (department_id, profile_id, role) values (%L::uuid, %L::uuid, ''staff'')', pg_temp.id('d2'), pg_temp.id('c1')));
 
+-- Rechtstreeks archiveren of een plaats heropenen gaat niet
+select pg_temp.geweigerd('archiveren buiten de functie om',
+  format('update public.department set archived_at = now() where id = %L::uuid', pg_temp.id('d')));
+select pg_temp.geweigerd('een plaats op een gearchiveerde afdeling heropenen',
+  format('update public.department_staff set valid_until = null where department_id = %L::uuid', pg_temp.id('d2')));
+
 -- Terugzetten
 select public.herstel_afdeling(pg_temp.id('d2'));
 select public.zet_verblijf(pg_temp.id('hh'), pg_temp.id('d2'), '7');

@@ -41,7 +41,8 @@ declare
   d public.department;
   n integer;
 begin
-  select * into d from public.department where id = afdeling;
+  -- Vergrendelen: zo kan niemand tegelijk een bewoner naar deze afdeling zetten.
+  select * into d from public.department where id = afdeling for update;
   if d.id is null or public.org_role_of(d.org_id) is distinct from 'org_admin' then
     raise exception 'Alleen de beheerder van de organisatie' using errcode = '42501';
   end if;
@@ -80,17 +81,28 @@ revoke execute on function public.herstel_afdeling(uuid) from public, anon;
 grant execute on function public.archiveer_afdeling(uuid) to authenticated;
 grant execute on function public.herstel_afdeling(uuid) to authenticated;
 
--- Niemand verblijft of werkt op een gearchiveerde afdeling.
+-- Niemand verblijft of werkt op een gearchiveerde afdeling. Alleen wat
+-- daarna nog loopt telt: een verblijf of plaats beëindigen mag altijd.
 create or replace function public.afdeling_niet_gearchiveerd()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  loopt boolean;
 begin
-  if new.department_id is not null
-     and exists (select 1 from public.department where id = new.department_id and archived_at is not null) then
-    raise exception 'Deze afdeling is gearchiveerd' using errcode = '22023';
+  if tg_table_name = 'stay' then
+    loopt := new.ended_at is null;
+  else
+    loopt := new.valid_until is null or new.valid_until > now();
+  end if;
+  if loopt and new.department_id is not null then
+    -- for share: wacht op een archivering die op dat moment bezig is.
+    perform 1 from public.department where id = new.department_id and archived_at is not null for share;
+    if found then
+      raise exception 'Deze afdeling is gearchiveerd' using errcode = '22023';
+    end if;
   end if;
   return new;
 end;
@@ -100,10 +112,34 @@ revoke execute on function public.afdeling_niet_gearchiveerd() from public, anon
 
 drop trigger if exists stay_afdeling_archief on public.stay;
 create trigger stay_afdeling_archief
-  before insert or update of department_id on public.stay
+  before insert or update on public.stay
   for each row execute function public.afdeling_niet_gearchiveerd();
 
 drop trigger if exists department_staff_archief on public.department_staff;
 create trigger department_staff_archief
-  before insert or update of department_id on public.department_staff
+  before insert or update on public.department_staff
   for each row execute function public.afdeling_niet_gearchiveerd();
+
+-- Archiveren alleen via archiveer_afdeling(): die kijkt of er nog iemand
+-- verblijft. Rechtstreeks archived_at zetten (de beheerder mag de tabel
+-- aanpassen, 52) zou dat overslaan. Geen security definer: zo weet de
+-- functie of de app (authenticated) dit doet of de server.
+create or replace function public.archief_via_functie()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if current_user = 'authenticated' and new.archived_at is distinct from old.archived_at then
+    raise exception 'Archiveer een afdeling via Beheer' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function public.archief_via_functie() from public, anon, authenticated;
+
+drop trigger if exists department_archief_via_functie on public.department;
+create trigger department_archief_via_functie
+  before update of archived_at on public.department
+  for each row execute function public.archief_via_functie();

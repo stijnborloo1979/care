@@ -507,13 +507,25 @@ export async function openOrgUitnodigingen(org: string): Promise<{ id: string; e
 // ---- Medewerkers beheren (70) ------------------------------------------
 
 export async function zetMedewerkerRol(org: string, profiel: string, rol: OrgRol): Promise<void> {
-  const { error } = await supabase.from('org_membership').update({ role: rol }).eq('org_id', org).eq('profile_id', profiel)
+  const { data, error } = await supabase
+    .from('org_membership')
+    .update({ role: rol })
+    .eq('org_id', org)
+    .eq('profile_id', profiel)
+    .select('profile_id')
   if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan dit aanpassen.')
 }
 
 export async function zetMedewerkerActief(org: string, profiel: string, actief: boolean): Promise<void> {
-  const { error } = await supabase.from('org_membership').update({ active: actief }).eq('org_id', org).eq('profile_id', profiel)
+  const { data, error } = await supabase
+    .from('org_membership')
+    .update({ active: actief })
+    .eq('org_id', org)
+    .eq('profile_id', profiel)
+    .select('profile_id')
   if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan dit aanpassen.')
 }
 
 export async function trekUitnodigingIn(id: string): Promise<void> {
