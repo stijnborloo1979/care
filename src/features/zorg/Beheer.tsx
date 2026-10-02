@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Archive, Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
+import { Archive, CircleCheck, Copy, KeyRound, TriangleAlert, UserPlus, X } from 'lucide-react'
+import { aandachtspunten, cijfers } from './overzicht'
 import { useOrganisatie } from './useOrganisatie'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -29,6 +30,7 @@ import {
   teamberichtTermijnGevolg,
   zetTeamberichtTermijn,
   noodtoegangenVanOrg,
+  openOrgUitnodigingen,
   stopToewijzing,
   toewijzingen,
   wijsToe,
@@ -53,6 +55,7 @@ export default function Beheer() {
   return (
     <div className="space-y-6">
       <Kop titel="Beheer" uitleg={`${org.naam} · ${ROLNAAM[org.rol]}`} />
+      <Overzicht orgId={orgId} isBeheerder={isBeheerder} />
       <Koppelcode orgId={orgId} isBeheerder={isBeheerder} />
       <Toewijzingen orgId={orgId} />
       {isBeheerder ? <Medewerkers orgId={orgId} /> : null}
@@ -109,6 +112,83 @@ function Koppelcode({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolea
         ) : null}
       </div>
       <Fout fout={nieuw.error} />
+    </Kaart>
+  )
+}
+
+// ---------------------------------------------------------------------
+
+/**
+ * Bovenaan: hoe staat het ervoor, en wat vraagt aandacht. Alleen wie waar
+ * verblijft en wie voor wie zorgt; nooit inhoud over een bewoner.
+ */
+function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean }) {
+  const bewoners = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], queryFn: () => alleBewoners(orgId) })
+  const team = useQuery({ queryKey: ['zorg', 'medewerkers', orgId], queryFn: () => medewerkers(orgId) })
+  const toe = useQuery({ queryKey: ['zorg', 'toewijzingen', orgId], queryFn: () => toewijzingen(orgId) })
+  const afd = useQuery({ queryKey: ['zorg', 'afdelingen', orgId], queryFn: () => haalAfdelingen(orgId) })
+  const inv = useQuery({
+    queryKey: ['zorg', 'open-uitnodigingen', orgId],
+    enabled: isBeheerder,
+    queryFn: () => openOrgUitnodigingen(orgId),
+  })
+
+  if (bewoners.isLoading || team.isLoading || toe.isLoading || afd.isLoading) return <Kaart><Laden /></Kaart>
+
+  const invoer = {
+    bewoners: bewoners.data ?? [],
+    toewijzingen: toe.data ?? [],
+    medewerkers: team.data ?? [],
+    afdelingen: afd.data ?? [],
+    uitnodigingen: isBeheerder ? inv.data ?? null : null,
+  }
+  const c = cijfers(invoer)
+  const punten = aandachtspunten(invoer)
+  const tegels: [string, number | null][] = [
+    ['Bewoners', c.bewoners],
+    ['Medewerkers', c.medewerkers],
+    ['Afdelingen', c.afdelingen],
+    ['Open uitnodigingen', c.uitnodigingen],
+  ]
+
+  return (
+    <Kaart titel="Overzicht">
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {tegels
+          .filter(([, n]) => n !== null)
+          .map(([t, n]) => (
+            <div key={t} className="min-w-0 rounded-2xl bg-surface-soft p-4">
+              <dt className="truncate text-sm text-ink-soft">{t}</dt>
+              <dd className="text-3xl font-bold tabular-nums">{n}</dd>
+            </div>
+          ))}
+      </dl>
+
+      <h3 className="mt-5 text-sm font-semibold uppercase tracking-wide text-ink-faint">Vraagt aandacht</h3>
+      {punten.length === 0 ? (
+        <p className="mt-2 flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">
+          <CircleCheck size={18} strokeWidth={1.75} className="shrink-0 text-accent-ink" aria-hidden="true" />
+          Alles in orde: elke bewoner wordt gevolgd en heeft een plaats.
+        </p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {punten.slice(0, 8).map((p) => (
+            <li key={p.sleutel} className="flex items-start gap-3 rounded-2xl bg-surface-soft px-4 py-3">
+              <TriangleAlert
+                size={18}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className={`mt-0.5 shrink-0 ${p.ernst === 'hoog' ? 'text-alert' : 'text-ink-faint'}`}
+              />
+              <span className="min-w-0">
+                {p.ernst === 'hoog' ? <span className="sr-only">Belangrijk: </span> : null}
+                {p.tekst}
+              </span>
+            </li>
+          ))}
+          {punten.length > 8 ? <li className="px-4 text-sm text-ink-soft">En nog {punten.length - 8} andere.</li> : null}
+        </ul>
+      )}
     </Kaart>
   )
 }

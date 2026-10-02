@@ -437,6 +437,19 @@ export function termijnTekst(maanden: number): string {
   return `${maanden} maanden`
 }
 
+/** Open uitnodigingen van de organisatie; alleen de beheerder mag ze lezen (60). */
+export async function openOrgUitnodigingen(org: string): Promise<{ id: string; email: string; expires_at: string }[] | null> {
+  const { data, error } = await supabase
+    .from('org_invitation')
+    .select('id, email, expires_at')
+    .eq('org_id', org)
+    .is('accepted_at', null)
+    .is('revoked_at', null)
+    .order('created_at', { ascending: false })
+  if (error) return null
+  return (data ?? []) as { id: string; email: string; expires_at: string }[]
+}
+
 export async function toewijzingen(org: string) {
   const { data, error } = await supabase
     .from('care_assignment')

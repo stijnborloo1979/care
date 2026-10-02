@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { ongezien } from './bewonerBerichten'
 import { ChevronRight, Search, TriangleAlert } from 'lucide-react'
 import { alleBewoners, mijnBewoners, type Bewoner } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
@@ -22,6 +23,8 @@ export default function Bewoners() {
 
   const mijn = useQuery({ queryKey: ['zorg', 'mijn-bewoners', orgId], enabled: !!orgId, queryFn: () => mijnBewoners(orgId) })
   const alle = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], enabled: !!orgId, queryFn: () => alleBewoners(orgId) })
+  // Nieuwe vragen van bewoners (68): de database toont alleen die van mijn bewoners.
+  const nieuw = useQuery({ queryKey: ['zorg', 'ongezien'], queryFn: ongezien, refetchInterval: 60_000 })
 
   const mijnIds = new Set((mijn.data ?? []).map((b) => b.household_id))
   const past = (b: Bewoner) =>
@@ -61,6 +64,11 @@ export default function Bewoners() {
                     {b.via === 'afdeling' ? ' · via je afdeling' : ''}
                   </span>
                 </span>
+                {nieuw.data?.[b.household_id] ? (
+                  <span className="shrink-0 rounded-pill bg-alert px-2.5 py-1 text-xs font-bold text-white">
+                    {nieuw.data[b.household_id]} {nieuw.data[b.household_id] === 1 ? 'vraag' : 'vragen'}
+                  </span>
+                ) : null}
                 <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" className="text-ink-faint" />
               </Link>
             </li>

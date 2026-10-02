@@ -208,9 +208,13 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     e-mailadres, ziet de uitnodiging van het woonzorgcentrum ook in de app
     en aanvaardt ze daar. Zelfde controles als de link; het token wordt
     nooit getoond.
+68. `68_bericht_zorgteam.sql` — de bewoner vraagt vanaf zijn tablet iets aan
+    zijn zorgteam (toegewezen medewerkers en team lead). Het team ziet het
+    in de app, markeert het als gezien en kan kort antwoorden. Beheer en
+    familie zien niets. Bewaard volgens de bewaartermijn van het WZC.
 
-Voor 47 tot 67 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 68 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -424,6 +428,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_65_review.sql` — elk lek uit de review; zakt zonder 65.
 - `test_66_null_rolcontrole.sql` — een vreemde roept elke functie aan; zakt zonder 66.
 - `test_67_uitnodigingen_in_app.sql` — alleen het juiste e-mailadres ziet en aanvaardt een uitnodiging.
+- `test_68_bericht_zorgteam.sql` — alleen de bewoner stuurt, alleen zijn zorgteam leest en antwoordt; zakt met een ruimere leesregel.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

@@ -6,6 +6,7 @@ import { dateLine, greeting, hhmm } from '../../lib/time'
 import { STATUS_LABEL, statusOf, whatNow } from './whatNow'
 import { useAgenda, useMarkDone, useNow } from './useAgenda'
 import PersonInbox from '../messages/PersonInbox'
+import ZorgteamKaart from '../zorg/ZorgteamKaart'
 import Icon, { type IconNaam } from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import OnthoudDit from '../memory/OnthoudDit'
@@ -152,7 +153,13 @@ export default function Today({ householdId, personName, timezone }: Props) {
         </section>
       ),
 
-    berichten: <PersonInbox householdId={householdId} />,
+    // Het zorgteam hoort bij de berichten: verschijnt alleen bij een verblijf in een WZC.
+    berichten: (
+      <div className="space-y-6">
+        <PersonInbox householdId={householdId} />
+        <ZorgteamKaart householdId={householdId} timezone={timezone} />
+      </div>
+    ),
 
     medicatie: <MedicatieKaart householdId={householdId} timezone={timezone} />,
 
