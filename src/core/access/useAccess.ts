@@ -47,3 +47,17 @@ export function useAccess(householdId: string | null | undefined): Access & { is
   })
   return { ...(q.data ?? ONBEKEND), isLoading: q.isLoading }
 }
+
+/**
+ * Mag ik dit? Volgens de database als die het weet (my_access), anders
+ * volgens de oude rolcontrole die het scherm vroeger zelf deed (`terugval`).
+ * Zo verandert er niets voor wie migratie 49 nog niet heeft.
+ */
+export function useMag(householdId: string | null | undefined, permissie: string, terugval: boolean): boolean {
+  const a = useAccess(householdId)
+  return mag(a, permissie, terugval)
+}
+
+export function mag(a: Pick<Access, 'bekend' | 'can'>, permissie: string, terugval: boolean): boolean {
+  return a.bekend ? a.can(permissie) : terugval
+}
