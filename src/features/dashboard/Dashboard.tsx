@@ -7,6 +7,8 @@ import Icon from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import { useHousehold } from '../household/useHousehold'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
+import DagVerhaal from '../dagverhaal/DagVerhaal'
+import GespreksStarters from '../bezoek/GespreksStarters'
 
 interface Props {
   householdId: string
@@ -156,7 +158,11 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         <p className="mt-1 text-lg text-ink-soft">{t.onder}</p>
       </div>
 
+      <DagVerhaal householdId={householdId} personName={personName} timezone={timezone} summary={data} />
+
       {bezoek}
+
+      <GespreksStarters householdId={householdId} personName={personName} timezone={timezone} />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-card bg-surface p-6 shadow-card">

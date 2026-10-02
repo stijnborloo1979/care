@@ -6,6 +6,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import BerichtenVanBewoner from './BerichtenVanBewoner'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
+import DitBenIkKaart from './DitBenIkKaart'
 import {
   CATEGORIEEN,
   agendaVandaag,
@@ -102,6 +103,7 @@ function Dossier({ hh, orgId, naam }: { hh: string; orgId: string; naam: string 
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="min-w-0 space-y-6">
         <BerichtenVanBewoner hh={hh} naam={naam} />
+        <DitBenIkKaart hh={hh} naam={naam} />
         <Notities hh={hh} orgId={orgId} />
       </div>
       <div className="space-y-6">
