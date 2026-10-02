@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useHousehold } from '../household/useHousehold'
+import { useOrganisatiesKlaar } from '../zorg/useOrganisatie'
 import { useQueryClient } from '@tanstack/react-query'
 import ZorgToegang from '../zorg/ZorgToegang'
 import {
@@ -31,6 +33,8 @@ export default function Onboarding() {
   // Geen standaardkeuze: of je de app zelf gebruikt of voor iemand anders,
   // bepaalt wie eigenaar wordt. Dat moet een bewuste keuze zijn.
   const [voorWie, setVoorWie] = useState<'zelf' | 'familielid' | null>(null)
+  const { all: huishoudens, isLoading: huisLaden } = useHousehold()
+  const organisaties = useOrganisatiesKlaar()
   const [naam, setNaam] = useState('')
   const [adres, setAdres] = useState('')
   const [mensen, setMensen] = useState<Persoon[]>([LEEG, LEEG, LEEG])
@@ -284,6 +288,10 @@ export default function Onboarding() {
 
   const s = stappen[stap]
   const laatste = stap === stappen.length - 1
+
+  // Een medewerker van een woonzorgcentrum zonder eigen familie hoort hier niet.
+  if (!huisLaden && !organisaties.isLoading && huishoudens.length === 0 && organisaties.lijst.length > 0 && !busy)
+    return <Navigate to="/zorg" replace />
 
   return (
     <main className="mx-auto max-w-[34rem] px-5 py-10">
