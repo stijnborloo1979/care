@@ -11,6 +11,8 @@ import DagVerhaal from '../dagverhaal/DagVerhaal'
 import GespreksStarters from '../bezoek/GespreksStarters'
 import DagInHetHuis from '../afdelingsdag/DagInHetHuis'
 import NieuwsVanHetHuis from '../nieuws/NieuwsVanHetHuis'
+import UitstapKaart from '../uitstap/UitstapKaart'
+import SpullenKaart from '../spullen/SpullenKaart'
 
 interface Props {
   householdId: string
@@ -170,6 +172,14 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
       {bezoek}
 
       <DagInHetHuis householdId={householdId} personName={personName} timezone={timezone} />
+
+      {/* Alleen bij een verblijf in een woonzorgcentrum. */}
+      {household?.org_id && !household.is_self ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <UitstapKaart householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
+          <SpullenKaart householdId={householdId} personName={personName} vorm="familie" />
+        </div>
+      ) : null}
 
       <NieuwsVanHetHuis householdId={householdId} timezone={timezone} />
 

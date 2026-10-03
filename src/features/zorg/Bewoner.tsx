@@ -7,6 +7,8 @@ import { useOrganisatie } from './useOrganisatie'
 import BerichtenVanBewoner from './BerichtenVanBewoner'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 import DitBenIkKaart from './DitBenIkKaart'
+import UitstapKaart from '../uitstap/UitstapKaart'
+import SpullenKaart from '../spullen/SpullenKaart'
 import {
   CATEGORIEEN,
   agendaVandaag,
@@ -108,6 +110,8 @@ function Dossier({ hh, orgId, naam }: { hh: string; orgId: string; naam: string 
       </div>
       <div className="space-y-6">
         <BezoekVastleggen householdId={hh} personName={naam} timezone="Europe/Brussels" vorm="zorgteam" />
+        <UitstapKaart householdId={hh} personName={naam} timezone="Europe/Brussels" vorm="zorgteam" />
+        <SpullenKaart householdId={hh} personName={naam} vorm="zorgteam" />
         <Kaart titel="Vandaag">
           {agenda.isLoading ? <Laden /> : null}
           {agenda.data && agenda.data.length === 0 ? <Leeg>Niets gepland vandaag.</Leeg> : null}

@@ -88,7 +88,9 @@ as $$
     (76, 'functie', 'systeem_controle', 'Systeemcontrole'),
     (77, 'functie', 'publieke_prijzen', 'Prijzen'),
     (78, 'functie', 'dag_van_bewoner', 'Dag van de afdeling'),
-    (79, 'functie', 'nieuws_voor', 'Nieuws van het WZC')
+    (79, 'functie', 'nieuws_voor', 'Nieuws van het WZC'),
+    (80, 'functie', 'uitstap_stap', 'Uitstap'),
+    (81, 'functie', 'kwijt_op_afdeling', 'Spullen van de bewoner')
   )
   select k.nr, k.label,
     case k.soort

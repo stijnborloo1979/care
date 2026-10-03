@@ -6,6 +6,7 @@ import { ChevronRight, Search, TriangleAlert } from 'lucide-react'
 import { alleBewoners, mijnBewoners, type Bewoner } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
 import { Fout, Kaart, Kop, Laden, Leeg } from './ui'
+import AfdelingNu from './AfdelingNu'
 
 function plaats(b: Pick<Bewoner, 'afdeling' | 'kamer'>) {
   return [b.afdeling, b.kamer ? `kamer ${b.kamer}` : null].filter(Boolean).join(' · ') || 'Nog geen afdeling'
@@ -37,6 +38,8 @@ export default function Bewoners() {
         titel="Bewoners"
         uitleg={org?.team_lead ? 'Jouw bewoners en die van je afdeling.' : 'De bewoners die jou zijn toegewezen.'}
       />
+
+      <AfdelingNu orgId={orgId} mijn={mijn.data ?? []} />
 
       <Kaart titel="Mijn bewoners">
         {mijn.isLoading ? <Laden /> : null}

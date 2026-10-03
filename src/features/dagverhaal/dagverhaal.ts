@@ -1,6 +1,7 @@
 import type { Summary } from '../../services/dashboard'
 import type { Bezoek } from '../../services/bezoek'
 import { aanwezigBij, type HuisMoment } from '../../services/afdelingsdagPuur'
+import type { Uitstap } from '../../services/uitstapPuur'
 import { hhmm, localDateKey } from '../../lib/time'
 
 /**
@@ -48,6 +49,8 @@ export function dagverhaal(input: {
   bezoeken: Bezoek[]
   /** De dag van de afdeling (78), voor wie in een woonzorgcentrum woont. */
   huis?: HuisMoment[]
+  /** Uitstap met de familie (80). Alleen wie en of ze terug is; de notitie niet. */
+  uitstappen?: Uitstap[]
   tz: string
   nu?: Date
 }): Dagverhaal {
@@ -88,6 +91,13 @@ export function dagverhaal(input: {
   if (bij.length > 0) {
     const titels = bij.slice(0, 3).map((m) => kleinBegin(m.titel))
     zinnen.push(`${naam} was vandaag bij ${lijstje(titels)}.`)
+  }
+
+  // Uitstap: met wie, en of ze al terug is. De notitie is vrije tekst en komt er niet in.
+  for (const u of (input.uitstappen ?? []).filter(
+    (u) => (u.status === 'weg' || u.status === 'terug') && localDateKey(new Date(u.vertrokken_at ?? u.vertrek), tz) === vandaag,
+  ).slice(0, 2)) {
+    zinnen.push(u.status === 'terug' ? `${naam} was op uitstap met ${u.met_wie}.` : `${naam} is op uitstap met ${u.met_wie}.`)
   }
 
   // Medicatie: alleen of het bevestigd is. Wat ze neemt, staat er niet.

@@ -250,9 +250,20 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     het woonzorgcentrum erbij. Nooit over één bewoner; blijft 180 dagen.
     Draai daarna `76_systeemcontrole.sql` opnieuw als je die al eerder
     draaide, dan kent de systeemcontrole 78 en 79 ook.
+80. `80_uitstap.sql` — de familie meldt een uitstap ("Els neemt mama mee van
+    14 tot 17 uur"). Het team ziet het bovenaan de bewonerslijst en duidt
+    vertrokken en terug aan; een half uur te laat valt op. De tablet zegt
+    "Uitstap met Els". Is ze terug, dan krijgt de familie een melding.
+    Bewaard tot 90 dagen na de terugkeer.
+81. `81_spullen.sql` — de spullen van de bewoner (bril, gebit, hoorapparaat,
+    kleding) met foto, kenmerk en waar ze horen. Kwijt melden zet ze op
+    "Kwijt op de afdeling" bij alle zorgkundigen van die afdeling (alleen
+    naam, kenmerk, bewoner en kamer); elk van hen kan "gevonden" aanduiden.
+    Draai daarna `76_systeemcontrole.sql` opnieuw als je die al eerder
+    draaide.
 
-Voor 47 tot 79 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 81 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -478,6 +489,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_77_prijzen.sql` — prijzen zichtbaar zonder inloggen, de tabel zelf niet; een eigen prijs blijft staan.
 - `test_78_dag_van_de_afdeling.sql` — de dag van de afdeling bij de bewoner, haar familie en haar zorgteam, niet bij de beheerder of een ander; team lead alleen voor de eigen afdeling; familie vult geen aanwezigheid in.
 - `test_79_nieuws_wzc.sql` — nieuws per organisatie en afdeling, team lead alleen aan de eigen afdeling, geen aanpassen, de tijd van de server, opruimen na 180 dagen.
+- `test_80_uitstap.sql` — melden door familie en toegewezen team, niet door tablet, collega of beheerder; vertrokken en terug in volgorde; melding aan de familie; opruimen na 90 dagen.
+- `test_81_spullen.sql` — spullen alleen voor bewoner, familie en toegewezen team; kwijt-lijst voor de afdeling zonder foto, niet voor een andere afdeling of de beheerder; gevonden door een collega; geen reeks meldingen.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

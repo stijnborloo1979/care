@@ -5,6 +5,7 @@ import type { Summary } from '../../services/dashboard'
 import { recenteBezoeken } from '../../services/bezoek'
 import { dagverhaal } from './dagverhaal'
 import { useDagVanHuis } from '../today/useVandaag'
+import { uitstappen } from '../../services/uitstap'
 
 /** De dag van mama in een paar zinnen, om te lezen of door te sturen. */
 export default function DagVerhaal({
@@ -25,12 +26,14 @@ export default function DagVerhaal({
     retry: false,
   })
   const huis = useDagVanHuis(householdId, timezone)
+  const uit = useQuery({ queryKey: ['uitstappen', householdId], queryFn: () => uitstappen(householdId), enabled: !!householdId, retry: false })
   const [gedeeld, setGedeeld] = useState(false)
   const { zinnen, logboek } = dagverhaal({
     naam: personName,
     summary,
     bezoeken: bezoeken.data ?? [],
     huis: huis.data ?? [],
+    uitstappen: uit.data ?? [],
     tz: timezone,
   })
   const tekst = `De dag van ${personName}\n\n${zinnen.join('\n')}`
