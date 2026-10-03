@@ -4,6 +4,7 @@ import { BookOpen, Check, Share2 } from 'lucide-react'
 import type { Summary } from '../../services/dashboard'
 import { recenteBezoeken } from '../../services/bezoek'
 import { dagverhaal } from './dagverhaal'
+import { useDagVanHuis } from '../today/useVandaag'
 
 /** De dag van mama in een paar zinnen, om te lezen of door te sturen. */
 export default function DagVerhaal({
@@ -23,8 +24,15 @@ export default function DagVerhaal({
     enabled: !!householdId,
     retry: false,
   })
+  const huis = useDagVanHuis(householdId, timezone)
   const [gedeeld, setGedeeld] = useState(false)
-  const { zinnen, logboek } = dagverhaal({ naam: personName, summary, bezoeken: bezoeken.data ?? [], tz: timezone })
+  const { zinnen, logboek } = dagverhaal({
+    naam: personName,
+    summary,
+    bezoeken: bezoeken.data ?? [],
+    huis: huis.data ?? [],
+    tz: timezone,
+  })
   const tekst = `De dag van ${personName}\n\n${zinnen.join('\n')}`
 
   async function deel() {

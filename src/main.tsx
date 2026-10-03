@@ -79,6 +79,7 @@ const ZorgBewoners = lazy(() => import("./features/zorg/Bewoners"));
 const ZorgBewoner = lazy(() => import("./features/zorg/Bewoner"));
 const ZorgOverdracht = lazy(() => import("./features/zorg/Overdracht"));
 const ZorgActiviteiten = lazy(() => import("./features/zorg/Activiteiten"));
+const ZorgNieuws = lazy(() => import("./features/zorg/Nieuws"));
 const ZorgBeheer = lazy(() => import("./features/zorg/Beheer"));
 const ZorgTeam = lazy(() => import("./features/zorg/Team"));
 const NieuweOrganisatie = lazy(() => import("./features/zorg/NieuweOrganisatie"));
@@ -193,6 +194,7 @@ if (!configuratieOk) {
                     <Route path="bewoner/:hh" element={<ZorgBewoner />} />
                     <Route path="overdracht" element={<ZorgOverdracht />} />
                     <Route path="activiteiten" element={<ZorgActiviteiten />} />
+                    <Route path="nieuws" element={<ZorgNieuws />} />
                     <Route path="team" element={<ZorgTeam />} />
                     <Route path="beheer" element={<ZorgBeheer />} />
                   </Route>

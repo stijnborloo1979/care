@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { hhmm } from '../../lib/time'
-import { useAgenda, useMarkDone, useNow } from './useAgenda'
+import { useMarkDone, useNow } from './useAgenda'
+import { useVandaag } from './useVandaag'
+import { isHuis } from '../../services/afdelingsdag'
 import { whatNow } from './whatNow'
 import { t } from '../../lib/i18n'
 
@@ -14,7 +16,7 @@ export default function WhatNow() {
   const hh = household?.household_id ?? ''
   const tz = household?.timezone ?? 'Europe/Brussels'
   const now = useNow()
-  const { data, isLoading } = useAgenda(hh, tz)
+  const { data, isLoading } = useVandaag(hh, tz, now)
   const markDone = useMarkDone(hh)
 
   const { current, next } = whatNow(data ?? [], now)
@@ -44,7 +46,7 @@ export default function WhatNow() {
             {current?.note ?? t('watnu.nietsMoet')}
           </p>
 
-          {current ? (
+          {current && !isHuis(current) ? (
             <button
               onClick={() => markDone.mutate({ id: current.id, done: true })}
               className="mt-6 flex min-h-[3.6rem] w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-xl font-semibold text-white"

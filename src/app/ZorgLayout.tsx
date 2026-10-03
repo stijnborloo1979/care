@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
-import { Building2, CalendarDays, ChevronDown, ClipboardList, KeyRound, LogOut, MessagesSquare, Settings2, Users } from 'lucide-react'
+import { Building2, CalendarDays, ChevronDown, ClipboardList, KeyRound, LogOut, Megaphone, MessagesSquare, Settings2, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
@@ -23,11 +23,14 @@ export default function ZorgLayout() {
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
   if (!org) return <Navigate to="/zorg/nieuw" replace />
 
-  const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon; teller?: number }[] = [
+  // Onderaan op een telefoon passen er vijf. Met Beheer erbij staat Nieuws
+  // daar niet; het staat dan bovenaan op Activiteiten.
+  const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon; teller?: number; nietOnderaan?: boolean }[] = [
     { to: '/zorg', end: true, label: 'Bewoners', icoon: Users, teller: vragen },
     { to: '/zorg/overdracht', label: 'Overdracht', icoon: ClipboardList },
     { to: '/zorg/team', label: 'Team', icoon: MessagesSquare },
     { to: '/zorg/activiteiten', label: 'Activiteiten', icoon: CalendarDays },
+    ...(beheert || org.team_lead ? [{ to: '/zorg/nieuws', label: 'Nieuws', icoon: Megaphone, nietOnderaan: beheert }] : []),
     ...(beheert ? [{ to: '/zorg/beheer', label: 'Beheer', icoon: Settings2 }] : []),
   ]
 
@@ -147,7 +150,7 @@ export default function ZorgLayout() {
           className="fixed inset-x-0 bottom-0 z-40 flex gap-1 border-t border-line bg-surface px-2 pt-1 lg:hidden"
           style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
         >
-          {nav.map((n) => (
+          {nav.filter((n) => !n.nietOnderaan).map((n) => (
             <NavLink
               key={n.to}
               to={n.to}

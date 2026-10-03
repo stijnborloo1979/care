@@ -287,8 +287,8 @@ export async function deelnames(activiteit: string): Promise<Deelname[]> {
   return (data ?? []) as Deelname[]
 }
 
-export async function schrijfIn(activiteit: string, hh: string) {
-  const { error } = await supabase.from('activity_participant').insert({ activity_id: activiteit, household_id: hh })
+export async function schrijfIn(activiteit: string, hh: string, status: Deelname['status'] = 'ingeschreven') {
+  const { error } = await supabase.from('activity_participant').insert({ activity_id: activiteit, household_id: hh, status })
   if (error) throw error
 }
 

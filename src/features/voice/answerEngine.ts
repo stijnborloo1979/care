@@ -1,4 +1,5 @@
 import type { AgendaEvent } from '../../services/agenda'
+import { isHuis } from '../../services/afdelingsdagPuur'
 import type { Item } from '../../services/homeMemory'
 import type { PersonCard } from '../../services/people'
 import type { MemoryNote } from '../../services/notes'
@@ -185,8 +186,10 @@ function alGedaan(vraag: string, k: Kennis, nu: Date): Answer | null {
 
   for (const a of ACTIVITEIT) {
     if (!a.woorden.test(v)) continue
+    // Nooit uit de dag van het woonzorgcentrum (78): dat het middagmaal
+    // voorbij is, zegt niet dat zij gegeten heeft.
     const kandidaten = k.events
-      .filter(a.zoek)
+      .filter((e) => !isHuis(e) && a.zoek(e))
       .sort(
         (x, y) =>
           Math.abs(new Date(x.starts_at).getTime() - nu.getTime()) -

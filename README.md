@@ -238,9 +238,21 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     afgedwongen) en `publieke_prijzen()` voor de prijspagina `/prijzen`.
     Een prijs aanpassen: `update public.plan set prijs_maand_cent = 1099
     where id = 'home';` in de SQL-editor.
+78. `78_dag_van_de_afdeling.sql` — de vaste dag van een afdeling (maaltijden,
+    rust, koffie) en de activiteiten staan vanzelf op de tablet van elke
+    bewoner van die afdeling, en bij haar familie ("Vandaag in het
+    woonzorgcentrum"). Het dagverhaal zegt "Rita was vandaag bij samen
+    zingen" als het zorgteam "aanwezig" aanduidde. Een team lead plant
+    alleen voor zijn eigen afdeling; aanwezigheid duidt alleen het zorgteam
+    aan.
+79. `79_nieuws_wzc.sql` — nieuws van het woonzorgcentrum aan alle families
+    of aan de families van één afdeling, in de familie-app met de naam van
+    het woonzorgcentrum erbij. Nooit over één bewoner; blijft 180 dagen.
+    Draai daarna `76_systeemcontrole.sql` opnieuw als je die al eerder
+    draaide, dan kent de systeemcontrole 78 en 79 ook.
 
-Voor 47 tot 77 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+Voor 47 tot 79 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -464,6 +476,8 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_75_bezoekfotos.sql` — niemand plaatst of wist een bezoekfoto van een ander; de rest van memories blijft zoals voorheen.
 - `test_76_systeemcontrole.sql` — na alle migraties ontbreekt niets; een weggehaalde kolom wordt gezien.
 - `test_77_prijzen.sql` — prijzen zichtbaar zonder inloggen, de tabel zelf niet; een eigen prijs blijft staan.
+- `test_78_dag_van_de_afdeling.sql` — de dag van de afdeling bij de bewoner, haar familie en haar zorgteam, niet bij de beheerder of een ander; team lead alleen voor de eigen afdeling; familie vult geen aanwezigheid in.
+- `test_79_nieuws_wzc.sql` — nieuws per organisatie en afdeling, team lead alleen aan de eigen afdeling, geen aanpassen, de tijd van de server, opruimen na 180 dagen.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

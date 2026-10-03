@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Megaphone } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useOrganisatie } from './useOrganisatie'
 import {
   activiteiten,
@@ -16,6 +17,7 @@ import {
   type Deelname,
 } from './zorgApi'
 import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, label, veld } from './ui'
+import VasteDag from './VasteDag'
 
 /** Zingen, wandelen, de kapper: wat er te doen is, en wie meedoet. */
 export default function Activiteiten() {
@@ -28,7 +30,18 @@ export default function Activiteiten() {
   if (!org) return null
   return (
     <div className="space-y-6">
-      <Kop titel="Activiteiten" uitleg="Wat er gepland is in het woonzorgcentrum." />
+      <Kop
+        titel="Activiteiten"
+        uitleg="Wat er gepland is in het woonzorgcentrum. Het staat vanzelf op de tablets van de bewoners."
+        rechts={
+          magPlannen ? (
+            <Link to="/zorg/nieuws" className={`${knopKlein} inline-flex items-center gap-2`}>
+              <Megaphone size={16} strokeWidth={1.75} aria-hidden="true" /> Nieuws voor de families
+            </Link>
+          ) : null
+        }
+      />
+      <VasteDag orgId={orgId} magPlannen={magPlannen} beheert={beheert} />
       {magPlannen ? <NieuweActiviteit orgId={orgId} /> : null}
       <Kaart titel="Gepland">
         {lijst.isLoading ? <Laden /> : null}
@@ -153,8 +166,13 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
   const ingeschreven = new Set((lijst.data ?? []).map((d) => d.household_id))
   const [nieuw, setNieuw] = useState('')
 
-  const ververs = () => queryClient.invalidateQueries({ queryKey: sleutel })
+  const ververs = () => {
+    queryClient.invalidateQueries({ queryKey: sleutel })
+    queryClient.invalidateQueries({ queryKey: ['dag-van-huis'] })
+  }
   const inschrijven = useMutation({ mutationFn: (hh: string) => schrijfIn(activiteit.id, hh), onSuccess: () => { setNieuw(''); ververs() } })
+  // Wie er gewoon bij was, zonder eerst in te schrijven.
+  const wasErbij = useMutation({ mutationFn: (hh: string) => schrijfIn(activiteit.id, hh, 'aanwezig'), onSuccess: () => { setNieuw(''); ververs() } })
   const aanwezig = useMutation({
     mutationFn: (p: { hh: string; status: Deelname['status'] }) => zetAanwezigheid(activiteit.id, p.hh, p.status),
     onSuccess: ververs,
@@ -218,9 +236,17 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
           <button type="submit" disabled={!nieuw || inschrijven.isPending} className={knop}>
             Inschrijven
           </button>
+          <button
+            type="button"
+            onClick={() => nieuw && wasErbij.mutate(nieuw)}
+            disabled={!nieuw || wasErbij.isPending}
+            className={knopKlein}
+          >
+            Was erbij
+          </button>
         </form>
       ) : null}
-      <Fout fout={inschrijven.error ?? aanwezig.error ?? annuleer.error} />
+      <Fout fout={inschrijven.error ?? wasErbij.error ?? aanwezig.error ?? annuleer.error} />
 
       {magBeheren && activiteit.status === 'gepland' ? (
         <button

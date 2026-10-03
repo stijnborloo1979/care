@@ -1,5 +1,6 @@
 import type { Summary } from '../../services/dashboard'
 import type { Bezoek } from '../../services/bezoek'
+import { aanwezigBij, type HuisMoment } from '../../services/afdelingsdagPuur'
 import { hhmm, localDateKey } from '../../lib/time'
 
 /**
@@ -45,6 +46,8 @@ export function dagverhaal(input: {
   naam: string
   summary: Summary
   bezoeken: Bezoek[]
+  /** De dag van de afdeling (78), voor wie in een woonzorgcentrum woont. */
+  huis?: HuisMoment[]
   tz: string
   nu?: Date
 }): Dagverhaal {
@@ -75,6 +78,16 @@ export function dagverhaal(input: {
   const bezoekVandaag = input.bezoeken.filter((b) => localDateKey(new Date(b.visited_at), tz) === vandaag)
   for (const b of bezoekVandaag.slice(0, 3)) {
     zinnen.push(`${b.visitor_name} was op bezoek ${dagdeel(b.visited_at, tz)}.`)
+  }
+
+  // Activiteiten van het woonzorgcentrum waar het team "aanwezig" aanduidde.
+  // Alleen dat: niet waar ze niet bij was, en geen notities van het team.
+  const bij = aanwezigBij(input.huis ?? []).filter(
+    (m) => localDateKey(new Date(m.begint), tz) === vandaag && new Date(m.begint) <= nu && zonderMedicatie(m.titel, medNamen),
+  )
+  if (bij.length > 0) {
+    const titels = bij.slice(0, 3).map((m) => kleinBegin(m.titel))
+    zinnen.push(`${naam} was vandaag bij ${lijstje(titels)}.`)
   }
 
   // Medicatie: alleen of het bevestigd is. Wat ze neemt, staat er niet.

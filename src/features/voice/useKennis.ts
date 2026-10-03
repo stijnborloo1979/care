@@ -5,7 +5,7 @@ import { getPeople } from '../../services/people'
 import { getQuickNotes } from '../../services/quickNotes'
 import { getMedsToday } from '../../services/medsToday'
 import { useRadio } from '../radio/radioStore'
-import { useAgenda } from '../today/useAgenda'
+import { useVandaag } from '../today/useVandaag'
 import type { Kennis } from './answerEngine'
 import { recenteBezoeken } from '../../services/bezoek'
 
@@ -21,7 +21,8 @@ export function useKennis(
   tz: string,
   homeId: string = householdId,
 ): { kennis: Kennis; isLoading: boolean } {
-  const agenda = useAgenda(householdId, tz)
+  // Ook de dag van het woonzorgcentrum: "wanneer is het middageten?"
+  const agenda = useVandaag(householdId, tz, new Date())
 
   const items = useQuery({
     queryKey: ['items', homeId],

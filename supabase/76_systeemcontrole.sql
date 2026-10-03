@@ -86,7 +86,9 @@ as $$
     (74, 'tabel', 'visit_log', 'Bezoekboek'),
     (75, 'functie', 'mag_bezoekfoto_plaatsen', 'Bezoekfoto''s'),
     (76, 'functie', 'systeem_controle', 'Systeemcontrole'),
-    (77, 'functie', 'publieke_prijzen', 'Prijzen')
+    (77, 'functie', 'publieke_prijzen', 'Prijzen'),
+    (78, 'functie', 'dag_van_bewoner', 'Dag van de afdeling'),
+    (79, 'functie', 'nieuws_voor', 'Nieuws van het WZC')
   )
   select k.nr, k.label,
     case k.soort

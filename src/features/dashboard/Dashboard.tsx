@@ -9,6 +9,8 @@ import { useHousehold } from '../household/useHousehold'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 import DagVerhaal from '../dagverhaal/DagVerhaal'
 import GespreksStarters from '../bezoek/GespreksStarters'
+import DagInHetHuis from '../afdelingsdag/DagInHetHuis'
+import NieuwsVanHetHuis from '../nieuws/NieuwsVanHetHuis'
 
 interface Props {
   householdId: string
@@ -128,7 +130,12 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         </div>
       ) : null}
 
-      {niveau === 'zelf' && !household?.is_self ? bezoek : null}
+      {niveau === 'zelf' && !household?.is_self ? (
+        <>
+          {bezoek}
+          <NieuwsVanHetHuis householdId={householdId} timezone={timezone} />
+        </>
+      ) : null}
 
       {niveau !== 'zelf' || household?.is_self ? (
       <>
@@ -161,6 +168,10 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
       <DagVerhaal householdId={householdId} personName={personName} timezone={timezone} summary={data} />
 
       {bezoek}
+
+      <DagInHetHuis householdId={householdId} personName={personName} timezone={timezone} />
+
+      <NieuwsVanHetHuis householdId={householdId} timezone={timezone} />
 
       <GespreksStarters householdId={householdId} personName={personName} timezone={timezone} />
 

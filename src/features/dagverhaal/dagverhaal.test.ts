@@ -70,4 +70,25 @@ describe('dagverhaal', () => {
   it('een lege dag zegt dat eerlijk', () => {
     expect(dagverhaal({ naam: 'Rita', tz: TZ, nu: NU, bezoeken: [], summary: leeg }).zinnen).toEqual(['Over vandaag staat er nog niets in de app.'])
   })
+
+  it('zegt waar ze bij was in het woonzorgcentrum, alleen als het team "aanwezig" aanduidde (78)', () => {
+    const m = (id: string, uur: string, titel: string, deelname: 'aanwezig' | 'afwezig' | 'ingeschreven' | null, status: 'gepland' | 'geannuleerd' = 'gepland') => ({
+      bron: 'activiteit' as const, id, titel, soort: 'activiteit' as const, emoji: null,
+      begint: `2026-10-02T${uur}:00+02:00`, eindigt: null, plaats: null, status, deelname,
+    })
+    const z = dagverhaal({
+      naam: 'Rita', tz: TZ, nu: NU, bezoeken: [], summary: leeg,
+      huis: [
+        m('1', '10:00', 'Samen zingen', 'aanwezig'),
+        m('2', '14:00', 'Petanque', 'afwezig'),
+        m('3', '15:00', 'Kapper', 'ingeschreven'),
+        m('4', '15:30', 'Bingo', 'aanwezig', 'geannuleerd'),
+        m('5', '19:00', 'Film', 'aanwezig'),
+        { ...m('6', '12:00', 'Middagmaal', null), bron: 'vast' as const },
+      ],
+    })
+    expect(z.zinnen[0]).toBe('Rita was vandaag bij samen zingen.')
+    expect(z.zinnen.join(' ')).not.toMatch(/Petanque|Kapper|Bingo|Film|Middagmaal/)
+  })
 })
+
