@@ -60,19 +60,20 @@ async function vanHuishouden(householdId: string, maandag: string, tz: string) {
   const van = zonedToUtc(maandag, '00:00', tz).toISOString()
   const tot = zonedToUtc(plusDagen(maandag, 7), '00:00', tz).toISOString()
 
-  const [agenda, taken] = await Promise.all([
+  const agendaVraag = (velden: string) =>
     supabase
       .from('agenda_event')
-      .select(
-        'id, household_id, starts_at, title, emoji, kind, done_at, claimed_by, opnemer:claimed_by (full_name)',
-      )
+      .select(velden)
       .eq('household_id', householdId)
       // Routines en maaltijden horen hier niet: dit scherm gaat over wat
       // familie moet regelen, niet over hoe de dag van de persoon loopt.
       .in('kind', ['visit', 'appt', 'other'])
       .gte('starts_at', van)
       .lt('starts_at', tot)
-      .order('starts_at'),
+      .order('starts_at')
+
+  const [eerste, taken] = await Promise.all([
+    agendaVraag('id, household_id, starts_at, title, emoji, kind, done_at, claimed_by, opnemer:claimed_by (full_name)'),
     supabase
       .from('task')
       .select('id, household_id, title, due_on, assignee, done_at')
@@ -81,6 +82,12 @@ async function vanHuishouden(householdId: string, maandag: string, tz: string) {
       .lt('due_on', plusDagen(maandag, 7))
       .order('due_on'),
   ])
+  // Zonder migratie 44 bestaat claimed_by niet: dan zonder "wie neemt het op",
+  // in plaats van een fout 400 en een leeg scherm.
+  const agenda =
+    eerste.error && (eerste.error.code === '42703' || eerste.error.code === 'PGRST200' || /claimed_by/.test(eerste.error.message ?? ''))
+      ? await agendaVraag('id, household_id, starts_at, title, emoji, kind, done_at')
+      : eerste
 
   if (agenda.error) throw agenda.error
   if (taken.error) throw taken.error

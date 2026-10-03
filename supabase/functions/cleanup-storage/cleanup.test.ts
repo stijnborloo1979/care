@@ -14,6 +14,9 @@ let boom: Record<string, Item[]>
 let berichten: { audio_path: string | null; photo_path: string | null }[]
 let verhalen: { audio_path: string }[]
 let verhaalFout: { message: string } | null
+let fotoBoom: Record<string, Item[]>
+let bezoeken: { photo_path: string }[] | null
+let gewistFoto: string[]
 let gewist: string[]
 let handler: () => Promise<Response>
 
@@ -31,6 +34,14 @@ beforeEach(async () => {
   verhalen = [{ audio_path: 'hh1/verhalen/verhaal.webm' }]
   verhaalFout = null
   gewist = []
+  fotoBoom = {
+    '': [map('hh1')],
+    hh1: [map('bezoek'), map('photos')],
+    'hh1/bezoek': [bestand('v1-a.jpg'), bestand('v2-wees.jpg'), bestand('v3-vers.jpg', NIEUW)],
+    'hh1/photos': [bestand('herinnering.jpg')],
+  }
+  bezoeken = [{ photo_path: 'hh1/bezoek/v1-a.jpg' }]
+  gewistFoto = []
 
   const g = globalThis as Record<string, unknown>
   g.Deno = {
@@ -40,17 +51,26 @@ beforeEach(async () => {
     },
   }
   g.__maakClient = () => ({
-    from: (tabel: string) => ({
-      select: () =>
+    from: (tabel: string) => {
+      const bron = (): { data: unknown[] | null; error: unknown } =>
         tabel === 'message'
-          ? Promise.resolve({ data: berichten, error: null })
-          : { not: () => Promise.resolve({ data: verhaalFout ? null : verhalen, error: verhaalFout }) },
-    }),
+          ? { data: berichten, error: null }
+          : tabel === 'visit_log'
+            ? bezoeken ? { data: bezoeken, error: null } : { data: null, error: { code: '42P01', message: 'geen tabel' } }
+            : verhaalFout ? { data: null, error: verhaalFout } : { data: verhalen, error: null }
+      const keten: Record<string, unknown> = {}
+      for (const m of ['select', 'not', 'order']) keten[m] = () => keten
+      keten.range = async (van: number, tot: number) => {
+        const r = bron()
+        return r.data ? { data: r.data.slice(van, tot + 1), error: null } : r
+      }
+      return keten
+    },
     storage: {
-      from: () => ({
-        list: async (prefix: string) => ({ data: boom[prefix] ?? [] }),
+      from: (bucket: string) => ({
+        list: async (prefix: string) => ({ data: (bucket === 'memories' ? fotoBoom : boom)[prefix] ?? [] }),
         remove: async (paden: string[]) => {
-          gewist.push(...paden)
+          ;(bucket === 'memories' ? gewistFoto : gewist).push(...paden)
           return { error: null }
         },
       }),
@@ -65,7 +85,7 @@ beforeEach(async () => {
 describe('cleanup-storage', () => {
   it('wist alleen een oud bestand zonder bericht', async () => {
     const r = await handler()
-    expect(await r.json()).toEqual({ gewist: 1 })
+    expect(await r.json()).toEqual({ gewist: 1, bezoekfotos: 1 })
     expect(gewist).toEqual(['hh1/family/wees.webm'])
   })
 
@@ -79,5 +99,27 @@ describe('cleanup-storage', () => {
     const r = await handler()
     expect(r.status).toBe(500)
     expect(gewist).toEqual([])
+  })
+
+  it('ruimt alleen een oude bezoekfoto zonder bezoek op, niets anders in memories', async () => {
+    await handler()
+    expect(gewistFoto).toEqual(['hh1/bezoek/v2-wees.jpg'])
+  })
+
+  it('zonder tabel visit_log (74 niet gedraaid) wist het niets in memories', async () => {
+    bezoeken = null
+    const r = await handler()
+    expect(gewistFoto).toEqual([])
+    expect((await r.json()).bezoekfotos).toBe(0)
+  })
+
+  it('kent alle berichten, ook voorbij de eerste 1000 rijen', async () => {
+    berichten = [
+      ...Array.from({ length: 1500 }, (_, i) => ({ audio_path: `hh1/family/x${i}.webm`, photo_path: null })),
+      { audio_path: 'hh1/family/wees.webm', photo_path: null },
+    ]
+    await handler()
+    // wees.webm staat pas op rij 1501 en blijft; bericht.webm hoort nu bij niets.
+    expect(gewist).toEqual(['hh1/family/bericht.webm'])
   })
 })

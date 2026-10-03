@@ -91,6 +91,10 @@ function Deuren() {
         <Link to="/privacy" className="underline underline-offset-4">
           Wat LifeAngle met je gegevens doet
         </Link>
+        <span aria-hidden="true"> · </span>
+        <Link to="/prijzen" className="underline underline-offset-4">
+          Prijzen
+        </Link>
       </p>
     </>
   )

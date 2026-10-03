@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
-import { Building2, CalendarDays, ChevronDown, ClipboardList, KeyRound, LogOut, MessagesSquare, Settings2, Users } from 'lucide-react'
+import { Building2, CalendarDays, ChevronDown, ClipboardList, KeyRound, LogOut, Megaphone, MessagesSquare, Settings2, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
 import { useOrganisatie } from '../features/zorg/useOrganisatie'
 import { ROLNAAM } from '../features/zorg/zorgApi'
+import { useOngezien } from '../features/zorg/OpenVragen'
 
 /**
  * Het scherm voor wie in een woonzorgcentrum werkt. Los van het
@@ -17,15 +18,19 @@ export default function ZorgLayout() {
   const { session, signOut } = useAuth()
   const { all: huishoudens } = useHousehold()
   const [open, setOpen] = useState(false)
+  const vragen = useOngezien(org?.org_id).totaal
 
   if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
   if (!org) return <Navigate to="/zorg/nieuw" replace />
 
-  const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon }[] = [
-    { to: '/zorg', end: true, label: 'Bewoners', icoon: Users },
+  // Onderaan op een telefoon passen er vijf. Met Beheer erbij staat Nieuws
+  // daar niet; het staat dan bovenaan op Activiteiten.
+  const nav: { to: string; end?: boolean; label: string; icoon: LucideIcon; teller?: number; nietOnderaan?: boolean }[] = [
+    { to: '/zorg', end: true, label: 'Bewoners', icoon: Users, teller: vragen },
     { to: '/zorg/overdracht', label: 'Overdracht', icoon: ClipboardList },
     { to: '/zorg/team', label: 'Team', icoon: MessagesSquare },
     { to: '/zorg/activiteiten', label: 'Activiteiten', icoon: CalendarDays },
+    ...(beheert || org.team_lead ? [{ to: '/zorg/nieuws', label: 'Nieuws', icoon: Megaphone, nietOnderaan: beheert }] : []),
     ...(beheert ? [{ to: '/zorg/beheer', label: 'Beheer', icoon: Settings2 }] : []),
   ]
 
@@ -122,7 +127,13 @@ export default function ZorgLayout() {
               }
             >
               <n.icoon size={19} strokeWidth={1.75} aria-hidden="true" />
-              {n.label}
+              <span className="flex-1">{n.label}</span>
+              {n.teller ? (
+                <span className="rounded-pill bg-alert px-2 py-0.5 text-xs font-bold text-white">
+                  {n.teller}
+                  <span className="sr-only"> open {n.teller === 1 ? 'vraag' : 'vragen'}</span>
+                </span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
@@ -139,7 +150,7 @@ export default function ZorgLayout() {
           className="fixed inset-x-0 bottom-0 z-40 flex gap-1 border-t border-line bg-surface px-2 pt-1 lg:hidden"
           style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
         >
-          {nav.map((n) => (
+          {nav.filter((n) => !n.nietOnderaan).map((n) => (
             <NavLink
               key={n.to}
               to={n.to}
@@ -150,7 +161,15 @@ export default function ZorgLayout() {
                 }`
               }
             >
-              <n.icoon size={20} strokeWidth={1.75} aria-hidden="true" />
+              <span className="relative">
+                <n.icoon size={20} strokeWidth={1.75} aria-hidden="true" />
+                {n.teller ? (
+                  <span className="absolute -right-2.5 -top-1.5 min-w-[1.1rem] rounded-pill bg-alert px-1 text-center text-[0.65rem] font-bold leading-[1.1rem] text-white">
+                    {n.teller}
+                    <span className="sr-only"> open {n.teller === 1 ? 'vraag' : 'vragen'}</span>
+                  </span>
+                ) : null}
+              </span>
               {n.label}
             </NavLink>
           ))}

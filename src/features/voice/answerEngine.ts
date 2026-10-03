@@ -1,4 +1,5 @@
 import type { AgendaEvent } from '../../services/agenda'
+import { isHuis } from '../../services/afdelingsdagPuur'
 import type { Item } from '../../services/homeMemory'
 import type { PersonCard } from '../../services/people'
 import type { MemoryNote } from '../../services/notes'
@@ -8,6 +9,7 @@ import { hhmm, localDateKey } from '../../lib/time'
 import { locale, t, taal } from '../../lib/i18n'
 import { patronen } from './patronen'
 import { whatNow } from '../today/whatNow'
+import { bezoekZin, type Bezoek } from '../../services/bezoek'
 
 export interface Answer {
   vraag: string
@@ -33,6 +35,8 @@ export interface Kennis {
   onthouden?: QuickNote[]
   /** De medicatiemomenten van vandaag. */
   medicatie?: MedMoment[]
+  /** Wie er de laatste dagen op bezoek was, nieuwste eerst (74). */
+  bezoeken?: Bezoek[]
   /** De gekozen radiozenders, favoriet eerst. */
   zenders?: { id: string; name: string }[]
   tz: string
@@ -182,8 +186,10 @@ function alGedaan(vraag: string, k: Kennis, nu: Date): Answer | null {
 
   for (const a of ACTIVITEIT) {
     if (!a.woorden.test(v)) continue
+    // Nooit uit de dag van het woonzorgcentrum (78): dat het middagmaal
+    // voorbij is, zegt niet dat zij gegeten heeft.
     const kandidaten = k.events
-      .filter(a.zoek)
+      .filter((e) => !isHuis(e) && a.zoek(e))
       .sort(
         (x, y) =>
           Math.abs(new Date(x.starts_at).getTime() - nu.getTime()) -
@@ -307,19 +313,46 @@ export function beantwoord(vraag: string, k: Kennis, nu = new Date()): Answer {
     }
   }
 
+  // wie was er / er komt nooit iemand: alleen wat in het bezoekboek staat
+  if (P.wasEr.test(v)) {
+    // "Wanneer was Els hier?": alleen over Els, en eerlijk als ze er niet bij staat.
+    const alle = k.bezoeken ?? []
+    const persoon = vindPersoon(vraag, k.people)
+    const naam =
+      persoon?.name ?? alle.map((b) => b.visitor_name).find((n) => v.includes(normaliseer(n)))
+    if (naam) {
+      const van = alle.filter((b) => normaliseer(b.visitor_name) === normaliseer(naam))
+      if (van.length === 0) return { vraag, titel: t('ass.geenBezoekVan', { naam }), regels: [t('ass.vraagFamilie')] }
+      return { vraag, titel: bezoekZin(van[0], k.tz, nu), regels: van[0].note ? [van[0].note] : [] }
+    }
+    const geweest = alle.slice(0, 4)
+    if (geweest.length > 0) {
+      return {
+        vraag,
+        titel: bezoekZin(geweest[0], k.tz, nu),
+        regels: geweest.slice(1).map((b) => bezoekZin(b, k.tz, nu)),
+      }
+    }
+    return { vraag, titel: t('ass.geenBezoekGenoteerd'), regels: [t('ass.vraagFamilie')] }
+  }
+
   // wie komt er
   if (P.wieKomt.test(v)) {
     const bezoek = k.events.filter((e) => e.person_id)
+    // Wie er onlangs was, zegt ook iets: "niemand komt" is dan niet waar.
+    const laatste = (k.bezoeken ?? [])[0]
+    const ook = laatste ? [bezoekZin(laatste, k.tz, nu)] : []
     if (bezoek.length > 0) {
       return {
         vraag,
         titel: t('vandaag.vandaag'),
-        regels: bezoek.map((e) =>
-          t('ass.staatGepland', { wat: e.title, tijd: hhmm(new Date(e.starts_at), k.tz) }),
-        ),
+        regels: [
+          ...bezoek.map((e) => t('ass.staatGepland', { wat: e.title, tijd: hhmm(new Date(e.starts_at), k.tz) })),
+          ...ook,
+        ],
       }
     }
-    return { vraag, titel: t('ass.niemandLangs'), regels: [] }
+    return { vraag, titel: t('ass.niemandLangs'), regels: ook }
   }
 
   // wanneer komt X

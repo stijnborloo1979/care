@@ -24,6 +24,8 @@ export interface Patronen {
   onthouden: RegExp
   watNu: RegExp
   wieKomt: RegExp
+  /** Wie er was, of "er komt nooit iemand": antwoord uit het bezoekboek (74). */
+  wasEr: RegExp
   wanneer: RegExp
   waar: RegExp
   hoe: RegExp
@@ -42,6 +44,7 @@ const NL: Patronen = {
   onthouden: /onthoud/,
   watNu: /wat moet ik|wat nu|nu doen/,
   wieKomt: /wie komt|bezoek/,
+  wasEr: /wie was (er|hier)|was er (iemand|bezoek)|niemand (komt|kwam)|nooit (iemand|bezoek)|komt er nooit|laatste bezoek|wanneer was .+ (hier|langs)/,
   wanneer: /wanneer|hoe laat/,
   waar: /\bwaar\b/,
   hoe: /\bhoe\b/,
@@ -61,6 +64,7 @@ const FR: Patronen = {
   onthouden: /retenir|note|rappeler|souvenir/,
   watNu: /que dois je|quoi maintenant|qu est ce que je dois/,
   wieKomt: /qui vient|visite|passe aujourd hui/,
+  wasEr: /qui est venu|personne ne (vient|est venu|passe)|jamais (personne|de visite)|derniere visite/,
   wanneer: /quand|a quelle heure/,
   waar: /\bou\b|ou sont|ou est/,
   hoe: /comment/,
@@ -81,6 +85,7 @@ const EN: Patronen = {
   onthouden: /remember|note|reminder/,
   watNu: /what should i|what now|what do i/,
   wieKomt: /who is coming|who comes|visit/,
+  wasEr: /who (came|was here|visited)|nobody (comes|came|visits)|never (visit|comes)|last visit/,
   wanneer: /when|what time/,
   waar: /\bwhere\b/,
   hoe: /\bhow\b/,

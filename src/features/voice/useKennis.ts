@@ -5,8 +5,9 @@ import { getPeople } from '../../services/people'
 import { getQuickNotes } from '../../services/quickNotes'
 import { getMedsToday } from '../../services/medsToday'
 import { useRadio } from '../radio/radioStore'
-import { useAgenda } from '../today/useAgenda'
+import { useVandaag } from '../today/useVandaag'
 import type { Kennis } from './answerEngine'
+import { recenteBezoeken } from '../../services/bezoek'
 
 /**
  * Alles wat de antwoordmotor mag gebruiken. Niets anders.
@@ -20,7 +21,8 @@ export function useKennis(
   tz: string,
   homeId: string = householdId,
 ): { kennis: Kennis; isLoading: boolean } {
-  const agenda = useAgenda(householdId, tz)
+  // Ook de dag van het woonzorgcentrum: "wanneer is het middageten?"
+  const agenda = useVandaag(householdId, tz, new Date())
 
   const items = useQuery({
     queryKey: ['items', homeId],
@@ -59,6 +61,15 @@ export function useKennis(
     staleTime: 15_000,
   })
 
+  // Wie er de laatste week langskwam (74). Zonder tabel: gewoon leeg.
+  const bezoeken = useQuery({
+    queryKey: ['bezoeken', householdId, 7],
+    queryFn: () => recenteBezoeken(householdId, 7),
+    enabled: !!householdId,
+    staleTime: 60_000,
+    retry: false,
+  })
+
   return {
     kennis: {
       events: agenda.data ?? [],
@@ -67,6 +78,7 @@ export function useKennis(
       notes: notes.data ?? [],
       onthouden: onthouden.data ?? [],
       medicatie: medicatie.data ?? [],
+      bezoeken: bezoeken.data ?? [],
       zenders: useRadio.getState().lijst.map((z) => ({ id: z.id, name: z.name })),
       tz,
     },

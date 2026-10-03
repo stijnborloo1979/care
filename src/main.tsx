@@ -62,6 +62,7 @@ const Calendar = lazy(() => import("./features/calendar/Calendar"));
 const WeekSamen = lazy(() => import("./features/week/WeekSamen"));
 const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
+const Prijzen = lazy(() => import("./features/prijzen/Prijzen"));
 const ManageMedication = lazy(() => import("./features/medication/ManageMedication"));
 const ManageNotesPage = lazy(() =>
   import("./features/family/FamilyPages").then((m) => ({
@@ -78,6 +79,7 @@ const ZorgBewoners = lazy(() => import("./features/zorg/Bewoners"));
 const ZorgBewoner = lazy(() => import("./features/zorg/Bewoner"));
 const ZorgOverdracht = lazy(() => import("./features/zorg/Overdracht"));
 const ZorgActiviteiten = lazy(() => import("./features/zorg/Activiteiten"));
+const ZorgNieuws = lazy(() => import("./features/zorg/Nieuws"));
 const ZorgBeheer = lazy(() => import("./features/zorg/Beheer"));
 const ZorgTeam = lazy(() => import("./features/zorg/Team"));
 const NieuweOrganisatie = lazy(() => import("./features/zorg/NieuweOrganisatie"));
@@ -161,6 +163,7 @@ if (!configuratieOk) {
                 <Routes>
                   <Route path="/login/*" element={<Welcome />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/prijzen" element={<Prijzen />} />
                   <Route path="/uitnodiging" element={<AcceptInvite />} />
                   <Route path="/zorg/uitnodiging" element={<ZorgUitnodiging />} />
                   <Route
@@ -191,6 +194,7 @@ if (!configuratieOk) {
                     <Route path="bewoner/:hh" element={<ZorgBewoner />} />
                     <Route path="overdracht" element={<ZorgOverdracht />} />
                     <Route path="activiteiten" element={<ZorgActiviteiten />} />
+                    <Route path="nieuws" element={<ZorgNieuws />} />
                     <Route path="team" element={<ZorgTeam />} />
                     <Route path="beheer" element={<ZorgBeheer />} />
                   </Route>

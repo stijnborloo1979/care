@@ -4,8 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import type { AgendaEvent } from '../../services/agenda'
 import { dateLine, greeting, hhmm } from '../../lib/time'
 import { STATUS_LABEL, statusOf, whatNow } from './whatNow'
-import { useAgenda, useMarkDone, useNow } from './useAgenda'
+import { useMarkDone, useNow } from './useAgenda'
+import { useVandaag } from './useVandaag'
+import { isHuis } from '../../services/afdelingsdag'
 import PersonInbox from '../messages/PersonInbox'
+import ZorgteamKaart from '../zorg/ZorgteamKaart'
+import BezoekOpTablet from '../bezoek/BezoekOpTablet'
 import Icon, { type IconNaam } from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import OnthoudDit from '../memory/OnthoudDit'
@@ -47,7 +51,8 @@ interface Props {
  */
 export default function Today({ householdId, personName, timezone }: Props) {
   const now = useNow()
-  const { data, isLoading, isError } = useAgenda(householdId, timezone)
+  // De eigen agenda plus de dag van het woonzorgcentrum (78), als die er is.
+  const { data, isLoading, isError } = useVandaag(householdId, timezone, now)
   const markDone = useMarkDone(householdId)
   const navigate = useNavigate()
   const [fotoVraag, setFotoVraag] = useState<string | null>(null)
@@ -96,6 +101,9 @@ export default function Today({ householdId, personName, timezone }: Props) {
               onDone={(id) => markDone.mutate({ id, done: true })}
             />
           )}
+          {/* Wie er vandaag of gisteren was: onder "nu", omdat "nu" altijd
+              op het scherm staat. Zonder bezoek staat hier niets. */}
+          <BezoekOpTablet householdId={householdId} timezone={timezone} />
         </div>
       </section>
     ),
@@ -152,7 +160,13 @@ export default function Today({ householdId, personName, timezone }: Props) {
         </section>
       ),
 
-    berichten: <PersonInbox householdId={householdId} />,
+    // Het zorgteam hoort bij de berichten: verschijnt alleen bij een verblijf in een WZC.
+    berichten: (
+      <div className="space-y-6">
+        <PersonInbox householdId={householdId} />
+        <ZorgteamKaart householdId={householdId} timezone={timezone} />
+      </div>
+    ),
 
     medicatie: <MedicatieKaart householdId={householdId} timezone={timezone} />,
 
@@ -265,13 +279,16 @@ function NowCard({
       {event.note ? <p className="mt-2 text-lg text-ink-soft">{event.note}</p> : null}
       <p className="mt-1 text-ink-faint">om {hhmm(new Date(event.starts_at), timezone)}</p>
 
-      <button
-        onClick={() => onDone(event.id)}
-        className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white shadow-lift"
-      >
-        <Icon naam="gedaan" size={20} />
-        Dit is gedaan
-      </button>
+      {/* Iets van het woonzorgcentrum vinkt de bewoner niet af. */}
+      {isHuis(event) ? null : (
+        <button
+          onClick={() => onDone(event.id)}
+          className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white shadow-lift"
+        >
+          <Icon naam="gedaan" size={20} />
+          Dit is gedaan
+        </button>
+      )}
     </div>
   )
 }
@@ -287,8 +304,11 @@ function TimelineRow({
   timezone: string
   onToggle: (id: string, done: boolean) => void
 }) {
+  const huis = isHuis(event)
   const status = statusOf(event, now)
-  const gedaan = status === 'done'
+  // Van het huis: voorbij is voorbij, niet "gedaan" en niet doorstreept.
+  const gedaan = status === 'done' && !huis
+  const woord = huis && status === 'done' ? STATUS_LABEL.late : STATUS_LABEL[status]
 
   return (
     // flex-wrap, want bij grote tekst wordt "Ongedaan" een knop van 158 px.
@@ -317,15 +337,17 @@ function TimelineRow({
           {event.title}
         </span>
         {/* Status nooit alleen via kleur: het woord staat er altijd bij. */}
-        <span className="text-sm text-ink-faint">{STATUS_LABEL[status]}</span>
+        <span className="text-sm text-ink-faint">{woord}</span>
       </span>
 
-      <button
-        onClick={() => onToggle(event.id, !gedaan)}
-        className="ml-auto min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold"
-      >
-        {gedaan ? 'Ongedaan' : 'Afvinken'}
-      </button>
+      {huis ? null : (
+        <button
+          onClick={() => onToggle(event.id, !gedaan)}
+          className="ml-auto min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold"
+        >
+          {gedaan ? 'Ongedaan' : 'Afvinken'}
+        </button>
+      )}
     </li>
   )
 }

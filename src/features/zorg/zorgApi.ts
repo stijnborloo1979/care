@@ -287,8 +287,8 @@ export async function deelnames(activiteit: string): Promise<Deelname[]> {
   return (data ?? []) as Deelname[]
 }
 
-export async function schrijfIn(activiteit: string, hh: string) {
-  const { error } = await supabase.from('activity_participant').insert({ activity_id: activiteit, household_id: hh })
+export async function schrijfIn(activiteit: string, hh: string, status: Deelname['status'] = 'ingeschreven') {
+  const { error } = await supabase.from('activity_participant').insert({ activity_id: activiteit, household_id: hh, status })
   if (error) throw error
 }
 
@@ -367,10 +367,64 @@ export async function noodtoegangenVanOrg(org: string) {
 
 export const medewerkers = (org: string) => rpcLijst<Medewerker>('org_medewerkers', { org })
 
+export interface AfdelingRij {
+  id: string
+  name: string
+  archived_at: string | null
+}
+
+/** Alle afdelingen, ook gearchiveerde (72). Zonder 72: geen archief, zoals voorheen. */
+export async function alleAfdelingen(org: string): Promise<AfdelingRij[]> {
+  const met = await supabase.from('department').select('id, name, archived_at').eq('org_id', org).order('name')
+  if (!met.error) return (met.data ?? []) as AfdelingRij[]
+  const zonder = await supabase.from('department').select('id, name').eq('org_id', org).order('name')
+  if (zonder.error) return []
+  return ((zonder.data ?? []) as { id: string; name: string }[]).map((a) => ({ ...a, archived_at: null }))
+}
+
+/** De afdelingen waar iemand kan verblijven of werken: niet gearchiveerd. */
 export async function afdelingen(org: string): Promise<{ id: string; name: string }[]> {
-  const { data, error } = await supabase.from('department').select('id, name').eq('org_id', org).order('name')
-  if (error) return []
-  return (data ?? []) as { id: string; name: string }[]
+  return (await alleAfdelingen(org)).filter((a) => !a.archived_at).map(({ id, name }) => ({ id, name }))
+}
+
+export async function hernoemAfdeling(id: string, naam: string): Promise<void> {
+  const { data, error } = await supabase.from('department').update({ name: naam.trim() }).eq('id', id).select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan een afdeling hernoemen.')
+}
+
+export async function archiveerAfdeling(id: string): Promise<void> {
+  const { error } = await supabase.rpc('archiveer_afdeling', { afdeling: id })
+  if (error) throw error
+}
+
+export async function herstelAfdeling(id: string): Promise<void> {
+  const { error } = await supabase.rpc('herstel_afdeling', { afdeling: id })
+  if (error) throw error
+}
+
+// ---- Organisatie (65: alleen deze kolommen) --------------------------
+
+export interface OrgGegevens {
+  name: string
+  contact_email: string | null
+  vat_number: string | null
+}
+
+export async function orgGegevens(org: string): Promise<OrgGegevens | null> {
+  const { data, error } = await supabase.from('organisation').select('name, contact_email, vat_number').eq('id', org).maybeSingle()
+  if (error) return null
+  return data as OrgGegevens | null
+}
+
+export async function zetOrgGegevens(org: string, g: OrgGegevens): Promise<void> {
+  const { data, error } = await supabase
+    .from('organisation')
+    .update({ name: g.name.trim(), contact_email: g.contact_email?.trim() || null, vat_number: g.vat_number?.trim() || null })
+    .eq('id', org)
+    .select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan de gegevens aanpassen.')
 }
 
 export async function nieuweAfdeling(org: string, naam: string) {
@@ -435,6 +489,68 @@ export async function zetBewaartermijn(org: string, maanden: number): Promise<nu
 export function termijnTekst(maanden: number): string {
   if (maanden % 12 === 0) return maanden === 12 ? '1 jaar' : `${maanden / 12} jaar`
   return `${maanden} maanden`
+}
+
+/** Open uitnodigingen van de organisatie; alleen de beheerder mag ze lezen (60). */
+export async function openOrgUitnodigingen(org: string): Promise<{ id: string; email: string; expires_at: string }[] | null> {
+  const { data, error } = await supabase
+    .from('org_invitation')
+    .select('id, email, expires_at')
+    .eq('org_id', org)
+    .is('accepted_at', null)
+    .is('revoked_at', null)
+    .order('created_at', { ascending: false })
+  if (error) return null
+  return (data ?? []) as { id: string; email: string; expires_at: string }[]
+}
+
+// ---- Medewerkers beheren (70) ------------------------------------------
+
+export async function zetMedewerkerRol(org: string, profiel: string, rol: OrgRol): Promise<void> {
+  const { data, error } = await supabase
+    .from('org_membership')
+    .update({ role: rol })
+    .eq('org_id', org)
+    .eq('profile_id', profiel)
+    .select('profile_id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan dit aanpassen.')
+}
+
+export async function zetMedewerkerActief(org: string, profiel: string, actief: boolean): Promise<void> {
+  const { data, error } = await supabase
+    .from('org_membership')
+    .update({ active: actief })
+    .eq('org_id', org)
+    .eq('profile_id', profiel)
+    .select('profile_id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan dit aanpassen.')
+}
+
+export async function trekUitnodigingIn(id: string): Promise<void> {
+  const { error } = await supabase.rpc('trek_uitnodiging_in', { uitnodiging: id })
+  if (error) throw error
+}
+
+/** 14 nieuwe dagen, en de mail opnieuw. De mail mag mislukken: de link blijft dezelfde. */
+export async function stuurUitnodigingOpnieuw(id: string): Promise<{ gemaild: boolean }> {
+  const { error } = await supabase.rpc('verleng_uitnodiging', { uitnodiging: id })
+  if (error) throw error
+  try {
+    const { error: mailFout } = await supabase.functions.invoke('send-invite', { body: { org_invite_id: id } })
+    return { gemaild: !mailFout }
+  } catch {
+    return { gemaild: false }
+  }
+}
+
+export type EindReden = 'verhuisd' | 'overleden' | 'andere'
+
+/** Het WZC sluit het verblijf af (71): het team verliest toegang, de familie houdt alles. */
+export async function beeindigVerblijf(hh: string, reden: EindReden): Promise<void> {
+  const { error } = await supabase.rpc('beeindig_verblijf', { hh, reden })
+  if (error) throw error
 }
 
 export async function toewijzingen(org: string) {

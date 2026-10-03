@@ -162,6 +162,15 @@ describe('heb ik dit al gedaan', () => {
     expect(a.titel).toBe('Ja, dat heb je gedaan.')
     expect(a.regels[0]).toContain('12:40')
   })
+
+  it('zegt nooit "gegeten" omdat het middagmaal van het woonzorgcentrum voorbij is (78)', () => {
+    const k = {
+      ...kennis,
+      events: [{ ...kennis.events[0], id: 'huis:x', done_at: '2026-03-10T13:00:00+01:00' }],
+    }
+    const a = beantwoord('Heb ik al gegeten?', k, new Date('2026-03-10T13:30:00+01:00'))
+    expect(a.titel).not.toBe('Ja, dat heb je gedaan.')
+  })
 })
 
 describe('onthoud dit', () => {
