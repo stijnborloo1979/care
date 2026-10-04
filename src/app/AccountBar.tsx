@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import TaalKiezer from '../components/TaalKiezer'
 import { ChevronDown, KeyRound, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthProvider'
@@ -87,6 +88,7 @@ export default function AccountBar() {
             <KeyRound size={16} strokeWidth={1.75} />
             Mijn account en wachtwoord
           </Link>
+          <TaalKiezer compact />
           <button
             onClick={signOut}
             className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft"

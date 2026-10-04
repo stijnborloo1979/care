@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import TaalKiezer from '../components/TaalKiezer'
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { BarChart3, BedDouble, Building2, CalendarDays, CalendarRange, ChevronDown, ClipboardList, House, KeyRound, LogOut, Megaphone, Menu, MessagesSquare, Settings2, Users, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -119,6 +120,7 @@ export default function ZorgLayout() {
             <KeyRound size={16} strokeWidth={1.75} aria-hidden="true" />
             Mijn account en wachtwoord
           </NavLink>
+          <TaalKiezer compact />
           <button
             onClick={signOut}
             className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft"

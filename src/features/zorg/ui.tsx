@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { tt } from '../../lib/uiTaal'
 
 /** Dezelfde bouwstenen als de familieschermen, op één plaats voor Care. */
 
@@ -41,10 +42,11 @@ export function Leeg({ children }: { children: ReactNode }) {
 
 /** Een fout van Supabase is een gewoon object met een message, geen Error. */
 export function foutTekst(fout: unknown): string {
-  if (fout instanceof Error) return fout.message
+  // Meldingen van de database zijn Nederlands; tt() vertaalt de gekende.
+  if (fout instanceof Error) return tt(fout.message)
   if (fout && typeof fout === 'object' && typeof (fout as { message?: unknown }).message === 'string')
-    return (fout as { message: string }).message
-  return typeof fout === 'string' ? fout : 'Er ging iets mis. Probeer het opnieuw.'
+    return tt((fout as { message: string }).message)
+  return typeof fout === 'string' ? tt(fout) : tt('Er ging iets mis. Probeer het opnieuw.')
 }
 
 export function Fout({ fout }: { fout: unknown }) {
