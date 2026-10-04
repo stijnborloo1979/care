@@ -67,6 +67,22 @@ export function taalVanToestel(): Taal {
 type Woordenboek = Record<string, string>
 
 const NL: Woordenboek = {
+  'bezoek.titel': 'Wie was er hier?',
+  'bezoek.voorlezen': 'Voorlezen',
+  'bezoek.wasHier': '{naam} was hier {wanneer}.',
+  'bezoek.morgen': 'vanmorgen',
+  'bezoek.middag': 'vanmiddag',
+  'bezoek.avond': 'vanavond',
+  'bezoek.gisterenmorgen': 'gisterenmorgen',
+  'bezoek.gisterenmiddag': 'gistermiddag',
+  'bezoek.gisterenavond': 'gisteravond',
+  'bezoek.op': 'op {dag}',
+  'uitstap.titel': 'Uitstap met {naam}',
+  'uitstap.terugOm': 'Je bent terug om {tijd}.',
+  'uitstap.weg': 'Je bent op uitstap met {naam}',
+  'ass.wieWasEr': 'Wie was er de laatste dagen?',
+  'ass.geenBezoekGenoteerd': 'Er staat deze week geen bezoek genoteerd.',
+  'ass.geenBezoekVan': 'Ik zie deze week geen bezoek van {naam}. Dat weet ik niet zeker.',
   // Navigatie
   'nav.vandaag': 'Vandaag',
   'nav.wie': 'Wie?',
@@ -310,6 +326,22 @@ const NL: Woordenboek = {
 }
 
 const FR: Woordenboek = {
+  'bezoek.titel': 'Qui est venu ?',
+  'bezoek.voorlezen': 'Lire à voix haute',
+  'bezoek.wasHier': '{naam} est venu(e) {wanneer}.',
+  'bezoek.morgen': 'ce matin',
+  'bezoek.middag': 'cet après-midi',
+  'bezoek.avond': 'ce soir',
+  'bezoek.gisterenmorgen': 'hier matin',
+  'bezoek.gisterenmiddag': 'hier après-midi',
+  'bezoek.gisterenavond': 'hier soir',
+  'bezoek.op': '{dag}',
+  'uitstap.titel': 'Sortie avec {naam}',
+  'uitstap.terugOm': 'Tu rentres à {tijd}.',
+  'uitstap.weg': 'Tu es en sortie avec {naam}',
+  'ass.wieWasEr': 'Qui est venu ces derniers jours ?',
+  'ass.geenBezoekGenoteerd': 'Aucune visite notée cette semaine.',
+  'ass.geenBezoekVan': 'Je ne vois pas de visite de {naam} cette semaine. Je n’en suis pas sûr.',
   'nav.vandaag': "Aujourd'hui",
   'nav.wie': 'Qui ?',
   'nav.praten': 'Parler',
@@ -475,6 +507,22 @@ const FR: Woordenboek = {
 }
 
 const EN: Woordenboek = {
+  'bezoek.titel': 'Who came by?',
+  'bezoek.voorlezen': 'Read aloud',
+  'bezoek.wasHier': '{naam} was here {wanneer}.',
+  'bezoek.morgen': 'this morning',
+  'bezoek.middag': 'this afternoon',
+  'bezoek.avond': 'this evening',
+  'bezoek.gisterenmorgen': 'yesterday morning',
+  'bezoek.gisterenmiddag': 'yesterday afternoon',
+  'bezoek.gisterenavond': 'yesterday evening',
+  'bezoek.op': 'on {dag}',
+  'uitstap.titel': 'Outing with {naam}',
+  'uitstap.terugOm': 'You will be back at {tijd}.',
+  'uitstap.weg': 'You are out with {naam}',
+  'ass.wieWasEr': 'Who came by recently?',
+  'ass.geenBezoekGenoteerd': 'No visits noted this week.',
+  'ass.geenBezoekVan': 'I don’t see a visit from {naam} this week. I’m not sure.',
   'nav.vandaag': 'Today',
   'nav.wie': 'Who?',
   'nav.praten': 'Talk',

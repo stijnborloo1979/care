@@ -6,6 +6,13 @@ import { useNow } from '../today/useAgenda'
 import Icon from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
 import { useHousehold } from '../household/useHousehold'
+import BezoekVastleggen from '../bezoek/BezoekVastleggen'
+import DagVerhaal from '../dagverhaal/DagVerhaal'
+import GespreksStarters from '../bezoek/GespreksStarters'
+import DagInHetHuis from '../afdelingsdag/DagInHetHuis'
+import NieuwsVanHetHuis from '../nieuws/NieuwsVanHetHuis'
+import UitstapKaart from '../uitstap/UitstapKaart'
+import SpullenKaart from '../spullen/SpullenKaart'
 
 interface Props {
   householdId: string
@@ -89,6 +96,12 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
 
   const t = toestandVan(data, now)
   const niveau = household?.support_level ?? 'ondersteund'
+  // Wie er langskwam: voor de persoon die het vergeet, en voor familie die
+  // wil weten wie er deze week was. Op elk ondersteuningsniveau, zoals de
+  // agenda; onder de toestand, die blijft het eerste wat je ziet.
+  const bezoek = !household?.is_self ? (
+    <BezoekVastleggen householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
+  ) : null
 
   return (
     <div className="space-y-6">
@@ -119,6 +132,13 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         </div>
       ) : null}
 
+      {niveau === 'zelf' && !household?.is_self ? (
+        <>
+          {bezoek}
+          <NieuwsVanHetHuis householdId={householdId} timezone={timezone} />
+        </>
+      ) : null}
+
       {niveau !== 'zelf' || household?.is_self ? (
       <>
       {/* De hele bedoeling van dit scherm in één blik. Daarom groot, met
@@ -147,6 +167,24 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         <p className="mt-1 text-lg text-ink-soft">{t.onder}</p>
       </div>
 
+      <DagVerhaal householdId={householdId} personName={personName} timezone={timezone} summary={data} />
+
+      {bezoek}
+
+      <DagInHetHuis householdId={householdId} personName={personName} timezone={timezone} />
+
+      {/* Alleen bij een verblijf in een woonzorgcentrum. */}
+      {household?.org_id && !household.is_self ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <UitstapKaart householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
+          <SpullenKaart householdId={householdId} personName={personName} vorm="familie" />
+        </div>
+      ) : null}
+
+      <NieuwsVanHetHuis householdId={householdId} timezone={timezone} />
+
+      <GespreksStarters householdId={householdId} personName={personName} timezone={timezone} />
+
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-card bg-surface p-6 shadow-card">
           <div className="flex items-center justify-between">
@@ -166,7 +204,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
             <ul className="mt-3 space-y-2">
               {data.log.slice(0, 6).map((l) => (
                 <li key={l.id} className="flex items-baseline gap-3">
-                  <span className="w-12 shrink-0 font-bold tabular-nums text-ink-soft">
+                  <span className="w-14 shrink-0 whitespace-nowrap font-bold tabular-nums text-ink-soft">
                     {hhmm(new Date(l.occurred_at), timezone)}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -226,7 +264,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
                   key={m.id}
                   className="flex flex-wrap items-center gap-3 border-b border-line py-2 last:border-none"
                 >
-                  <span className="w-12 shrink-0 font-bold tabular-nums text-ink-soft">
+                  <span className="w-14 shrink-0 whitespace-nowrap font-bold tabular-nums text-ink-soft">
                     {hhmm(new Date(m.due_at), timezone)}
                   </span>
                   <span className="min-w-0 flex-1">
