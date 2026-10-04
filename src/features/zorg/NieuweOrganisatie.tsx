@@ -6,6 +6,7 @@ import { maakOrganisatie } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
 import { Fout, knop, label, veld } from './ui'
 import { tt } from '../../lib/uiTaal'
+import { DemoKnop } from './Demo'
 
 /**
  * Een woonzorgcentrum registreren. Wie dit doet, wordt er beheerder van.
@@ -57,6 +58,16 @@ export default function NieuweOrganisatie() {
         </button>
         <Fout fout={maak.error} />
       </form>
+
+      <div className="mt-8 rounded-card border-[1.5px] border-dashed border-accent bg-accent-soft p-5">
+        <h2 className="text-lg font-bold">{tt('Eerst rondkijken?')}</h2>
+        <p className="mt-1 text-ink-soft">
+          {tt('Open een demo-woonzorgcentrum met afdelingen, kamers en acht verzonnen bewoners. Je kan het daarna met één klik wissen.')}
+        </p>
+        <div className="mt-3">
+          <DemoKnop groot />
+        </div>
+      </div>
 
       <Link to="/" className="mt-6 block text-center font-semibold text-ink-faint underline underline-offset-4">
         {tt('Terug')}

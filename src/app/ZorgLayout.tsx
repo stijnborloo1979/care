@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import TaalKiezer from '../components/TaalKiezer'
+import { DemoBalk, DemoKnop } from '../features/zorg/Demo'
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, BedDouble, Building2, CalendarDays, CalendarRange, ChevronDown, ClipboardList, House, KeyRound, LogOut, Megaphone, Menu, MessagesSquare, Settings2, Users, X } from 'lucide-react'
+import { BarChart3, FileUp, BedDouble, Building2, CalendarDays, CalendarRange, ChevronDown, ClipboardList, House, KeyRound, LogOut, Megaphone, Menu, MessagesSquare, Settings2, Users, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
@@ -46,6 +47,7 @@ export default function ZorgLayout() {
     ...(beheert || org.team_lead ? [{ to: '/zorg/nieuws', label: tt('Nieuws'), icoon: Megaphone, groep: 'Families' }] : []),
     ...(beheert
       ? [
+          { to: '/zorg/importeren', label: tt('Importeren'), icoon: FileUp, groep: 'Beheer' },
           { to: '/zorg/rapporten', label: tt('Rapporten'), icoon: BarChart3, groep: 'Beheer' },
           { to: '/zorg/beheer', label: tt('Beheer'), icoon: Settings2, groep: 'Beheer' },
         ]
@@ -121,6 +123,7 @@ export default function ZorgLayout() {
             <KeyRound size={16} strokeWidth={1.75} aria-hidden="true" />
             {tt('Mijn account en wachtwoord')}
           </NavLink>
+          <DemoKnop onKlaar={() => setOpen(false)} />
           <TaalKiezer compact />
           <button
             onClick={signOut}
@@ -176,6 +179,7 @@ export default function ZorgLayout() {
       <div className="min-w-0 flex-1">
         <div className="mx-auto max-w-5xl px-4 pb-28 pt-5 sm:px-5 lg:pb-12">
           <div className="mb-4 lg:hidden print:hidden">{kopBalk}</div>
+          <DemoBalk />
           <Outlet />
         </div>
 

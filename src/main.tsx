@@ -84,6 +84,7 @@ const ZorgVandaag = lazy(() => import("./features/zorg/Vandaag"));
 const ZorgKamers = lazy(() => import("./features/zorg/Kamers"));
 const ZorgWeek = lazy(() => import("./features/zorg/Weekplanning"));
 const ZorgRapporten = lazy(() => import("./features/zorg/Rapporten"));
+const ZorgImporteren = lazy(() => import("./features/zorg/Importeren"));
 const ZorgBeheer = lazy(() => import("./features/zorg/Beheer"));
 const ZorgTeam = lazy(() => import("./features/zorg/Team"));
 const NieuweOrganisatie = lazy(() => import("./features/zorg/NieuweOrganisatie"));
@@ -199,6 +200,7 @@ if (!configuratieOk) {
                     <Route path="kamers" element={<ZorgKamers />} />
                     <Route path="week" element={<ZorgWeek />} />
                     <Route path="rapporten" element={<ZorgRapporten />} />
+                    <Route path="importeren" element={<ZorgImporteren />} />
                     <Route path="bewoner/:hh" element={<ZorgBewoner />} />
                     <Route path="overdracht" element={<ZorgOverdracht />} />
                     <Route path="activiteiten" element={<ZorgActiviteiten />} />
