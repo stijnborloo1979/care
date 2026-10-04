@@ -99,3 +99,17 @@ export function dagenTekst(dagen: number[]): string {
 export function uurKort(t: string | null): string {
   return t ? t.slice(0, 5) : ''
 }
+
+/** Eén moment van de vaste dag (78), zoals het WZC het beheert. */
+export interface VastMoment {
+  id: string
+  org_id: string
+  department_id: string | null
+  titel: string
+  soort: HuisMoment['soort']
+  emoji: string | null
+  begint: string
+  eindigt: string | null
+  dagen: number[]
+  actief: boolean
+}

@@ -46,7 +46,7 @@ export default function Bewoner() {
   const isMijn = !!mijn.data?.some((b) => b.household_id === hh)
 
   const terug = (
-    <Link to="/zorg" className="inline-flex items-center gap-1.5 font-semibold text-accent-ink">
+    <Link to="/zorg/bewoners" className="inline-flex items-center gap-1.5 font-semibold text-accent-ink">
       <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Bewoners
     </Link>
   )
@@ -452,7 +452,7 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
         </div>
       ) : null}
       <p className="text-sm text-ink-faint">
-        <Link to="/zorg" className="font-semibold text-accent-ink underline underline-offset-4">
+        <Link to="/zorg/bewoners" className="font-semibold text-accent-ink underline underline-offset-4">
           Terug naar de bewoners
         </Link>{' '}
         — de noodtoegang loopt door tot je ze stopt of tot ze afloopt.

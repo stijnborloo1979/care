@@ -130,7 +130,7 @@ function Koppelcode({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolea
  * Bovenaan: hoe staat het ervoor, en wat vraagt aandacht. Alleen wie waar
  * verblijft en wie voor wie zorgt; nooit inhoud over een bewoner.
  */
-function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean }) {
+export function Overzicht({ orgId, isBeheerder, alleenAandacht = false }: { orgId: string; isBeheerder: boolean; alleenAandacht?: boolean }) {
   const bewoners = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], queryFn: () => alleBewoners(orgId) })
   const team = useQuery({ queryKey: ['zorg', 'medewerkers', orgId], queryFn: () => medewerkers(orgId) })
   const toe = useQuery({ queryKey: ['zorg', 'toewijzingen', orgId], queryFn: () => toewijzingen(orgId) })
@@ -160,7 +160,8 @@ function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean
   ]
 
   return (
-    <Kaart titel="Overzicht">
+    <Kaart titel={alleenAandacht ? 'Vraagt aandacht' : 'Overzicht'}>
+      {alleenAandacht ? null : (
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tegels
           .filter(([, n]) => n !== null)
@@ -171,15 +172,18 @@ function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean
             </div>
           ))}
       </dl>
+      )}
 
-      <h3 className="mt-5 text-sm font-semibold uppercase tracking-wide text-ink-faint">Vraagt aandacht</h3>
+      {alleenAandacht ? null : (
+        <h3 className="mt-5 text-sm font-semibold uppercase tracking-wide text-ink-faint">Vraagt aandacht</h3>
+      )}
       {punten.length === 0 ? (
-        <p className="mt-2 flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">
+        <p className={`${alleenAandacht ? '' : 'mt-2 '}flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft`}>
           <CircleCheck size={18} strokeWidth={1.75} className="shrink-0 text-accent-ink" aria-hidden="true" />
           Alles in orde: elke bewoner wordt gevolgd en heeft een plaats.
         </p>
       ) : (
-        <ul className="mt-2 space-y-2">
+        <ul className={`${alleenAandacht ? '' : 'mt-2 '}space-y-2`}>
           {punten.slice(0, 8).map((p) => (
             <li key={p.sleutel} className="flex items-start gap-3 rounded-2xl bg-surface-soft px-4 py-3">
               <TriangleAlert

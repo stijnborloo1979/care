@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
-import type { HuisMoment } from './afdelingsdagPuur'
+import type { HuisMoment, VastMoment } from './afdelingsdagPuur'
 
 export * from './afdelingsdagPuur'
 
@@ -17,18 +17,6 @@ export async function dagVanBewoner(hh: string, dag?: string): Promise<HuisMomen
 
 // ---- Voor het woonzorgcentrum: de vaste dag beheren ----------------------
 
-export interface VastMoment {
-  id: string
-  org_id: string
-  department_id: string | null
-  titel: string
-  soort: HuisMoment['soort']
-  emoji: string | null
-  begint: string
-  eindigt: string | null
-  dagen: number[]
-  actief: boolean
-}
 
 const VELDEN = 'id, org_id, department_id, titel, soort, emoji, begint, eindigt, dagen, actief'
 
