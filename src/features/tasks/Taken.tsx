@@ -16,12 +16,13 @@ import { localDateKey } from '../../lib/time'
 import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from '../household/useHousehold'
 import Icon from '../../components/Icon'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const HERHALING: { waarde: Herhaling; label: string }[] = [
-  { waarde: 'none', label: 'Eenmalig' },
-  { waarde: 'daily', label: 'Elke dag' },
-  { waarde: 'weekly', label: 'Elke week' },
-  { waarde: 'monthly', label: 'Elke maand' },
+  { waarde: 'none', label: tt('Eenmalig') },
+  { waarde: 'daily', label: tt('Elke dag') },
+  { waarde: 'weekly', label: tt('Elke week') },
+  { waarde: 'monthly', label: tt('Elke maand') },
 ]
 
 /**
@@ -64,37 +65,37 @@ export default function Taken() {
   const opnemen = useMutation({
     mutationFn: claimTask,
     onSuccess: verversen,
-    onError: (e) => melden(e, 'Opnemen lukte niet.'),
+    onError: (e) => melden(e, tt('Opnemen lukte niet.')),
   })
 
   const toewijzen = useMutation({
     mutationFn: (p: { id: string; wie: string | null }) => assignTask(p.id, p.wie),
     onSuccess: verversen,
-    onError: (e) => melden(e, 'Toewijzen lukte niet.'),
+    onError: (e) => melden(e, tt('Toewijzen lukte niet.')),
   })
 
   const afvinken = useMutation({
     mutationFn: completeTask,
     onSuccess: verversen,
-    onError: (e) => melden(e, 'Afvinken lukte niet.'),
+    onError: (e) => melden(e, tt('Afvinken lukte niet.')),
   })
 
   const heropenen = useMutation({
     mutationFn: reopenTask,
     onSuccess: verversen,
-    onError: (e) => melden(e, 'Terugzetten lukte niet.'),
+    onError: (e) => melden(e, tt('Terugzetten lukte niet.')),
   })
 
   const wissen = useMutation({
     mutationFn: deleteTask,
     onSuccess: verversen,
-    onError: (e) => melden(e, 'Verwijderen lukte niet.'),
+    onError: (e) => melden(e, tt('Verwijderen lukte niet.')),
   })
 
   const naam = (id: string | null) => {
     if (!id) return null
-    if (id === ik) return 'jij'
-    return familie?.find((f) => f.profile_id === id)?.naam ?? 'iemand'
+    if (id === ik) return tt('jij')
+    return familie?.find((f) => f.profile_id === id)?.naam ?? tt('iemand')
   }
 
   const vandaag = localDateKey(new Date(), tz)
@@ -103,20 +104,20 @@ export default function Taken() {
 
   const groepen: { titel: string; uitleg?: string; rijen: Task[] }[] = [
     {
-      titel: 'Te laat',
+      titel: tt('Te laat'),
       rijen: open.filter((t) => t.due_on && t.due_on < vandaag),
     },
     {
-      titel: 'Vandaag',
+      titel: tt('Vandaag'),
       rijen: open.filter((t) => t.due_on === vandaag),
     },
     {
-      titel: 'Later',
+      titel: tt('Later'),
       rijen: open.filter((t) => t.due_on && t.due_on > vandaag),
     },
     {
-      titel: 'Ooit',
-      uitleg: 'Zonder dag erbij.',
+      titel: tt('Ooit'),
+      uitleg: tt('Zonder dag erbij.'),
       rijen: open.filter((t) => !t.due_on),
     },
   ].filter((g) => g.rijen.length > 0)
@@ -124,10 +125,11 @@ export default function Taken() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Taken</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Taken')}</h1>
         <p className="mt-1 text-ink-soft">
-          Het regelwerk onder elkaar verdelen. {household?.person_name.split(' ')[0] ?? 'De persoon'}{' '}
-          ziet dit scherm niet.
+          {tt('Het regelwerk onder elkaar verdelen. {naam} ziet dit scherm niet.', {
+            naam: household?.person_name.split(' ')[0] ?? tt('De persoon'),
+          })}
         </p>
       </header>
 
@@ -145,11 +147,11 @@ export default function Taken() {
         </p>
       ) : null}
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       {!isLoading && open.length === 0 ? (
         <p className="rounded-card bg-surface p-6 text-ink-soft shadow-card">
-          Niets openstaand. Wat hierboven bijkomt, verschijnt hier.
+          {tt('Niets openstaand. Wat hierboven bijkomt, verschijnt hier.')}
         </p>
       ) : null}
 
@@ -165,7 +167,7 @@ export default function Taken() {
               <li key={t.id} className="flex flex-wrap items-start gap-3 py-3">
                 <button
                   onClick={() => afvinken.mutate(t.id)}
-                  aria-label={`${t.title} afvinken`}
+                  aria-label={tt('{titel} afvinken', { titel: t.title })}
                   className="mt-0.5 grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-line-strong text-ink-faint hover:border-accent hover:text-accent"
                 >
                   <Icon naam="gedaan" className="h-5 w-5" />
@@ -175,7 +177,7 @@ export default function Taken() {
                   <p className="font-semibold">{t.title}</p>
                   {t.note ? <p className="text-sm text-ink-soft">{t.note}</p> : null}
                   <p className="mt-0.5 text-sm text-ink-faint">
-                    {t.due_on ? dagLabel(t.due_on, vandaag, tz) : 'geen dag'}
+                    {t.due_on ? dagLabel(t.due_on, vandaag, tz) : tt('geen dag')}
                     {t.repeat !== 'none'
                       ? ` · ${HERHALING.find((h) => h.waarde === t.repeat)?.label.toLowerCase()}`
                       : ''}
@@ -185,15 +187,15 @@ export default function Taken() {
 
                 {t.assignee ? (
                   <select
-                    aria-label={`Wie doet ${t.title}`}
+                    aria-label={tt('Wie doet {titel}', { titel: t.title })}
                     value={t.assignee}
                     onChange={(e) => toewijzen.mutate({ id: t.id, wie: e.target.value || null })}
                     className="min-h-[2.6rem] rounded-pill border border-line bg-surface-soft px-3 font-semibold"
                   >
-                    <option value="">Niemand</option>
+                    <option value="">{tt('Niemand')}</option>
                     {(familie ?? []).map((f) => (
                       <option key={f.profile_id} value={f.profile_id}>
-                        {f.profile_id === ik ? 'Ik' : f.naam}
+                        {f.profile_id === ik ? tt('Ik') : f.naam}
                       </option>
                     ))}
                   </select>
@@ -202,16 +204,16 @@ export default function Taken() {
                     onClick={() => opnemen.mutate(t.id)}
                     className="min-h-[2.6rem] rounded-pill bg-accent-ink px-4 font-bold text-white"
                   >
-                    Neem ik
+                    {tt('Neem ik')}
                   </button>
                 )}
 
                 <button
                   onClick={() => wissen.mutate(t.id)}
-                  aria-label={`${t.title} verwijderen`}
+                  aria-label={tt('{titel} verwijderen', { titel: t.title })}
                   className="min-h-[2.6rem] rounded-pill px-3 text-sm font-semibold text-ink-faint underline underline-offset-4"
                 >
-                  weg
+                  {tt('weg')}
                 </button>
               </li>
             ))}
@@ -222,7 +224,7 @@ export default function Taken() {
       {gedaan.length > 0 ? (
         <details className="rounded-card bg-surface p-4 shadow-card sm:p-6">
           <summary className="cursor-pointer text-lg font-bold">
-            Afgevinkt deze week <span className="text-ink-faint">{gedaan.length}</span>
+            {tt('Afgevinkt deze week')} <span className="text-ink-faint">{gedaan.length}</span>
           </summary>
           <ul className="mt-3 divide-y divide-line">
             {gedaan.map((t) => (
@@ -233,7 +235,7 @@ export default function Taken() {
                   onClick={() => heropenen.mutate(t.id)}
                   className="min-h-[2.4rem] rounded-pill px-3 text-sm font-semibold underline underline-offset-4"
                 >
-                  terugzetten
+                  {tt('terugzetten')}
                 </button>
               </li>
             ))}
@@ -280,7 +282,7 @@ function NieuweTaak({
       setHerhaling('none')
       await onKlaar()
     },
-    onError: (e) => onFout(e instanceof Error ? e.message : 'Toevoegen lukte niet.'),
+    onError: (e) => onFout(e instanceof Error ? e.message : tt('Toevoegen lukte niet.')),
   })
 
   return (
@@ -292,14 +294,14 @@ function NieuweTaak({
       className="rounded-card bg-surface p-4 shadow-card sm:p-6"
     >
       <label htmlFor="taak" className="font-semibold">
-        Wat moet er gebeuren?
+        {tt('Wat moet er gebeuren?')}
       </label>
       <div className="mt-2 flex flex-wrap gap-2">
         <input
           id="taak"
           value={titel}
           onChange={(e) => setTitel(e.target.value)}
-          placeholder="Boodschappen doen"
+          placeholder={tt('Boodschappen doen')}
           className="min-h-touch min-w-[min(14rem,100%)] flex-1 rounded-pill border border-line bg-surface-soft px-4"
         />
         <button
@@ -307,33 +309,33 @@ function NieuweTaak({
           disabled={!titel.trim() || toevoegen.isPending}
           className="min-h-touch rounded-pill bg-accent-ink px-5 font-bold text-white disabled:opacity-50"
         >
-          Toevoegen
+          {tt('Toevoegen')}
         </button>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
         <input
           type="date"
-          aria-label="Wanneer"
+          aria-label={tt('Wanneer')}
           value={dag}
           onChange={(e) => setDag(e.target.value)}
           className="min-h-[2.6rem] rounded-pill border border-line bg-surface-soft px-3"
         />
         <select
-          aria-label="Wie doet het"
+          aria-label={tt('Wie doet het')}
           value={wie}
           onChange={(e) => setWie(e.target.value)}
           className="min-h-[2.6rem] rounded-pill border border-line bg-surface-soft px-3"
         >
-          <option value="">Nog op te nemen</option>
+          <option value="">{tt('Nog op te nemen')}</option>
           {familie.map((f) => (
             <option key={f.profile_id} value={f.profile_id}>
-              {f.profile_id === ik ? 'Ik' : f.naam}
+              {f.profile_id === ik ? tt('Ik') : f.naam}
             </option>
           ))}
         </select>
         <select
-          aria-label="Hoe vaak"
+          aria-label={tt('Hoe vaak')}
           value={herhaling}
           onChange={(e) => setHerhaling(e.target.value as Herhaling)}
           className="min-h-[2.6rem] rounded-pill border border-line bg-surface-soft px-3"
@@ -352,16 +354,16 @@ function NieuweTaak({
 /** "vandaag", "morgen", of gewoon de dag. Een datum van deze week lees je
  *  sneller als weekdag dan als 25/09. */
 function dagLabel(dag: string, vandaag: string, tz: string): string {
-  if (dag === vandaag) return 'vandaag'
+  if (dag === vandaag) return tt('vandaag')
 
   const d = new Date(`${dag}T12:00:00Z`)
   const verschil = Math.round(
     (Date.parse(`${dag}T12:00:00Z`) - Date.parse(`${vandaag}T12:00:00Z`)) / 86_400_000,
   )
-  if (verschil === 1) return 'morgen'
-  if (verschil === -1) return 'gisteren'
+  if (verschil === 1) return tt('morgen')
+  if (verschil === -1) return tt('gisteren')
   if (verschil > 1 && verschil < 7) {
-    return new Intl.DateTimeFormat('nl-BE', { timeZone: tz, weekday: 'long' }).format(d)
+    return new Intl.DateTimeFormat(uiLocale(), { timeZone: tz, weekday: 'long' }).format(d)
   }
-  return new Intl.DateTimeFormat('nl-BE', { timeZone: tz, day: 'numeric', month: 'long' }).format(d)
+  return new Intl.DateTimeFormat(uiLocale(), { timeZone: tz, day: 'numeric', month: 'long' }).format(d)
 }

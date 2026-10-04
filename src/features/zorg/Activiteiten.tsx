@@ -18,6 +18,7 @@ import {
 } from './zorgApi'
 import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, label, veld } from './ui'
 import VasteDag from './VasteDag'
+import { tt } from '../../lib/uiTaal'
 
 /** Zingen, wandelen, de kapper: wat er te doen is, en wie meedoet. */
 export default function Activiteiten() {
@@ -31,22 +32,22 @@ export default function Activiteiten() {
   return (
     <div className="space-y-6">
       <Kop
-        titel="Activiteiten"
-        uitleg="Wat er gepland is in het woonzorgcentrum. Het staat vanzelf op de tablets van de bewoners."
+        titel={tt('Activiteiten')}
+        uitleg={tt('Wat er gepland is in het woonzorgcentrum. Het staat vanzelf op de tablets van de bewoners.')}
         rechts={
           magPlannen ? (
             <Link to="/zorg/nieuws" className={`${knopKlein} inline-flex items-center gap-2`}>
-              <Megaphone size={16} strokeWidth={1.75} aria-hidden="true" /> Nieuws voor de families
+              <Megaphone size={16} strokeWidth={1.75} aria-hidden="true" /> {tt('Nieuws voor de families')}
             </Link>
           ) : null
         }
       />
       <VasteDag orgId={orgId} magPlannen={magPlannen} beheert={beheert} />
       {magPlannen ? <NieuweActiviteit orgId={orgId} /> : null}
-      <Kaart titel="Gepland">
+      <Kaart titel={tt('Gepland')}>
         {lijst.isLoading ? <Laden /> : null}
         <Fout fout={lijst.error} />
-        {lijst.data && lijst.data.length === 0 ? <Leeg>Er is nog niets gepland.</Leeg> : null}
+        {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Er is nog niets gepland.')}</Leeg> : null}
         <ul className="space-y-2">
           {(lijst.data ?? []).map((a) => (
             <li key={a.id} className="rounded-2xl border border-line">
@@ -62,7 +63,7 @@ export default function Activiteiten() {
                   <span className="block text-sm text-ink-soft">
                     {dagEnUur(a.starts_at)}
                     {a.plaats ? ` · ${a.plaats}` : ''}
-                    {a.status === 'geannuleerd' ? ' · geannuleerd' : ''}
+                    {a.status === 'geannuleerd' ? ` · ${tt('geannuleerd')}` : ''}
                   </span>
                 </span>
                 <ChevronDown
@@ -107,7 +108,7 @@ function NieuweActiviteit({ orgId }: { orgId: string }) {
   })
 
   return (
-    <Kaart titel="Nieuwe activiteit">
+    <Kaart titel={tt('Nieuwe activiteit')}>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -116,31 +117,31 @@ function NieuweActiviteit({ orgId }: { orgId: string }) {
         className="grid gap-3 sm:grid-cols-2"
       >
         <label className="sm:col-span-2">
-          <span className={label}>Wat</span>
-          <input required maxLength={120} value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="Samen zingen" className={veld} />
+          <span className={label}>{tt('Wat')}</span>
+          <input required maxLength={120} value={titel} onChange={(e) => setTitel(e.target.value)} placeholder={tt('Samen zingen')} className={veld} />
         </label>
         <label>
-          <span className={label}>Wanneer</span>
+          <span className={label}>{tt('Wanneer')}</span>
           <input required type="datetime-local" value={wanneer} onChange={(e) => setWanneer(e.target.value)} className={veld} />
         </label>
         <label>
-          <span className={label}>Waar</span>
-          <input value={plaats} onChange={(e) => setPlaats(e.target.value)} placeholder="Cafetaria" className={veld} />
+          <span className={label}>{tt('Waar')}</span>
+          <input value={plaats} onChange={(e) => setPlaats(e.target.value)} placeholder={tt('Cafetaria')} className={veld} />
         </label>
         <label className="sm:col-span-2">
-          <span className={label}>Voor</span>
+          <span className={label}>{tt('Voor')}</span>
           <select value={afdeling} onChange={(e) => setAfdeling(e.target.value)} className={veld}>
-            <option value="">Het hele woonzorgcentrum</option>
+            <option value="">{tt('Het hele woonzorgcentrum')}</option>
             {(afd.data ?? []).map((a) => (
               <option key={a.id} value={a.id}>
-                Afdeling {a.name}
+                {tt('Afdeling {naam}', { naam: a.name })}
               </option>
             ))}
           </select>
         </label>
         <div className="sm:col-span-2">
           <button type="submit" disabled={bewaar.isPending} className={`${knop} w-full sm:w-auto`}>
-            {bewaar.isPending ? 'Bezig…' : 'Activiteit plannen'}
+            {bewaar.isPending ? tt('Bezig…') : tt('Activiteit plannen')}
           </button>
           <Fout fout={bewaar.error} />
         </div>
@@ -150,9 +151,9 @@ function NieuweActiviteit({ orgId }: { orgId: string }) {
 }
 
 const STATUS: Record<Deelname['status'], string> = {
-  ingeschreven: 'ingeschreven',
-  aanwezig: 'aanwezig',
-  afwezig: 'afwezig',
+  ingeschreven: tt('ingeschreven'),
+  aanwezig: tt('aanwezig'),
+  afwezig: tt('afwezig'),
 }
 
 function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeheren: boolean }) {
@@ -186,11 +187,11 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
 
   return (
     <div className="border-t border-line px-4 py-3">
-      {lijst.data && lijst.data.length === 0 ? <Leeg>Nog niemand ingeschreven.</Leeg> : null}
+      {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Nog niemand ingeschreven.')}</Leeg> : null}
       <ul className="space-y-1.5">
         {(lijst.data ?? []).map((d) => (
           <li key={d.household_id} className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-soft px-3 py-2">
-            <span className="min-w-0 flex-1 font-semibold">{namen[d.household_id] ?? 'Bewoner'}</span>
+            <span className="min-w-0 flex-1 font-semibold">{namen[d.household_id] ?? tt('Bewoner')}</span>
             <span className="text-sm text-ink-soft">{STATUS[d.status]}</span>
             {mijnIds.has(d.household_id) && activiteit.status !== 'geannuleerd' ? (
               <span className="flex gap-1">
@@ -199,14 +200,14 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
                   aria-pressed={d.status === 'aanwezig'}
                   className={knopKlein}
                 >
-                  Aanwezig
+                  {tt('Aanwezig')}
                 </button>
                 <button
                   onClick={() => aanwezig.mutate({ hh: d.household_id, status: 'afwezig' })}
                   aria-pressed={d.status === 'afwezig'}
                   className={knopKlein}
                 >
-                  Afwezig
+                  {tt('Afwezig')}
                 </button>
               </span>
             ) : null}
@@ -223,9 +224,9 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
           className="mt-3 flex flex-wrap items-end gap-2"
         >
           <label className="min-w-[12rem] flex-1">
-            <span className={label}>Iemand inschrijven</span>
+            <span className={label}>{tt('Iemand inschrijven')}</span>
             <select value={nieuw} onChange={(e) => setNieuw(e.target.value)} className={veld}>
-              <option value="">Kies een bewoner</option>
+              <option value="">{tt('Kies een bewoner')}</option>
               {teKiezen.map((b) => (
                 <option key={b.household_id} value={b.household_id}>
                   {b.naam}
@@ -234,7 +235,7 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
             </select>
           </label>
           <button type="submit" disabled={!nieuw || inschrijven.isPending} className={knop}>
-            Inschrijven
+            {tt('Inschrijven')}
           </button>
           <button
             type="button"
@@ -242,7 +243,7 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
             disabled={!nieuw || wasErbij.isPending}
             className={knopKlein}
           >
-            Was erbij
+            {tt('Was erbij')}
           </button>
         </form>
       ) : null}
@@ -251,11 +252,11 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
       {magBeheren && activiteit.status === 'gepland' ? (
         <button
           onClick={() => {
-            if (confirm(`"${activiteit.titel}" annuleren?`)) annuleer.mutate()
+            if (confirm(tt('"{titel}" annuleren?', { titel: activiteit.titel }))) annuleer.mutate()
           }}
           className="mt-3 text-sm font-semibold text-ink-soft underline underline-offset-4"
         >
-          Activiteit annuleren
+          {tt('Activiteit annuleren')}
         </button>
       ) : null}
     </div>

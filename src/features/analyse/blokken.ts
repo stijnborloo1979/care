@@ -6,6 +6,8 @@
  * aanvinkte.
  */
 
+import { tt } from '../../lib/uiTaal'
+
 export interface BlokDef {
   id: string
   /** Kop op het scherm. */
@@ -19,41 +21,41 @@ export interface BlokDef {
 export const BLOKKEN: BlokDef[] = [
   {
     id: 'medicatie',
-    titel: 'Medicatie bevestigd',
-    opPapier: 'Medicatie',
-    onder: 'Per moment van de dag, en welk deel de persoon zelf bevestigde.',
+    titel: tt('Medicatie bevestigd'),
+    opPapier: tt('Medicatie'),
+    onder: tt('Per moment van de dag, en welk deel de persoon zelf bevestigde.'),
   },
   {
     id: 'dagritme',
-    titel: 'Wanneer de dag begon',
-    opPapier: 'Dagritme',
+    titel: tt('Wanneer de dag begon'),
+    opPapier: tt('Dagritme'),
     onder:
-      'Het tijdstip van de eerste afgevinkte activiteit. Het uiteenlopen zegt meer dan het gemiddelde.',
+      tt('Het tijdstip van de eerste afgevinkte activiteit. Het uiteenlopen zegt meer dan het gemiddelde.'),
   },
   {
     id: 'weekpatroon',
-    titel: 'Per dag van de week',
-    opPapier: 'Per dag van de week',
+    titel: tt('Per dag van de week'),
+    opPapier: tt('Per dag van de week'),
     onder:
-      'Klopt alles op zondag omdat er dan bezoek is, dan meet je bezoek en geen zelfstandigheid.',
+      tt('Klopt alles op zondag omdat er dan bezoek is, dan meet je bezoek en geen zelfstandigheid.'),
   },
   {
     id: 'nacht',
-    titel: "Activiteit 's nachts",
-    opPapier: "Activiteit 's nachts",
-    onder: 'Handelingen door de persoon zelf tussen 1 en 6 uur.',
+    titel: tt("Activiteit 's nachts"),
+    opPapier: tt("Activiteit 's nachts"),
+    onder: tt('Handelingen door de persoon zelf tussen 1 en 6 uur.'),
   },
   {
     id: 'schema',
-    titel: 'Wijzigingen aan het medicatieschema',
-    opPapier: 'Wijzigingen aan het medicatieschema',
-    onder: 'Een daling betekent iets anders als er kort daarvoor een middel bijkwam.',
+    titel: tt('Wijzigingen aan het medicatieschema'),
+    opPapier: tt('Wijzigingen aan het medicatieschema'),
+    onder: tt('Een daling betekent iets anders als er kort daarvoor een middel bijkwam.'),
   },
   {
     id: 'notities',
-    titel: 'Wat familie en zorgverleners noteerden',
-    opPapier: 'Notities van familie en zorgverleners',
-    onder: 'In hun eigen woorden. Vaak het stuk waar een arts het meest aan heeft.',
+    titel: tt('Wat familie en zorgverleners noteerden'),
+    opPapier: tt('Notities van familie en zorgverleners'),
+    onder: tt('In hun eigen woorden. Vaak het stuk waar een arts het meest aan heeft.'),
   },
 ]
 

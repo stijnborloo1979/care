@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import StoragePhoto from '../../components/StoragePhoto'
 import { deletePhoto, savePhoto, uploadPhoto, type MemoryPhoto } from '../../services/memories'
 import { usePhotos } from './usePhotos'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Het verhaal bij de foto is belangrijker dan de foto zelf: dat is wat
@@ -14,9 +15,9 @@ export default function ManageMemories({ householdId }: { householdId: string })
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Herinneringen</h2>
+      <h2 className="text-lg font-bold">{tt('Herinneringen')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Foto&rsquo;s met een jaartal en het verhaal erbij.
+        {tt('Foto’s met een jaartal en het verhaal erbij.')}
       </p>
 
       <ul className="mt-4 space-y-2">
@@ -37,7 +38,7 @@ export default function ManageMemories({ householdId }: { householdId: string })
                 onClick={() => setOpen(open === p.id ? null : p.id)}
                 className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
               >
-                {open === p.id ? 'Sluiten' : 'Wijzigen'}
+                {open === p.id ? tt('Sluiten') : tt('Wijzigen')}
               </button>
             </div>
             {open === p.id ? (
@@ -55,7 +56,7 @@ export default function ManageMemories({ householdId }: { householdId: string })
             onClick={() => setOpen('nieuw')}
             className="flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
           >
-            + Herinnering toevoegen
+            {tt('+ Herinnering toevoegen')}
           </button>
         )}
       </div>
@@ -94,7 +95,7 @@ function PhotoEditor({
       await ververs()
       onDone()
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Opslaan lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Opslaan lukte niet.')),
   })
 
   const verwijder = useMutation({
@@ -113,7 +114,7 @@ function PhotoEditor({
       await uploadPhoto(householdId, photo.id, file)
       await ververs()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Uploaden lukte niet.')
+      setError(err instanceof Error ? err.message : tt('Uploaden lukte niet.'))
     } finally {
       setUploading(false)
     }
@@ -130,7 +131,7 @@ function PhotoEditor({
     >
       <div className="flex flex-wrap gap-3">
         <label className="w-28">
-          <span className="text-sm font-semibold text-ink-soft">Jaar</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Jaar')}</span>
           <input
             value={year}
             onChange={(e) => setYear(e.target.value)}
@@ -140,35 +141,35 @@ function PhotoEditor({
           />
         </label>
         <label className="min-w-[min(10rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Titel</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Titel')}</span>
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Vakantie in Spanje"
+            placeholder={tt('Vakantie in Spanje')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
       </div>
 
       <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Het verhaal erbij</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Het verhaal erbij')}</span>
         <textarea
           value={story}
           onChange={(e) => setStory(e.target.value)}
           rows={3}
-          placeholder="Twee weken aan zee, met het hele gezin in de gele auto."
+          placeholder={tt('Twee weken aan zee, met het hele gezin in de gele auto.')}
           className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
         />
         <span className="mt-1 block text-xs text-ink-faint">
-          Dit wordt voorgelezen in de rustige modus.
+          {tt('Dit wordt voorgelezen in de rustige modus.')}
         </span>
       </label>
 
       {photo ? (
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative min-h-[2.4rem] cursor-pointer overflow-hidden rounded-pill border-[1.5px] border-line-strong px-4 py-1 text-sm font-semibold">
-            {uploading ? 'Bezig…' : 'Foto kiezen'}
+            {uploading ? tt('Bezig…') : tt('Foto kiezen')}
             <input
               type="file"
               accept="image/*"
@@ -179,15 +180,15 @@ function PhotoEditor({
           <button
             type="button"
             onClick={() => {
-              if (confirm(`"${photo.title}" verwijderen?`)) verwijder.mutate()
+              if (confirm(tt('"{naam}" verwijderen?', { naam: photo.title }))) verwijder.mutate()
             }}
             className="min-h-[2.4rem] rounded-pill border-[1.5px] border-alert px-4 text-sm font-semibold text-alert"
           >
-            Verwijderen
+            {tt('Verwijderen')}
           </button>
         </div>
       ) : (
-        <p className="text-xs text-ink-faint">De foto kan je kiezen zodra de herinnering bewaard is.</p>
+        <p className="text-xs text-ink-faint">{tt('De foto kan je kiezen zodra de herinnering bewaard is.')}</p>
       )}
 
       <div className="flex gap-2">
@@ -196,14 +197,14 @@ function PhotoEditor({
           disabled={opslaan.isPending}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {opslaan.isPending ? 'Opslaan…' : 'Opslaan'}
+          {opslaan.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
         <button
           type="button"
           onClick={onDone}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
-          Annuleren
+          {tt('Annuleren')}
         </button>
       </div>
 

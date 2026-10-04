@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import StoragePhoto from '../../components/StoragePhoto'
-import { locale } from '../../lib/i18n'
 import { deleteMessage, getPersonInbox, toonNaam, type InboxMessage } from './messages'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 /**
  * Wat er nu op het scherm van de persoon staat, en een knop om het weg te
@@ -34,16 +34,16 @@ export default function OpHaarScherm({ householdId, naam }: { householdId: strin
 
   return (
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-      <h2 className="text-lg font-bold">Staat nu op het scherm</h2>
+      <h2 className="text-lg font-bold">{tt('Staat nu op het scherm')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Alles verdwijnt na twee dagen vanzelf. Wil je het eerder weg, dan kan dat hier.
+        {tt('Alles verdwijnt na twee dagen vanzelf. Wil je het eerder weg, dan kan dat hier.')}
       </p>
 
       {isLoading ? (
-        <p className="mt-4 text-ink-soft">Bezig met laden…</p>
+        <p className="mt-4 text-ink-soft">{tt('Bezig met laden…')}</p>
       ) : berichten.length === 0 ? (
         <p className="mt-4 text-ink-soft">
-          Er staat nu niets. Wat je stuurt, verschijnt hier meteen.
+          {tt('Er staat nu niets. Wat je stuurt, verschijnt hier meteen.')}
         </p>
       ) : (
         <ul className="mt-4 list-none space-y-3 p-0">
@@ -64,32 +64,35 @@ export default function OpHaarScherm({ householdId, naam }: { householdId: strin
 
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold">
-                  {m.photo_path ? 'Foto' : m.audio_path ? 'Ingesproken bericht' : 'Bericht'} van{' '}
-                  {toonNaam(m.author_name)}
+                  {m.photo_path
+                    ? tt('Foto van {naam}', { naam: toonNaam(m.author_name) })
+                    : m.audio_path
+                      ? tt('Ingesproken bericht van {naam}', { naam: toonNaam(m.author_name) })
+                      : tt('Bericht van {naam}', { naam: toonNaam(m.author_name) })}
                 </span>
                 {m.body ? <span className="block text-ink-soft">{m.body}</span> : null}
                 <span className="block text-sm text-ink-faint">
-                  {new Intl.DateTimeFormat(locale(), {
+                  {new Intl.DateTimeFormat(uiLocale(), {
                     day: 'numeric',
                     month: 'long',
                     hour: '2-digit',
                     minute: '2-digit',
                   }).format(new Date(m.created_at))}
                   {/* Of ze het al bekeken heeft: dat scheelt een telefoontje. */}
-                  {m.seen_by_person ? ` · ${naam} heeft het gezien` : ' · nog niet bekeken'}
+                  {m.seen_by_person ? ` · ${tt('{naam} heeft het gezien', { naam })}` : ` · ${tt('nog niet bekeken')}`}
                 </span>
               </span>
 
               <button
                 onClick={() => {
-                  if (confirm('Dit bericht weghalen? Het verdwijnt meteen van het scherm.')) {
+                  if (confirm(tt('Dit bericht weghalen? Het verdwijnt meteen van het scherm.'))) {
                     weg.mutate(m)
                   }
                 }}
                 disabled={weg.isPending}
                 className="min-h-touch shrink-0 rounded-pill border-[1.5px] border-alert/50 px-4 font-semibold text-alert disabled:opacity-60"
               >
-                Weghalen
+                {tt('Weghalen')}
               </button>
             </li>
           ))}
@@ -98,8 +101,7 @@ export default function OpHaarScherm({ householdId, naam }: { householdId: strin
 
       {weg.isError ? (
         <p role="alert" className="mt-3 text-alert">
-          Dat lukte niet. Je kan alleen weghalen wat je zelf stuurde; de beheerder kan alles
-          weghalen.
+          {tt('Dat lukte niet. Je kan alleen weghalen wat je zelf stuurde; de beheerder kan alles weghalen.')}
         </p>
       ) : null}
     </section>

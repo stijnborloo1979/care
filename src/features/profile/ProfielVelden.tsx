@@ -3,37 +3,38 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { getProfiel, LEEG, setProfiel, type Profiel } from '../../services/profiel'
+import { tt } from '../../lib/uiTaal'
 
 const VELDEN: { sleutel: keyof Profiel; label: string; onder: string; voorbeeld: string }[] = [
   {
     sleutel: 'noemNaam',
-    label: 'Hoe wil ze aangesproken worden?',
-    onder: 'Niet iedereen heet voor iedereen hetzelfde.',
+    label: tt('Hoe wil ze aangesproken worden?'),
+    onder: tt('Niet iedereen heet voor iedereen hetzelfde.'),
     voorbeeld: 'Marieke',
   },
   {
     sleutel: 'omgang',
-    label: 'Zo praat je best met deze persoon',
-    onder: 'Wat jij vanzelf doet, weet een verpleegkundige op dag één niet.',
-    voorbeeld: 'Traag praten, één vraag tegelijk. Ga links staan, daar hoort ze beter.',
+    label: tt('Zo praat je best met deze persoon'),
+    onder: tt('Wat jij vanzelf doet, weet een verpleegkundige op dag één niet.'),
+    voorbeeld: tt('Traag praten, één vraag tegelijk. Ga links staan, daar hoort ze beter.'),
   },
   {
     sleutel: 'rust',
-    label: 'Als ze onrustig is, helpt dit',
-    onder: 'Het belangrijkste veld van het hele blad.',
-    voorbeeld: 'Muziek van vroeger opzetten. Even mee naar buiten. Niet tegenspreken.',
+    label: tt('Als ze onrustig is, helpt dit'),
+    onder: tt('Het belangrijkste veld van het hele blad.'),
+    voorbeeld: tt('Muziek van vroeger opzetten. Even mee naar buiten. Niet tegenspreken.'),
   },
   {
     sleutel: 'vermijden',
-    label: 'Hier raakt ze van overstuur',
-    onder: 'Even belangrijk, en vaak moeilijker op te schrijven.',
-    voorbeeld: 'Veel mensen tegelijk. Als iemand zegt dat ze zich vergist.',
+    label: tt('Hier raakt ze van overstuur'),
+    onder: tt('Even belangrijk, en vaak moeilijker op te schrijven.'),
+    voorbeeld: tt('Veel mensen tegelijk. Als iemand zegt dat ze zich vergist.'),
   },
   {
     sleutel: 'vrij',
-    label: 'Nog iets dat ze moeten weten',
-    onder: 'Wat hier niet in de vakjes past.',
-    voorbeeld: 'Slaapt met het licht aan. De bril ligt altijd links naast het bed.',
+    label: tt('Nog iets dat ze moeten weten'),
+    onder: tt('Wat hier niet in de vakjes past.'),
+    voorbeeld: tt('Slaapt met het licht aan. De bril ligt altijd links naast het bed.'),
   },
 ]
 
@@ -51,7 +52,7 @@ const VELDEN: { sleutel: keyof Profiel; label: string; onder: string; voorbeeld:
 export default function ProfielVelden() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
-  const voornaam = household?.person_name.split(' ')[0] ?? 'de persoon'
+  const voornaam = household?.person_name.split(' ')[0] ?? tt('de persoon')
   const queryClient = useQueryClient()
 
   const { data } = useQuery({
@@ -76,11 +77,9 @@ export default function ProfielVelden() {
     <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold">Dit ben ik</h2>
+          <h2 className="text-lg font-bold">{tt('Dit ben ik')}</h2>
           <p className="mt-1 max-w-[62ch] text-sm text-ink-soft">
-            Eén blad dat meegaat naar het ziekenhuis of het woonzorgcentrum. Daar is {voornaam} op
-            dag één een naam op een lijst; dit maakt er een mens van. De rest — familie,
-            voorkeuren, de dagindeling — haalt het blad uit wat hier al staat.
+            {tt('Eén blad dat meegaat naar het ziekenhuis of het woonzorgcentrum. Daar is {voornaam} op dag één een naam op een lijst; dit maakt er een mens van. De rest — familie, voorkeuren, de dagindeling — haalt het blad uit wat hier al staat.', { voornaam })}
           </p>
         </div>
 
@@ -88,7 +87,7 @@ export default function ProfielVelden() {
           to="/dit-ben-ik"
           className="flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-bold text-white"
         >
-          Bekijken en afdrukken
+          {tt('Bekijken en afdrukken')}
         </Link>
       </header>
 
@@ -114,10 +113,10 @@ export default function ProfielVelden() {
 
       <p aria-live="polite" className="mt-3 text-sm text-ink-soft">
         {bewaar.isPending
-          ? 'Bezig met opslaan…'
+          ? tt('Bezig met opslaan…')
           : bewaar.isError
-            ? 'Niet opgeslagen — probeer opnieuw.'
-            : `${ingevuld} van ${VELDEN.length} ingevuld. Het slaat vanzelf op.`}
+            ? tt('Niet opgeslagen — probeer opnieuw.')
+            : tt('{n} van {totaal} ingevuld. Het slaat vanzelf op.', { n: ingevuld, totaal: VELDEN.length })}
       </p>
     </section>
   )

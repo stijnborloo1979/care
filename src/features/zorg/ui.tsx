@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { tt } from '../../lib/uiTaal'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 /** Dezelfde bouwstenen als de familieschermen, op één plaats voor Care. */
 
@@ -59,11 +59,11 @@ export function Fout({ fout }: { fout: unknown }) {
 }
 
 export function Laden() {
-  return <p className="text-ink-soft">Bezig met laden…</p>
+  return <p className="text-ink-soft">{tt('Bezig met laden…')}</p>
 }
 
 export const uur = (iso: string) =>
-  new Date(iso).toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' })
+  new Date(iso).toLocaleTimeString(uiLocale(), { hour: '2-digit', minute: '2-digit' })
 
 export const dagEnUur = (iso: string) =>
-  new Date(iso).toLocaleString('nl-BE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  new Date(iso).toLocaleString(uiLocale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })

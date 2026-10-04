@@ -13,6 +13,7 @@ import {
   createRooms,
   createRoutine,
 } from '../../services/onboarding'
+import { tt } from '../../lib/uiTaal'
 
 type Persoon = { name: string; relation: string; phone: string }
 
@@ -87,22 +88,22 @@ export default function Onboarding() {
       await queryClient.refetchQueries({ queryKey: ['households'], type: 'all' })
       navigate(voorWie === 'zelf' ? '/' : '/familie', { replace: true })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Er ging iets mis. Probeer het opnieuw.')
+      setError(e instanceof Error ? e.message : tt('Er ging iets mis. Probeer het opnieuw.'))
       setBusy(false)
     }
   }
 
   const stappen = [
     {
-      titel: 'Voor wie is deze app?',
-      onder: 'Dat bepaalt wie de app beheert en welk scherm je straks ziet.',
+      titel: tt('Voor wie is deze app?'),
+      onder: tt('Dat bepaalt wie de app beheert en welk scherm je straks ziet.'),
       verplicht: voorWie === null,
       inhoud: (
         <div className="space-y-3">
           {(
             [
-              { w: 'zelf', em: '🌷', label: 'Ik gebruik de app zelf' },
-              { w: 'familielid', em: '👨‍👩‍👧', label: 'Ik zorg voor een familielid' },
+              { w: 'zelf', em: '🌷', label: tt('Ik gebruik de app zelf') },
+              { w: 'familielid', em: '👨‍👩‍👧', label: tt('Ik zorg voor een familielid') },
             ] as const
           ).map((o) => (
             <button
@@ -125,15 +126,15 @@ export default function Onboarding() {
       ),
     },
     {
-      titel: voorWie === 'zelf' ? 'Hoe heet je?' : 'Over wie gaat het?',
+      titel: voorWie === 'zelf' ? tt('Hoe heet je?') : tt('Over wie gaat het?'),
       onder:
         voorWie === 'zelf'
-          ? 'Zo spreekt de app je aan.'
-          : 'De naam die op het scherm komt te staan.',
+          ? tt('Zo spreekt de app je aan.')
+          : tt('De naam die op het scherm komt te staan.'),
       inhoud: (
         <div className="space-y-3">
           <label className="block">
-            <span className="text-sm font-semibold text-ink-soft">Naam</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Naam')}</span>
             <input
               autoFocus
               value={naam}
@@ -143,24 +144,24 @@ export default function Onboarding() {
             />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-ink-soft">Adres, mag leeg blijven</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Adres, mag leeg blijven')}</span>
             <input
               value={adres}
               onChange={(e) => setAdres(e.target.value)}
-              placeholder="Lindestraat 12, Herent"
+              placeholder={tt('Lindestraat 12, Herent')}
               className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             />
           </label>
           <p className="text-sm text-ink-faint">
-            Het adres verschijnt op het hulpscherm, als antwoord op "waar ben ik?".
+            {tt('Het adres verschijnt op het hulpscherm, als antwoord op "waar ben ik?".')}
           </p>
         </div>
       ),
       verplicht: !naam.trim(),
     },
     {
-      titel: 'Wie is er belangrijk?',
-      onder: 'Drie volstaat om te beginnen. Later kan je er meer toevoegen en uitnodigen.',
+      titel: tt('Wie is er belangrijk?'),
+      onder: tt('Drie volstaat om te beginnen. Later kan je er meer toevoegen en uitnodigen.'),
       inhoud: (
         <div className="space-y-4">
           {mensen.map((m, i) => (
@@ -172,7 +173,7 @@ export default function Onboarding() {
                   kopie[i] = { ...m, name: e.target.value }
                   setMensen(kopie)
                 }}
-                placeholder="Naam"
+                placeholder={tt('Naam')}
                 className="min-h-touch min-w-[min(7rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
               />
               <input
@@ -182,7 +183,7 @@ export default function Onboarding() {
                   kopie[i] = { ...m, relation: e.target.value }
                   setMensen(kopie)
                 }}
-                placeholder="Dochter"
+                placeholder={tt('Dochter')}
                 className="min-h-touch min-w-[min(7rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
               />
               <input
@@ -192,7 +193,7 @@ export default function Onboarding() {
                   kopie[i] = { ...m, phone: e.target.value }
                   setMensen(kopie)
                 }}
-                placeholder="Telefoon"
+                placeholder={tt('Telefoon')}
                 inputMode="tel"
                 className="min-h-touch min-w-[min(7rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
               />
@@ -202,14 +203,14 @@ export default function Onboarding() {
             onClick={() => setMensen([...mensen, LEEG])}
             className="font-semibold text-accent-ink underline underline-offset-4"
           >
-            Nog iemand
+            {tt('Nog iemand')}
           </button>
         </div>
       ),
     },
     {
-      titel: 'De dagelijkse routine',
-      onder: 'Eén regel per moment, beginnend met het uur. Pas aan wat niet klopt.',
+      titel: tt('De dagelijkse routine'),
+      onder: tt('Eén regel per moment, beginnend met het uur. Pas aan wat niet klopt.'),
       inhoud: (
         <textarea
           value={routine}
@@ -220,8 +221,8 @@ export default function Onboarding() {
       ),
     },
     {
-      titel: 'Welke kamers zijn er?',
-      onder: 'Tik weg wat er niet is.',
+      titel: tt('Welke kamers zijn er?'),
+      onder: tt('Tik weg wat er niet is.'),
       inhoud: (
         <div className="flex flex-wrap gap-2">
           {STANDAARD_KAMERS.map((k) => {
@@ -247,15 +248,15 @@ export default function Onboarding() {
       ),
     },
     {
-      titel: 'Eén ding om te onthouden',
-      onder: 'Begin met wat het vaakst gezocht wordt of niet meer lukt.',
+      titel: tt('Eén ding om te onthouden'),
+      onder: tt('Begin met wat het vaakst gezocht wordt of niet meer lukt.'),
       inhoud: (
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             <input
               value={dingNaam}
               onChange={(e) => setDingNaam(e.target.value)}
-              placeholder="Koffiezetapparaat"
+              placeholder={tt('Koffiezetapparaat')}
               className="min-h-touch min-w-[min(10rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             />
             <select
@@ -271,14 +272,14 @@ export default function Onboarding() {
           <input
             value={dingWaar}
             onChange={(e) => setDingWaar(e.target.value)}
-            placeholder="Op het aanrecht, rechts van de gootsteen."
+            placeholder={tt('Op het aanrecht, rechts van de gootsteen.')}
             className="min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
           <textarea
             value={dingStappen}
             onChange={(e) => setDingStappen(e.target.value)}
             rows={4}
-            placeholder={'Vul het waterreservoir.\nZet een kopje onder de tuit.\nDruk op de grote knop.'}
+            placeholder={tt('Vul het waterreservoir.\nZet een kopje onder de tuit.\nDruk op de grote knop.')}
             className="w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
           />
         </div>
@@ -316,7 +317,7 @@ export default function Onboarding() {
             onClick={() => setStap(stap - 1)}
             className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
           >
-            Terug
+            {tt('Terug')}
           </button>
         ) : null}
 
@@ -325,7 +326,7 @@ export default function Onboarding() {
           disabled={busy || s.verplicht}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-50"
         >
-          {busy ? 'Bezig…' : laatste ? 'Klaar' : 'Verder'}
+          {busy ? tt('Bezig…') : laatste ? tt('Klaar') : tt('Verder')}
         </button>
       </div>
 
@@ -334,7 +335,7 @@ export default function Onboarding() {
           to="/zorg/nieuw"
           className="mt-6 block text-center font-semibold text-ink-faint underline underline-offset-4"
         >
-          Ik registreer een woonzorgcentrum
+          {tt('Ik registreer een woonzorgcentrum')}
         </Link>
       ) : null}
 
@@ -343,7 +344,7 @@ export default function Onboarding() {
           onClick={() => setStap(stap + 1)}
           className="mt-4 w-full text-center font-semibold text-ink-faint underline underline-offset-4"
         >
-          Deze stap overslaan
+          {tt('Deze stap overslaan')}
         </button>
       ) : null}
 

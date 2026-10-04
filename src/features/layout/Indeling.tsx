@@ -15,6 +15,7 @@ import {
   type Indeling as IndelingT,
   type Tegel,
 } from './modules'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Familie stelt het dagscherm van de persoon samen.
@@ -34,7 +35,7 @@ import {
 export default function Indeling() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
-  const voornaam = household?.person_name.split(' ')[0] ?? 'de persoon'
+  const voornaam = household?.person_name.split(' ')[0] ?? tt('de persoon')
   const queryClient = useQueryClient()
 
   const { prefs } = useDisplayPrefs(hh)
@@ -77,10 +78,9 @@ export default function Indeling() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Indeling</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{tt('Indeling')}</h1>
           <p className="mt-1 max-w-[52ch] text-ink-soft">
-            Wat er op het dagscherm van {voornaam} staat, in welke volgorde en hoe groot. Het
-            verandert meteen op de tablet; je hoeft die niet aan te raken.
+            {tt('Wat er op het dagscherm van {voornaam} staat, in welke volgorde en hoe groot. Het verandert meteen op de tablet; je hoeft die niet aan te raken.', { voornaam })}
           </p>
         </div>
 
@@ -90,13 +90,13 @@ export default function Indeling() {
             className="inline-flex items-center gap-2 text-sm font-semibold text-ok"
           >
             {bewaar.isPending ? (
-              <span className="text-ink-soft">Bezig met opslaan…</span>
+              <span className="text-ink-soft">{tt('Bezig met opslaan…')}</span>
             ) : bewaar.isError ? (
-              <span className="text-alert">Niet opgeslagen — probeer opnieuw</span>
+              <span className="text-alert">{tt('Niet opgeslagen — probeer opnieuw')}</span>
             ) : (
               <>
                 <Icon naam="gedaan" size={16} />
-                Opgeslagen
+                {tt('Opgeslagen')}
               </>
             )}
           </span>
@@ -105,10 +105,11 @@ export default function Indeling() {
 
       {indelingKolomOntbreekt() ? (
         <p className="rounded-card border-[1.5px] border-warn/40 bg-warn/10 p-4 leading-relaxed">
-          <strong className="font-bold">Nog niet klaar om te bewaren.</strong> De database kent de
-          indeling nog niet. Draai <code>supabase/27_layout.sql</code> in de SQL-editor van Supabase;
-          tot dan toont het scherm van {voornaam} de standaardindeling en blijven wijzigingen hier
-          niet staan.
+          <strong className="font-bold">{tt('Nog niet klaar om te bewaren.')}</strong>{' '}
+          <MetCode
+            zin={tt('De database kent de indeling nog niet. Draai {bestand} in de SQL-editor van Supabase; tot dan toont het scherm van {voornaam} de standaardindeling en blijven wijzigingen hier niet staan.', { voornaam })}
+            code="supabase/27_layout.sql"
+          />
         </p>
       ) : null}
 
@@ -116,9 +117,9 @@ export default function Indeling() {
           Losse tegels aanzetten werkt ook, maar dan moet je zelf bedenken
           wat samen een goed scherm is. */}
       <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-        <h2 className="text-lg font-bold">Beginnen vanaf een sjabloon</h2>
+        <h2 className="text-lg font-bold">{tt('Beginnen vanaf een sjabloon')}</h2>
         <p className="mt-1 text-sm text-ink-soft">
-          Dit vervangt de hele indeling. Daarna kan je nog alles aanpassen.
+          {tt('Dit vervangt de hele indeling. Daarna kan je nog alles aanpassen.')}
         </p>
 
         <ul className="mt-4 grid list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-4">
@@ -141,11 +142,11 @@ export default function Indeling() {
                     {actief ? (
                       <span className="ml-auto inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-accent-ink">
                         <Icon naam="gedaan" size={14} />
-                        In gebruik
+                        {tt('In gebruik')}
                       </span>
                     ) : (
                       <span className="ml-auto text-xs font-semibold text-ink-faint">
-                        {sj.tegels.length} blokken
+                        {tt('{n} blokken', { n: sj.tegels.length })}
                       </span>
                     )}
                   </span>
@@ -160,16 +161,16 @@ export default function Indeling() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         {/* Het voorbeeld */}
         <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
-          <h2 className="text-lg font-bold">Zo ziet het scherm van {voornaam} eruit</h2>
+          <h2 className="text-lg font-bold">{tt('Zo ziet het scherm van {voornaam} eruit', { voornaam })}</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Tik een tegel om hem aan te passen.{' '}
+            {tt('Tik een tegel om hem aan te passen.')}{' '}
             <Link to="/persoon" className="font-semibold underline underline-offset-4">
-              Het echte scherm bekijken
+              {tt('Het echte scherm bekijken')}
             </Link>
           </p>
 
           {isLoading ? (
-            <p className="mt-4 text-ink-soft">Bezig met laden…</p>
+            <p className="mt-4 text-ink-soft">{tt('Bezig met laden…')}</p>
           ) : (
             <ul className="mt-4 grid list-none grid-cols-2 gap-3 p-0">
               {tegels.map((t) => {
@@ -190,11 +191,11 @@ export default function Indeling() {
                         <span className="font-bold">{m.naam}</span>
                         {m.vast ? (
                           <span className="ml-auto rounded-pill bg-accent-ink px-2 py-0.5 text-xs font-bold text-white">
-                            vast
+                            {tt('vast')}
                           </span>
                         ) : (
                           <span className="ml-auto text-xs font-semibold uppercase tracking-wider text-ink-faint">
-                            {t.maat}
+                            {t.maat === 'vol' ? tt('vol') : tt('half')}
                           </span>
                         )}
                       </span>
@@ -207,16 +208,16 @@ export default function Indeling() {
           )}
 
           <p className="mt-4 text-sm text-ink-faint">
-            {tegels.length} {tegels.length === 1 ? 'tegel' : 'tegels'}. De leesvolgorde is van boven
-            naar beneden — precies wat de voorleesfunctie aanhoudt.
+            {tegels.length === 1
+              ? tt('{n} tegel. De leesvolgorde is van boven naar beneden — precies wat de voorleesfunctie aanhoudt.', { n: tegels.length })
+              : tt('{n} tegels. De leesvolgorde is van boven naar beneden — precies wat de voorleesfunctie aanhoudt.', { n: tegels.length })}
           </p>
 
           {/* Een opmerking, geen blokkade. Hoeveel rustig is, weet jij
               beter dan de app. */}
           {lang ? (
             <p className="mt-2 text-sm text-ink-soft">
-              Dit zijn er meer dan {RUSTIG_TOT}. Dat kan, maar elke tegel erbij is één keuze meer
-              die {voornaam} tegelijk ziet. Kijk gerust of er eentje bij kan die je niet mist.
+              {tt('Dit zijn er meer dan {n}. Dat kan, maar elke tegel erbij is één keuze meer die {voornaam} tegelijk ziet. Kijk gerust of er eentje bij kan die je niet mist.', { n: RUSTIG_TOT, voornaam })}
             </p>
           ) : null}
         </section>
@@ -227,20 +228,20 @@ export default function Indeling() {
             {tegel && def ? (
               <>
                 <p className="text-sm font-bold uppercase tracking-wider text-ink-soft">
-                  Gekozen tegel
+                  {tt('Gekozen tegel')}
                 </p>
                 <p className="mt-1 text-xl font-bold">{def.naam}</p>
 
-                <p className="mt-4 text-sm font-bold">Grootte</p>
+                <p className="mt-4 text-sm font-bold">{tt('Grootte')}</p>
                 <div className="mt-2 flex gap-2">
                   <Maatknop
-                    label="Vol"
+                    label={tt('Vol')}
                     aan={tegel.maat === 'vol'}
                     uit={!!def.altijdVol}
                     onClick={() => pas(zetMaat(tegels, index, 'vol'))}
                   />
                   <Maatknop
-                    label="Half"
+                    label={tt('Half')}
                     aan={tegel.maat === 'half'}
                     uit={!!def.altijdVol || groteTekst}
                     onClick={() => pas(zetMaat(tegels, index, 'half'))}
@@ -248,38 +249,35 @@ export default function Indeling() {
                 </div>
                 {def.altijdVol ? (
                   <p className="mt-2 text-sm text-ink-soft">
-                    Deze tegel is altijd vol-breed; half wordt hier onleesbaar.
+                    {tt('Deze tegel is altijd vol-breed; half wordt hier onleesbaar.')}
                   </p>
                 ) : groteTekst ? (
                   <p className="mt-2 text-sm text-ink-soft">
-                    Halve tegels kunnen niet zolang de tekst op groot staat — dan blijven er drie
-                    woorden per regel over.
+                    {tt('Halve tegels kunnen niet zolang de tekst op groot staat — dan blijven er drie woorden per regel over.')}
                   </p>
                 ) : null}
 
-                <p className="mt-4 text-sm font-bold">Volgorde</p>
+                <p className="mt-4 text-sm font-bold">{tt('Volgorde')}</p>
                 <div className="mt-2 flex gap-2">
                   <button
                     onClick={() => pas(schuif(tegels, index, -1))}
                     disabled={!magSchuiven(tegels, index, -1)}
                     className="min-h-touch flex-1 rounded-pill border-[1.5px] border-line-strong font-semibold disabled:opacity-45"
                   >
-                    Omhoog
+                    {tt('Omhoog')}
                   </button>
                   <button
                     onClick={() => pas(schuif(tegels, index, 1))}
                     disabled={!magSchuiven(tegels, index, 1)}
                     className="min-h-touch flex-1 rounded-pill border-[1.5px] border-line-strong font-semibold disabled:opacity-45"
                   >
-                    Omlaag
+                    {tt('Omlaag')}
                   </button>
                 </div>
 
                 {def.vast ? (
                   <p className="mt-4 text-sm text-ink-soft">
-                    "Wat nu?" staat altijd bovenaan en kan niet weg. Dat is de vraag waar de app om
-                    draait; die hoort niet per huishouden ergens anders te staan. Half mag wel: op
-                    een tablet staat de kaart dan bovenaan de linkerkolom.
+                    {tt('"Wat nu?" staat altijd bovenaan en kan niet weg. Dat is de vraag waar de app om draait; die hoort niet per huishouden ergens anders te staan. Half mag wel: op een tablet staat de kaart dan bovenaan de linkerkolom.')}
                   </p>
                 ) : (
                   <button
@@ -289,23 +287,23 @@ export default function Indeling() {
                     }}
                     className="mt-4 min-h-touch w-full rounded-pill border-[1.5px] border-alert/50 font-semibold text-alert"
                   >
-                    Van het scherm halen
+                    {tt('Van het scherm halen')}
                   </button>
                 )}
               </>
             ) : (
               <p className="text-ink-soft">
-                Tik hierboven een tegel om hem groter te maken, te verplaatsen of weg te halen.
+                {tt('Tik hierboven een tegel om hem groter te maken, te verplaatsen of weg te halen.')}
               </p>
             )}
           </section>
 
           {/* Toevoegen */}
           <section className="rounded-card bg-surface p-5 shadow-card">
-            <h2 className="text-lg font-bold">Toevoegen</h2>
+            <h2 className="text-lg font-bold">{tt('Toevoegen')}</h2>
 
             {beschikbaar.length === 0 ? (
-              <p className="mt-2 text-sm text-ink-soft">Alles staat er al op.</p>
+              <p className="mt-2 text-sm text-ink-soft">{tt('Alles staat er al op.')}</p>
             ) : (
               <ul className="mt-3 list-none space-y-2 p-0">
                 {beschikbaar.map((m) => (
@@ -368,5 +366,17 @@ function Maatknop({
     >
       {label}
     </button>
+  )
+}
+
+/** Een vertaalde zin met een bestandsnaam als <code> op de plaats van {bestand}. */
+function MetCode({ zin, code }: { zin: string; code: string }) {
+  const [voor, na = ''] = zin.split('{bestand}')
+  return (
+    <>
+      {voor}
+      <code>{code}</code>
+      {na}
+    </>
   )
 }

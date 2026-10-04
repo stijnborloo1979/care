@@ -6,6 +6,7 @@ import { getWeekSamen, laatLos, neemOp, planBezoek } from '../../services/weekSa
 import { claimTask } from '../../services/tasks'
 import { localDateKey, maandagVan, plusDagen } from '../../lib/time'
 import Icon from '../../components/Icon'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 /**
  * De week samen.
@@ -64,12 +65,12 @@ export default function WeekSamen() {
     onSuccess: vernieuw,
   })
 
-  const dagNaam = new Intl.DateTimeFormat('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dagNaam = new Intl.DateTimeFormat(uiLocale(), { weekday: 'long', day: 'numeric', month: 'long' })
 
   if (mijn.length === 0) {
     return (
       <p className="text-ink-soft">
-        Dit scherm toont de week van de mensen voor wie je zorgt. Je bent nog nergens familielid.
+        {tt('Dit scherm toont de week van de mensen voor wie je zorgt. Je bent nog nergens familielid.')}
       </p>
     )
   }
@@ -78,16 +79,16 @@ export default function WeekSamen() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">De week samen</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{tt('De week samen')}</h1>
           <p className="mt-1 max-w-[62ch] text-ink-soft">
-            Wie gaat er wanneer langs, en wie doet wat. Zeg het hier in plaats van het te bellen.
+            {tt('Wie gaat er wanneer langs, en wie doet wat. Zeg het hier in plaats van het te bellen.')}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMaandag(plusDagen(maandag, -7))}
-            aria-label="Vorige week"
+            aria-label={tt('Vorige week')}
             className="grid h-11 w-11 place-items-center rounded-full border border-line bg-surface"
           >
             ‹
@@ -96,11 +97,11 @@ export default function WeekSamen() {
             onClick={() => setMaandag(maandagVan(vandaag))}
             className="min-h-touch rounded-pill border border-line bg-surface px-4 font-semibold"
           >
-            Deze week
+            {tt('Deze week')}
           </button>
           <button
             onClick={() => setMaandag(plusDagen(maandag, 7))}
-            aria-label="Volgende week"
+            aria-label={tt('Volgende week')}
             className="grid h-11 w-11 place-items-center rounded-full border border-line bg-surface"
           >
             ›
@@ -108,7 +109,7 @@ export default function WeekSamen() {
         </div>
       </header>
 
-      {isLoading ? <p className="text-ink-soft">Even geduld…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Even geduld…')}</p> : null}
 
       <div className="space-y-4">
         {(data ?? []).map((d) => (
@@ -120,7 +121,7 @@ export default function WeekSamen() {
           >
             <h2 className="text-lg font-bold first-letter:uppercase">
               {dagNaam.format(new Date(d.dag + 'T12:00:00'))}
-              {d.dag === vandaag ? <span className="ml-2 text-accent-ink">vandaag</span> : null}
+              {d.dag === vandaag ? <span className="ml-2 text-accent-ink">{tt('vandaag')}</span> : null}
             </h2>
 
             <div className="mt-3 grid gap-4 md:grid-cols-2">
@@ -142,7 +143,7 @@ export default function WeekSamen() {
                         <span className="min-w-[min(8rem,100%)] flex-1">
                           <span className="font-semibold">{e.title}</span>
                           <span className="block text-sm text-ink-soft">
-                            {new Date(e.starts_at).toLocaleTimeString('nl-BE', {
+                            {new Date(e.starts_at).toLocaleTimeString(uiLocale(), {
                               hour: '2-digit',
                               minute: '2-digit',
                               timeZone: tz,
@@ -156,14 +157,14 @@ export default function WeekSamen() {
                             onClick={() => loslaten.mutate(e.id)}
                             className="min-h-touch shrink-0 rounded-pill border border-line px-4 text-sm font-semibold"
                           >
-                            Toch niet
+                            {tt('Toch niet')}
                           </button>
                         ) : e.claimed_by ? null : (
                           <button
                             onClick={() => opnemen.mutate(e.id)}
                             className="min-h-touch shrink-0 rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold"
                           >
-                            Ik doe dit
+                            {tt('Ik doe dit')}
                           </button>
                         )}
                       </li>
@@ -184,7 +185,7 @@ export default function WeekSamen() {
                             onClick={() => taakOpnemen.mutate(t.id)}
                             className="min-h-touch shrink-0 rounded-pill border border-line px-4 text-sm font-semibold"
                           >
-                            Ik doe dit
+                            {tt('Ik doe dit')}
                           </button>
                         ) : null}
                       </li>
@@ -196,14 +197,14 @@ export default function WeekSamen() {
                     <div className="mt-3 flex flex-wrap items-center gap-3">
                       <span className="flex items-center gap-2 text-sm text-ink-soft">
                         <Icon naam="wie" size={16} />
-                        Niemand gepland
+                        {tt('Niemand gepland')}
                       </span>
                       <button
                         onClick={() => bezoek.mutate({ hh: p.household_id, dag: d.dag })}
                         disabled={bezoek.isPending}
                         className="min-h-touch rounded-pill border-[1.5px] border-accent bg-accent-soft px-4 text-sm font-semibold disabled:opacity-60"
                       >
-                        Ik ga langs
+                        {tt('Ik ga langs')}
                       </button>
                     </div>
                   ) : null}
@@ -215,8 +216,7 @@ export default function WeekSamen() {
       </div>
 
       <p className="text-sm text-ink-faint">
-        Een bezoek dat je hier plant, staat om 14:00 en verschijnt meteen op het scherm van de
-        persoon. Het uur verzet je in de kalender.
+        {tt('Een bezoek dat je hier plant, staat om 14:00 en verschijnt meteen op het scherm van de persoon. Het uur verzet je in de kalender.')}
       </p>
     </div>
   )

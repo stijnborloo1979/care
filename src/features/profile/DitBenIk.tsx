@@ -8,6 +8,7 @@ import { getMedicijnen, tijdenVan } from '../../services/medication'
 import { getStories } from '../../services/stories'
 import { getProfiel } from '../../services/profiel'
 import { locale } from '../../lib/i18n'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * "Dit ben ik" — één blad dat meegaat naar het ziekenhuis of het
@@ -70,40 +71,40 @@ export default function DitBenIk() {
       <div className="niet-printen sticky top-0 z-10 border-b border-line bg-surface px-5 py-3">
         <div className="mx-auto flex max-w-[48rem] flex-wrap items-center gap-3">
           <Link to="/familie/wie" className="font-semibold underline underline-offset-4">
-            ‹ Terug
+            {tt('‹ Terug')}
           </Link>
           <button
             onClick={() => window.print()}
             className="ml-auto min-h-touch rounded-pill bg-accent-ink px-5 font-bold text-white"
           >
-            Afdrukken of opslaan als PDF
+            {tt('Afdrukken of opslaan als PDF')}
           </button>
         </div>
       </div>
 
       <main className="mx-auto max-w-[48rem] px-6 py-10">
         <header className="border-b-2 border-ink pb-4">
-          <p className="text-sm font-bold uppercase tracking-[0.2em]">Dit ben ik</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em]">{tt('Dit ben ik')}</p>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight">{naam}</h1>
           <p className="mt-2 text-lg">
-            Noem me <strong>{aanspreken}</strong>.
+            {tt('Noem me')} <strong>{aanspreken}</strong>.
           </p>
         </header>
 
         {/* Het belangrijkste eerst. Wie dit blad maar half leest, moet dít
             gelezen hebben. */}
         <section className="kader mt-6 border-[1.5px] border-ink p-4">
-          <h2 className="kop">Wat je moet weten om mij te helpen</h2>
+          <h2 className="kop">{tt('Wat je moet weten om mij te helpen')}</h2>
           <dl className="mt-2 space-y-2">
-            <Veld label="Zo praat je best met mij" tekst={profiel?.omgang} />
-            <Veld label="Als ik onrustig ben, helpt dit" tekst={profiel?.rust} />
-            <Veld label="Hier raak ik van overstuur" tekst={profiel?.vermijden} />
+            <Veld label={tt('Zo praat je best met mij')} tekst={profiel?.omgang} />
+            <Veld label={tt('Als ik onrustig ben, helpt dit')} tekst={profiel?.rust} />
+            <Veld label={tt('Hier raak ik van overstuur')} tekst={profiel?.vermijden} />
           </dl>
         </section>
 
         {stukjes.length > 0 ? (
           <section className="heel-houden mt-6">
-            <h2 className="kop">Waar ik vandaan kom</h2>
+            <h2 className="kop">{tt('Waar ik vandaan kom')}</h2>
             <div className="mt-2 space-y-2">
               {stukjes.map((v) => (
                 <p key={v.id}>{v.body}</p>
@@ -113,9 +114,9 @@ export default function DitBenIk() {
         ) : null}
 
         <section className="heel-houden mt-6">
-          <h2 className="kop">Wie bij mij hoort</h2>
+          <h2 className="kop">{tt('Wie bij mij hoort')}</h2>
           {familie.length === 0 ? (
-            <p className="mt-2">Nog niemand ingevuld.</p>
+            <p className="mt-2">{tt('Nog niemand ingevuld.')}</p>
           ) : (
             <ul className="mt-2 list-none space-y-1 p-0">
               {familie.map((p) => (
@@ -131,7 +132,7 @@ export default function DitBenIk() {
 
           {zorg.length > 0 ? (
             <>
-              <p className="mt-3 font-semibold">Mijn huisarts en andere contacten</p>
+              <p className="mt-3 font-semibold">{tt('Mijn huisarts en andere contacten')}</p>
               <ul className="mt-1 list-none space-y-1 p-0">
                 {zorg.map((p) => (
                   <li key={p.id} className="flex flex-wrap gap-x-2">
@@ -147,9 +148,9 @@ export default function DitBenIk() {
 
         {dagdelen.length > 0 ? (
           <section className="heel-houden mt-6">
-            <h2 className="kop">Hoe mijn dag er thuis uitziet</h2>
+            <h2 className="kop">{tt('Hoe mijn dag er thuis uitziet')}</h2>
             <p className="mt-1 text-[0.95rem]">
-              Niet om na te volgen, wel om te weten wat ik gewend ben.
+              {tt('Niet om na te volgen, wel om te weten wat ik gewend ben.')}
             </p>
             <ul className="mt-2 list-none space-y-1 p-0">
               {dagdelen.map((s) => (
@@ -164,7 +165,7 @@ export default function DitBenIk() {
 
         {voorkeuren.length > 0 ? (
           <section className="heel-houden mt-6">
-            <h2 className="kop">Wat ik graag heb</h2>
+            <h2 className="kop">{tt('Wat ik graag heb')}</h2>
             <ul className="mt-2 list-none space-y-1 p-0">
               {voorkeuren.map((n) => (
                 <li key={n.id}>
@@ -178,11 +179,11 @@ export default function DitBenIk() {
 
         {actieveMeds.length > 0 ? (
           <section className="heel-houden mt-6">
-            <h2 className="kop">Wanneer ik thuis medicatie krijg</h2>
+            <h2 className="kop">{tt('Wanneer ik thuis medicatie krijg')}</h2>
             {/* Bewust zonder dosering. Zie de uitleg bovenaan dit bestand. */}
             <p className="mt-1 text-[0.95rem]">
-              <strong>Dit is geen medicatielijst.</strong> Het zegt alleen op welke momenten ik thuis
-              iets kreeg. Vraag het schema met doseringen aan mijn huisarts of apotheek.
+              <strong>{tt('Dit is geen medicatielijst.')}</strong>{' '}
+              {tt('Het zegt alleen op welke momenten ik thuis iets kreeg. Vraag het schema met doseringen aan mijn huisarts of apotheek.')}
             </p>
             <ul className="mt-2 list-none space-y-1 p-0">
               {actieveMeds.map((m) => (
@@ -199,13 +200,13 @@ export default function DitBenIk() {
 
         {profiel?.vrij?.trim() ? (
           <section className="heel-houden mt-6">
-            <h2 className="kop">Nog dit</h2>
+            <h2 className="kop">{tt('Nog dit')}</h2>
             <p className="mt-2 whitespace-pre-wrap">{profiel.vrij}</p>
           </section>
         ) : null}
 
         <footer className="mt-8 border-t border-line pt-3 text-sm">
-          Samengesteld door mijn familie op {vandaag}, via de app LifeAngle. Geen medisch dossier.
+          {tt('Samengesteld door mijn familie op {datum}, via de app LifeAngle. Geen medisch dossier.', { datum: vandaag })}
         </footer>
       </main>
     </div>
@@ -225,7 +226,7 @@ function Veld({ label, tekst }: { label: string; tekst?: string }) {
     <div>
       <dt className="font-bold">{label}</dt>
       <dd className="m-0 whitespace-pre-wrap">
-        {schoon || <span className="text-ink-faint">— niet ingevuld —</span>}
+        {schoon || <span className="text-ink-faint">{tt('— niet ingevuld —')}</span>}
       </dd>
     </div>
   )

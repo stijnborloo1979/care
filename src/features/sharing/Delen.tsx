@@ -5,33 +5,34 @@ import { useHousehold, type SupportLevel } from '../household/useHousehold'
 import { useMag } from '../../core/access/useAccess'
 import WieBekeek from './WieBekeek'
 import WzcKoppeling from './WzcKoppeling'
+import { tt } from '../../lib/uiTaal'
 
 const NIVEAUS: { id: SupportLevel; titel: string; uitleg: string; ziet: string }[] = [
   {
     id: 'zelf',
-    titel: 'Ik doe het zelf',
-    uitleg: 'Je gebruikt LifeAngle voor jezelf. Familie kan mee plannen, maar kijkt niet mee.',
-    ziet: 'Familie ziet de agenda. Niet je medicatie, logboek, notities of locatie. Geen meldingen.',
+    titel: tt('Ik doe het zelf'),
+    uitleg: tt('Je gebruikt LifeAngle voor jezelf. Familie kan mee plannen, maar kijkt niet mee.'),
+    ziet: tt('Familie ziet de agenda. Niet je medicatie, logboek, notities of locatie. Geen meldingen.'),
   },
   {
     id: 'samen',
-    titel: 'We doen het samen',
-    uitleg: 'Familie helpt mee met plannen en invullen, en kan zien hoe je dag verloopt.',
-    ziet: 'Familie ziet de agenda, medicatie en het logboek. Nog steeds geen meldingen.',
+    titel: tt('We doen het samen'),
+    uitleg: tt('Familie helpt mee met plannen en invullen, en kan zien hoe je dag verloopt.'),
+    ziet: tt('Familie ziet de agenda, medicatie en het logboek. Nog steeds geen meldingen.'),
   },
   {
     id: 'ondersteund',
-    titel: 'Help me meer',
-    uitleg: 'Familie krijgt een seintje als er iets afwijkt, zoals vergeten medicatie.',
-    ziet: 'Familie ziet alles wat nodig is, en krijgt meldingen bij afwijkingen.',
+    titel: tt('Help me meer'),
+    uitleg: tt('Familie krijgt een seintje als er iets afwijkt, zoals vergeten medicatie.'),
+    ziet: tt('Familie ziet alles wat nodig is, en krijgt meldingen bij afwijkingen.'),
   },
 ]
 
 const ROL: Record<string, string> = {
-  admin: 'Beheerder',
-  member: 'Familie',
-  caregiver: 'Zorgverlener',
-  person: 'Tablet van de persoon',
+  admin: tt('Beheerder'),
+  member: tt('Familie'),
+  caregiver: tt('Zorgverlener'),
+  person: tt('Tablet van de persoon'),
 }
 
 type Lid = { profile_id: string; role: string; profile: { full_name: string | null } | null }
@@ -123,21 +124,21 @@ export default function Delen() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold tracking-tight">
-          {ikBenHet ? 'Wie ziet wat' : `Wat ${voornaam} deelt`}
+          {ikBenHet ? tt('Wie ziet wat') : tt('Wat {naam} deelt', { naam: voornaam })}
         </h1>
         <p className="mt-1 text-ink-soft">
           {ikBenHet
-            ? 'Jij beslist hoeveel je familie meekijkt. Minder kan altijd; meer vraagt jouw ja.'
-            : `Als beheerder pas je dit meteen aan. Elke wijziging komt in het zorglogboek, zodat ${voornaam} altijd kan zien wat er veranderde.`}
+            ? tt('Jij beslist hoeveel je familie meekijkt. Minder kan altijd; meer vraagt jouw ja.')
+            : tt('Als beheerder pas je dit meteen aan. Elke wijziging komt in het zorglogboek, zodat {naam} altijd kan zien wat er veranderde.', { naam: voornaam })}
         </p>
       </header>
 
       {/* Een openstaand voorstel komt eerst: dat is wat er nu een antwoord vraagt. */}
       {gevraagd && ikBenHet ? (
         <section className="rounded-card bg-accent-soft p-6 shadow-lift ring-1 ring-accent/25">
-          <p className="text-lg font-bold">Je familie stelt voor om meer te helpen</p>
+          <p className="text-lg font-bold">{tt('Je familie stelt voor om meer te helpen')}</p>
           <p className="mt-1 text-ink-soft">
-            Voorstel: <strong>{NIVEAUS.find((n) => n.id === gevraagd)?.titel}</strong>.{' '}
+            {tt('Voorstel:')} <strong>{NIVEAUS.find((n) => n.id === gevraagd)?.titel}</strong>.{' '}
             {NIVEAUS.find((n) => n.id === gevraagd)?.ziet}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -145,13 +146,13 @@ export default function Delen() {
               onClick={() => antwoord.mutate(true)}
               className="min-h-touch flex-1 rounded-pill bg-accent-ink px-5 font-semibold text-white"
             >
-              Ja, dat is goed
+              {tt('Ja, dat is goed')}
             </button>
             <button
               onClick={() => antwoord.mutate(false)}
               className="min-h-touch flex-1 rounded-pill border-[1.5px] border-line-strong bg-surface px-5 font-semibold"
             >
-              Nee, nog niet
+              {tt('Nee, nog niet')}
             </button>
           </div>
         </section>
@@ -162,7 +163,7 @@ export default function Delen() {
       <section className="space-y-3">
         <h2 className="flex items-center gap-2 text-lg font-bold">
           <ShieldCheck size={20} strokeWidth={1.75} aria-hidden="true" />
-          Hoeveel hulp
+          {tt('Hoeveel hulp')}
         </h2>
         {NIVEAUS.map((n) => {
           const actief = n.id === huidig
@@ -181,7 +182,7 @@ export default function Delen() {
                 <span className="text-lg font-bold">{n.titel}</span>
                 {actief ? (
                   <span className="rounded-pill bg-accent-ink px-3 py-0.5 text-sm font-semibold text-white">
-                    nu
+                    {tt('nu')}
                   </span>
                 ) : null}
               </span>
@@ -192,17 +193,17 @@ export default function Delen() {
         })}
         {niveau.data === 'toegepast' ? (
           <p className="text-sm font-semibold text-accent-ink">
-            Aangepast. Het staat in het zorglogboek.
+            {tt('Aangepast. Het staat in het zorglogboek.')}
           </p>
         ) : null}
         {!ikBenHet && !isBeheerder ? (
           <p className="text-sm text-ink-soft">
-            Alleen de familiebeheerder kan dit wijzigen.
+            {tt('Alleen de familiebeheerder kan dit wijzigen.')}
           </p>
         ) : null}
         {niveau.error ? (
           <p role="alert" className="text-sm text-alert">
-            {niveau.error instanceof Error ? niveau.error.message : 'Dat lukte niet.'}
+            {niveau.error instanceof Error ? niveau.error.message : tt('Dat lukte niet.')}
           </p>
         ) : null}
       </section>
@@ -216,19 +217,19 @@ export default function Delen() {
               ) : (
                 <EyeOff size={20} strokeWidth={1.75} aria-hidden="true" />
               )}
-              Wat ik laat onthouden
+              {tt('Wat ik laat onthouden')}
             </h2>
             <p className="mt-1 text-sm text-ink-soft">
               {household.share_quick_notes
-                ? 'Familie kan zien wat je via "Onthoud dit" noteert, zodra ze meekijken.'
-                : 'Alleen jij ziet wat je via "Onthoud dit" noteert.'}
+                ? tt('Familie kan zien wat je via "Onthoud dit" noteert, zodra ze meekijken.')
+                : tt('Alleen jij ziet wat je via "Onthoud dit" noteert.')}
             </p>
           </div>
           {ikBenHet || (isBeheerder && !leden?.some((l) => l.role === 'person')) ? (
             <button
               role="switch"
               aria-checked={household.share_quick_notes}
-              aria-label="Notities delen met familie"
+              aria-label={tt('Notities delen met familie')}
               onClick={() => delen.mutate(!household.share_quick_notes)}
               className={`relative h-9 w-16 shrink-0 rounded-pill border-[1.5px] ${
                 household.share_quick_notes
@@ -249,7 +250,7 @@ export default function Delen() {
       <section className="rounded-card bg-surface p-6 shadow-card">
         <h2 className="flex items-center gap-2 text-lg font-bold">
           <Users size={20} strokeWidth={1.75} aria-hidden="true" />
-          Wie er bij hoort
+          {tt('Wie er bij hoort')}
         </h2>
         <ul className="mt-3 space-y-2">
           {(leden ?? []).map((l) => (
@@ -258,29 +259,29 @@ export default function Delen() {
               className="flex items-center gap-3 rounded-2xl bg-surface-soft px-4 py-3"
             >
               <span className="min-w-0 flex-1">
-                <span className="block font-semibold">{l.profile?.full_name ?? 'Onbekend'}</span>
+                <span className="block font-semibold">{l.profile?.full_name ?? tt('Onbekend')}</span>
                 <span className="text-sm text-ink-soft">{ROL[l.role] ?? l.role}</span>
               </span>
               {isBeheerder && l.role === 'member' ? (
                 <button
                   onClick={() => {
-                    if (confirm(`${l.profile?.full_name ?? 'Deze persoon'} ook beheerder maken?`))
+                    if (confirm(tt('{naam} ook beheerder maken?', { naam: l.profile?.full_name ?? tt('Deze persoon') })))
                       maakBeheerder.mutate(l.profile_id)
                   }}
                   className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold text-ink-soft"
                 >
-                  Maak beheerder
+                  {tt('Maak beheerder')}
                 </button>
               ) : null}
               {isBeheerder && l.role !== 'admin' ? (
                 <button
                   onClick={() => {
-                    if (confirm(`${l.profile?.full_name ?? 'Deze persoon'} geen toegang meer geven?`))
+                    if (confirm(tt('{naam} geen toegang meer geven?', { naam: l.profile?.full_name ?? tt('Deze persoon') })))
                       verwijder.mutate(l.profile_id)
                   }}
                   className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold text-ink-soft"
                 >
-                  Toegang weghalen
+                  {tt('Toegang weghalen')}
                 </button>
               ) : null}
             </li>

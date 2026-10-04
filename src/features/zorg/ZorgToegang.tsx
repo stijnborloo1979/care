@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { useOrganisaties } from './useOrganisatie'
 import { aanvaardInApp, mijnUitnodigingen, ROLNAAM } from './zorgApi'
 import { foutTekst } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 export function useOpenUitnodigingen() {
   const { session } = useAuth()
@@ -47,20 +48,20 @@ export default function ZorgToegang({ vorm, onKlaar }: { vorm: 'menu' | 'kaart';
     return (
       <div className="mb-6 space-y-3">
         {open.map((u) => (
-          <section key={u.id} className="rounded-card bg-accent-soft p-5" aria-label="Uitnodiging">
+          <section key={u.id} className="rounded-card bg-accent-soft p-5" aria-label={tt('Uitnodiging')}>
             <p className="flex items-center gap-2 font-bold text-accent-ink">
               <Building2 size={20} strokeWidth={1.75} aria-hidden="true" />
-              Uitnodiging van {u.organisatie}
+              {tt('Uitnodiging van {organisatie}', { organisatie: u.organisatie })}
             </p>
             <p className="mt-1 text-ink-soft">
-              Je bent uitgenodigd als {ROLNAAM[u.rol]?.toLowerCase() ?? u.rol}. Werk je daar? Dan hoef je hieronder niets in te vullen.
+              {tt('Je bent uitgenodigd als {rol}. Werk je daar? Dan hoef je hieronder niets in te vullen.', { rol: ROLNAAM[u.rol]?.toLowerCase() ?? u.rol })}
             </p>
             <button
               onClick={() => aanvaard.mutate(u.id)}
               disabled={aanvaard.isPending}
               className="mt-3 min-h-touch rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-50"
             >
-              {aanvaard.isPending ? 'Bezig…' : 'Aanvaarden'}
+              {aanvaard.isPending ? tt('Bezig…') : tt('Aanvaarden')}
             </button>
           </section>
         ))}
@@ -72,12 +73,12 @@ export default function ZorgToegang({ vorm, onKlaar }: { vorm: 'menu' | 'kaart';
   const item = 'flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft'
   return (
     <>
-      <p className="px-2 pb-1 pt-1 text-xs font-bold uppercase tracking-wide text-ink-faint">Woonzorgcentrum</p>
+      <p className="px-2 pb-1 pt-1 text-xs font-bold uppercase tracking-wide text-ink-faint">{tt('Woonzorgcentrum')}</p>
       {open.map((u) => (
         <button key={u.id} onClick={() => aanvaard.mutate(u.id)} disabled={aanvaard.isPending} className={item}>
           <Building2 size={16} strokeWidth={1.75} aria-hidden="true" />
           <span className="min-w-0 flex-1">
-            Uitnodiging van {u.organisatie} aanvaarden
+            {tt('Uitnodiging van {organisatie} aanvaarden', { organisatie: u.organisatie })}
             <span className="block text-xs font-normal text-ink-faint">{ROLNAAM[u.rol] ?? u.rol}</span>
           </span>
         </button>
@@ -85,12 +86,12 @@ export default function ZorgToegang({ vorm, onKlaar }: { vorm: 'menu' | 'kaart';
       {lid ? (
         <Link to="/zorg" onClick={onKlaar} className={item}>
           <Building2 size={16} strokeWidth={1.75} aria-hidden="true" />
-          Naar het woonzorgcentrum
+          {tt('Naar het woonzorgcentrum')}
         </Link>
       ) : (
         <Link to="/zorg/nieuw" onClick={onKlaar} className={item}>
           <Building2 size={16} strokeWidth={1.75} aria-hidden="true" />
-          Een woonzorgcentrum registreren
+          {tt('Een woonzorgcentrum registreren')}
         </Link>
       )}
       {fout ? <p role="alert" className="px-2 text-xs text-alert">{fout}</p> : null}

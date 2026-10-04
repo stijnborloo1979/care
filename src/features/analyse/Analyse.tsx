@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { setRapportKeuze, WEEKDAGEN, type DagritmeRij, type UurRij, type WeekRij } from '../../services/analyse'
 import { locale } from '../../lib/i18n'
+import { tt } from '../../lib/uiTaal'
 import { BLOKKEN, nietOpgenomen } from './blokken'
 import { useAnalyse } from './useAnalyse'
 
 const PERIODES = [
-  { dagen: 30, label: '30 dagen' },
-  { dagen: 90, label: '3 maanden' },
-  { dagen: 365, label: '1 jaar' },
+  { dagen: 30, label: tt('30 dagen') },
+  { dagen: 90, label: tt('3 maanden') },
+  { dagen: 365, label: tt('1 jaar') },
 ]
 
 /**
@@ -35,7 +36,7 @@ const PERIODES = [
 export default function Analyse() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
-  const voornaam = household?.person_name.split(' ')[0] ?? 'de persoon'
+  const voornaam = household?.person_name.split(' ')[0] ?? tt('de persoon')
   const [dagen, setDagen] = useState(90)
   const queryClient = useQueryClient()
 
@@ -65,8 +66,7 @@ export default function Analyse() {
       <>
         <Nacht rijen={a.nacht} />
         <p className="mt-2 text-sm text-ink-faint">
-          Dit telt alleen wat er in de app gebeurde. Iemand kan wakker liggen zonder het scherm aan
-          te raken, dus dit is geen slaapmeting.
+          {tt('Dit telt alleen wat er in de app gebeurde. Iemand kan wakker liggen zonder het scherm aan te raken, dus dit is geen slaapmeting.')}
         </p>
       </>
     ),
@@ -99,12 +99,12 @@ export default function Analyse() {
   }
 
   const legeTekst: Record<string, string> = {
-    medicatie: 'Er staan in deze periode geen medicatiemomenten.',
-    dagritme: 'Er is in deze periode niets afgevinkt, dus hierover valt niets te zeggen.',
-    weekpatroon: 'Nog te weinig gegevens om per weekdag iets te tonen.',
-    nacht: "Er is 's nachts niets geregistreerd in deze periode.",
-    schema: 'Het schema is in deze periode niet gewijzigd.',
-    notities: 'Er staan geen notities in het zorglogboek voor deze periode.',
+    medicatie: tt('Er staan in deze periode geen medicatiemomenten.'),
+    dagritme: tt('Er is in deze periode niets afgevinkt, dus hierover valt niets te zeggen.'),
+    weekpatroon: tt('Nog te weinig gegevens om per weekdag iets te tonen.'),
+    nacht: tt("Er is 's nachts niets geregistreerd in deze periode."),
+    schema: tt('Het schema is in deze periode niet gewijzigd.'),
+    notities: tt('Er staan geen notities in het zorglogboek voor deze periode.'),
   }
 
   const weg = nietOpgenomen(blokken, a.leeg)
@@ -113,10 +113,9 @@ export default function Analyse() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Analyse</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{tt('Analyse')}</h1>
           <p className="mt-1 max-w-[60ch] text-ink-soft">
-            Wat er in de app gebeurde, over een langere periode. Wat je hier aanvinkt, komt op het
-            verslag voor de dokter.
+            {tt('Wat er in de app gebeurde, over een langere periode. Wat je hier aanvinkt, komt op het verslag voor de dokter.')}
           </p>
         </div>
 
@@ -140,7 +139,7 @@ export default function Analyse() {
             to={`/verslag?dagen=${dagen}`}
             className="flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-bold text-white"
           >
-            Verslag maken
+            {tt('Verslag maken')}
           </Link>
         </div>
       </header>
@@ -149,24 +148,20 @@ export default function Analyse() {
           te lezen. */}
       <section className="rounded-card border-[1.5px] border-accent bg-accent-soft p-5">
         <h2 className="text-sm font-bold uppercase tracking-wider text-accent-ink">
-          Staat altijd op het verslag
+          {tt('Staat altijd op het verslag')}
         </h2>
 
         {a.dekking ? (
           <p className="mt-2 text-lg">
-            <strong>
-              {a.dekking.dagen_gebruik} van {a.dekking.dagen_periode} dagen
-            </strong>{' '}
-            werd de app gebruikt. Alle cijfers hieronder gaan over die dagen, niet over de hele
-            periode.
+            {tt('{gebruik} van {periode} dagen werd de app gebruikt. Alle cijfers hieronder gaan over die dagen, niet over de hele periode.', { gebruik: a.dekking.dagen_gebruik, periode: a.dekking.dagen_periode })}
           </p>
         ) : (
-          <p className="mt-2 text-ink-soft">Bezig met laden…</p>
+          <p className="mt-2 text-ink-soft">{tt('Bezig met laden…')}</p>
         )}
 
         {a.stabiel.length > 0 ? (
           <div className="mt-3">
-            <p className="font-semibold">Wat gelijk bleef</p>
+            <p className="font-semibold">{tt('Wat gelijk bleef')}</p>
             <ul className="mt-1 list-disc pl-5 text-ink-soft">
               {a.stabiel.map((z) => (
                 <li key={z}>{z}</li>
@@ -195,24 +190,22 @@ export default function Analyse() {
           afdrukken wat de arts niet zal zien. */}
       {weg.bewustWeg.length > 0 ? (
         <p className="text-sm text-ink-soft">
-          Niet op het verslag: {weg.bewustWeg.join(', ')}. Dat staat ook op het blad zelf, zodat de
-          arts weet wat hij niet ziet.
+          {tt('Niet op het verslag: {lijst}. Dat staat ook op het blad zelf, zodat de arts weet wat hij niet ziet.', { lijst: weg.bewustWeg.join(', ') })}
         </p>
       ) : null}
 
       {/* Wat er niet is, staat er met de reden bij. Weglaten zou het
           scherm stuk doen lijken, en verbergt dat er een keuze achter zit. */}
       <section className="rounded-card border border-dashed border-line-strong p-5">
-        <h2 className="font-bold text-ink-soft">Nog niet beschikbaar</h2>
+        <h2 className="font-bold text-ink-soft">{tt('Nog niet beschikbaar')}</h2>
         <ul className="mt-2 space-y-2 text-sm text-ink-soft">
           <li>
-            <strong>Hoe vaak dezelfde vraag terugkwam.</strong> Vragen aan de spraakassistent worden
-            nergens bewaard. Dat zou een nieuwe registratie vragen, en meteen een gevoelige: je legt
-            dan vast wat {voornaam} vroeg. Dat hoort zichtbaar te zijn voor {voornaam} en uit te zetten.
+            <strong>{tt('Hoe vaak dezelfde vraag terugkwam.')}</strong>{' '}
+            {tt('Vragen aan de spraakassistent worden nergens bewaard. Dat zou een nieuwe registratie vragen, en meteen een gevoelige: je legt dan vast wat {voornaam} vroeg. Dat hoort zichtbaar te zijn voor {voornaam} en uit te zetten.', { voornaam })}
           </li>
           <li>
-            <strong>Slaap en schermtijd.</strong> De app registreert niet wanneer het scherm aan
-            stond, alleen wat er gedaan werd. Een echte meting vraagt de tablet zelf of een sensor.
+            <strong>{tt('Slaap en schermtijd.')}</strong>{' '}
+            {tt('De app registreert niet wanneer het scherm aan stond, alleen wat er gedaan werd. Een echte meting vraagt de tablet zelf of een sensor.')}
           </li>
         </ul>
       </section>
@@ -260,7 +253,7 @@ function Blok({
             onChange={() => onWissel(id)}
             className="h-5 w-5 accent-[var(--accent-ink)]"
           />
-          Op het verslag
+          {tt('Op het verslag')}
         </label>
       </header>
 
@@ -277,7 +270,7 @@ function Medicatie({ a, voornaam }: { a: ReturnType<typeof useAnalyse>; voornaam
       <p className="text-3xl font-extrabold tabular-nums">
         {Math.round((a.totaal.bevestigd / Math.max(1, a.totaal.momenten)) * 100)} %
         <span className="ml-2 text-base font-semibold text-ink-soft">
-          {a.totaal.bevestigd} van {a.totaal.momenten}, over {a.totaal.dagen} dagen
+          {tt('{bevestigd} van {momenten}, over {dagen} dagen', { bevestigd: a.totaal.bevestigd, momenten: a.totaal.momenten, dagen: a.totaal.dagen })}
         </span>
       </p>
 
@@ -293,15 +286,14 @@ function Medicatie({ a, voornaam }: { a: ReturnType<typeof useAnalyse>; voornaam
                 <span className="bg-accent" style={{ width: `${Math.max(0, pct - zelfPct)}%` }} />
               </span>
               <span className="w-32 shrink-0 text-right text-sm text-ink-soft tabular-nums">
-                {pct} % · {r.zelf} zelf
+                {pct} % · {tt('{n} zelf', { n: r.zelf })}
               </span>
             </li>
           )
         })}
       </ul>
       <p className="mt-2 text-sm text-ink-faint">
-        Donker is wat {voornaam} zelf bevestigde, lichter wat iemand anders deed. Bevestigd is niet
-        hetzelfde als ingenomen.
+        {tt('Donker is wat {voornaam} zelf bevestigde, lichter wat iemand anders deed. Bevestigd is niet hetzelfde als ingenomen.', { voornaam })}
       </p>
     </>
   )
@@ -330,7 +322,7 @@ function Dagritme({ rijen }: { rijen: DagritmeRij[] }) {
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
               <span className="font-semibold">{maand(r.maand)}</span>
               <span className="text-ink-soft tabular-nums">
-                {r.vroegste} – {r.laatste} · mediaan {r.mediaan} · {r.dagen} dagen
+                {tt('{vroegste} – {laatste} · mediaan {mediaan} · {dagen} dagen', { vroegste: r.vroegste, laatste: r.laatste, mediaan: r.mediaan, dagen: r.dagen })}
               </span>
             </div>
             <div className="relative mt-1 h-6 rounded-pill bg-surface-deep">
@@ -347,8 +339,7 @@ function Dagritme({ rijen }: { rijen: DagritmeRij[] }) {
         )
       })}
       <p className="text-sm text-ink-faint">
-        De balk loopt van de vroegste tot de laatste start; het streepje is de mediaan. Schaal 5 tot
-        13 uur. Wordt de balk breder, dan loopt het dagritme meer uiteen.
+        {tt('De balk loopt van de vroegste tot de laatste start; het streepje is de mediaan. Schaal 5 tot 13 uur. Wordt de balk breder, dan loopt het dagritme meer uiteen.')}
       </p>
     </div>
   )
@@ -377,7 +368,7 @@ function Weekpatroon({ rijen }: { rijen: WeekRij[] }) {
           <li key={r.weekdag} className="flex items-center gap-3">
             {/* Breed genoeg voor "donderdag", anders raakt het woord de balk. */}
             <span className="w-[6.5rem] shrink-0 font-semibold capitalize">
-              {WEEKDAGEN[r.weekdag - 1]}
+              {tt(WEEKDAGEN[r.weekdag - 1])}
             </span>
             <span className="flex h-3 flex-1 overflow-hidden rounded-pill bg-surface-deep">
               <span className="bg-accent-ink" style={{ width: `${((pct ?? 0) * zelf) / 100}%` }} />
@@ -387,7 +378,7 @@ function Weekpatroon({ rijen }: { rijen: WeekRij[] }) {
               />
             </span>
             <span className="w-20 shrink-0 text-right text-sm tabular-nums text-ink-soft">
-              {pct === null ? '—' : `${pct} %`} · {r.dagen}d
+              {pct === null ? '—' : `${pct} %`} · {tt('{n}d', { n: r.dagen })}
             </span>
           </li>
         ))}
@@ -398,7 +389,7 @@ function Weekpatroon({ rijen }: { rijen: WeekRij[] }) {
       <div className="hidden grid-cols-7 gap-2 sm:grid">
         {cijfers.map(({ r, pct, zelf }) => (
           <div key={r.weekdag} className="rounded-2xl border border-line bg-surface-soft p-2 text-center">
-            <p className="text-xs font-bold text-ink-faint">{WEEKDAGEN[r.weekdag - 1].slice(0, 2)}</p>
+            <p className="text-xs font-bold text-ink-faint">{tt(WEEKDAGEN[r.weekdag - 1]).slice(0, 2)}</p>
             <p className="mt-1 text-lg font-extrabold tabular-nums">{pct === null ? '—' : `${pct}%`}</p>
             <div className="mx-auto mt-1 h-16 w-3 overflow-hidden rounded-pill bg-surface-deep">
               <div className="flex h-full w-full flex-col justify-end">
@@ -406,7 +397,7 @@ function Weekpatroon({ rijen }: { rijen: WeekRij[] }) {
                 <span className="bg-accent-ink" style={{ height: `${((pct ?? 0) * zelf) / 100}%` }} />
               </div>
             </div>
-            <p className="mt-1 text-xs text-ink-faint">{r.dagen}d</p>
+            <p className="mt-1 text-xs text-ink-faint">{tt('{n}d', { n: r.dagen })}</p>
           </div>
         ))}
       </div>
@@ -425,8 +416,8 @@ function Nacht({ rijen }: { rijen: UurRij[] }) {
             className="w-full rounded-t bg-accent"
             style={{ height: `${Math.max(4, (r.aantal / max) * 72)}px` }}
           />
-          <span className="text-xs text-ink-soft tabular-nums">{r.uur}u</span>
-          <span className="text-xs text-ink-faint">{r.dagen}d</span>
+          <span className="text-xs text-ink-soft tabular-nums">{tt('{n}u', { n: r.uur })}</span>
+          <span className="text-xs text-ink-faint">{tt('{n}d', { n: r.dagen })}</span>
         </div>
       ))}
     </div>

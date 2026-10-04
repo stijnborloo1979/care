@@ -13,12 +13,13 @@ import { orgNieuws } from '../../services/nieuws'
 import AfdelingNu from './AfdelingNu'
 import { Overzicht } from './Beheer'
 import { Kaart, Leeg, dagEnUur } from './ui'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const EMOJI: Record<string, string> = { maaltijd: '🍽️', rust: '🛋️', activiteit: '🎵', verzorging: '🛁', andere: '📌' }
 
 function groet(nu: Date) {
   const u = nu.getHours()
-  return u < 12 ? 'Goedemorgen' : u < 18 ? 'Goedemiddag' : 'Goedenavond'
+  return u < 12 ? tt('Goedemorgen') : u < 18 ? tt('Goedemiddag') : tt('Goedenavond')
 }
 
 /**
@@ -58,27 +59,27 @@ export default function Vandaag() {
   const voornaam = (session?.user.user_metadata?.full_name as string | undefined)?.split(' ')[0]
 
   const tegels: { naam: string; waarde: string | number; onder?: string; naar: string }[] = [
-    { naam: 'Bewoners', waarde: t.bewoners, onder: `${(afd.data ?? []).length} afdelingen`, naar: '/zorg/bewoners' },
-    { naam: 'Vrije bedden', waarde: t.vrij ?? '–', onder: t.bedden ? `van ${t.bedden} bedden` : 'kamers nog niet ingevoerd', naar: '/zorg/kamers' },
+    { naam: tt('Bewoners'), waarde: t.bewoners, onder: (afd.data ?? []).length === 1 ? tt('{n} afdeling', { n: 1 }) : tt('{n} afdelingen', { n: (afd.data ?? []).length }), naar: '/zorg/bewoners' },
+    { naam: tt('Vrije bedden'), waarde: t.vrij ?? '–', onder: t.bedden ? tt('van {n} bedden', { n: t.bedden }) : tt('kamers nog niet ingevoerd'), naar: '/zorg/kamers' },
     {
-      naam: 'Vandaag gepland',
+      naam: tt('Vandaag gepland'),
       waarde: vandaag.filter((i) => !i.vast && !i.geannuleerd).length,
-      onder: volgende ? `straks: ${volgende.tijd} ${volgende.titel}` : 'activiteiten',
+      onder: volgende ? tt('straks: {tijd} {titel}', { tijd: volgende.tijd, titel: volgende.titel }) : tt('activiteiten'),
       naar: '/zorg/week',
     },
     beheert
-      ? { naam: 'Nieuws verstuurd', waarde: (nieuws.data ?? []).length, onder: 'laatste 180 dagen', naar: '/zorg/nieuws' }
-      : { naam: 'Open vragen', waarde: vragen, onder: 'van je bewoners', naar: '/zorg/bewoners' },
+      ? { naam: tt('Nieuws verstuurd'), waarde: (nieuws.data ?? []).length, onder: tt('laatste 180 dagen'), naar: '/zorg/nieuws' }
+      : { naam: tt('Open vragen'), waarde: vragen, onder: tt('van je bewoners'), naar: '/zorg/bewoners' },
   ]
 
   const snel: { naar: string; naam: string; icoon: LucideIcon; zichtbaar: boolean }[] = [
-    { naar: '/zorg/bewoners', naam: 'Bewoners', icoon: Users, zichtbaar: true },
-    { naar: '/zorg/overdracht', naam: 'Overdracht', icoon: ClipboardList, zichtbaar: true },
-    { naar: '/zorg/week', naam: 'Weekplanning', icoon: CalendarRange, zichtbaar: true },
-    { naar: '/zorg/activiteiten', naam: 'Activiteit plannen', icoon: CalendarDays, zichtbaar: beheert || !!org.team_lead },
-    { naar: '/zorg/kamers', naam: 'Kamers', icoon: BedDouble, zichtbaar: true },
-    { naar: '/zorg/nieuws', naam: 'Nieuws versturen', icoon: Megaphone, zichtbaar: beheert || !!org.team_lead },
-    { naar: '/zorg/rapporten', naam: 'Rapporten', icoon: BarChart3, zichtbaar: beheert },
+    { naar: '/zorg/bewoners', naam: tt('Bewoners'), icoon: Users, zichtbaar: true },
+    { naar: '/zorg/overdracht', naam: tt('Overdracht'), icoon: ClipboardList, zichtbaar: true },
+    { naar: '/zorg/week', naam: tt('Weekplanning'), icoon: CalendarRange, zichtbaar: true },
+    { naar: '/zorg/activiteiten', naam: tt('Activiteit plannen'), icoon: CalendarDays, zichtbaar: beheert || !!org.team_lead },
+    { naar: '/zorg/kamers', naam: tt('Kamers'), icoon: BedDouble, zichtbaar: true },
+    { naar: '/zorg/nieuws', naam: tt('Nieuws versturen'), icoon: Megaphone, zichtbaar: beheert || !!org.team_lead },
+    { naar: '/zorg/rapporten', naam: tt('Rapporten'), icoon: BarChart3, zichtbaar: beheert },
   ]
 
   return (
@@ -89,7 +90,7 @@ export default function Vandaag() {
           {voornaam ? `, ${voornaam}` : ''}
         </h1>
         <p className="mt-1 text-ink-soft">
-          {org.naam} — {new Intl.DateTimeFormat('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' }).format(nu)}
+          {org.naam} — {new Intl.DateTimeFormat(uiLocale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(nu)}
         </p>
       </header>
 
@@ -106,13 +107,13 @@ export default function Vandaag() {
       <AfdelingNu orgId={orgId} mijn={mijn.data ?? []} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <Kaart titel={<><CalendarDays size={20} strokeWidth={1.75} aria-hidden="true" /> Vandaag in het huis</>}>
+        <Kaart titel={<><CalendarDays size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Vandaag in het huis')}</>}>
           {vandaag.length === 0 ? (
             <Leeg>
-              Er staat vandaag niets gepland.{' '}
+              {tt('Er staat vandaag niets gepland.')}{' '}
               {beheert || org.team_lead ? (
                 <Link to="/zorg/activiteiten" className="font-semibold underline underline-offset-4">
-                  Vul de vaste dag in
+                  {tt('Vul de vaste dag in')}
                 </Link>
               ) : null}
             </Leeg>
@@ -131,12 +132,12 @@ export default function Vandaag() {
                       <span aria-hidden="true">{i.emoji || EMOJI[i.soort]} </span>
                       <span className={i.geannuleerd ? 'line-through' : 'font-semibold'}>{i.titel}</span>
                       <span className="text-sm text-ink-soft">
-                        {i.department_id ? ` · ${namen[i.department_id] ?? ''}` : ' · hele huis'}
+                        {i.department_id ? ` · ${namen[i.department_id] ?? ''}` : ` · ${tt('hele huis')}`}
                         {i.plaats ? ` · ${i.plaats}` : ''}
-                        {i.geannuleerd ? ' · gaat niet door' : ''}
+                        {i.geannuleerd ? ` · ${tt('gaat niet door')}` : ''}
                       </span>
                     </span>
-                    {isVolgende ? <span className="shrink-0 text-xs font-bold uppercase text-accent-ink">straks</span> : null}
+                    {isVolgende ? <span className="shrink-0 text-xs font-bold uppercase text-accent-ink">{tt('straks')}</span> : null}
                   </li>
                 )
               })}
@@ -145,16 +146,16 @@ export default function Vandaag() {
         </Kaart>
 
         <div className="space-y-6">
-          <Kaart titel={<><Megaphone size={20} strokeWidth={1.75} aria-hidden="true" /> Laatste nieuws</>}>
+          <Kaart titel={<><Megaphone size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Laatste nieuws')}</>}>
             {(nieuws.data ?? []).length === 0 ? (
-              <p className="text-ink-soft">Nog geen nieuws aan de families.</p>
+              <p className="text-ink-soft">{tt('Nog geen nieuws aan de families.')}</p>
             ) : (
               <ul className="space-y-3">
                 {(nieuws.data ?? []).slice(0, 3).map((n) => (
                   <li key={n.id}>
                     <p className="font-semibold">{n.titel}</p>
                     <p className="text-sm text-ink-faint">
-                      {n.department_id ? `Afdeling ${namen[n.department_id] ?? ''}` : 'Alle families'} · {dagEnUur(n.created_at)}
+                      {n.department_id ? tt('Afdeling {naam}', { naam: namen[n.department_id] ?? '' }) : tt('Alle families')} · {dagEnUur(n.created_at)}
                     </p>
                   </li>
                 ))}
@@ -162,12 +163,12 @@ export default function Vandaag() {
             )}
             {beheert || org.team_lead ? (
               <Link to="/zorg/nieuws" className="mt-3 inline-block text-sm font-semibold text-accent-ink underline underline-offset-4">
-                Nieuw bericht
+                {tt('Nieuw bericht')}
               </Link>
             ) : null}
           </Kaart>
 
-          <Kaart titel="Snel naar">
+          <Kaart titel={tt('Snel naar')}>
             <ul className="grid grid-cols-2 gap-2">
               {snel
                 .filter((s) => s.zichtbaar)

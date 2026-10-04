@@ -14,8 +14,9 @@ import {
 import type { EventKind } from '../../services/agenda'
 import DictateButton from '../../components/DictateButton'
 import QuickAdd from '../planning/QuickAdd'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
-const DAGNAMEN = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo']
+const DAGNAMEN = [tt('ma'), tt('di'), tt('wo'), tt('do'), tt('vr'), tt('za'), tt('zo')]
 
 type Bewerken = { datum: string; item?: KalenderItem } | null
 
@@ -49,23 +50,24 @@ export default function Calendar() {
   }, [data, tz])
 
   const dagen = Array.from({ length: 7 }, (_, i) => plusDagen(maandag, i))
-  const titel = new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'long' })
+  const titel = new Intl.DateTimeFormat(uiLocale(), { day: 'numeric', month: 'long' })
 
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Kalender</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{tt('Kalender')}</h1>
           <p className="mt-1 text-ink-soft">
-            Wat je hier plant, verschijnt vanzelf op het scherm van{' '}
-            {household?.person_name.split(' ')[0] ?? 'de persoon'}.
+            {tt('Wat je hier plant, verschijnt vanzelf op het scherm van {naam}.', {
+              naam: household?.person_name.split(' ')[0] ?? tt('de persoon'),
+            })}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMaandag(plusDagen(maandag, -7))}
-            aria-label="Vorige week"
+            aria-label={tt('Vorige week')}
             className="grid h-11 w-11 place-items-center rounded-full border border-line bg-surface"
           >
             <ChevronLeft size={20} strokeWidth={1.75} />
@@ -74,11 +76,11 @@ export default function Calendar() {
             onClick={() => setMaandag(maandagVan(vandaag))}
             className="min-h-[2.75rem] rounded-pill border border-line bg-surface px-4 font-semibold"
           >
-            Deze week
+            {tt('Deze week')}
           </button>
           <button
             onClick={() => setMaandag(plusDagen(maandag, 7))}
-            aria-label="Volgende week"
+            aria-label={tt('Volgende week')}
             className="grid h-11 w-11 place-items-center rounded-full border border-line bg-surface"
           >
             <ChevronRight size={20} strokeWidth={1.75} />
@@ -93,7 +95,7 @@ export default function Calendar() {
         {titel.format(new Date(`${plusDagen(maandag, 6)}T12:00:00`))}
       </p>
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       {/* Op een breed scherm zeven kolommen, op een telefoon onder elkaar. */}
       <div className="grid gap-3 lg:grid-cols-7">
@@ -114,7 +116,7 @@ export default function Calendar() {
                 </span>
                 {isVandaag ? (
                   <span className="text-xs font-bold uppercase tracking-wide text-accent-ink">
-                    vandaag
+                    {tt('vandaag')}
                   </span>
                 ) : null}
               </div>
@@ -128,7 +130,7 @@ export default function Calendar() {
                     >
                       <span className="block text-xs font-bold tabular-nums text-ink-soft">
                         {hhmm(new Date(e.starts_at), tz)}
-                        {e.done_at ? ' · gedaan' : ''}
+                        {e.done_at ? tt(' · gedaan') : ''}
                       </span>
                       <span
                         className={`block text-sm font-semibold leading-snug ${
@@ -149,7 +151,7 @@ export default function Calendar() {
                   className="mt-2 flex min-h-[2.4rem] items-center justify-center gap-1 rounded-xl text-sm font-semibold text-ink-soft hover:bg-surface-soft"
                 >
                   <Plus size={16} strokeWidth={1.75} />
-                  Toevoegen
+                  {tt('Toevoegen')}
                 </button>
               ) : null}
             </section>
@@ -228,10 +230,10 @@ function ItemEditor({
     onError: (e) =>
       setFout(
         e instanceof Error && e.message.includes('row-level security')
-          ? 'Je kan alleen je eigen afspraken wijzigen.'
+          ? tt('Je kan alleen je eigen afspraken wijzigen.')
           : e instanceof Error
             ? e.message
-            : 'Opslaan lukte niet.',
+            : tt('Opslaan lukte niet.'),
       ),
   })
 
@@ -263,7 +265,7 @@ function ItemEditor({
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={item ? 'Afspraak wijzigen' : 'Afspraak toevoegen'}
+      aria-label={item ? tt('Afspraak wijzigen') : tt('Afspraak toevoegen')}
       onClick={onKlaar}
     >
       <form
@@ -272,7 +274,7 @@ function ItemEditor({
           e.preventDefault()
           setFout(null)
           if (!titel.trim()) {
-            setFout('Geef de afspraak een naam.')
+            setFout(tt('Geef de afspraak een naam.'))
             return
           }
           bewaar.mutate()
@@ -282,12 +284,12 @@ function ItemEditor({
       >
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold tracking-tight">
-            {item ? 'Afspraak wijzigen' : 'Afspraak toevoegen'}
+            {item ? tt('Afspraak wijzigen') : tt('Afspraak toevoegen')}
           </h2>
           <button
             type="button"
             onClick={onKlaar}
-            aria-label="Sluiten"
+            aria-label={tt('Sluiten')}
             className="grid h-10 w-10 place-items-center rounded-full hover:bg-surface-soft"
           >
             <X size={20} strokeWidth={1.75} />
@@ -295,17 +297,17 @@ function ItemEditor({
         </div>
 
         {item?.maker?.full_name ? (
-          <p className="mt-1 text-sm text-ink-faint">Gepland door {item.maker.full_name}</p>
+          <p className="mt-1 text-sm text-ink-faint">{tt('Gepland door {naam}', { naam: item.maker.full_name })}</p>
         ) : null}
         {vanRoutine ? (
           <p className="mt-2 rounded-2xl bg-surface-soft p-3 text-sm text-ink-soft">
-            Dit komt uit een vaste routine. Wat je hier wijzigt, geldt alleen voor deze dag.
+            {tt('Dit komt uit een vaste routine. Wat je hier wijzigt, geldt alleen voor deze dag.')}
           </p>
         ) : null}
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <label>
-            <span className="text-sm font-semibold text-ink-soft">Dag</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Dag')}</span>
             <input
               type="date"
               required
@@ -315,7 +317,7 @@ function ItemEditor({
             />
           </label>
           <label>
-            <span className="text-sm font-semibold text-ink-soft">Uur</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Uur')}</span>
             <input
               type="time"
               required
@@ -328,24 +330,26 @@ function ItemEditor({
 
         {botsing ? (
           <p className="mt-2 rounded-2xl bg-accent-soft p-3 text-sm text-accent-ink">
-            Om {hhmm(new Date(botsing.starts_at), tz)} staat al <strong>{botsing.title}</strong>.
-            Twee dingen zo dicht bij elkaar kan veel zijn.
+            {tt('Om {uur} staat al {titel}. Twee dingen zo dicht bij elkaar kan veel zijn.', {
+              uur: hhmm(new Date(botsing.starts_at), tz),
+              titel: botsing.title,
+            })}
           </p>
         ) : null}
 
         <label className="mt-3 block">
-          <span className="text-sm font-semibold text-ink-soft">Wat?</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Wat?')}</span>
           <input
             required
             value={titel}
             onChange={(e) => setTitel(e.target.value)}
-            placeholder="Tandarts"
+            placeholder={tt('Tandarts')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
 
         <div className="mt-3">
-          <span className="text-sm font-semibold text-ink-soft">Soort</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Soort')}</span>
           <div className="mt-1 flex flex-wrap gap-2">
             {SOORTEN.map((s) => (
               <button
@@ -362,20 +366,20 @@ function ItemEditor({
                     : 'border-line bg-surface text-ink-soft'
                 }`}
               >
-                {s.emoji} {s.label}
+                {s.emoji} {tt(s.label)}
               </button>
             ))}
           </div>
         </div>
 
         <label className="mt-3 block">
-          <span className="text-sm font-semibold text-ink-soft">Wie komt er, of met wie?</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Wie komt er, of met wie?')}</span>
           <select
             value={persoonId ?? ''}
             onChange={(e) => setPersoonId(e.target.value || null)}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           >
-            <option value="">Niemand in het bijzonder</option>
+            <option value="">{tt('Niemand in het bijzonder')}</option>
             {(mensen ?? [])
               .filter((p) => p.kind !== 'self')
               .map((p) => (
@@ -389,7 +393,7 @@ function ItemEditor({
         <div className="mt-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-semibold text-ink-soft">
-              Wat moet de persoon weten?
+              {tt('Wat moet de persoon weten?')}
             </span>
             <DictateButton onTekst={(t) => setNotitie(t)} />
           </div>
@@ -397,11 +401,11 @@ function ItemEditor({
             value={notitie}
             onChange={(e) => setNotitie(e.target.value)}
             rows={2}
-            placeholder="Els haalt je om 13:30 op. Neem je identiteitskaart mee."
+            placeholder={tt('Els haalt je om 13:30 op. Neem je identiteitskaart mee.')}
             className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
           />
           <span className="mt-1 block text-xs text-ink-faint">
-            Dit wordt getoond en voorgelezen vlak voor de afspraak.
+            {tt('Dit wordt getoond en voorgelezen vlak voor de afspraak.')}
           </span>
         </div>
 
@@ -411,17 +415,17 @@ function ItemEditor({
             disabled={bewaar.isPending}
             className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
           >
-            {bewaar.isPending ? 'Opslaan…' : 'Opslaan'}
+            {bewaar.isPending ? tt('Opslaan…') : tt('Opslaan')}
           </button>
           {item ? (
             <button
               type="button"
               onClick={() => {
-                if (confirm(`"${item.title}" verwijderen?`)) wis.mutate()
+                if (confirm(tt('"{titel}" verwijderen?', { titel: item.title }))) wis.mutate()
               }}
               className="min-h-touch rounded-pill border-[1.5px] border-alert px-5 font-semibold text-alert"
             >
-              Verwijderen
+              {tt('Verwijderen')}
             </button>
           ) : null}
         </div>

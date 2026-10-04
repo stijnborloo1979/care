@@ -6,6 +6,7 @@ import { localDateKey } from '../../lib/time'
 import { emojiVan, kwijtOpAfdeling, markeerGevonden, sindsTekst } from '../../services/spullen'
 import type { Bewoner } from './zorgApi'
 import { Fout, Kaart, knopKlein } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 const TZ = 'Europe/Brussels'
 
@@ -56,7 +57,7 @@ export default function AfdelingNu({ orgId, mijn }: { orgId: string; mijn: Bewon
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {vandaag.length > 0 ? (
-        <Kaart titel={<><Car size={20} strokeWidth={1.75} aria-hidden="true" /> Uitstap vandaag</>}>
+        <Kaart titel={<><Car size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Uitstap vandaag')}</>}>
           <ul className="space-y-2">
             {vandaag.map((u) => {
               const tst = toestand(u, nu)
@@ -64,21 +65,21 @@ export default function AfdelingNu({ orgId, mijn }: { orgId: string; mijn: Bewon
                 <li key={u.id} className={`flex flex-wrap items-center gap-2 rounded-2xl px-3 py-2 ${tst === 'te-laat' ? 'bg-alert-soft ring-1 ring-alert' : 'bg-surface-soft'}`}>
                   <span className="min-w-0 flex-1">
                     <Link to={`/zorg/bewoner/${u.household_id}`} className="font-semibold underline-offset-4 hover:underline">
-                      {namen[u.household_id] ?? 'Bewoner'}
+                      {namen[u.household_id] ?? tt('Bewoner')}
                     </Link>{' '}
-                    met {u.met_wie}
+                    {tt('met {wie}', { wie: u.met_wie })}
                     <span className={`block text-sm ${tst === 'te-laat' ? 'font-semibold text-alert' : 'text-ink-soft'}`}>
-                      {vanTot(u, TZ, nu)} · {tst === 'te-laat' ? 'nog niet terug' : tst === 'weg' ? 'vertrokken' : 'gepland'}
+                      {vanTot(u, TZ, nu)} · {tst === 'te-laat' ? tt('nog niet terug') : tst === 'weg' ? tt('vertrokken') : tt('gepland')}
                     </span>
                   </span>
                   {u.status === 'gepland' ? (
                     <button disabled={stap.isPending} onClick={() => stap.mutate({ id: u.id, stap: 'weg' })} className={knopKlein}>
-                      Vertrokken
+                      {tt('Vertrokken')}
                     </button>
                   ) : null}
                   {u.status === 'weg' ? (
                     <button disabled={stap.isPending} onClick={() => stap.mutate({ id: u.id, stap: 'terug' })} className={knopKlein}>
-                      Is terug
+                      {tt('Is terug')}
                     </button>
                   ) : null}
                 </li>
@@ -90,20 +91,20 @@ export default function AfdelingNu({ orgId, mijn }: { orgId: string; mijn: Bewon
       ) : null}
 
       {lijstKwijt.length > 0 ? (
-        <Kaart titel={<><Search size={20} strokeWidth={1.75} aria-hidden="true" /> Kwijt op de afdeling</>}>
+        <Kaart titel={<><Search size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Kwijt op de afdeling')}</>}>
           <ul className="space-y-2">
             {lijstKwijt.map((k) => (
               <li key={k.id} className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-soft px-3 py-2">
                 <span className="text-2xl" aria-hidden="true">{emojiVan(k.soort)}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="font-semibold">{k.naam}</span> van {k.bewoner}
-                  {k.kamer ? ` (kamer ${k.kamer})` : ''}
+                  <span className="font-semibold">{k.naam}</span> {tt('van {bewoner}', { bewoner: k.bewoner })}
+                  {k.kamer ? ` (${tt('kamer {kamer}', { kamer: k.kamer })})` : ''}
                   <span className="block text-sm text-ink-soft">
-                    {[k.kenmerk, k.waar ? `hoort: ${k.waar}` : null, sindsTekst(k.kwijt_sinds, nu)].filter(Boolean).join(' · ')}
+                    {[k.kenmerk, k.waar ? tt('hoort: {waar}', { waar: k.waar }) : null, sindsTekst(k.kwijt_sinds, nu)].filter(Boolean).join(' · ')}
                   </span>
                 </span>
                 <button disabled={gevonden.isPending} onClick={() => gevonden.mutate(k.id)} className={knopKlein}>
-                  Gevonden
+                  {tt('Gevonden')}
                 </button>
               </li>
             ))}

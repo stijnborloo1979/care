@@ -18,6 +18,7 @@ import {
   type KamerStand,
 } from '../../services/kamers'
 import { Fout, Kaart, Kop, Laden, Leeg, knop, knopKlein, label, veld } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Kamers en bezetting (82): welke kamers er zijn, wie waar woont en wat
@@ -42,15 +43,15 @@ export default function Kamers() {
   const t = totalen(standen)
   const zonderKamer = standen.reduce((n, a) => n + a.zonderKamer.length, 0)
   const tegels: [string, number | null][] = [
-    ['Bewoners', t.bewoners],
-    ['Bedden', t.bedden],
-    ['Vrije bedden', t.vrij],
-    ['Zonder kamer', zonderKamer],
+    [tt('Bewoners'), t.bewoners],
+    [tt('Bedden'), t.bedden],
+    [tt('Vrije bedden'), t.vrij],
+    [tt('Zonder kamer'), zonderKamer],
   ]
 
   return (
     <div className="space-y-6">
-      <Kop titel="Kamers en bezetting" uitleg="Wie waar woont en wat er vrij is, per afdeling." />
+      <Kop titel={tt('Kamers en bezetting')} uitleg={tt('Wie waar woont en wat er vrij is, per afdeling.')} />
 
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tegels.map(([naam, n]) => (
@@ -65,8 +66,8 @@ export default function Kamers() {
       <Fout fout={afd.error ?? km.error ?? bz.error} />
       {(km.data ?? []).length === 0 && !km.isLoading ? (
         <Leeg>
-          Er zijn nog geen kamers ingevoerd.{' '}
-          {beheert ? 'Voeg ze hieronder toe, bijvoorbeeld "101-120" in één keer.' : 'Vraag het aan de beheerder of een coördinator.'}
+          {tt('Er zijn nog geen kamers ingevoerd.')}{' '}
+          {beheert ? tt('Voeg ze hieronder toe, bijvoorbeeld "101-120" in één keer.') : tt('Vraag het aan de beheerder of een coördinator.')}
         </Leeg>
       ) : null}
 
@@ -77,7 +78,7 @@ export default function Kamers() {
       {beheert && (afd.data ?? []).length > 0 ? <KamersToevoegen orgId={orgId} afdelingen={afd.data ?? []} onKlaar={ververs} /> : null}
       {beheert && (afd.data ?? []).length === 0 && !afd.isLoading ? (
         <Leeg>
-          Maak eerst afdelingen aan bij <Link to="/zorg/beheer" className="font-semibold underline">Beheer</Link>.
+          {tt('Maak eerst afdelingen aan bij')} <Link to="/zorg/beheer" className="font-semibold underline">{tt('Beheer')}</Link>.
         </Leeg>
       ) : null}
     </div>
@@ -90,10 +91,10 @@ function AfdelingKaart({ stand, magBeheren, onKlaar }: { stand: AfdelingStand; m
     <Kaart
       titel={
         <span className="flex w-full flex-wrap items-baseline justify-between gap-2">
-          <span>{stand.id ? `Afdeling ${stand.naam}` : stand.naam}</span>
+          <span>{stand.id ? tt('Afdeling {naam}', { naam: stand.naam }) : stand.naam}</span>
           <span className="text-sm font-normal text-ink-soft">
-            {stand.bezet} {stand.bezet === 1 ? 'bewoner' : 'bewoners'}
-            {stand.bedden > 0 ? ` · ${vrij} vrij van ${stand.bedden}` : ''}
+            {stand.bezet === 1 ? tt('{n} bewoner', { n: stand.bezet }) : tt('{n} bewoners', { n: stand.bezet })}
+            {stand.bedden > 0 ? ` · ${tt('{vrij} vrij van {bedden}', { vrij, bedden: stand.bedden })}` : ''}
           </span>
         </span>
       }
@@ -105,12 +106,12 @@ function AfdelingKaart({ stand, magBeheren, onKlaar }: { stand: AfdelingStand; m
           ))}
         </ul>
       ) : stand.id ? (
-        <p className="text-sm text-ink-soft">Nog geen kamers op deze afdeling.</p>
+        <p className="text-sm text-ink-soft">{tt('Nog geen kamers op deze afdeling.')}</p>
       ) : null}
 
       {stand.zonderKamer.length > 0 ? (
         <div className="mt-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Nog zonder kamer</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Nog zonder kamer')}</h3>
           <ul className="mt-2 space-y-1.5">
             {stand.zonderKamer.map((b) => (
               <ZonderKamer key={b.household_id} b={b} afdeling={stand} magBeheren={magBeheren} onKlaar={onKlaar} />
@@ -146,7 +147,7 @@ function KamerTegel({ stand, afdeling, magBeheren, onKlaar }: { stand: KamerStan
         <span className="flex items-center gap-1.5 text-lg font-bold">
           <DoorOpen size={18} strokeWidth={1.75} aria-hidden="true" /> {kamer.naam}
         </span>
-        <span className="flex items-center gap-1 text-xs text-ink-soft" title={`${kamer.bedden} bed(den)`}>
+        <span className="flex items-center gap-1 text-xs text-ink-soft" title={tt('{n} bed(den)', { n: kamer.bedden })}>
           <BedDouble size={14} strokeWidth={1.75} aria-hidden="true" /> {kamer.bedden}
         </span>
       </p>
@@ -160,26 +161,26 @@ function KamerTegel({ stand, afdeling, magBeheren, onKlaar }: { stand: KamerStan
         ))}
       </ul>
       <p className="text-sm text-ink-soft">
-        {!kamer.actief ? 'buiten gebruik' : vrij > 0 ? (vrij === kamer.bedden ? 'vrij' : `${vrij} bed vrij`) : 'bezet'}
+        {!kamer.actief ? tt('buiten gebruik') : vrij > 0 ? (vrij === kamer.bedden ? tt('vrij') : tt('{n} bed vrij', { n: vrij })) : tt('bezet')}
       </p>
 
       {magBeheren ? (
         <div className="mt-2 flex flex-wrap gap-1">
           {kamer.actief && vrij > 0 && kandidaten.length > 0 ? (
             <button onClick={() => setOpen(!open)} aria-expanded={open} className={knopKlein}>
-              Bewoner plaatsen
+              {tt('Bewoner plaatsen')}
             </button>
           ) : null}
           {bewoners.length === 0 ? (
             <>
               <button onClick={() => wijzig.mutate(!kamer.actief)} className={knopKlein}>
-                {kamer.actief ? 'Buiten gebruik' : 'In gebruik'}
+                {kamer.actief ? tt('Buiten gebruik') : tt('In gebruik nemen')}
               </button>
               <button
                 onClick={() => {
-                  if (confirm(`Kamer ${kamer.naam} wissen?`)) wis.mutate()
+                  if (confirm(tt('Kamer {naam} wissen?', { naam: kamer.naam }))) wis.mutate()
                 }}
-                aria-label={`Kamer ${kamer.naam} wissen`}
+                aria-label={tt('Kamer {naam} wissen', { naam: kamer.naam })}
                 className={knopKlein}
               >
                 <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -216,7 +217,7 @@ function ZonderKamer({ b, afdeling, magBeheren, onKlaar }: { b: Bezetting; afdel
     <li className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-soft px-3 py-2">
       <span className="min-w-0 flex-1">
         <span className="font-semibold">{b.naam}</span>
-        {b.kamer ? <span className="text-sm text-ink-soft"> · kamer "{b.kamer}" bestaat niet op deze afdeling</span> : null}
+        {b.kamer ? <span className="text-sm text-ink-soft"> · {tt('kamer "{kamer}" bestaat niet op deze afdeling', { kamer: b.kamer })}</span> : null}
       </span>
       {magBeheren && afdeling.id && vrije.length > 0 ? (
         <form
@@ -226,8 +227,8 @@ function ZonderKamer({ b, afdeling, magBeheren, onKlaar }: { b: Bezetting; afdel
           }}
           className="flex items-center gap-2"
         >
-          <select value={kamer} onChange={(e) => setKamer(e.target.value)} aria-label={`Kamer voor ${b.naam}`} className="min-h-[2.5rem] rounded-xl border border-line-strong bg-surface px-2">
-            <option value="">Kies een kamer</option>
+          <select value={kamer} onChange={(e) => setKamer(e.target.value)} aria-label={tt('Kamer voor {naam}', { naam: b.naam })} className="min-h-[2.5rem] rounded-xl border border-line-strong bg-surface px-2">
+            <option value="">{tt('Kies een kamer')}</option>
             {vrije.map((k) => (
               <option key={k.kamer.id} value={k.kamer.naam}>
                 {k.kamer.naam}
@@ -235,7 +236,7 @@ function ZonderKamer({ b, afdeling, magBeheren, onKlaar }: { b: Bezetting; afdel
             ))}
           </select>
           <button type="submit" disabled={!kamer || zet.isPending} className={knopKlein}>
-            Plaatsen
+            {tt('Toewijzen')}
           </button>
         </form>
       ) : null}
@@ -257,7 +258,7 @@ function KamersToevoegen({ orgId, afdelingen, onKlaar }: { orgId: string; afdeli
     },
   })
   return (
-    <Kaart titel="Kamers toevoegen">
+    <Kaart titel={tt('Kamers toevoegen')}>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -266,7 +267,7 @@ function KamersToevoegen({ orgId, afdelingen, onKlaar }: { orgId: string; afdeli
         className="grid gap-3 sm:grid-cols-3"
       >
         <label>
-          <span className={label}>Afdeling</span>
+          <span className={label}>{tt('Afdeling')}</span>
           <select value={afdeling} onChange={(e) => setAfdeling(e.target.value)} className={veld}>
             {afdelingen.map((a) => (
               <option key={a.id} value={a.id}>
@@ -276,11 +277,11 @@ function KamersToevoegen({ orgId, afdelingen, onKlaar }: { orgId: string; afdeli
           </select>
         </label>
         <label>
-          <span className={label}>Kamers</span>
-          <input value={reeks} onChange={(e) => setReeks(e.target.value)} placeholder="101-120 of 12, 14, 16" className={veld} />
+          <span className={label}>{tt('Kamers')}</span>
+          <input value={reeks} onChange={(e) => setReeks(e.target.value)} placeholder={tt('101-120 of 12, 14, 16')} className={veld} />
         </label>
         <label>
-          <span className={label}>Bedden per kamer</span>
+          <span className={label}>{tt('Bedden per kamer')}</span>
           <select value={bedden} onChange={(e) => setBedden(Number(e.target.value))} className={veld}>
             {[1, 2, 3, 4].map((n) => (
               <option key={n} value={n}>
@@ -291,7 +292,7 @@ function KamersToevoegen({ orgId, afdelingen, onKlaar }: { orgId: string; afdeli
         </label>
         <div className="sm:col-span-3">
           <button type="submit" disabled={!namen.length || bewaar.isPending} className={`${knop} w-full sm:w-auto`}>
-            {bewaar.isPending ? 'Bezig…' : namen.length > 1 ? `${namen.length} kamers toevoegen` : 'Kamer toevoegen'}
+            {bewaar.isPending ? tt('Bezig…') : namen.length > 1 ? tt('{n} kamers toevoegen', { n: namen.length }) : tt('Kamer toevoegen')}
           </button>
           <Fout fout={bewaar.error} />
         </div>

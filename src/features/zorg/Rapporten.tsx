@@ -5,12 +5,13 @@ import { Download, ShieldCheck } from 'lucide-react'
 import { useOrganisatie } from './useOrganisatie'
 import { LABELS, VOLGORDE, naarCsv, orgRapport, periode } from '../../services/rapport'
 import { Fout, Kaart, Kop, Laden, Leeg, knopKlein, label, veld } from './ui'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const PERIODES = [
-  { id: 'deze-maand', naam: 'Deze maand' },
-  { id: 'vorige-maand', naam: 'Vorige maand' },
-  { id: '30-dagen', naam: 'Laatste 30 dagen' },
-  { id: 'dit-jaar', naam: 'Dit jaar' },
+  { id: 'deze-maand', naam: tt('Deze maand') },
+  { id: 'vorige-maand', naam: tt('Vorige maand') },
+  { id: '30-dagen', naam: tt('Laatste 30 dagen') },
+  { id: 'dit-jaar', naam: tt('Dit jaar') },
 ] as const
 
 /**
@@ -38,7 +39,7 @@ export default function Rapporten() {
   const totaal = (s: string) => rijen.find((r) => r.sleutel === s && r.afdeling === null)
   const afdelingen = [...new Set(rijen.filter((r) => r.afdeling !== null).map((r) => r.afdeling as string))].sort()
   const perAfd = (a: string, s: string) => rijen.find((r) => r.afdeling === a && r.sleutel === s)?.waarde ?? 0
-  const fmt = new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+  const fmt = new Intl.DateTimeFormat(uiLocale(), { day: 'numeric', month: 'long', year: 'numeric' })
 
   function download() {
     const blob = new Blob([naarCsv(rijen, p.van, p.tot)], { type: 'text/csv;charset=utf-8' })
@@ -53,12 +54,12 @@ export default function Rapporten() {
   return (
     <div className="space-y-6">
       <Kop
-        titel="Rapporten"
-        uitleg="Wat er in het huis gebeurt, in aantallen."
+        titel={tt('Rapporten')}
+        uitleg={tt('Wat er in het huis gebeurt, in aantallen.')}
         rechts={
           rijen.length > 0 ? (
             <button onClick={download} className={`${knopKlein} inline-flex items-center gap-2`}>
-              <Download size={16} strokeWidth={1.75} aria-hidden="true" /> Download (CSV)
+              <Download size={16} strokeWidth={1.75} aria-hidden="true" /> {tt('Download (CSV)')}
             </button>
           ) : null
         }
@@ -84,28 +85,28 @@ export default function Rapporten() {
             keuze === 'eigen' ? 'border-accent-ink bg-accent-soft text-accent-ink' : 'border-line-strong text-ink-soft'
           }`}
         >
-          Zelf kiezen
+          {tt('Zelf kiezen')}
         </button>
         {keuze === 'eigen' ? (
           <span className="flex flex-wrap gap-2">
             <label>
-              <span className={label}>Van</span>
+              <span className={label}>{tt('Van')}</span>
               <input type="date" value={van} max={tot} onChange={(e) => setVan(e.target.value)} className={veld} />
             </label>
             <label>
-              <span className={label}>Tot en met</span>
+              <span className={label}>{tt('Tot en met')}</span>
               <input type="date" value={tot} min={van} max={new Date(new Date(van + 'T12:00:00').getTime() + 365 * 864e5).toISOString().slice(0, 10)} onChange={(e) => setTot(e.target.value)} className={veld} />
             </label>
           </span>
         ) : null}
       </div>
       <p className="text-ink-soft">
-        {fmt.format(new Date(p.van + 'T12:00:00'))} tot en met {fmt.format(new Date(p.tot + 'T12:00:00'))}
+        {tt('{van} tot en met {tot}', { van: fmt.format(new Date(p.van + 'T12:00:00')), tot: fmt.format(new Date(p.tot + 'T12:00:00')) })}
       </p>
 
       {rapport.isLoading ? <Laden /> : null}
       <Fout fout={rapport.error} />
-      {rapport.data === null ? <Leeg>De rapporten zijn er na de update van de database (83).</Leeg> : null}
+      {rapport.data === null ? <Leeg>{tt('De rapporten zijn er na de update van de database (83).')}</Leeg> : null}
 
       {rijen.length > 0 ? (
         <>
@@ -117,22 +118,22 @@ export default function Rapporten() {
                 <div key={s} className="min-w-0 rounded-card bg-surface p-4 shadow-card">
                   <dt className="truncate text-sm font-semibold text-ink-soft">{LABELS[s]?.label ?? s}</dt>
                   <dd className="text-3xl font-bold tabular-nums">{r.waarde ?? '–'}</dd>
-                  <dd className="text-xs text-ink-faint">{r.waarde === null ? 'Pas vanaf 5 bewoners en 28 dagen' : LABELS[s]?.uitleg}</dd>
+                  <dd className="text-xs text-ink-faint">{r.waarde === null ? tt('Pas vanaf 5 bewoners en 28 dagen') : LABELS[s]?.uitleg}</dd>
                 </div>
               )
             })}
           </dl>
 
           {afdelingen.length > 0 ? (
-            <Kaart titel="Per afdeling">
+            <Kaart titel={tt('Per afdeling')}>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[28rem] text-left">
                   <thead>
                     <tr className="border-b border-line text-sm text-ink-soft">
-                      <th className="py-2 pr-3 font-semibold">Afdeling</th>
-                      <th className="py-2 pr-3 text-right font-semibold">Bewoners</th>
-                      <th className="py-2 pr-3 text-right font-semibold">Activiteiten</th>
-                      <th className="py-2 text-right font-semibold">Aanwezigheden</th>
+                      <th className="py-2 pr-3 font-semibold">{tt('Afdeling')}</th>
+                      <th className="py-2 pr-3 text-right font-semibold">{tt('Bewoners')}</th>
+                      <th className="py-2 pr-3 text-right font-semibold">{tt('Activiteiten')}</th>
+                      <th className="py-2 text-right font-semibold">{tt('Aanwezigheden')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -152,7 +153,7 @@ export default function Rapporten() {
 
           <p className="flex items-start gap-2 text-sm text-ink-faint">
             <ShieldCheck size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
-            Alleen aantallen, nooit namen of iets over één bewoner. Bezoeken en uitstappen tellen pas mee als er in die periode minstens vijf bewoners waren, over minstens 28 dagen.
+            {tt('Alleen aantallen, nooit namen of iets over één bewoner. Bezoeken en uitstappen tellen pas mee als er in die periode minstens vijf bewoners waren, over minstens 28 dagen.')}
           </p>
         </>
       ) : null}

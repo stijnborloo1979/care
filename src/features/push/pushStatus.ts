@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase'
 import { redenen, uitgeschakeld } from './pushStatus.intern'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Waarom komt een melding niet aan?
@@ -172,8 +173,9 @@ export async function stuurTestmelding(householdId: string): Promise<Testuitslag
  * Supabase geeft een nieuwe functie een willekeurig adres, en dat verandert
  * niet mee als je de titel aanpast.
  */
-const ONBEREIKBAAR =
-  'push-notify is niet bereikbaar. Kijk in Supabase bij Edge Functions of het adres onder de titel eindigt op /push-notify — staat daar iets anders, dan roept de app een functie aan die niet bestaat.'
+const ONBEREIKBAAR = tt(
+  'push-notify is niet bereikbaar. Kijk in Supabase bij Edge Functions of het adres onder de titel eindigt op /push-notify — staat daar iets anders, dan roept de app een functie aan die niet bestaat.',
+)
 
 /**
  * Welke wegen de server niet eens kan proberen.

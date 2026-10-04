@@ -12,6 +12,7 @@ import AccountBar from "./AccountBar";
 import Licht from "../features/licht/Licht";
 import { useOrganisaties } from "../features/zorg/useOrganisatie";
 import ZorgToegang from "../features/zorg/ZorgToegang";
+import { tt } from "../lib/uiTaal";
 
 
 
@@ -30,7 +31,7 @@ export default function FamilyLayout() {
     mag(toegang, "agenda.write", household?.role === "admin" || household?.role === "member"),
   );
 
-  if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  if (isLoading) return <p className="p-6 text-ink-soft">{tt("Even geduld…")}</p>;
 
   if (!household) return <Navigate to="/start" replace />;
 
@@ -48,12 +49,12 @@ export default function FamilyLayout() {
         <aside className="hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
           <div className="pb-4">
             <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">
-              {household.is_self ? "Beheren" : "LifeAngle"}
+              {household.is_self ? tt("Beheren") : "LifeAngle"}
             </p>
             <AccountBar />
           </div>
 
-          <nav aria-label="Hoofdnavigatie" className="space-y-0.5">
+          <nav aria-label={tt("Hoofdnavigatie")} className="space-y-0.5">
             {nav.map((n) => (
               <NavLink
                 key={n.to}
@@ -78,14 +79,14 @@ export default function FamilyLayout() {
               to="/persoon"
               className="block font-semibold text-accent-ink underline underline-offset-4"
             >
-              Scherm van {household.person_name.split(" ")[0]}
+              {tt("Scherm van {naam}", { naam: household.person_name.split(" ")[0] })}
             </NavLink>
             {(organisaties.data ?? []).length > 0 ? (
               <NavLink
                 to="/zorg"
                 className="block font-semibold text-accent-ink underline underline-offset-4"
               >
-                Naar het woonzorgcentrum
+                {tt("Naar het woonzorgcentrum")}
               </NavLink>
             ) : null}
           </div>
@@ -102,7 +103,7 @@ export default function FamilyLayout() {
           </div>
 
           <nav
-            aria-label="Hoofdnavigatie"
+            aria-label={tt("Hoofdnavigatie")}
             className="fixed inset-x-0 bottom-0 z-40 flex gap-1 overflow-x-auto border-t border-line bg-surface px-2 pt-1 lg:hidden"
             style={{
               paddingBottom: "calc(0.4rem + env(safe-area-inset-bottom, 0px))",

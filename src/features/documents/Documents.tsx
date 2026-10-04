@@ -10,6 +10,7 @@ import {
   type DocumentRow,
 } from '../../services/documents'
 import { useHousehold } from '../household/useHousehold'
+import { tt } from '../../lib/uiTaal'
 
 export default function Documents() {
   const { household } = useHousehold()
@@ -35,7 +36,7 @@ export default function Documents() {
       setFile(null)
       await queryClient.invalidateQueries({ queryKey: ['documents', hh] })
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Toevoegen lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Toevoegen lukte niet.')),
   })
 
   const verwijder = useMutation({
@@ -56,10 +57,9 @@ export default function Documents() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Documenten</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Documenten')}</h1>
         <p className="mt-1 text-ink-soft">
-          Alleen zichtbaar voor familie. Niet voor zorgverleners, en niet op het scherm van de
-          persoon.
+          {tt('Alleen zichtbaar voor familie. Niet voor zorgverleners, en niet op het scherm van de persoon.')}
         </p>
       </header>
 
@@ -73,17 +73,17 @@ export default function Documents() {
       >
         <div className="flex flex-wrap gap-3">
           <label className="min-w-[min(12rem,100%)] flex-1">
-            <span className="text-sm font-semibold text-ink-soft">Naam</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Naam')}</span>
             <input
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Hospitalisatieverzekering"
+              placeholder={tt('Hospitalisatieverzekering')}
               className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             />
           </label>
           <label className="min-w-[min(10rem,100%)]">
-            <span className="text-sm font-semibold text-ink-soft">Categorie</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Categorie')}</span>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as DocCategory)}
@@ -91,7 +91,7 @@ export default function Documents() {
             >
               {CATEGORIEEN.map((c) => (
                 <option key={c.waarde} value={c.waarde}>
-                  {c.label}
+                  {tt(c.label)}
                 </option>
               ))}
             </select>
@@ -99,7 +99,7 @@ export default function Documents() {
         </div>
 
         <label className="mt-3 block">
-          <span className="text-sm font-semibold text-ink-soft">Bestand</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Bestand')}</span>
           <input
             type="file"
             accept="application/pdf,image/*"
@@ -113,7 +113,7 @@ export default function Documents() {
           disabled={voegToe.isPending}
           className="mt-3 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {voegToe.isPending ? 'Bezig…' : 'Document toevoegen'}
+          {voegToe.isPending ? tt('Bezig…') : tt('Document toevoegen')}
         </button>
 
         {error ? (
@@ -126,11 +126,11 @@ export default function Documents() {
       <input
         value={zoek}
         onChange={(e) => setZoek(e.target.value)}
-        placeholder="Zoeken"
+        placeholder={tt('Zoeken')}
         className="min-h-touch w-full max-w-md rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
       />
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {CATEGORIEEN.map((c) => {
@@ -138,14 +138,14 @@ export default function Documents() {
           return (
             <section key={c.waarde} className="rounded-card bg-surface p-6 shadow-card">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold">{c.label}</h2>
+                <h2 className="text-lg font-bold">{tt(c.label)}</h2>
                 <span className="rounded-pill border border-line px-3 py-0.5 text-sm font-semibold text-ink-soft">
                   {docs.length}
                 </span>
               </div>
 
               {docs.length === 0 ? (
-                <p className="mt-3 text-sm text-ink-soft">Nog niets in deze categorie.</p>
+                <p className="mt-3 text-sm text-ink-soft">{tt('Nog niets in deze categorie.')}</p>
               ) : (
                 <ul className="mt-3 space-y-2">
                   {docs.map((d) => (
@@ -157,18 +157,18 @@ export default function Documents() {
                           onClick={() => open(d)}
                           className="shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 py-1 text-sm font-semibold"
                         >
-                          Openen
+                          {tt('Openen')}
                         </button>
                       ) : (
-                        <span className="shrink-0 text-sm text-ink-faint">geen bestand</span>
+                        <span className="shrink-0 text-sm text-ink-faint">{tt('geen bestand')}</span>
                       )}
                       <button
                         onClick={() => {
-                          if (confirm(`"${d.name}" verwijderen?`)) verwijder.mutate(d)
+                          if (confirm(tt('"{titel}" verwijderen?', { titel: d.name }))) verwijder.mutate(d)
                         }}
                         className="shrink-0 rounded-pill border border-alert px-3 py-1 text-sm font-semibold text-alert"
                       >
-                        Wissen
+                        {tt('Wissen')}
                       </button>
                     </li>
                   ))}
@@ -180,8 +180,7 @@ export default function Documents() {
       </div>
 
       <p className="text-sm text-ink-faint">
-        Links naar documenten zijn vijf minuten geldig en niet deelbaar. Verwijderen wist ook het
-        bestand zelf.
+        {tt('Links naar documenten zijn vijf minuten geldig en niet deelbaar. Verwijderen wist ook het bestand zelf.')}
       </p>
     </div>
   )

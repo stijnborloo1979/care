@@ -8,6 +8,7 @@ import { useHousehold } from '../features/household/useHousehold'
 import { useOrganisatie } from '../features/zorg/useOrganisatie'
 import { ROLNAAM } from '../features/zorg/zorgApi'
 import { useOngezien } from '../features/zorg/OpenVragen'
+import { tt } from '../lib/uiTaal'
 
 /**
  * Het scherm voor wie in een woonzorgcentrum werkt. Los van het
@@ -29,24 +30,24 @@ export default function ZorgLayout() {
     return () => window.removeEventListener('keydown', toets)
   }, [meer])
 
-  if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
+  if (isLoading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>
   if (!org) return <Navigate to="/zorg/nieuw" replace />
 
   type Item = { to: string; end?: boolean; label: string; icoon: LucideIcon; teller?: number; groep: string; onderaan?: boolean }
   // Vier vaste knoppen onderaan op een telefoon, de rest onder "Meer".
   const nav: Item[] = [
-    { to: '/zorg', end: true, label: 'Vandaag', icoon: House, groep: 'Dagelijks', onderaan: true },
-    { to: '/zorg/bewoners', label: 'Bewoners', icoon: Users, teller: vragen, groep: 'Dagelijks', onderaan: true },
-    { to: '/zorg/overdracht', label: 'Overdracht', icoon: ClipboardList, groep: 'Dagelijks', onderaan: true },
-    { to: '/zorg/team', label: 'Team', icoon: MessagesSquare, groep: 'Dagelijks', onderaan: true },
-    { to: '/zorg/activiteiten', label: 'Activiteiten', icoon: CalendarDays, groep: 'Planning' },
-    { to: '/zorg/week', label: 'Weekplanning', icoon: CalendarRange, groep: 'Planning' },
-    { to: '/zorg/kamers', label: 'Kamers', icoon: BedDouble, groep: 'Planning' },
-    ...(beheert || org.team_lead ? [{ to: '/zorg/nieuws', label: 'Nieuws', icoon: Megaphone, groep: 'Families' }] : []),
+    { to: '/zorg', end: true, label: tt('Vandaag'), icoon: House, groep: 'Dagelijks', onderaan: true },
+    { to: '/zorg/bewoners', label: tt('Bewoners'), icoon: Users, teller: vragen, groep: 'Dagelijks', onderaan: true },
+    { to: '/zorg/overdracht', label: tt('Overdracht'), icoon: ClipboardList, groep: 'Dagelijks', onderaan: true },
+    { to: '/zorg/team', label: tt('Team'), icoon: MessagesSquare, groep: 'Dagelijks', onderaan: true },
+    { to: '/zorg/activiteiten', label: tt('Activiteiten'), icoon: CalendarDays, groep: 'Planning' },
+    { to: '/zorg/week', label: tt('Weekplanning'), icoon: CalendarRange, groep: 'Planning' },
+    { to: '/zorg/kamers', label: tt('Kamers'), icoon: BedDouble, groep: 'Planning' },
+    ...(beheert || org.team_lead ? [{ to: '/zorg/nieuws', label: tt('Nieuws'), icoon: Megaphone, groep: 'Families' }] : []),
     ...(beheert
       ? [
-          { to: '/zorg/rapporten', label: 'Rapporten', icoon: BarChart3, groep: 'Beheer' },
-          { to: '/zorg/beheer', label: 'Beheer', icoon: Settings2, groep: 'Beheer' },
+          { to: '/zorg/rapporten', label: tt('Rapporten'), icoon: BarChart3, groep: 'Beheer' },
+          { to: '/zorg/beheer', label: tt('Beheer'), icoon: Settings2, groep: 'Beheer' },
         ]
       : []),
   ]
@@ -73,7 +74,7 @@ export default function ZorgLayout() {
           <span className="block truncate text-sm font-semibold">{org.naam}</span>
           <span className="block truncate text-xs text-ink-soft">
             {ROLNAAM[org.rol]}
-            {org.team_lead ? ' · team lead' : ''}
+            {org.team_lead ? ` · ${tt('team lead')}` : ''}
           </span>
         </span>
         <ChevronDown
@@ -87,7 +88,7 @@ export default function ZorgLayout() {
         <div className="absolute inset-x-0 z-50 mt-1 rounded-2xl border border-line bg-surface p-2 shadow-lift">
           {alle.length > 1 ? (
             <>
-              <p className="px-2 pb-1 pt-1 text-xs font-bold uppercase tracking-wide text-ink-faint">Organisatie</p>
+              <p className="px-2 pb-1 pt-1 text-xs font-bold uppercase tracking-wide text-ink-faint">{tt('Organisatie')}</p>
               {alle.map((o) => (
                 <button
                   key={o.org_id}
@@ -108,7 +109,7 @@ export default function ZorgLayout() {
           ) : null}
           {huishoudens.length > 0 ? (
             <NavLink to="/" className="block rounded-xl px-2 py-2 text-sm font-semibold hover:bg-surface-soft">
-              Naar mijn familie
+              {tt('Naar mijn familie')}
             </NavLink>
           ) : null}
           <p className="truncate px-2 py-1 text-xs text-ink-faint">{ik}</p>
@@ -118,7 +119,7 @@ export default function ZorgLayout() {
             className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft"
           >
             <KeyRound size={16} strokeWidth={1.75} aria-hidden="true" />
-            Mijn account en wachtwoord
+            {tt('Mijn account en wachtwoord')}
           </NavLink>
           <TaalKiezer compact />
           <button
@@ -126,7 +127,7 @@ export default function ZorgLayout() {
             className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold hover:bg-surface-soft"
           >
             <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
-            Uitloggen
+            {tt('Uitloggen')}
           </button>
         </div>
       ) : null}
@@ -138,10 +139,10 @@ export default function ZorgLayout() {
       <aside className="hidden print:!hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
         <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">LifeAngle Care</p>
         <div className="pb-4">{kopBalk}</div>
-        <nav aria-label="Hoofdnavigatie" className="space-y-4">
+        <nav aria-label={tt('Hoofdnavigatie')} className="space-y-4">
           {groepen.map((g) => (
             <div key={g}>
-              <p className="px-3 pb-1 text-xs font-bold uppercase tracking-wide text-ink-faint">{g}</p>
+              <p className="px-3 pb-1 text-xs font-bold uppercase tracking-wide text-ink-faint">{tt(g)}</p>
               <div className="space-y-0.5">
                 {nav
                   .filter((n) => n.groep === g)
@@ -161,7 +162,7 @@ export default function ZorgLayout() {
                       {n.teller ? (
                         <span className="rounded-pill bg-alert px-2 py-0.5 text-xs font-bold text-white">
                           {n.teller}
-                          <span className="sr-only"> open {n.teller === 1 ? 'vraag' : 'vragen'}</span>
+                          <span className="sr-only"> {n.teller === 1 ? tt('open vraag') : tt('open vragen')}</span>
                         </span>
                       ) : null}
                     </NavLink>
@@ -207,7 +208,7 @@ export default function ZorgLayout() {
         ) : null}
 
         <nav
-          aria-label="Hoofdnavigatie"
+          aria-label={tt('Hoofdnavigatie')}
           className="fixed inset-x-0 bottom-0 z-40 flex gap-1 border-t border-line bg-surface px-2 pt-1 lg:hidden print:hidden"
           style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
         >
@@ -228,7 +229,7 @@ export default function ZorgLayout() {
                 {n.teller ? (
                   <span className="absolute -right-2.5 -top-1.5 min-w-[1.1rem] rounded-pill bg-alert px-1 text-center text-[0.65rem] font-bold leading-[1.1rem] text-white">
                     {n.teller}
-                    <span className="sr-only"> open {n.teller === 1 ? 'vraag' : 'vragen'}</span>
+                    <span className="sr-only"> {n.teller === 1 ? tt('open vraag') : tt('open vragen')}</span>
                   </span>
                 ) : null}
               </span>
@@ -243,7 +244,7 @@ export default function ZorgLayout() {
             }`}
           >
             {meer ? <X size={20} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={20} strokeWidth={1.75} aria-hidden="true" />}
-            Meer
+            {tt('Meer')}
           </button>
         </nav>
       </div>

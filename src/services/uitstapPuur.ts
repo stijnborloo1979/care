@@ -2,6 +2,7 @@ import type { AgendaEvent } from './agenda'
 import { HUIS_PREFIX } from './afdelingsdagPuur'
 import { hhmm, localDateKey } from '../lib/time'
 import { t } from '../lib/i18n'
+import { tt, uiLocale } from '../lib/uiTaal'
 
 /** Uitstap (80): de familie neemt de bewoner mee. */
 export interface Uitstap {
@@ -69,9 +70,9 @@ export function vanTot(u: Pick<Uitstap, 'vertrek' | 'terug'>, tz: string, nu: Da
   const tr = new Date(u.terug)
   const dag = (d: Date) =>
     localDateKey(d, tz) === localDateKey(nu, tz)
-      ? 'vandaag'
-      : new Intl.DateTimeFormat('nl-BE', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(d)
-  const uur = (d: Date) => new Intl.DateTimeFormat('nl-BE', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(d)
+      ? tt('vandaag')
+      : new Intl.DateTimeFormat(uiLocale(), { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(d)
+  const uur = (d: Date) => new Intl.DateTimeFormat(uiLocale(), { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(d)
   if (localDateKey(v, tz) === localDateKey(tr, tz)) return `${dag(v)} ${uur(v)}–${uur(tr)}`
   return `${dag(v)} ${uur(v)} – ${dag(tr)} ${uur(tr)}`
 }

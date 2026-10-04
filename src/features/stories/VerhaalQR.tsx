@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Een QR-code naar één verhaal, voor in het boek.
@@ -47,7 +48,7 @@ export default function VerhaalQR({ id, grootte = 108 }: { id: string; grootte?:
       src={src}
       width={grootte}
       height={grootte}
-      alt="Scan om dit verhaal te beluisteren"
+      alt={tt('Scan om dit verhaal te beluisteren')}
       style={{ width: grootte, height: grootte }}
     />
   )

@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import DictateButton from '../../components/DictateButton'
 import Icon from '../../components/Icon'
 import { quickAdd } from './quickAdd'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Eén veld in plaats van een formulier. De app toont eerst wat ze ervan
@@ -20,7 +21,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
 
   const bewaren = useMutation({
     mutationFn: async () => {
-      if (!herkend) throw new Error('Geen tijd herkend')
+      if (!herkend) throw new Error(tt('Geen tijd herkend'))
       const { error } = await supabase.from('agenda_event').insert({
         household_id: householdId,
         starts_at: herkend.startsAt.toISOString(),
@@ -32,20 +33,20 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
       return herkend
     },
     onSuccess: async (r) => {
-      setGelukt(`${r.titel} staat in de planning, ${r.uitleg}.`)
+      setGelukt(tt('{titel} staat in de planning, {uitleg}.', { titel: r.titel, uitleg: r.uitleg }))
       setTekst('')
       await queryClient.invalidateQueries({ queryKey: ['agenda', householdId] })
       await queryClient.invalidateQueries({ queryKey: ['week', householdId] })
       await queryClient.invalidateQueries({ queryKey: ['summary', householdId] })
     },
-    onError: (e) => setFout(e instanceof Error ? e.message : 'Toevoegen lukte niet.'),
+    onError: (e) => setFout(e instanceof Error ? e.message : tt('Toevoegen lukte niet.')),
   })
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Snel een afspraak toevoegen</h2>
+      <h2 className="text-lg font-bold">{tt('Snel een afspraak toevoegen')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Typ of spreek het in gewone taal in: <em>donderdag 14u dokter Janssens</em>.
+        {tt('Typ of spreek het in gewone taal in:')} <em>donderdag 14u dokter Janssens</em>.
       </p>
 
       <form
@@ -54,7 +55,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
           setFout(null)
           setGelukt(null)
           if (!herkend) {
-            setFout('Ik haal er geen dag of uur uit. Probeer "morgen 14u dokter".')
+            setFout(tt('Ik haal er geen dag of uur uit. Probeer "{voorbeeld}".', { voorbeeld: 'morgen 14u dokter' }))
             return
           }
           bewaren.mutate()
@@ -78,13 +79,13 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
           className="flex min-h-touch items-center gap-2 rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
           <Icon naam="nieuw" size={18} />
-          Toevoegen
+          {tt('Toevoegen')}
         </button>
       </form>
 
       {herkend ? (
         <p className="mt-3 text-sm text-ink-soft">
-          Begrepen als <strong>{herkend.titel}</strong>, {herkend.uitleg}.
+          {tt('Begrepen als')} <strong>{herkend.titel}</strong>, {herkend.uitleg}.
         </p>
       ) : null}
 

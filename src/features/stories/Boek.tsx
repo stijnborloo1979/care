@@ -8,6 +8,7 @@ import { hoofdstukVanFoto, inHoofdstukken, type Hoofdstuk } from './hoofdstukken
 import StoragePhoto from '../../components/StoragePhoto'
 import VerhaalQR from './VerhaalQR'
 import { locale } from '../../lib/i18n'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Het levensboek.
@@ -73,10 +74,12 @@ export default function Boek() {
       <div className="niet-printen sticky top-0 z-10 border-b border-line bg-surface px-5 py-3">
         <div className="mx-auto flex max-w-[52rem] flex-wrap items-center gap-3">
           <Link to="/familie/fotos" className="font-semibold underline underline-offset-4">
-            ‹ Terug
+            ‹ {tt('Terug')}
           </Link>
           <span className="text-ink-soft">
-            {verhalen.length} {verhalen.length === 1 ? 'verhaal' : 'verhalen'}
+            {verhalen.length === 1
+              ? tt('{n} verhaal', { n: verhalen.length })
+              : tt('{n} verhalen', { n: verhalen.length })}
           </span>
           <div className="ml-auto flex flex-wrap gap-2">
             {metGeluid.length > 0 ? <LuisterAlles verhalen={metGeluid} /> : null}
@@ -84,39 +87,41 @@ export default function Boek() {
               onClick={() => window.print()}
               className="min-h-touch rounded-pill bg-accent-ink px-5 font-bold text-white"
             >
-              Afdrukken of opslaan als PDF
+              {tt('Afdrukken of opslaan als PDF')}
             </button>
           </div>
         </div>
       </div>
 
       <main className="mx-auto max-w-[52rem] px-8 py-12">
-        {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+        {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
         {!isLoading && verhalen.length === 0 ? (
           <p className="text-ink-soft">
-            Er zijn nog geen verhalen. Ze verschijnen hier zodra er een vraag beantwoord is.
+            {tt('Er zijn nog geen verhalen. Ze verschijnen hier zodra er een vraag beantwoord is.')}
           </p>
         ) : null}
 
         {verhalen.length > 0 ? (
           <>
             <header className="titelblad flex min-h-[70vh] flex-col justify-center text-center">
-              <p className="text-lg uppercase tracking-[0.3em] text-ink-faint">Het leven van</p>
+              <p className="text-lg uppercase tracking-[0.3em] text-ink-faint">{tt('Het leven van')}</p>
               <h1 className="mt-6 text-6xl font-extrabold tracking-tight">{naam}</h1>
-              <p className="mt-8 text-xl text-ink-soft">In eigen woorden verteld</p>
+              <p className="mt-8 text-xl text-ink-soft">{tt('In eigen woorden verteld')}</p>
               <p className="mt-2 text-ink-faint">{vandaag}</p>
             </header>
 
-            <nav aria-label="Inhoud" className="na-pagina pt-10">
-              <h2 className="text-2xl font-bold">Inhoud</h2>
+            <nav aria-label={tt('Inhoud')} className="na-pagina pt-10">
+              <h2 className="text-2xl font-bold">{tt('Inhoud')}</h2>
               <ol className="mt-4 space-y-2 text-lg">
                 {hoofdstukken.map((h, i) => (
                   <li key={h.titel} className="flex gap-3">
                     <span className="text-ink-faint">{i + 1}.</span>
                     <span>{h.titel}</span>
                     <span className="text-ink-faint">
-                      {h.verhalen.length} {h.verhalen.length === 1 ? 'verhaal' : 'verhalen'}
+                      {h.verhalen.length === 1
+                        ? tt('{n} verhaal', { n: h.verhalen.length })
+                        : tt('{n} verhalen', { n: h.verhalen.length })}
                     </span>
                   </li>
                 ))}
@@ -139,13 +144,13 @@ export default function Boek() {
 
             {fotoPerHoofdstuk.rest.length > 0 ? (
               <section className="na-pagina pt-10">
-                <h2 className="text-3xl font-extrabold tracking-tight">Uit het album</h2>
+                <h2 className="text-3xl font-extrabold tracking-tight">{tt('Uit het album')}</h2>
                 <Fotos fotos={fotoPerHoofdstuk.rest} />
               </section>
             ) : null}
 
             <footer className="mt-16 border-t border-line pt-6 text-center text-ink-faint">
-              Verteld door {naam}, bewaard door de familie.
+              {tt('Verteld door {naam}, bewaard door de familie.', { naam })}
             </footer>
           </>
         ) : null}
@@ -189,8 +194,11 @@ function VerhaalInBoek({ verhaal }: { verhaal: LifeStory }) {
           <p className="mt-2 whitespace-pre-wrap text-lg leading-relaxed">{verhaal.body}</p>
         ) : (
           <p className="mt-2 text-lg italic text-ink-soft">
-            Verteld in eigen stem
-            {duur > 0 ? ` — ${minuten > 0 ? `${minuten} min ` : ''}${seconden} sec` : ''}.
+            {duur <= 0
+              ? tt('Verteld in eigen stem.')
+              : minuten > 0
+                ? tt('Verteld in eigen stem — {min} min {sec} sec.', { min: minuten, sec: seconden })
+                : tt('Verteld in eigen stem — {sec} sec.', { sec: seconden })}
           </p>
         )}
       </div>
@@ -201,7 +209,7 @@ function VerhaalInBoek({ verhaal }: { verhaal: LifeStory }) {
         <figure className="m-0 w-[108px] flex-none text-center">
           <VerhaalQR id={verhaal.id} />
           <figcaption className="mt-1 text-xs leading-tight text-ink-faint">
-            Scan om te horen
+            {tt('Scan om te horen')}
           </figcaption>
         </figure>
       ) : null}
@@ -253,7 +261,9 @@ function LuisterAlles({ verhalen }: { verhalen: LifeStory[] }) {
       onClick={() => (speelt ? stop() : void speel(0))}
       className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
     >
-      {speelt ? `Stop (${nummer + 1}/${verhalen.length})` : `Luister alles (${verhalen.length})`}
+      {speelt
+        ? tt('Stop ({nr}/{totaal})', { nr: nummer + 1, totaal: verhalen.length })
+        : tt('Luister alles ({totaal})', { totaal: verhalen.length })}
     </button>
   )
 }

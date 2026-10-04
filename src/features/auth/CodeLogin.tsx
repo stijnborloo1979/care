@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { tt } from '../../lib/uiTaal'
 
 type Stap = 'email' | 'code' | 'wachtwoord'
 
@@ -13,7 +14,7 @@ type Stap = 'email' | 'code' | 'wachtwoord'
  * mailsjabloon {{ .Token }} bevat. De link blijft dus ook werken.
  */
 export default function CodeLogin({
-  titel = 'Inloggen of een account maken',
+  titel = tt('Inloggen of een account maken'),
   uitleg,
 }: {
   titel?: string
@@ -34,12 +35,12 @@ export default function CodeLogin({
   function vertaal(e: unknown) {
     const b = e instanceof Error ? e.message : String(e)
     if (b.includes('rate limit') || b.includes('Too many'))
-      return 'Te veel mails in korte tijd. Wacht een uur, of log in met een wachtwoord.'
+      return tt('Te veel mails in korte tijd. Wacht een uur, of log in met een wachtwoord.')
     if (b.includes('Token has expired') || b.includes('invalid'))
-      return 'Deze code klopt niet of is verlopen. Vraag een nieuwe aan.'
-    if (b.includes('Invalid login')) return 'Dat e-mailadres of wachtwoord klopt niet.'
+      return tt('Deze code klopt niet of is verlopen. Vraag een nieuwe aan.')
+    if (b.includes('Invalid login')) return tt('Dat e-mailadres of wachtwoord klopt niet.')
     if (b.includes('Error sending'))
-      return 'De mail kon niet verstuurd worden. Probeer het straks opnieuw, of log in met een wachtwoord.'
+      return tt('De mail kon niet verstuurd worden. Probeer het straks opnieuw, of log in met een wachtwoord.')
     return b
   }
 
@@ -106,11 +107,11 @@ export default function CodeLogin({
   return (
     <div className="rounded-card bg-surface p-6 shadow-lift">
       {/* Waar je zit, in drie stappen. */}
-      <ol className="flex items-center gap-2 text-sm font-semibold" aria-label="Stappen">
+      <ol className="flex items-center gap-2 text-sm font-semibold" aria-label={tt('Stappen')}>
         {[
-          ['email', 'E-mail'],
-          ['code', 'Code'],
-          ['klaar', 'Binnen'],
+          ['email', tt('E-mail')],
+          ['code', tt('Code')],
+          ['klaar', tt('Binnen')],
         ].map(([id, label], i) => {
           const actief =
             (id === 'email' && (stap === 'email' || stap === 'wachtwoord')) ||
@@ -137,17 +138,17 @@ export default function CodeLogin({
       </ol>
 
       <h2 className="mt-6 text-2xl font-bold tracking-tight">
-        {stap === 'code' ? 'Vul de code in' : titel}
+        {stap === 'code' ? tt('Vul de code in') : titel}
       </h2>
 
       {stap === 'email' ? (
         <form onSubmit={stuurCode}>
           <p className="mt-2 text-ink-soft">
             {uitleg ??
-              'Vul je e-mailadres in. Je krijgt een code van zes cijfers. Heb je nog geen account, dan wordt het meteen aangemaakt.'}
+              tt('Vul je e-mailadres in. Je krijgt een code van zes cijfers. Heb je nog geen account, dan wordt het meteen aangemaakt.')}
           </p>
           <label className="mt-5 block">
-            <span className="text-sm font-semibold text-ink-soft">E-mailadres</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('E-mailadres')}</span>
             <input
               type="email"
               required
@@ -156,7 +157,7 @@ export default function CodeLogin({
               inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="naam@voorbeeld.be"
+              placeholder={tt('naam@voorbeeld.be')}
               className="mt-1 min-h-[3.2rem] w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 text-lg"
             />
           </label>
@@ -165,7 +166,7 @@ export default function CodeLogin({
             disabled={busy}
             className="mt-4 flex min-h-[3.2rem] w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-60"
           >
-            {busy ? 'Bezig…' : 'Stuur mij een code'}
+            {busy ? tt('Bezig…') : tt('Stuur mij een code')}
           </button>
           <button
             type="button"
@@ -175,7 +176,7 @@ export default function CodeLogin({
             }}
             className="mt-4 w-full text-center text-sm font-semibold text-ink-soft underline underline-offset-4"
           >
-            Ik heb een wachtwoord
+            {tt('Ik heb een wachtwoord')}
           </button>
         </form>
       ) : null}
@@ -183,14 +184,15 @@ export default function CodeLogin({
       {stap === 'code' ? (
         <div>
           <p className="mt-2 text-ink-soft">
-            We stuurden een mail naar <strong>{email}</strong>. Kijk ook even in je spam.
+            {tt('We stuurden een mail naar {email}. Kijk ook even in je spam.', { email: '\u0000' })
+              .split('\u0000')
+              .flatMap((deel, i) => (i === 0 ? [deel] : [<strong key={i}>{email}</strong>, deel]))}
           </p>
           {/* Zonder eigen mailserver stuurt Supabase alleen een link, geen
               code. Dan moet dit scherm dat zeggen, in plaats van te
               wachten op iets dat niet komt. */}
           <p className="mt-3 rounded-2xl bg-surface-soft p-3 text-sm text-ink-soft">
-            Staat er alleen een link in de mail en geen code? Klik dan gewoon op die link — dan ben
-            je ook binnen.
+            {tt('Staat er alleen een link in de mail en geen code? Klik dan gewoon op die link — dan ben je ook binnen.')}
           </p>
           <input
             ref={codeRef}
@@ -204,11 +206,11 @@ export default function CodeLogin({
             inputMode="numeric"
             autoComplete="one-time-code"
             placeholder="000000"
-            aria-label="Code van zes cijfers"
+            aria-label={tt('Code van zes cijfers')}
             className="mt-5 min-h-[4rem] w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 text-center font-mono text-3xl tracking-[0.5em]"
           />
           <p className="mt-2 text-center text-sm text-ink-faint">
-            {busy ? 'Controleren…' : 'De code is een uur geldig.'}
+            {busy ? tt('Controleren…') : tt('De code is een uur geldig.')}
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-4 text-sm font-semibold text-ink-soft">
             <button
@@ -216,7 +218,7 @@ export default function CodeLogin({
               disabled={busy}
               className="underline underline-offset-4"
             >
-              Nieuwe code sturen
+              {tt('Nieuwe code sturen')}
             </button>
             <button
               onClick={() => {
@@ -226,7 +228,7 @@ export default function CodeLogin({
               }}
               className="underline underline-offset-4"
             >
-              Ander e-mailadres
+              {tt('Ander e-mailadres')}
             </button>
           </div>
         </div>
@@ -235,7 +237,7 @@ export default function CodeLogin({
       {stap === 'wachtwoord' ? (
         <form onSubmit={metWachtwoord}>
           <label className="mt-5 block">
-            <span className="text-sm font-semibold text-ink-soft">E-mailadres</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('E-mailadres')}</span>
             <input
               type="email"
               required
@@ -246,7 +248,7 @@ export default function CodeLogin({
             />
           </label>
           <label className="mt-3 block">
-            <span className="text-sm font-semibold text-ink-soft">Wachtwoord</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Wachtwoord')}</span>
             <input
               type="password"
               required
@@ -261,7 +263,7 @@ export default function CodeLogin({
             disabled={busy}
             className="mt-4 flex min-h-[3.2rem] w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-60"
           >
-            {busy ? 'Bezig…' : 'Inloggen'}
+            {busy ? tt('Bezig…') : tt('Inloggen')}
           </button>
           <button
             type="button"
@@ -271,7 +273,7 @@ export default function CodeLogin({
             }}
             className="mt-4 w-full text-center text-sm font-semibold text-ink-soft underline underline-offset-4"
           >
-            Liever een code per mail
+            {tt('Liever een code per mail')}
           </button>
         </form>
       ) : null}

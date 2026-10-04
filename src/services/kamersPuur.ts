@@ -1,3 +1,5 @@
+import { tt } from '../lib/uiTaal'
+
 /** Kamers en bezetting (82). */
 export interface Kamer {
   id: string
@@ -69,7 +71,7 @@ export function bezettingPerAfdeling(
       }
     })
   const zonder = bewoners.filter((b) => !b.department_id || !afdelingen.some((a) => a.id === b.department_id))
-  if (zonder.length > 0) lijst.push({ id: null, naam: 'Zonder afdeling', kamers: [], zonderKamer: zonder, bedden: 0, bezet: zonder.length })
+  if (zonder.length > 0) lijst.push({ id: null, naam: tt('Zonder afdeling'), kamers: [], zonderKamer: zonder, bedden: 0, bezet: zonder.length })
   return lijst
 }
 

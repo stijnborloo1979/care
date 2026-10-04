@@ -17,6 +17,7 @@ import {
   type Bezitting,
 } from '../../services/spullen'
 import { foutTekst } from '../zorg/ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * De spullen van de bewoner (81): bril, gebit, hoorapparaat, gemerkte
@@ -56,15 +57,14 @@ export default function SpullenKaart({
   return (
     <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby={`spullen-${vorm}`}>
       <h2 id={`spullen-${vorm}`} className="flex items-center gap-2 text-lg font-bold">
-        <Glasses size={20} strokeWidth={1.75} aria-hidden="true" /> Spullen van {personName}
+        <Glasses size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Spullen van {naam}', { naam: personName })}
         {aantalKwijt > 0 ? (
-          <span className="rounded-pill bg-alert px-2.5 py-0.5 text-xs font-bold text-white">{aantalKwijt} kwijt</span>
+          <span className="rounded-pill bg-alert px-2.5 py-0.5 text-xs font-bold text-white">{tt('{n} kwijt', { n: aantalKwijt })}</span>
         ) : null}
       </h2>
       {data.length === 0 && !lijst.isLoading ? (
         <p className="mt-1 text-ink-soft">
-          Bril, gebit, hoorapparaat, gemerkte kleding: met een foto en waar het hoort. Raakt iets kwijt, dan zoekt de hele
-          afdeling mee.
+          {tt('Bril, gebit, hoorapparaat, gemerkte kleding: met een foto en waar het hoort. Raakt iets kwijt, dan zoekt de hele afdeling mee.')}
         </p>
       ) : null}
 
@@ -78,13 +78,13 @@ export default function SpullenKaart({
             onFoto={async (f) => { await uploadSpulFoto(householdId, b.id, f); ververs() }}
             onKwijt={() => kwijt.mutate(b.id)}
             onGevonden={() => gevonden.mutate(b.id)}
-            onWis={() => { if (confirm(`"${b.naam}" wissen?`)) wis.mutate(b) }}
+            onWis={() => { if (confirm(tt('"{titel}" wissen?', { titel: b.naam }))) wis.mutate(b) }}
           />
         ))}
       </ul>
       {data.length > 4 ? (
         <button onClick={() => setAlles(!alles)} aria-expanded={alles} className="mt-2 text-sm font-semibold text-accent-ink underline underline-offset-4">
-          {alles ? 'Minder tonen' : `Alle ${data.length} spullen`}
+          {alles ? tt('Minder tonen') : tt('Alle {n} spullen', { n: data.length })}
         </button>
       ) : null}
       {fout ? <p className="mt-2 text-sm text-alert">{foutTekst(fout)}</p> : null}
@@ -93,7 +93,7 @@ export default function SpullenKaart({
         <Nieuw householdId={householdId} onKlaar={() => { setOpen(false); ververs() }} onStop={() => setOpen(false)} />
       ) : (
         <button onClick={() => setOpen(true)} className="mt-4 inline-flex min-h-touch items-center rounded-pill border-[1.5px] border-line-strong px-5 font-semibold">
-          Iets toevoegen
+          {tt('Iets toevoegen')}
         </button>
       )}
     </section>
@@ -124,21 +124,21 @@ function Rij({
       <div className="min-w-0 flex-1">
         <p className="font-semibold">{b.naam}</p>
         {b.kenmerk ? <p className="text-sm text-ink-soft">{b.kenmerk}</p> : null}
-        {b.waar ? <p className="text-sm text-ink-soft">Hoort: {b.waar}</p> : null}
-        {b.kwijt_sinds ? <p className="text-sm font-semibold text-alert">Kwijt · {sindsTekst(b.kwijt_sinds)}</p> : null}
+        {b.waar ? <p className="text-sm text-ink-soft">{tt('Hoort: {waar}', { waar: b.waar })}</p> : null}
+        {b.kwijt_sinds ? <p className="text-sm font-semibold text-alert">{tt('Kwijt')} · {sindsTekst(b.kwijt_sinds)}</p> : null}
         <div className="mt-2 flex flex-wrap gap-2">
           {b.kwijt_sinds ? (
             <button onClick={onGevonden} className="min-h-[2.5rem] rounded-pill bg-accent-ink px-4 text-sm font-semibold text-white">
-              Gevonden
+              {tt('Gevonden')}
             </button>
           ) : (
             <button onClick={onKwijt} className="min-h-[2.5rem] rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold">
-              Kwijt
+              {tt('Kwijt')}
             </button>
           )}
-          {magFoto ? <FotoKiezer label={b.foto_path ? 'Andere foto' : 'Foto'} onKies={onFoto} /> : null}
+          {magFoto ? <FotoKiezer label={b.foto_path ? tt('Andere foto') : tt('Foto')} onKies={onFoto} /> : null}
           {magWissen ? (
-            <button onClick={onWis} aria-label={`${b.naam} wissen`} className="min-h-[2.5rem] rounded-pill px-3 text-ink-faint">
+            <button onClick={onWis} aria-label={tt('{titel} wissen', { titel: b.naam })} className="min-h-[2.5rem] rounded-pill px-3 text-ink-faint">
               <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
             </button>
           ) : null}
@@ -163,11 +163,11 @@ function Nieuw({ householdId, onKlaar, onStop }: { householdId: string; onKlaar:
   return (
     <form onSubmit={(e) => { e.preventDefault(); bewaar.mutate() }} className="mt-4 grid gap-3 sm:grid-cols-2">
       <label>
-        <span className="text-sm font-semibold text-ink-soft">Wat</span>
-        <input required maxLength={80} value={naam} onChange={(e) => setNaam(e.target.value)} placeholder="Leesbril" className={veld} />
+        <span className="text-sm font-semibold text-ink-soft">{tt('Wat')}</span>
+        <input required maxLength={80} value={naam} onChange={(e) => setNaam(e.target.value)} placeholder={tt('Leesbril')} className={veld} />
       </label>
       <label>
-        <span className="text-sm font-semibold text-ink-soft">Soort</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Soort')}</span>
         <select value={soort} onChange={(e) => setSoort(e.target.value as Bezitting['soort'])} className={veld}>
           {SOORTEN.map((s) => (
             <option key={s.id} value={s.id}>
@@ -177,20 +177,20 @@ function Nieuw({ householdId, onKlaar, onStop }: { householdId: string; onKlaar:
         </select>
       </label>
       <label className="sm:col-span-2">
-        <span className="text-sm font-semibold text-ink-soft">Herkenbaar aan (mag leeg)</span>
-        <input maxLength={200} value={kenmerk} onChange={(e) => setKenmerk(e.target.value)} placeholder="Rood montuur, naam binnenin" className={veld} />
+        <span className="text-sm font-semibold text-ink-soft">{tt('Herkenbaar aan (mag leeg)')}</span>
+        <input maxLength={200} value={kenmerk} onChange={(e) => setKenmerk(e.target.value)} placeholder={tt('Rood montuur, naam binnenin')} className={veld} />
       </label>
       <label className="sm:col-span-2">
-        <span className="text-sm font-semibold text-ink-soft">Waar het hoort (mag leeg)</span>
-        <input maxLength={200} value={waar} onChange={(e) => setWaar(e.target.value)} placeholder="Op het nachtkastje" className={veld} />
+        <span className="text-sm font-semibold text-ink-soft">{tt('Waar het hoort (mag leeg)')}</span>
+        <input maxLength={200} value={waar} onChange={(e) => setWaar(e.target.value)} placeholder={tt('Op het nachtkastje')} className={veld} />
       </label>
       {bewaar.error ? <p className="text-sm text-alert sm:col-span-2">{foutTekst(bewaar.error)}</p> : null}
       <div className="flex flex-wrap gap-2 sm:col-span-2">
         <button type="submit" disabled={bewaar.isPending} className="min-h-touch rounded-pill bg-accent-ink px-5 font-semibold text-white">
-          {bewaar.isPending ? 'Bezig…' : 'Bewaren'}
+          {bewaar.isPending ? tt('Bezig…') : tt('Bewaren')}
         </button>
         <button type="button" onClick={onStop} className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold">
-          Annuleren
+          {tt('Annuleren')}
         </button>
       </div>
     </form>

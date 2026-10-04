@@ -26,6 +26,7 @@ import {
   type Zorgnotitie,
 } from './zorgApi'
 import { Fout, Kaart, Laden, Leeg, dagEnUur, knop, knopKlein, knopRustig, label, tekstvak, uur } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 export default function Bewoner() {
   const { hh = '' } = useParams()
@@ -47,7 +48,7 @@ export default function Bewoner() {
 
   const terug = (
     <Link to="/zorg/bewoners" className="inline-flex items-center gap-1.5 font-semibold text-accent-ink">
-      <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Bewoners
+      <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> {tt('Bewoners')}
     </Link>
   )
 
@@ -56,9 +57,9 @@ export default function Bewoner() {
   const kop = (
     <header>
       {terug}
-      <h1 className="mt-3 text-2xl font-bold tracking-tight">{bewoner?.naam ?? 'Bewoner'}</h1>
+      <h1 className="mt-3 text-2xl font-bold tracking-tight">{bewoner?.naam ?? tt('Bewoner')}</h1>
       <p className="mt-1 text-ink-soft">
-        {[bewoner?.afdeling, bewoner?.kamer ? `kamer ${bewoner.kamer}` : null].filter(Boolean).join(' · ')}
+        {[bewoner?.afdeling, bewoner?.kamer ? tt('kamer {kamer}', { kamer: bewoner.kamer }) : null].filter(Boolean).join(' · ')}
       </p>
     </header>
   )
@@ -67,7 +68,7 @@ export default function Bewoner() {
     return (
       <div className="space-y-6">
         {kop}
-        <Dossier hh={hh} orgId={orgId} naam={bewoner?.naam.split(' ')[0] ?? 'de bewoner'} />
+        <Dossier hh={hh} orgId={orgId} naam={bewoner?.naam.split(' ')[0] ?? tt('de bewoner')} />
       </div>
     )
   }
@@ -85,9 +86,9 @@ export default function Bewoner() {
     <div className="space-y-6">
       {kop}
       {org?.team_lead ? (
-        <NoodStart hh={hh} naam={bewoner?.naam ?? 'deze bewoner'} />
+        <NoodStart hh={hh} naam={bewoner?.naam ?? tt('deze bewoner')} />
       ) : (
-        <Leeg>Je bent niet toegewezen aan deze bewoner. Vraag het aan je coördinator.</Leeg>
+        <Leeg>{tt('Je bent niet toegewezen aan deze bewoner. Vraag het aan je coördinator.')}</Leeg>
       )}
     </div>
   )
@@ -112,9 +113,9 @@ function Dossier({ hh, orgId, naam }: { hh: string; orgId: string; naam: string 
         <BezoekVastleggen householdId={hh} personName={naam} timezone="Europe/Brussels" vorm="zorgteam" />
         <UitstapKaart householdId={hh} personName={naam} timezone="Europe/Brussels" vorm="zorgteam" />
         <SpullenKaart householdId={hh} personName={naam} vorm="zorgteam" />
-        <Kaart titel="Vandaag">
+        <Kaart titel={tt('Vandaag')}>
           {agenda.isLoading ? <Laden /> : null}
-          {agenda.data && agenda.data.length === 0 ? <Leeg>Niets gepland vandaag.</Leeg> : null}
+          {agenda.data && agenda.data.length === 0 ? <Leeg>{tt('Niets gepland vandaag.')}</Leeg> : null}
           <ul className="space-y-1.5">
             {(agenda.data ?? []).map((e) => (
               <li key={e.id} className="flex items-start gap-3 rounded-2xl bg-surface-soft px-3 py-2">
@@ -122,15 +123,15 @@ function Dossier({ hh, orgId, naam }: { hh: string; orgId: string; naam: string 
                 <span className="min-w-0 flex-1 break-words">{e.title}</span>
                 {e.done_at ? (
                   <span className="inline-flex items-center gap-1 text-sm text-ok">
-                    <Check size={15} strokeWidth={2} aria-hidden="true" /> gedaan
+                    <Check size={15} strokeWidth={2} aria-hidden="true" /> {tt('gedaan')}
                   </span>
                 ) : null}
               </li>
             ))}
           </ul>
         </Kaart>
-        <Kaart titel={<><Users size={20} strokeWidth={1.75} aria-hidden="true" /> Contactpersonen</>}>
-          {mensen.data && mensen.data.length === 0 ? <Leeg>Geen contactpersonen.</Leeg> : null}
+        <Kaart titel={<><Users size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Contactpersonen')}</>}>
+          {mensen.data && mensen.data.length === 0 ? <Leeg>{tt('Geen contactpersonen.')}</Leeg> : null}
           <ul className="space-y-1.5">
             {(mensen.data ?? []).map((p) => (
               <li key={p.id} className="flex items-center gap-3 rounded-2xl bg-surface-soft px-3 py-2">
@@ -139,7 +140,7 @@ function Dossier({ hh, orgId, naam }: { hh: string; orgId: string; naam: string 
                   <span className="block text-sm text-ink-soft">{p.relation}</span>
                 </span>
                 {p.phone ? (
-                  <a href={`tel:${p.phone}`} className={knopKlein} aria-label={`Bel ${p.name}`}>
+                  <a href={`tel:${p.phone}`} className={knopKlein} aria-label={tt('Bel {naam}', { naam: p.name })}>
                     <Phone size={15} strokeWidth={1.75} aria-hidden="true" />
                   </a>
                 ) : null}
@@ -183,7 +184,7 @@ function Notities({ hh, orgId }: { hh: string; orgId: string }) {
   const vervangen = new Set((lijst.data ?? []).map((n) => n.vervangt).filter(Boolean))
 
   return (
-    <Kaart titel="Zorgnotities">
+    <Kaart titel={tt('Zorgnotities')}>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -193,15 +194,15 @@ function Notities({ hh, orgId }: { hh: string; orgId: string }) {
       >
         {corrigeert ? (
           <p className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-            <span className="font-semibold">Correctie op:</span>
+            <span className="font-semibold">{tt('Correctie op:')}</span>
             <span className="min-w-0 flex-1 truncate text-ink-soft">{corrigeert.body}</span>
             <button type="button" onClick={() => setCorrigeert(null)} className={knopKlein}>
-              Annuleren
+              {tt('Annuleren')}
             </button>
           </p>
         ) : null}
         <fieldset>
-          <legend className="sr-only">Soort notitie</legend>
+          <legend className="sr-only">{tt('Soort notitie')}</legend>
           <div className="flex flex-wrap gap-1.5">
             {CATEGORIEEN.map((c) => (
               <button
@@ -219,7 +220,7 @@ function Notities({ hh, orgId }: { hh: string; orgId: string }) {
           </div>
         </fieldset>
         <label className="mt-3 block">
-          <span className={label}>Wat zag of deed je?</span>
+          <span className={label}>{tt('Wat zag of deed je?')}</span>
           <textarea
             required
             rows={3}
@@ -237,24 +238,24 @@ function Notities({ hh, orgId }: { hh: string; orgId: string }) {
             className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent-ink)]"
           />
           <span>
-            <span className="font-semibold">Ook voor de familie</span>
+            <span className="font-semibold">{tt('Ook voor de familie')}</span>
             <span className="block text-sm text-ink-soft">
-              Familie die mag meekijken en de bewoner zelf zien deze notitie. Anders blijft ze in het team.
+              {tt('Familie die mag meekijken en de bewoner zelf zien deze notitie. Anders blijft ze in het team.')}
             </span>
           </span>
         </label>
         <button type="submit" disabled={bewaar.isPending || !tekst.trim()} className={`${knop} mt-3 w-full sm:w-auto`}>
-          {bewaar.isPending ? 'Bezig…' : corrigeert ? 'Correctie bewaren' : 'Notitie bewaren'}
+          {bewaar.isPending ? tt('Bezig…') : corrigeert ? tt('Correctie bewaren') : tt('Notitie bewaren')}
         </button>
         <Fout fout={bewaar.error} />
       </form>
 
       <p className="mt-3 text-xs text-ink-faint">
-        Een notitie kan je niet aanpassen of wissen. Klopt er iets niet, voeg dan een correctie toe.
+        {tt('Een notitie kan je niet aanpassen of wissen. Klopt er iets niet, voeg dan een correctie toe.')}
       </p>
 
       {lijst.isLoading ? <Laden /> : null}
-      {lijst.data && lijst.data.length === 0 ? <div className="mt-3"><Leeg>Nog geen zorgnotities.</Leeg></div> : null}
+      {lijst.data && lijst.data.length === 0 ? <div className="mt-3"><Leeg>{tt('Nog geen zorgnotities.')}</Leeg></div> : null}
       <ul className="mt-3 space-y-2">
         {(lijst.data ?? []).map((n) => (
           <li
@@ -266,14 +267,14 @@ function Notities({ hh, orgId }: { hh: string; orgId: string }) {
               <span className="text-ink-faint">·</span>
               <time dateTime={n.created_at} className="text-ink-soft">{dagEnUur(n.created_at)}</time>
               <span className="text-ink-faint">·</span>
-              <span className="text-ink-soft">{(n.author_id && namen[n.author_id]) || 'Een collega'}</span>
+              <span className="text-ink-soft">{(n.author_id && namen[n.author_id]) || tt('Een collega')}</span>
               {n.visibility === 'familie' ? (
                 <span className="inline-flex items-center gap-1 rounded-pill bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent-ink">
-                  <Eye size={13} strokeWidth={1.75} aria-hidden="true" /> ook familie
+                  <Eye size={13} strokeWidth={1.75} aria-hidden="true" /> {tt('ook familie')}
                 </span>
               ) : null}
-              {vervangen.has(n.id) ? <span className="text-xs font-semibold text-ink-faint">gecorrigeerd</span> : null}
-              {n.vervangt ? <span className="text-xs font-semibold text-ink-faint">correctie</span> : null}
+              {vervangen.has(n.id) ? <span className="text-xs font-semibold text-ink-faint">{tt('gecorrigeerd')}</span> : null}
+              {n.vervangt ? <span className="text-xs font-semibold text-ink-faint">{tt('correctie')}</span> : null}
             </div>
             <p className="mt-1 whitespace-pre-wrap break-words">{n.body}</p>
             {!vervangen.has(n.id) ? (
@@ -286,7 +287,7 @@ function Notities({ hh, orgId }: { hh: string; orgId: string }) {
                 }}
                 className="mt-1 text-sm font-semibold text-accent-ink underline underline-offset-4"
               >
-                Corrigeren
+                {tt('Corrigeren')}
               </button>
             ) : null}
           </li>
@@ -310,15 +311,14 @@ function NoodStart({ hh, naam }: { hh: string; naam: string }) {
   const genoeg = reden.trim().length >= 20
 
   return (
-    <Kaart titel={<><TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" /> Noodtoegang</>}>
+    <Kaart titel={<><TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Noodtoegang')}</>}>
       <p className="text-ink-soft">
-        Je bent niet toegewezen aan {naam}. In een noodgeval kan je als team lead 4 uur meekijken: naam,
-        voorkeuren, agenda, logboek, zorgnotities en contactpersonen. Geen dagboek, documenten of locatie.
+        {tt('Je bent niet toegewezen aan {naam}. In een noodgeval kan je als team lead 4 uur meekijken: naam, voorkeuren, agenda, logboek, zorgnotities en contactpersonen. Geen dagboek, documenten of locatie.', { naam })}
       </p>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-soft">
-        <li>De familiebeheerder en de beheerder van je organisatie krijgen meteen bericht, met jouw reden.</li>
-        <li>Elke keer dat je kijkt, wordt bijgehouden.</li>
-        <li>Hoogstens 3 keer per 24 uur.</li>
+        <li>{tt('De familiebeheerder en de beheerder van je organisatie krijgen meteen bericht, met jouw reden.')}</li>
+        <li>{tt('Elke keer dat je kijkt, wordt bijgehouden.')}</li>
+        <li>{tt('Hoogstens 3 keer per 24 uur.')}</li>
       </ul>
       <form
         onSubmit={(e) => {
@@ -328,19 +328,19 @@ function NoodStart({ hh, naam }: { hh: string; naam: string }) {
         className="mt-4"
       >
         <label className="block">
-          <span className={label}>Waarom heb je dit nu nodig?</span>
+          <span className={label}>{tt('Waarom heb je dit nu nodig?')}</span>
           <textarea
             rows={3}
             maxLength={500}
             value={reden}
             onChange={(e) => setReden(e.target.value)}
-            placeholder="Bijvoorbeeld: gevallen in de gang, familie niet bereikbaar, nachtdienst zoekt de contactpersoon."
+            placeholder={tt('Bijvoorbeeld: gevallen in de gang, familie niet bereikbaar, nachtdienst zoekt de contactpersoon.')}
             className={tekstvak}
           />
         </label>
-        <p className="mt-1 text-sm text-ink-faint">{genoeg ? 'Genoeg uitleg.' : `Nog ${20 - reden.trim().length} tekens.`}</p>
+        <p className="mt-1 text-sm text-ink-faint">{genoeg ? tt('Genoeg uitleg.') : 20 - reden.trim().length === 1 ? tt('Nog {n} teken.', { n: 1 }) : tt('Nog {n} tekens.', { n: 20 - reden.trim().length })}</p>
         <button type="submit" disabled={!genoeg || start.isPending} className={`${knop} mt-3 w-full sm:w-auto`}>
-          {start.isPending ? 'Bezig…' : 'Noodtoegang starten'}
+          {start.isPending ? tt('Bezig…') : tt('Noodtoegang starten')}
         </button>
         <Fout fout={start.error} />
       </form>
@@ -371,19 +371,19 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-2 font-bold">
             <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
-            Noodtoegang{d ? ` tot ${uur(d.noodtoegang.tot)}` : ''}
+            {d ? tt('Noodtoegang tot {uur}', { uur: uur(d.noodtoegang.tot) }) : tt('Noodtoegang')}
           </p>
           <button
             onClick={() => {
-              if (confirm('Noodtoegang nu stoppen?')) stop.mutate()
+              if (confirm(tt('Noodtoegang nu stoppen?'))) stop.mutate()
             }}
             disabled={stop.isPending}
             className={`${knopRustig} w-full sm:w-auto`}
           >
-            Nu stoppen
+            {tt('Nu stoppen')}
           </button>
         </div>
-        <p className="mt-1 text-sm text-ink-soft">Elke keer dat je deze pagina opent, wordt bijgehouden.</p>
+        <p className="mt-1 text-sm text-ink-soft">{tt('Elke keer dat je deze pagina opent, wordt bijgehouden.')}</p>
         <Fout fout={stop.error} />
       </section>
 
@@ -391,8 +391,8 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
       <Fout fout={inzage.error} />
       {d ? (
         <div className="grid gap-6 lg:grid-cols-2">
-          <Kaart titel="Contactpersonen">
-            {d.contacten.length === 0 ? <Leeg>Geen contactpersonen.</Leeg> : null}
+          <Kaart titel={tt('Contactpersonen')}>
+            {d.contacten.length === 0 ? <Leeg>{tt('Geen contactpersonen.')}</Leeg> : null}
             <ul className="space-y-1.5">
               {d.contacten.map((c, i) => (
                 <li key={i} className="flex items-center gap-3 rounded-2xl bg-surface-soft px-3 py-2">
@@ -409,8 +409,8 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
               ))}
             </ul>
           </Kaart>
-          <Kaart titel="Voorkeuren">
-            {d.voorkeuren.length === 0 ? <Leeg>Geen voorkeuren genoteerd.</Leeg> : null}
+          <Kaart titel={tt('Voorkeuren')}>
+            {d.voorkeuren.length === 0 ? <Leeg>{tt('Geen voorkeuren genoteerd.')}</Leeg> : null}
             <ul className="space-y-1.5">
               {d.voorkeuren.map((v, i) => (
                 <li key={i} className="rounded-2xl bg-surface-soft px-3 py-2">
@@ -420,8 +420,8 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
               ))}
             </ul>
           </Kaart>
-          <Kaart titel="Agenda vandaag en morgen">
-            {d.agenda.length === 0 ? <Leeg>Niets gepland.</Leeg> : null}
+          <Kaart titel={tt('Agenda vandaag en morgen')}>
+            {d.agenda.length === 0 ? <Leeg>{tt('Niets gepland.')}</Leeg> : null}
             <ul className="space-y-1.5">
               {d.agenda.map((a, i) => (
                 <li key={i} className="flex gap-3 rounded-2xl bg-surface-soft px-3 py-2">
@@ -431,18 +431,18 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
               ))}
             </ul>
           </Kaart>
-          <Kaart titel="Laatste 24 uur">
-            {(d.zorgnotities ?? []).length + d.logboek.length === 0 ? <Leeg>Niets genoteerd.</Leeg> : null}
+          <Kaart titel={tt('Laatste 24 uur')}>
+            {(d.zorgnotities ?? []).length + d.logboek.length === 0 ? <Leeg>{tt('Niets genoteerd.')}</Leeg> : null}
             <ul className="space-y-1.5">
               {(d.zorgnotities ?? []).map((n, i) => (
                 <li key={`z${i}`} className="rounded-2xl bg-surface-soft px-3 py-2">
-                  <span className="text-sm text-ink-soft">{dagEnUur(n.om)} · zorgnotitie</span>
+                  <span className="text-sm text-ink-soft">{dagEnUur(n.om)} · {tt('zorgnotitie')}</span>
                   <span className="block">{n.tekst}</span>
                 </li>
               ))}
               {d.logboek.map((l, i) => (
                 <li key={`l${i}`} className="rounded-2xl bg-surface-soft px-3 py-2">
-                  <span className="text-sm text-ink-soft">{dagEnUur(l.om)} · logboek</span>
+                  <span className="text-sm text-ink-soft">{dagEnUur(l.om)} · {tt('logboek')}</span>
                   <span className="block">{l.titel}</span>
                   {l.notitie ? <span className="block text-sm text-ink-soft">{l.notitie}</span> : null}
                 </li>
@@ -453,9 +453,9 @@ function NoodDossier({ id, hh }: { id: string; hh: string }) {
       ) : null}
       <p className="text-sm text-ink-faint">
         <Link to="/zorg/bewoners" className="font-semibold text-accent-ink underline underline-offset-4">
-          Terug naar de bewoners
+          {tt('Terug naar de bewoners')}
         </Link>{' '}
-        — de noodtoegang loopt door tot je ze stopt of tot ze afloopt.
+        — {tt('de noodtoegang loopt door tot je ze stopt of tot ze afloopt.')}
       </p>
     </div>
   )

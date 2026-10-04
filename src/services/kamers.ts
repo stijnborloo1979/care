@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
 import type { Bezetting, Kamer } from './kamersPuur'
+import { tt } from '../lib/uiTaal'
 
 export * from './kamersPuur'
 
@@ -40,13 +41,13 @@ export async function nieuweKamers(org: string, afdeling: string, namen: string[
 export async function wijzigKamer(id: string, p: Partial<Pick<Kamer, 'bedden' | 'actief' | 'notitie'>>) {
   const { data, error } = await supabase.from('kamer').update(p).eq('id', id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Alleen de beheerder of een coördinator past kamers aan.')
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder of een coördinator past kamers aan.'))
 }
 
 export async function wisKamer(id: string) {
   const { data, error } = await supabase.from('kamer').delete().eq('id', id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Alleen de beheerder of een coördinator wist kamers.')
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder of een coördinator wist kamers.'))
 }
 
 /** "1-12" of "101, 102, 105" → losse kamernamen. Hoogstens 200. */

@@ -15,13 +15,14 @@ import {
   type VastMoment,
 } from '../../services/afdelingsdag'
 import { Fout, Kaart, Laden, Leeg, knop, knopKlein, label, veld } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 const SOORTEN: { id: VastMoment['soort']; naam: string; emoji: string }[] = [
-  { id: 'maaltijd', naam: 'Maaltijd', emoji: '🍽️' },
-  { id: 'rust', naam: 'Rust', emoji: '🛋️' },
-  { id: 'activiteit', naam: 'Activiteit', emoji: '🎵' },
-  { id: 'verzorging', naam: 'Verzorging', emoji: '🛁' },
-  { id: 'andere', naam: 'Andere', emoji: '📌' },
+  { id: 'maaltijd', naam: tt('Maaltijd'), emoji: '🍽️' },
+  { id: 'rust', naam: tt('Rust'), emoji: '🛋️' },
+  { id: 'activiteit', naam: tt('Activiteit'), emoji: '🎵' },
+  { id: 'verzorging', naam: tt('Verzorging'), emoji: '🛁' },
+  { id: 'andere', naam: tt('Andere'), emoji: '📌' },
 ]
 
 /**
@@ -56,19 +57,19 @@ export default function VasteDag({ orgId, magPlannen, beheert }: { orgId: string
   const volgorde = [...groepen.keys()].sort((a, b) => (a === '' ? -1 : b === '' ? 1 : (namen[a] ?? '').localeCompare(namen[b] ?? '')))
 
   return (
-    <Kaart titel="De vaste dag">
+    <Kaart titel={tt('De vaste dag')}>
       <p className="text-ink-soft">
-        Wat elke dag terugkomt. Het staat vanzelf op de tablet van elke bewoner van die afdeling, en bij haar familie.
+        {tt('Wat elke dag terugkomt. Het staat vanzelf op de tablet van elke bewoner van die afdeling, en bij haar familie.')}
       </p>
       {lijst.isLoading ? <Laden /> : null}
       <Fout fout={lijst.error ?? actief.error ?? wis.error} />
-      {lijst.data && lijst.data.length === 0 ? <Leeg>Nog geen vaste dag ingevuld.</Leeg> : null}
+      {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Nog geen vaste dag ingevuld.')}</Leeg> : null}
 
       <div className="mt-3 space-y-4">
         {volgorde.map((k) => (
           <div key={k || 'huis'}>
             <h3 className="text-sm font-bold uppercase tracking-wide text-ink-faint">
-              {k ? `Afdeling ${namen[k] ?? '…'}` : 'Het hele woonzorgcentrum'}
+              {k ? tt('Afdeling {naam}', { naam: namen[k] ?? '…' }) : tt('Het hele woonzorgcentrum')}
             </h3>
             <ul className="mt-1.5 space-y-1.5">
               {(groepen.get(k) ?? []).map((m) => (
@@ -87,7 +88,7 @@ export default function VasteDag({ orgId, magPlannen, beheert }: { orgId: string
                     </span>
                     <span className="block text-sm text-ink-soft">
                       {dagenTekst(m.dagen)}
-                      {m.actief ? '' : ' · staat uit'}
+                      {m.actief ? '' : ` · ${tt('staat uit')}`}
                     </span>
                   </span>
                   {magPlannen && magHier(m.department_id) ? (
@@ -97,13 +98,13 @@ export default function VasteDag({ orgId, magPlannen, beheert }: { orgId: string
                         aria-pressed={m.actief}
                         className={knopKlein}
                       >
-                        {m.actief ? 'Zet uit' : 'Zet aan'}
+                        {m.actief ? tt('Zet uit') : tt('Zet aan')}
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm(`"${m.titel}" wissen?`)) wis.mutate(m.id)
+                          if (confirm(tt('"{titel}" wissen?', { titel: m.titel }))) wis.mutate(m.id)
                         }}
-                        aria-label={`${m.titel} wissen`}
+                        aria-label={tt('{titel} wissen', { titel: m.titel })}
                         className={knopKlein}
                       >
                         <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -178,13 +179,13 @@ function NieuwMoment({
       }}
       className="mt-5 grid gap-3 border-t border-line pt-4 sm:grid-cols-2"
     >
-      <h3 className="text-base font-bold sm:col-span-2">Iets toevoegen</h3>
+      <h3 className="text-base font-bold sm:col-span-2">{tt('Iets toevoegen')}</h3>
       <label className="sm:col-span-2">
-        <span className={label}>Wat</span>
-        <input required maxLength={80} value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="Middagmaal" className={veld} />
+        <span className={label}>{tt('Wat')}</span>
+        <input required maxLength={80} value={titel} onChange={(e) => setTitel(e.target.value)} placeholder={tt('Middagmaal')} className={veld} />
       </label>
       <label>
-        <span className={label}>Soort</span>
+        <span className={label}>{tt('Soort')}</span>
         <select value={soort} onChange={(e) => setSoort(e.target.value as VastMoment['soort'])} className={veld}>
           {SOORTEN.map((s) => (
             <option key={s.id} value={s.id}>
@@ -194,26 +195,26 @@ function NieuwMoment({
         </select>
       </label>
       <label>
-        <span className={label}>Voor</span>
+        <span className={label}>{tt('Voor')}</span>
         <select value={doel} onChange={(e) => setAfdeling(e.target.value)} className={veld}>
-          {aanIedereen ? <option value="">Het hele woonzorgcentrum</option> : null}
+          {aanIedereen ? <option value="">{tt('Het hele woonzorgcentrum')}</option> : null}
           {afdelingen.map((a) => (
             <option key={a.id} value={a.id}>
-              Afdeling {a.name}
+              {tt('Afdeling {naam}', { naam: a.name })}
             </option>
           ))}
         </select>
       </label>
       <label>
-        <span className={label}>Van</span>
+        <span className={label}>{tt('Van')}</span>
         <input required type="time" value={begint} onChange={(e) => setBegint(e.target.value)} className={veld} />
       </label>
       <label>
-        <span className={label}>Tot (mag leeg)</span>
+        <span className={label}>{tt('Tot (mag leeg)')}</span>
         <input type="time" value={eindigt} onChange={(e) => setEindigt(e.target.value)} className={veld} />
       </label>
       <fieldset className="sm:col-span-2">
-        <legend className={label}>Op welke dagen</legend>
+        <legend className={label}>{tt('Op welke dagen')}</legend>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {WEEKDAGEN.map((w) => (
             <button
@@ -232,7 +233,7 @@ function NieuwMoment({
       </fieldset>
       <div className="sm:col-span-2">
         <button type="submit" disabled={bewaar.isPending} className={`${knop} w-full sm:w-auto`}>
-          {bewaar.isPending ? 'Bezig…' : 'Toevoegen aan de vaste dag'}
+          {bewaar.isPending ? tt('Bezig…') : tt('Toevoegen aan de vaste dag')}
         </button>
         <Fout fout={bewaar.error} />
       </div>

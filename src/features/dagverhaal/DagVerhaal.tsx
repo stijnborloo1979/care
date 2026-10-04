@@ -6,6 +6,7 @@ import { recenteBezoeken } from '../../services/bezoek'
 import { dagverhaal } from './dagverhaal'
 import { useDagVanHuis } from '../today/useVandaag'
 import { uitstappen } from '../../services/uitstap'
+import { tt } from '../../lib/uiTaal'
 
 /** De dag van mama in een paar zinnen, om te lezen of door te sturen. */
 export default function DagVerhaal({
@@ -36,7 +37,7 @@ export default function DagVerhaal({
     uitstappen: uit.data ?? [],
     tz: timezone,
   })
-  const tekst = `De dag van ${personName}\n\n${zinnen.join('\n')}`
+  const tekst = `${tt('De dag van {naam}', { naam: personName })}\n\n${zinnen.join('\n')}`
 
   async function deel() {
     try {
@@ -52,14 +53,14 @@ export default function DagVerhaal({
     <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby="dagverhaal-kop">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 id="dagverhaal-kop" className="flex items-center gap-2 text-lg font-bold">
-          <BookOpen size={20} strokeWidth={1.75} aria-hidden="true" /> De dag van {personName}
+          <BookOpen size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('De dag van {naam}', { naam: personName })}
         </h2>
         <button
           onClick={deel}
           className="inline-flex min-h-[2.5rem] items-center gap-2 rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold"
         >
           {gedeeld ? <Check size={16} strokeWidth={2} aria-hidden="true" /> : <Share2 size={16} strokeWidth={1.75} aria-hidden="true" />}
-          {gedeeld ? 'Klaar om te plakken' : 'Doorsturen'}
+          {gedeeld ? tt('Klaar om te plakken') : tt('Doorsturen')}
         </button>
       </div>
       <div className="mt-3 space-y-1.5 text-lg leading-relaxed">
@@ -69,16 +70,16 @@ export default function DagVerhaal({
       </div>
       {logboek.length > 0 ? (
         <div className="mt-4 rounded-2xl bg-surface-soft p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Zelf geschreven vandaag</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Zelf geschreven vandaag')}</h3>
           <ul className="mt-1 space-y-1">
             {logboek.map((l, i) => (
               <li key={i}>{l}</li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-ink-faint">Dit wordt niet mee doorgestuurd.</p>
+          <p className="mt-2 text-xs text-ink-faint">{tt('Dit wordt niet mee doorgestuurd.')}</p>
         </div>
       ) : null}
-      <p className="mt-3 text-sm text-ink-faint">Alleen wat in de app staat. Geen beoordeling van de gezondheid.</p>
+      <p className="mt-3 text-sm text-ink-faint">{tt('Alleen wat in de app staat. Geen beoordeling van de gezondheid.')}</p>
     </section>
   )
 }

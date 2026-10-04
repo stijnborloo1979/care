@@ -15,14 +15,15 @@ import {
   type Bezoek,
 } from '../../services/bezoek'
 import { hhmm, localDateKey, plusDagen, zonedToUtc } from '../../lib/time'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 type Moment = 'nu' | 'vandaag' | 'gisteren'
 
 function foutTekstBezoek(e: unknown): string {
   const code = (e as { code?: string } | null)?.code
-  if (code === 'PGRST205' || code === '42P01') return 'Het bezoekboek staat nog niet aan. Vraag de beheerder om de update te installeren.'
+  if (code === 'PGRST205' || code === '42P01') return tt('Het bezoekboek staat nog niet aan. Vraag de beheerder om de update te installeren.')
   if (e && typeof e === 'object' && 'message' in e) return String((e as { message: unknown }).message)
-  return 'Het bezoek kon niet bewaard worden.'
+  return tt('Het bezoek kon niet bewaard worden.')
 }
 
 /** Het moment van het bezoek, als echte tijd. Pure functie, getest. */
@@ -36,7 +37,7 @@ export function momentNaarTijd(m: Moment, uur: string, tz: string, nu: Date = ne
 }
 
 const DAG = (iso: string, tz: string) =>
-  new Intl.DateTimeFormat('nl-BE', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(iso))
+  new Intl.DateTimeFormat(uiLocale(), { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(iso))
 
 /**
  * "Ik was op bezoek": in twintig seconden vastgelegd, zodat de persoon het
@@ -148,12 +149,12 @@ export default function BezoekVastleggen({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 id="bezoek-kop" className="flex items-center gap-2 text-lg font-bold">
-            <HeartHandshake size={20} strokeWidth={1.75} aria-hidden="true" /> Wie was er hier?
+            <HeartHandshake size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Wie was er hier?')}
           </h2>
           <p className="mt-1 text-ink-soft">
             {vorm === 'familie'
-              ? `Leg je bezoek vast, dan ziet ${personName} het de rest van de dag op het scherm en vergeet het niet.`
-              : `Wie kwam er langs bij ${personName}? De familie en ${personName} zien het.`}
+              ? tt('Leg je bezoek vast, dan ziet {naam} het de rest van de dag op het scherm en vergeet het niet.', { naam: personName })
+              : tt('Wie kwam er langs bij {naam}? De familie en {naam} zien het.', { naam: personName })}
           </p>
         </div>
         {!open ? (
@@ -169,7 +170,7 @@ export default function BezoekVastleggen({
             }}
             className="min-h-touch shrink-0 rounded-pill bg-accent-ink px-5 font-semibold text-white"
           >
-            {vorm === 'familie' ? 'Ik was op bezoek' : 'Bezoek vastleggen'}
+            {vorm === 'familie' ? tt('Ik was op bezoek') : tt('Bezoek vastleggen')}
           </button>
         ) : null}
       </div>
@@ -178,8 +179,8 @@ export default function BezoekVastleggen({
         <p role="status" className="mt-4 flex items-start gap-2 rounded-2xl bg-accent-soft p-4 text-accent-ink">
           <Check size={20} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>
-            Bewaard. {personName} ziet op het scherm: <strong>“{klaar}”</strong>
-            {zonderFoto ? ' De foto kon niet mee; het bezoek staat er wel.' : null}
+            {tt('Bewaard. {naam} ziet op het scherm:', { naam: personName })} <strong>“{klaar}”</strong>
+            {zonderFoto ? ' ' + tt('De foto kon niet mee; het bezoek staat er wel.') : null}
           </span>
         </p>
       ) : null}
@@ -193,7 +194,7 @@ export default function BezoekVastleggen({
           className="mt-4 space-y-4 rounded-2xl border border-line p-4"
         >
           <fieldset>
-            <legend className="text-sm font-semibold">Wie?</legend>
+            <legend className="text-sm font-semibold">{tt('Wie?')}</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {familie.map((p) => (
                 <button
@@ -216,18 +217,18 @@ export default function BezoekVastleggen({
                   aria-pressed={kaart === ''}
                   className={`${keuze} ${kaart === '' ? aan : uit}`}
                 >
-                  Iemand anders
+                  {tt('Iemand anders')}
                 </button>
               ) : null}
             </div>
             {kaart === '' ? (
               <label className="mt-2 block">
-                <span className="sr-only">Naam</span>
+                <span className="sr-only">{tt('Naam')}</span>
                 <input
                   value={naam}
                   onChange={(e) => setNaam(e.target.value)}
                   maxLength={80}
-                  placeholder={vorm === 'familie' ? 'Naam, bv. Tante Lea' : 'Bv. de kapster, een vrijwilliger'}
+                  placeholder={vorm === 'familie' ? tt('Naam, bv. Tante Lea') : tt('Bv. de kapster, een vrijwilliger')}
                   className="block min-h-touch w-full rounded-2xl border border-line-strong bg-surface px-4 text-lg"
                 />
               </label>
@@ -235,7 +236,7 @@ export default function BezoekVastleggen({
           </fieldset>
 
           <fieldset>
-            <legend className="text-sm font-semibold">Wanneer?</legend>
+            <legend className="text-sm font-semibold">{tt('Wanneer?')}</legend>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {(['nu', 'vandaag', 'gisteren'] as Moment[]).map((m) => (
                 <button
@@ -245,12 +246,12 @@ export default function BezoekVastleggen({
                   aria-pressed={moment === m}
                   className={`${keuze} ${moment === m ? aan : uit}`}
                 >
-                  {m === 'nu' ? 'Net' : m === 'vandaag' ? 'Eerder vandaag' : 'Gisteren'}
+                  {m === 'nu' ? tt('Net') : m === 'vandaag' ? tt('Eerder vandaag') : tt('Gisteren')}
                 </button>
               ))}
               {moment !== 'nu' ? (
                 <label className="flex items-center gap-2">
-                  <span className="text-sm text-ink-soft">om</span>
+                  <span className="text-sm text-ink-soft">{tt('om')}</span>
                   <input
                     type="time"
                     value={uur}
@@ -265,16 +266,16 @@ export default function BezoekVastleggen({
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label htmlFor="bezoek-notitie" className="text-sm font-semibold">
-                Wat deden jullie? <span className="font-normal text-ink-soft">(mag leeg)</span>
+                {tt('Wat deden jullie?')} <span className="font-normal text-ink-soft">{tt('(mag leeg)')}</span>
               </label>
-              <DictateButton onTekst={(t) => setNotitie(t.slice(0, 300))} label="Inspreken" />
+              <DictateButton onTekst={(t) => setNotitie(t.slice(0, 300))} label={tt('Inspreken')} />
             </div>
             <input
               id="bezoek-notitie"
               value={notitie}
               onChange={(e) => setNotitie(e.target.value)}
               maxLength={300}
-              placeholder="Samen koffie gedronken en over Spanje gepraat."
+              placeholder={tt('Samen koffie gedronken en over Spanje gepraat.')}
               className="mt-1 block min-h-touch w-full rounded-2xl border border-line-strong bg-surface px-4 text-lg"
             />
           </div>
@@ -283,11 +284,11 @@ export default function BezoekVastleggen({
             <div>
               {voorbeeld ? (
                 <div className="relative w-40">
-                  <img src={voorbeeld} alt="Gekozen foto" className="aspect-[4/3] w-40 rounded-2xl object-cover" />
+                  <img src={voorbeeld} alt={tt('Gekozen foto')} className="aspect-[4/3] w-40 rounded-2xl object-cover" />
                   <button
                     type="button"
                     onClick={() => setFoto(null)}
-                    aria-label="Foto weghalen"
+                    aria-label={tt('Foto weghalen')}
                     className="absolute -right-2 -top-2 grid h-8 w-8 place-items-center rounded-full bg-surface shadow-card"
                   >
                     <X size={16} strokeWidth={2} aria-hidden="true" />
@@ -296,7 +297,7 @@ export default function BezoekVastleggen({
               ) : (
                 <label className="inline-flex min-h-touch cursor-pointer items-center gap-2 rounded-pill border-[1.5px] border-line-strong px-4 font-semibold">
                   <Camera size={18} strokeWidth={1.75} aria-hidden="true" />
-                  Foto toevoegen
+                  {tt('Foto toevoegen')}
                   <input
                     type="file"
                     accept="image/*"
@@ -308,7 +309,7 @@ export default function BezoekVastleggen({
                   />
                 </label>
               )}
-              <p className="mt-1 text-sm text-ink-soft">Een foto van jullie samen helpt het meest om het te onthouden.</p>
+              <p className="mt-1 text-sm text-ink-soft">{tt('Een foto van jullie samen helpt het meest om het te onthouden.')}</p>
             </div>
           ) : null}
 
@@ -318,14 +319,14 @@ export default function BezoekVastleggen({
               disabled={!gekozenNaam || bewaar.isPending}
               className="min-h-touch flex-1 rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-50 sm:flex-none"
             >
-              {bewaar.isPending ? 'Bezig…' : 'Bewaren'}
+              {bewaar.isPending ? tt('Bezig…') : tt('Bewaren')}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
             >
-              Annuleren
+              {tt('Annuleren')}
             </button>
           </div>
           {bewaar.error ? (
@@ -338,7 +339,7 @@ export default function BezoekVastleggen({
 
       {bezoeken.length > 0 ? (
         <div className="mt-5">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Deze week</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Deze week')}</h3>
           <ul className="mt-2 space-y-2">
             {bezoeken.map((b) => {
               const wisbaar = b.author_id === ik && Date.now() - new Date(b.created_at).getTime() < 24 * 3600_000
@@ -357,9 +358,9 @@ export default function BezoekVastleggen({
                   {wisbaar ? (
                     <button
                       onClick={() => {
-                        if (confirm('Dit bezoek wissen?')) wis.mutate(b)
+                        if (confirm(tt('Dit bezoek wissen?'))) wis.mutate(b)
                       }}
-                      aria-label={`Bezoek van ${b.visitor_name} wissen`}
+                      aria-label={tt('Bezoek van {naam} wissen', { naam: b.visitor_name })}
                       className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-faint hover:bg-surface"
                     >
                       <Trash2 size={17} strokeWidth={1.75} aria-hidden="true" />
@@ -371,7 +372,7 @@ export default function BezoekVastleggen({
           </ul>
         </div>
       ) : lijst.data ? (
-        <p className="mt-4 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">Deze week nog geen bezoek vastgelegd.</p>
+        <p className="mt-4 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">{tt('Deze week nog geen bezoek vastgelegd.')}</p>
       ) : null}
     </section>
   )

@@ -4,11 +4,12 @@ import Avatar from '../../components/Avatar'
 import { deletePerson, savePerson, uploadPersonPhoto, type PersonCard } from '../../services/people'
 import { usePeople } from './usePeople'
 import DictateButton from '../../components/DictateButton'
+import { tt } from '../../lib/uiTaal'
 
 const SOORT: { waarde: PersonCard['kind']; label: string }[] = [
-  { waarde: 'family', label: 'Familie' },
-  { waarde: 'care', label: 'Zorg' },
-  { waarde: 'contact', label: 'Contact' },
+  { waarde: 'family', label: tt('Familie') },
+  { waarde: 'care', label: tt('Zorg') },
+  { waarde: 'contact', label: tt('Contact') },
 ]
 
 /**
@@ -22,9 +23,9 @@ export default function ManagePeople({ householdId }: { householdId: string }) {
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Wie is wie</h2>
+      <h2 className="text-lg font-bold">{tt('Wie is wie')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Familie, zorgverleners en buren, met een zin die uitlegt wie ze zijn.
+        {tt('Familie, zorgverleners en buren, met een zin die uitlegt wie ze zijn.')}
       </p>
 
       <ul className="mt-4 space-y-2">
@@ -45,7 +46,7 @@ export default function ManagePeople({ householdId }: { householdId: string }) {
                   onClick={() => setOpen(open === p.id ? null : p.id)}
                   className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
                 >
-                  {open === p.id ? 'Sluiten' : 'Wijzigen'}
+                  {open === p.id ? tt('Sluiten') : tt('Wijzigen')}
                 </button>
               </div>
 
@@ -68,7 +69,7 @@ export default function ManagePeople({ householdId }: { householdId: string }) {
             onClick={() => setOpen('nieuw')}
             className="flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
           >
-            + Persoon toevoegen
+            {tt('+ Persoon toevoegen')}
           </button>
         )}
       </div>
@@ -113,7 +114,7 @@ function PersonEditor({
       await ververs()
       onDone()
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Opslaan lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Opslaan lukte niet.')),
   })
 
   const verwijder = useMutation({
@@ -132,7 +133,7 @@ function PersonEditor({
       await uploadPersonPhoto(householdId, person.id, file)
       await ververs()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Foto uploaden lukte niet.')
+      setError(err instanceof Error ? err.message : tt('Foto uploaden lukte niet.'))
     } finally {
       setUploading(false)
     }
@@ -149,7 +150,7 @@ function PersonEditor({
     >
       <div className="flex flex-wrap gap-3">
         <label className="min-w-[min(8rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Naam</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Naam')}</span>
           <input
             required
             value={name}
@@ -158,12 +159,12 @@ function PersonEditor({
           />
         </label>
         <label className="min-w-[min(8rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Relatie</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Relatie')}</span>
           <input
             required
             value={relation}
             onChange={(e) => setRelation(e.target.value)}
-            placeholder="Dochter"
+            placeholder={tt('Dochter')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
@@ -171,30 +172,30 @@ function PersonEditor({
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-ink-soft">Wie is dit? In de je-vorm</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Wie is dit? In de je-vorm')}</span>
           <DictateButton onTekst={(t) => setDescription(t)} />
         </div>
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Els is je dochter. Ze woont in Leuven."
+          placeholder={tt('Els is je dochter. Ze woont in Leuven.')}
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
       </div>
 
       <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Extra, mag leeg blijven</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Extra, mag leeg blijven')}</span>
         <input
           value={detail}
           onChange={(e) => setDetail(e.target.value)}
-          placeholder="Belt elke avond rond zeven uur."
+          placeholder={tt('Belt elke avond rond zeven uur.')}
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
       </label>
 
       <div className="flex flex-wrap gap-3">
         <label className="min-w-[min(8rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Telefoon</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Telefoon')}</span>
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -203,7 +204,7 @@ function PersonEditor({
           />
         </label>
         <label className="min-w-[min(8rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Soort</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Soort')}</span>
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as PersonCard['kind'])}
@@ -221,7 +222,7 @@ function PersonEditor({
       {person ? (
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative min-h-[2.4rem] cursor-pointer overflow-hidden rounded-pill border-[1.5px] border-line-strong px-4 py-1 text-sm font-semibold">
-            {uploading ? 'Bezig…' : 'Foto kiezen'}
+            {uploading ? tt('Bezig…') : tt('Foto kiezen')}
             <input
               type="file"
               accept="image/*"
@@ -232,15 +233,15 @@ function PersonEditor({
           <button
             type="button"
             onClick={() => {
-              if (confirm(`"${person.name}" verwijderen uit Wie is wie?`)) verwijder.mutate()
+              if (confirm(tt('"{naam}" verwijderen uit Wie is wie?', { naam: person.name }))) verwijder.mutate()
             }}
             className="min-h-[2.4rem] rounded-pill border-[1.5px] border-alert px-4 text-sm font-semibold text-alert"
           >
-            Verwijderen
+            {tt('Verwijderen')}
           </button>
         </div>
       ) : (
-        <p className="text-xs text-ink-faint">Een foto kan je toevoegen zodra de persoon bewaard is.</p>
+        <p className="text-xs text-ink-faint">{tt('Een foto kan je toevoegen zodra de persoon bewaard is.')}</p>
       )}
 
       <div className="flex gap-2">
@@ -249,14 +250,14 @@ function PersonEditor({
           disabled={opslaan.isPending}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {opslaan.isPending ? 'Opslaan…' : 'Opslaan'}
+          {opslaan.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
         <button
           type="button"
           onClick={onDone}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
-          Annuleren
+          {tt('Annuleren')}
         </button>
       </div>
 

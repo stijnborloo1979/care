@@ -4,6 +4,7 @@ import { MessageCircleQuestion } from 'lucide-react'
 import { mijnBewoners } from './zorgApi'
 import { ongezien } from './bewonerBerichten'
 import { Kaart } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Open vragen per bewoner, alleen van mijn bewoners in deze organisatie.
@@ -32,7 +33,7 @@ export default function OpenVragen({ orgId }: { orgId: string }) {
   const rijen = (bewoners.data ?? []).filter((b) => (open.data[b.household_id] ?? 0) > 0)
   if (rijen.length === 0) return null
   return (
-    <Kaart titel={<><MessageCircleQuestion size={20} strokeWidth={1.75} aria-hidden="true" /> Open vragen van bewoners</>}>
+    <Kaart titel={<><MessageCircleQuestion size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Open vragen van bewoners')}</>}>
       <ul className="space-y-2">
         {rijen.map((b) => {
           const n = open.data[b.household_id]
@@ -44,7 +45,7 @@ export default function OpenVragen({ orgId }: { orgId: string }) {
               >
                 <span className="min-w-0 truncate font-semibold">{b.naam}</span>
                 <span className="shrink-0 rounded-pill bg-alert px-2.5 py-1 text-xs font-bold text-white">
-                  {n} {n === 1 ? 'vraag' : 'vragen'}
+                  {n === 1 ? tt('{n} vraag', { n }) : tt('{n} vragen', { n })}
                 </span>
               </Link>
             </li>

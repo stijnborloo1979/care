@@ -13,6 +13,7 @@ import {
   type OrgRol,
 } from './zorgApi'
 import { Fout, Kaart, Leeg, dagEnUur, knopKlein } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 function useVerversTeam(orgId: string) {
   const queryClient = useQueryClient()
@@ -44,11 +45,11 @@ export function MedewerkerActies({ orgId, m }: { orgId: string; m: Medewerker })
               const nieuw = e.target.value as OrgRol
               const waarschuwing =
                 nieuw === 'org_admin' && (m.afdelingen.length > 0)
-                  ? ` Als beheerder ziet ${m.naam} geen inhoud over bewoners: afdelingen en toewijzingen vervallen.`
+                  ? ` ${tt('Als beheerder ziet {naam} geen inhoud over bewoners: afdelingen en toewijzingen vervallen.', { naam: m.naam })}`
                   : ''
-              if (confirm(`${m.naam} ${ROLNAAM[nieuw].toLowerCase()} maken?${waarschuwing}`)) rol.mutate(nieuw)
+              if (confirm(`${tt('{naam} {rol} maken?', { naam: m.naam, rol: ROLNAAM[nieuw].toLowerCase() })}${waarschuwing}`)) rol.mutate(nieuw)
             }}
-            aria-label={`Rol van ${m.naam}`}
+            aria-label={tt('Rol van {naam}', { naam: m.naam })}
             className="min-h-[2.25rem] rounded-pill border border-line bg-surface px-3 text-sm font-semibold text-ink-soft"
           >
             {(Object.keys(ROLNAAM) as OrgRol[]).map((r) => (
@@ -59,16 +60,16 @@ export function MedewerkerActies({ orgId, m }: { orgId: string; m: Medewerker })
           </select>
           <button
             onClick={() => {
-              if (confirm(`${m.naam} uit dienst zetten? Toegang, afdelingen en toewijzingen stoppen meteen.`)) actief.mutate(false)
+              if (confirm(tt('{naam} uit dienst zetten? Toegang, afdelingen en toewijzingen stoppen meteen.', { naam: m.naam }))) actief.mutate(false)
             }}
             className={knopKlein}
           >
-            Uit dienst
+            {tt('Uit dienst')}
           </button>
         </>
       ) : (
         <button onClick={() => actief.mutate(true)} className={knopKlein}>
-          Terug in dienst
+          {tt('Terug in dienst')}
         </button>
       )}
       <Fout fout={rol.error ?? actief.error} />
@@ -84,7 +85,7 @@ export function OpenUitnodigingen({ orgId }: { orgId: string }) {
   const opnieuw = useMutation({
     mutationFn: stuurUitnodigingOpnieuw,
     onSuccess: (r) => {
-      setMelding(r.gemaild ? 'Opnieuw gemaild, en 14 dagen langer geldig.' : '14 dagen langer geldig. De mail kon niet vertrekken; stuur de link zelf.')
+      setMelding(r.gemaild ? tt('Opnieuw gemaild, en 14 dagen langer geldig.') : tt('14 dagen langer geldig. De mail kon niet vertrekken; stuur de link zelf.'))
       ververs()
     },
   })
@@ -95,8 +96,8 @@ export function OpenUitnodigingen({ orgId }: { orgId: string }) {
   if (!lijst.data) return null
 
   return (
-    <Kaart titel={<><MailPlus size={20} strokeWidth={1.75} aria-hidden="true" /> Openstaande uitnodigingen</>}>
-      {open.length === 0 ? <Leeg>Geen openstaande uitnodigingen.</Leeg> : null}
+    <Kaart titel={<><MailPlus size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Openstaande uitnodigingen')}</>}>
+      {open.length === 0 ? <Leeg>{tt('Geen openstaande uitnodigingen.')}</Leeg> : null}
       <ul className="space-y-2">
         {open.map((u) => {
           const verlopen = new Date(u.expires_at).getTime() <= nu
@@ -105,20 +106,21 @@ export function OpenUitnodigingen({ orgId }: { orgId: string }) {
               <span className="min-w-0 flex-1">
                 <span className="block break-all font-semibold">{u.email}</span>
                 <span className="block text-sm text-ink-soft">
-                  {verlopen ? 'Verlopen op ' : 'Geldig tot '}
-                  {dagEnUur(u.expires_at)}
+                  {verlopen
+                    ? tt('Verlopen op {datum}', { datum: dagEnUur(u.expires_at) })
+                    : tt('Geldig tot {datum}', { datum: dagEnUur(u.expires_at) })}
                 </span>
               </span>
               <button onClick={() => opnieuw.mutate(u.id)} disabled={opnieuw.isPending} className={knopKlein}>
-                Opnieuw sturen
+                {tt('Opnieuw sturen')}
               </button>
               <button
                 onClick={() => {
-                  if (confirm(`De uitnodiging voor ${u.email} intrekken? De link werkt dan niet meer.`)) intrekken.mutate(u.id)
+                  if (confirm(tt('De uitnodiging voor {email} intrekken? De link werkt dan niet meer.', { email: u.email }))) intrekken.mutate(u.id)
                 }}
                 className={knopKlein}
               >
-                Intrekken
+                {tt('Intrekken')}
               </button>
             </li>
           )

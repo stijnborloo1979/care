@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
 import { compressImage, extensionForImage } from '../lib/image'
+import { tt } from '../lib/uiTaal'
 
 /** De spullen van de bewoner (81). */
 export interface Bezitting {
@@ -29,13 +30,13 @@ export interface KwijtOpAfdeling {
 }
 
 export const SOORTEN: { id: Bezitting['soort']; naam: string; emoji: string }[] = [
-  { id: 'bril', naam: 'Bril', emoji: '👓' },
-  { id: 'gebit', naam: 'Gebit', emoji: '🦷' },
-  { id: 'hoorapparaat', naam: 'Hoorapparaat', emoji: '🦻' },
-  { id: 'kleding', naam: 'Kleding', emoji: '👕' },
-  { id: 'sieraad', naam: 'Sieraad', emoji: '💍' },
-  { id: 'hulpmiddel', naam: 'Hulpmiddel', emoji: '🦯' },
-  { id: 'andere', naam: 'Andere', emoji: '📦' },
+  { id: 'bril', naam: tt('Bril'), emoji: '👓' },
+  { id: 'gebit', naam: tt('Gebit'), emoji: '🦷' },
+  { id: 'hoorapparaat', naam: tt('Hoorapparaat'), emoji: '🦻' },
+  { id: 'kleding', naam: tt('Kleding'), emoji: '👕' },
+  { id: 'sieraad', naam: tt('Sieraad'), emoji: '💍' },
+  { id: 'hulpmiddel', naam: tt('Hulpmiddel'), emoji: '🦯' },
+  { id: 'andere', naam: tt('Andere'), emoji: '📦' },
 ]
 
 export const emojiVan = (s: Bezitting['soort']) => SOORTEN.find((x) => x.id === s)?.emoji ?? '📦'
@@ -93,7 +94,7 @@ export async function uploadSpulFoto(hh: string, id: string, file: File): Promis
 export async function wisBezitting(b: Pick<Bezitting, 'id' | 'foto_path'>) {
   const { data, error } = await supabase.from('bezitting').delete().eq('id', b.id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Dit kan je niet wissen.')
+  if (!data || data.length === 0) throw new Error(tt('Dit kan je niet wissen.'))
   if (b.foto_path) await supabase.storage.from(BUCKET).remove([b.foto_path])
 }
 
@@ -119,8 +120,8 @@ export async function kwijtOpAfdeling(org: string): Promise<KwijtOpAfdeling[]> {
 /** "sinds vanmorgen", "sinds gisteren", "sinds 3 dagen" (familie- en zorgscherm). */
 export function sindsTekst(iso: string, nu: Date = new Date()): string {
   const uren = (nu.getTime() - new Date(iso).getTime()) / 3600_000
-  if (uren < 1) return 'net gemeld'
-  if (uren < 24) return `sinds ${Math.floor(uren)} uur`
+  if (uren < 1) return tt('net gemeld')
+  if (uren < 24) return tt('sinds {n} uur', { n: Math.floor(uren) })
   const dagen = Math.floor(uren / 24)
-  return dagen === 1 ? 'sinds gisteren' : `sinds ${dagen} dagen`
+  return dagen === 1 ? tt('sinds gisteren') : tt('sinds {n} dagen', { n: dagen })
 }

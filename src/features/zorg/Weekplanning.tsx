@@ -6,9 +6,10 @@ import { afdelingen as haalAfdelingen } from './zorgApi'
 import { vasteDag } from '../../services/afdelingsdag'
 import { activiteitenTussen, maandagVan, weekRooster } from '../../services/weekplanning'
 import { Fout, Kaart, Kop, Laden, knopKlein, label, veld } from './ui'
+import { tt, uiLocale, uiTaal } from '../../lib/uiTaal'
 
 const EMOJI: Record<string, string> = { maaltijd: '🍽️', rust: '🛋️', activiteit: '🎵', verzorging: '🛁', andere: '📌' }
-const DAGEN = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag']
+const DAGEN = [tt('Maandag'), tt('Dinsdag'), tt('Woensdag'), tt('Donderdag'), tt('Vrijdag'), tt('Zaterdag'), tt('Zondag')]
 
 /**
  * De week van het huis: vaste dag en activiteiten, per afdeling. Om op een
@@ -33,7 +34,7 @@ export default function Weekplanning() {
   const namen = Object.fromEntries((afd.data ?? []).map((a) => [a.id, a.name]))
   const rooster = weekRooster(maandag, vast.data ?? [], acts.data ?? [], afdeling || null)
   const vandaag = new Date().toDateString()
-  const fmt = new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'long' })
+  const fmt = new Intl.DateTimeFormat(uiLocale(), { day: 'numeric', month: 'long' })
   const verschuif = (dagen: number) => setMaandag(new Date(maandag.getFullYear(), maandag.getMonth(), maandag.getDate() + dagen))
   const leeg = rooster.every((d) => d.items.length === 0)
 
@@ -41,11 +42,11 @@ export default function Weekplanning() {
     <div className="space-y-6 weekplanning">
       <div className="print:hidden">
         <Kop
-          titel="Weekplanning"
-          uitleg="De vaste dag en de activiteiten van het huis. Wat hier staat, staat ook op de tablets."
+          titel={tt('Weekplanning')}
+          uitleg={tt('De vaste dag en de activiteiten van het huis. Wat hier staat, staat ook op de tablets.')}
           rechts={
             <button onClick={() => window.print()} className={`${knopKlein} inline-flex items-center gap-2`}>
-              <Printer size={16} strokeWidth={1.75} aria-hidden="true" /> Afdrukken
+              <Printer size={16} strokeWidth={1.75} aria-hidden="true" /> {tt('Afdrukken')}
             </button>
           }
         />
@@ -53,20 +54,20 @@ export default function Weekplanning() {
 
       <div className="flex flex-wrap items-end gap-3 print:hidden">
         <div className="flex items-center gap-1">
-          <button onClick={() => verschuif(-7)} aria-label="Vorige week" className={knopKlein}>
+          <button onClick={() => verschuif(-7)} aria-label={tt('Vorige week')} className={knopKlein}>
             <ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" />
           </button>
           <button onClick={() => setMaandag(maandagVan(new Date()))} className={knopKlein}>
-            Deze week
+            {tt('Deze week')}
           </button>
-          <button onClick={() => verschuif(7)} aria-label="Volgende week" className={knopKlein}>
+          <button onClick={() => verschuif(7)} aria-label={tt('Volgende week')} className={knopKlein}>
             <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
         <label className="min-w-[12rem]">
-          <span className={label}>Afdeling</span>
+          <span className={label}>{tt('Afdeling')}</span>
           <select value={afdeling} onChange={(e) => setAfdeling(e.target.value)} className={veld}>
-            <option value="">Alle afdelingen</option>
+            <option value="">{tt('Alle afdelingen')}</option>
             {(afd.data ?? []).map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
@@ -78,7 +79,7 @@ export default function Weekplanning() {
 
       <h2 className="text-xl font-bold">
         {org.naam}
-        {afdeling ? ` · afdeling ${namen[afdeling] ?? ''}` : ''} — week van {fmt.format(maandag)}
+        {afdeling ? ` · ${tt('afdeling {naam}', { naam: namen[afdeling] ?? '' })}` : ''} — {tt('week van {datum}', { datum: fmt.format(maandag) })}
       </h2>
 
       {vast.isLoading || acts.isLoading ? <Laden /> : null}
@@ -86,7 +87,7 @@ export default function Weekplanning() {
       {leeg && !vast.isLoading && !acts.isLoading ? (
         <Kaart>
           <p className="text-ink-soft">
-            Er staat deze week nog niets. Vul bij Activiteiten de vaste dag in (ontbijt, middagmaal, rust) en plan activiteiten.
+            {tt('Er staat deze week nog niets. Vul bij Activiteiten de vaste dag in (ontbijt, middagmaal, rust) en plan activiteiten.')}
           </p>
         </Kaart>
       ) : null}
@@ -98,7 +99,7 @@ export default function Weekplanning() {
             const isVandaag = datum.toDateString() === vandaag
             return (
               <section
-                lang="nl"
+                lang={uiTaal()}
                 key={d.datum}
                 className={`min-w-0 rounded-card bg-surface p-3 shadow-card print:rounded-none print:border print:border-line print:p-1 print:shadow-none ${isVandaag ? 'ring-2 ring-accent' : ''}`}
                 aria-label={`${DAGEN[i]} ${fmt.format(datum)}`}
@@ -107,10 +108,10 @@ export default function Weekplanning() {
                   {DAGEN[i]}
                   <span className="block text-sm font-normal text-ink-soft">
                     {fmt.format(datum)}
-                    {isVandaag ? ' · vandaag' : ''}
+                    {isVandaag ? ` · ${tt('vandaag')}` : ''}
                   </span>
                 </h3>
-                {d.items.length === 0 ? <p className="mt-2 text-sm text-ink-faint">Niets gepland</p> : null}
+                {d.items.length === 0 ? <p className="mt-2 text-sm text-ink-faint">{tt('Niets gepland')}</p> : null}
                 <ul className="mt-2 space-y-1.5">
                   {d.items.map((it) => (
                     <li
@@ -120,10 +121,10 @@ export default function Weekplanning() {
                       <span className="font-bold tabular-nums">{it.tijd}</span>{' '}
                       <span aria-hidden="true">{it.emoji || EMOJI[it.soort]}</span>{' '}
                       <span className={it.geannuleerd ? 'line-through' : 'font-semibold'}>{it.titel}</span>
-                      {it.geannuleerd ? <span className="block text-xs">gaat niet door</span> : null}
+                      {it.geannuleerd ? <span className="block text-xs">{tt('gaat niet door')}</span> : null}
                       {it.plaats ? <span className="block text-xs text-ink-soft">{it.plaats}</span> : null}
                       {!afdeling && it.department_id ? (
-                        <span className="block text-xs text-ink-soft">afdeling {namen[it.department_id] ?? ''}</span>
+                        <span className="block text-xs text-ink-soft">{tt('afdeling {naam}', { naam: namen[it.department_id] ?? '' })}</span>
                       ) : null}
                     </li>
                   ))}
@@ -134,8 +135,8 @@ export default function Weekplanning() {
         </div>
       ) : null}
       <p className="text-sm text-ink-faint">
-        <span className="mr-3 inline-block h-3 w-3 rounded bg-surface-soft align-middle ring-1 ring-line" /> vaste dag
-        <span className="ml-4 mr-3 inline-block h-3 w-3 rounded bg-accent-soft align-middle" /> activiteit
+        <span className="mr-3 inline-block h-3 w-3 rounded bg-surface-soft align-middle ring-1 ring-line" /> {tt('vaste dag')}
+        <span className="ml-4 mr-3 inline-block h-3 w-3 rounded bg-accent-soft align-middle" /> {tt('activiteit')}
       </p>
     </div>
   )

@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { beeindigVerblijf, type EindReden } from './zorgApi'
 import { Fout, knop, knopRustig } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 const REDENEN: [EindReden, string][] = [
-  ['verhuisd', 'Verhuisd'],
-  ['overleden', 'Overleden'],
-  ['andere', 'Andere reden'],
+  ['verhuisd', tt('Verhuisd')],
+  ['overleden', tt('Overleden')],
+  ['andere', tt('Andere reden')],
 ]
 
 /**
@@ -29,20 +30,19 @@ export default function VerblijfBeeindigen({ orgId, hh, naam }: { orgId: string;
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="text-sm font-semibold text-ink-soft underline underline-offset-4">
-        Verblijf beëindigen
+        {tt('Verblijf beëindigen')}
       </button>
     )
   }
 
   return (
     <div className="mt-3 w-full rounded-2xl border border-line bg-surface-soft p-4">
-      <p className="font-semibold">Het verblijf van {naam} beëindigen</p>
+      <p className="font-semibold">{tt('Het verblijf van {naam} beëindigen', { naam })}</p>
       <p className="mt-1 text-sm text-ink-soft">
-        Het zorgteam verliest meteen de toegang en alle toewijzingen stoppen. De familie krijgt een melding en houdt al
-        haar gegevens. Komt {naam} terug, dan koppelt de familie opnieuw met de koppelcode.
+        {tt('Het zorgteam verliest meteen de toegang en alle toewijzingen stoppen. De familie krijgt een melding en houdt al haar gegevens. Komt {naam} terug, dan koppelt de familie opnieuw met de koppelcode.', { naam })}
       </p>
       <fieldset className="mt-3">
-        <legend className="text-sm font-semibold">Reden</legend>
+        <legend className="text-sm font-semibold">{tt('Reden')}</legend>
         <div className="mt-1 flex flex-wrap gap-2">
           {REDENEN.map(([r, t]) => (
             <label
@@ -59,10 +59,10 @@ export default function VerblijfBeeindigen({ orgId, hh, naam }: { orgId: string;
       </fieldset>
       <div className="mt-3 flex flex-wrap gap-2">
         <button onClick={() => sluit.mutate()} disabled={!reden || sluit.isPending} className={knop}>
-          {sluit.isPending ? 'Bezig…' : 'Verblijf beëindigen'}
+          {sluit.isPending ? tt('Bezig…') : tt('Verblijf beëindigen')}
         </button>
         <button onClick={() => setOpen(false)} className={knopRustig}>
-          Annuleren
+          {tt('Annuleren')}
         </button>
       </div>
       <Fout fout={sluit.error} />

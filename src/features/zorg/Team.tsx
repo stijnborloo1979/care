@@ -6,15 +6,16 @@ import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import { medewerkers, nogWisbaar, stuurTeambericht, teamberichten, wisTeambericht } from './zorgApi'
 import { Fout, Kop, Laden, Leeg, uur } from './ui'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const dagLabel = (iso: string) => {
   const d = new Date(iso)
   const vandaag = new Date()
-  if (d.toDateString() === vandaag.toDateString()) return 'Vandaag'
+  if (d.toDateString() === vandaag.toDateString()) return tt('Vandaag')
   const gisteren = new Date(vandaag)
   gisteren.setDate(gisteren.getDate() - 1)
-  if (d.toDateString() === gisteren.toDateString()) return 'Gisteren'
-  return d.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+  if (d.toDateString() === gisteren.toDateString()) return tt('Gisteren')
+  return d.toLocaleDateString(uiLocale(), { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
 /**
@@ -75,8 +76,8 @@ export default function Team() {
   if (afdelingen.length === 0) {
     return (
       <div className="space-y-6">
-        <Kop titel="Team" />
-        <Leeg>Je staat nog op geen afdeling. De beheerder van {org.naam} zet je op een afdeling.</Leeg>
+        <Kop titel={tt('Team')} />
+        <Leeg>{tt('Je staat nog op geen afdeling. De beheerder van {org} zet je op een afdeling.', { org: org.naam })}</Leeg>
       </div>
     )
   }
@@ -84,10 +85,10 @@ export default function Team() {
   let vorigeDag = ''
   return (
     <div className="space-y-4">
-      <Kop titel="Team" uitleg="Korte berichten voor je afdeling. Wat over een bewoner blijvend belangrijk is, schrijf je in een zorgnotitie." />
+      <Kop titel={tt('Team')} uitleg={tt('Korte berichten voor je afdeling. Wat over een bewoner blijvend belangrijk is, schrijf je in een zorgnotitie.')} />
 
       {afdelingen.length > 1 ? (
-        <div role="tablist" aria-label="Afdeling" className="flex flex-wrap gap-2">
+        <div role="tablist" aria-label={tt('Afdeling')} className="flex flex-wrap gap-2">
           {afdelingen.map((a) => (
             <button
               key={a.id}
@@ -104,10 +105,10 @@ export default function Team() {
         </div>
       ) : null}
 
-      <section className="rounded-card bg-surface p-4 shadow-card sm:p-5" aria-label={`Berichten van ${afdeling?.naam ?? ''}`}>
+      <section className="rounded-card bg-surface p-4 shadow-card sm:p-5" aria-label={tt('Berichten van {afdeling}', { afdeling: afdeling?.naam ?? '' })}>
         {lijst.isLoading ? <Laden /> : null}
         <Fout fout={lijst.error} />
-        {lijst.data && lijst.data.length === 0 ? <Leeg>Nog geen berichten op {afdeling?.naam}.</Leeg> : null}
+        {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Nog geen berichten op {afdeling}.', { afdeling: afdeling?.naam ?? '' })}</Leeg> : null}
         <ol className="space-y-2" aria-live="polite">
           {(lijst.data ?? []).map((b) => {
             const dag = dagLabel(b.created_at)
@@ -126,13 +127,13 @@ export default function Team() {
                     }`}
                   >
                     {!vanMij ? (
-                      <p className="text-sm font-semibold text-accent-ink">{(b.author_id && namen[b.author_id]) || 'Een collega'}</p>
+                      <p className="text-sm font-semibold text-accent-ink">{(b.author_id && namen[b.author_id]) || tt('Een collega')}</p>
                     ) : null}
                     <p className="whitespace-pre-wrap break-words">{b.body}</p>
                     <p className="mt-0.5 flex items-center justify-end gap-2 text-xs text-ink-faint">
                       {vanMij && nogWisbaar(b.created_at) ? (
                         <button onClick={() => wis.mutate(b.id)} className="font-semibold underline underline-offset-2">
-                          wissen
+                          {tt('wissen')}
                         </button>
                       ) : null}
                       <time dateTime={b.created_at}>{uur(b.created_at)}</time>
@@ -154,7 +155,7 @@ export default function Team() {
         className="sticky bottom-20 flex items-end gap-2 rounded-card bg-surface p-3 shadow-lift lg:bottom-4"
       >
         <label className="min-w-0 flex-1">
-          <span className="sr-only">Bericht aan {afdeling?.naam}</span>
+          <span className="sr-only">{tt('Bericht aan {afdeling}', { afdeling: afdeling?.naam ?? '' })}</span>
           <textarea
             rows={1}
             maxLength={2000}
@@ -166,14 +167,14 @@ export default function Team() {
                 if (tekst.trim()) stuur.mutate()
               }
             }}
-            placeholder={`Bericht aan ${afdeling?.naam ?? 'je afdeling'}`}
+            placeholder={afdeling?.naam ? tt('Bericht aan {afdeling}', { afdeling: afdeling.naam }) : tt('Bericht aan je afdeling')}
             className="block max-h-40 min-h-touch w-full resize-none rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
           />
         </label>
         <button
           type="submit"
           disabled={!tekst.trim() || stuur.isPending}
-          aria-label="Versturen"
+          aria-label={tt('Versturen')}
           className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent-ink text-white disabled:opacity-50"
         >
           <Send size={20} strokeWidth={1.75} aria-hidden="true" />
