@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 /** Dezelfde bouwstenen als de familieschermen, op één plaats voor Care. */
 
@@ -41,10 +42,11 @@ export function Leeg({ children }: { children: ReactNode }) {
 
 /** Een fout van Supabase is een gewoon object met een message, geen Error. */
 export function foutTekst(fout: unknown): string {
-  if (fout instanceof Error) return fout.message
+  // Meldingen van de database zijn Nederlands; tt() vertaalt de gekende.
+  if (fout instanceof Error) return tt(fout.message)
   if (fout && typeof fout === 'object' && typeof (fout as { message?: unknown }).message === 'string')
-    return (fout as { message: string }).message
-  return typeof fout === 'string' ? fout : 'Er ging iets mis. Probeer het opnieuw.'
+    return tt((fout as { message: string }).message)
+  return typeof fout === 'string' ? tt(fout) : tt('Er ging iets mis. Probeer het opnieuw.')
 }
 
 export function Fout({ fout }: { fout: unknown }) {
@@ -57,11 +59,11 @@ export function Fout({ fout }: { fout: unknown }) {
 }
 
 export function Laden() {
-  return <p className="text-ink-soft">Bezig met laden…</p>
+  return <p className="text-ink-soft">{tt('Bezig met laden…')}</p>
 }
 
 export const uur = (iso: string) =>
-  new Date(iso).toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' })
+  new Date(iso).toLocaleTimeString(uiLocale(), { hour: '2-digit', minute: '2-digit' })
 
 export const dagEnUur = (iso: string) =>
-  new Date(iso).toLocaleString('nl-BE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  new Date(iso).toLocaleString(uiLocale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })

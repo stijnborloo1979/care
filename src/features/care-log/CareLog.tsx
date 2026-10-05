@@ -4,12 +4,13 @@ import { addCareEntry, deleteCareEntry, getCareLog } from '../../services/careLo
 import { hhmm } from '../../lib/time'
 import { useHousehold } from '../household/useHousehold'
 import DictateButton from '../../components/DictateButton'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const HERKOMST: Record<string, string> = {
-  family: 'familie',
-  caregiver: 'zorgverlener',
-  person: 'zelf afgevinkt',
-  system: 'automatisch',
+  family: tt('familie'),
+  caregiver: tt('zorgverlener'),
+  person: tt('zelf afgevinkt'),
+  system: tt('automatisch'),
 }
 
 export default function CareLog() {
@@ -42,7 +43,7 @@ export default function CareLog() {
       await queryClient.invalidateQueries({ queryKey: ['carelog', hh] })
       await queryClient.invalidateQueries({ queryKey: ['summary', hh] })
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Toevoegen lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Toevoegen lukte niet.')),
   })
 
   const verwijder = useMutation({
@@ -53,7 +54,7 @@ export default function CareLog() {
   // Per dag groeperen: een lange lijst zonder koppen leest niemand na.
   const perDag = new Map<string, typeof data extends undefined ? never : NonNullable<typeof data>>()
   ;(data ?? []).forEach((e) => {
-    const dag = new Intl.DateTimeFormat('nl-BE', {
+    const dag = new Intl.DateTimeFormat(uiLocale(), {
       timeZone: tz,
       weekday: 'long',
       day: 'numeric',
@@ -67,9 +68,9 @@ export default function CareLog() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Zorglogboek</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Zorglogboek')}</h1>
         <p className="mt-1 text-ink-soft">
-          Wat er gebeurd is, door familie, zorgverleners en de app zelf.
+          {tt('Wat er gebeurd is, door familie, zorgverleners en de app zelf.')}
         </p>
       </header>
 
@@ -82,26 +83,26 @@ export default function CareLog() {
         className="rounded-card bg-surface p-6 shadow-card"
       >
         <label className="block">
-          <span className="text-sm font-semibold text-ink-soft">Wat gebeurde er?</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Wat gebeurde er?')}</span>
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Samen gewandeld"
+            placeholder={tt('Samen gewandeld')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
 
         <div className="mt-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-sm font-semibold text-ink-soft">Notitie, mag leeg blijven</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Notitie, mag leeg blijven')}</span>
             <DictateButton onTekst={(t) => setNote((v) => (v ? v + ' ' + t : t))} />
           </div>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
-            placeholder="Vandaag wat vermoeid."
+            placeholder={tt('Vandaag wat vermoeid.')}
             className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
           />
         </div>
@@ -111,7 +112,7 @@ export default function CareLog() {
           disabled={voegToe.isPending}
           className="mt-3 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {voegToe.isPending ? 'Bezig…' : 'Toevoegen'}
+          {voegToe.isPending ? tt('Bezig…') : tt('Toevoegen')}
         </button>
 
         {error ? (
@@ -121,7 +122,7 @@ export default function CareLog() {
         ) : null}
       </form>
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       {[...perDag.entries()].map(([dag, entries]) => (
         <section key={dag} className="rounded-card bg-surface p-6 shadow-card">
@@ -142,7 +143,7 @@ export default function CareLog() {
                     onClick={() => verwijder.mutate(e.id)}
                     className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold text-ink-soft"
                   >
-                    Wissen
+                    {tt('Wissen')}
                   </button>
                 ) : null}
               </li>
@@ -152,7 +153,7 @@ export default function CareLog() {
       ))}
 
       {!isLoading && (data ?? []).length === 0 ? (
-        <p className="text-ink-soft">Nog niets genoteerd deze week.</p>
+        <p className="text-ink-soft">{tt('Nog niets genoteerd deze week.')}</p>
       ) : null}
     </div>
   )

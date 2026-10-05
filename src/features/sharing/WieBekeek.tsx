@@ -12,6 +12,7 @@ import {
   wie,
   type InzageSoort,
 } from '../../services/inzage'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const ICOON: Record<InzageSoort, typeof FileText> = {
   document: FileText,
@@ -20,7 +21,7 @@ const ICOON: Record<InzageSoort, typeof FileText> = {
 }
 
 const uur = (iso: string) =>
-  new Date(iso).toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit' })
+  new Date(iso).toLocaleTimeString(uiLocale(), { hour: '2-digit', minute: '2-digit' })
 
 /**
  * Kunnen zien wat er gebeurde, niet alleen wat er beloofd wordt. De
@@ -76,12 +77,10 @@ export default function WieBekeek({
         <section className="space-y-3" aria-labelledby="nood-titel">
           <h2 id="nood-titel" className="flex items-center gap-2 text-lg font-bold">
             <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
-            Noodtoegang
+            {tt('Noodtoegang')}
           </h2>
           <p className="text-sm text-ink-soft">
-            Een teamverantwoordelijke van het woonzorgcentrum kan in een noodgeval 4 uur
-            meekijken: naam, voorkeuren, agenda, logboek en contactpersonen. Geen dagboek,
-            documenten of locatie.
+            {tt('Een teamverantwoordelijke van het woonzorgcentrum kan in een noodgeval 4 uur meekijken: naam, voorkeuren, agenda, logboek en contactpersonen. Geen dagboek, documenten of locatie.')}
           </p>
           <ul className="space-y-2">
             {noodRijen.map((n) => {
@@ -96,18 +95,20 @@ export default function WieBekeek({
                     <div className="min-w-0 flex-1">
                       <p className="font-bold">
                         {loopt
-                          ? `Loopt nog tot ${uur(n.expires_at)}`
+                          ? tt('Loopt nog tot {uur}', { uur: uur(n.expires_at) })
                           : status === 'gestopt'
-                            ? 'Gestopt'
-                            : 'Afgelopen'}
+                            ? tt('Gestopt')
+                            : tt('Afgelopen')}
                         <span className="font-normal text-ink-soft">
-                          {' · gestart '}
-                          {new Date(n.started_at).toLocaleString('nl-BE', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
+                          {' · '}
+                          {tt('gestart {wanneer}', {
+                            wanneer: new Date(n.started_at).toLocaleString(uiLocale(), {
+                              weekday: 'short',
+                              day: 'numeric',
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            }),
                           })}
                         </span>
                       </p>
@@ -115,22 +116,22 @@ export default function WieBekeek({
                       {isBeheerder ? (
                         <p className="mt-1 text-sm text-ink-faint">
                           {n.inzages === 0
-                            ? 'Nog niets ingekeken.'
+                            ? tt('Nog niets ingekeken.')
                             : n.inzages === 1
-                              ? '1 keer ingekeken.'
-                              : `${n.inzages} keer ingekeken.`}
+                              ? tt('1 keer ingekeken.')
+                              : tt('{n} keer ingekeken.', { n: n.inzages })}
                         </p>
                       ) : null}
                     </div>
                     {loopt && isBeheerder ? (
                       <button
                         onClick={() => {
-                          if (confirm('Deze noodtoegang nu stoppen?')) stop.mutate(n.id)
+                          if (confirm(tt('Deze noodtoegang nu stoppen?'))) stop.mutate(n.id)
                         }}
                         disabled={stop.isPending}
                         className="min-h-touch w-full shrink-0 rounded-pill border-[1.5px] border-line-strong bg-surface px-5 font-semibold disabled:opacity-60 sm:w-auto"
                       >
-                        Nu stoppen
+                        {tt('Nu stoppen')}
                       </button>
                     ) : null}
                   </div>
@@ -140,7 +141,7 @@ export default function WieBekeek({
           </ul>
           {stop.error ? (
             <p role="alert" className="text-sm text-alert">
-              {stop.error instanceof Error ? stop.error.message : 'Stoppen lukte niet.'}
+              {stop.error instanceof Error ? stop.error.message : tt('Stoppen lukte niet.')}
             </p>
           ) : null}
         </section>
@@ -150,22 +151,21 @@ export default function WieBekeek({
         <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby="bekeek-titel">
           <h2 id="bekeek-titel" className="flex items-center gap-2 text-lg font-bold">
             <History size={20} strokeWidth={1.75} aria-hidden="true" />
-            Wie bekeek wat
+            {tt('Wie bekeek wat')}
           </h2>
           <p className="mt-1 text-sm text-ink-soft">
-            De laatste 30 dagen: wie een document opende, een opname beluisterde of de locatie
-            bekeek. Wat {voornaam} zelf bekijkt, staat hier niet. Alleen beheerders zien dit.
+            {tt('De laatste 30 dagen: wie een document opende, een opname beluisterde of de locatie bekeek. Wat {naam} zelf bekijkt, staat hier niet. Alleen beheerders zien dit.', { naam: voornaam })}
           </p>
 
-          {log.isLoading ? <p className="mt-4 text-ink-soft">Bezig met laden…</p> : null}
+          {log.isLoading ? <p className="mt-4 text-ink-soft">{tt('Bezig met laden…')}</p> : null}
           {log.error ? (
             <p role="alert" className="mt-4 text-sm text-alert">
-              Dit overzicht kon niet geladen worden.
+              {tt('Dit overzicht kon niet geladen worden.')}
             </p>
           ) : null}
           {log.data && log.data.inzages.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">
-              Niemand bekeek de laatste 30 dagen documenten, opnames of de locatie.
+              {tt('Niemand bekeek de laatste 30 dagen documenten, opnames of de locatie.')}
             </p>
           ) : null}
 

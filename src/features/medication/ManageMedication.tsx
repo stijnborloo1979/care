@@ -15,6 +15,7 @@ import {
   verwijderMedicijnFoto,
   type Medicijn,
 } from '../../services/medication'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Het medicatieschema. Wat hier staat, verschijnt als herinnering op het
@@ -40,14 +41,13 @@ export default function ManageMedication() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Medicatie</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Medicatie')}</h1>
         <p className="mt-1 text-ink-soft">
-          Het schema zoals de huisarts of apotheker het voorschreef. LifeAngle herinnert eraan, maar
-          stelt geen diagnose en geeft geen medisch advies.
+          {tt('Het schema zoals de huisarts of apotheker het voorschreef. LifeAngle herinnert eraan, maar stelt geen diagnose en geeft geen medisch advies.')}
         </p>
       </header>
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       <ul className="space-y-3">
         {actief.map((m) => (
@@ -63,7 +63,7 @@ export default function ManageMedication() {
           className="flex min-h-touch items-center gap-2 rounded-pill bg-accent-ink px-5 font-semibold text-white"
         >
           <Plus size={18} strokeWidth={1.75} />
-          Medicijn toevoegen
+          {tt('Medicijn toevoegen')}
         </button>
       )}
 
@@ -71,9 +71,9 @@ export default function ManageMedication() {
 
       {gestopt.length > 0 ? (
         <section>
-          <h2 className="text-lg font-bold text-ink-soft">Gestopt</h2>
+          <h2 className="text-lg font-bold text-ink-soft">{tt('Gestopt')}</h2>
           <p className="mt-1 text-sm text-ink-faint">
-            Blijven bewaard met hun geschiedenis. Zet ze weer aan als ze terug nodig zijn.
+            {tt('Blijven bewaard met hun geschiedenis. Zet ze weer aan als ze terug nodig zijn.')}
           </p>
           <ul className="mt-3 space-y-3">
             {gestopt.map((m) => (
@@ -118,7 +118,7 @@ function MedRij({
           onClick={onToggle}
           className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
         >
-          {open ? 'Sluiten' : 'Wijzigen'}
+          {open ? tt('Sluiten') : tt('Wijzigen')}
         </button>
       </div>
       {open ? <MedEditor hh={hh} m={m} onKlaar={onToggle} /> : null}
@@ -168,7 +168,7 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
       await ververs()
       onKlaar()
     },
-    onError: (e) => setFout(e instanceof Error ? e.message : 'Opslaan lukte niet.'),
+    onError: (e) => setFout(e instanceof Error ? e.message : tt('Opslaan lukte niet.')),
   })
 
   const wis = useMutation({
@@ -184,28 +184,28 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
       onSubmit={(e) => {
         e.preventDefault()
         setFout(null)
-        if (!naam.trim()) return setFout('Geef het medicijn een naam.')
-        if (tijden.length === 0) return setFout('Kies minstens één tijdstip.')
+        if (!naam.trim()) return setFout(tt('Geef het medicijn een naam.'))
+        if (tijden.length === 0) return setFout(tt('Kies minstens één tijdstip.'))
         bewaar.mutate(m?.active ?? true)
       }}
       className="mt-4 space-y-3 rounded-2xl bg-surface-soft p-4"
     >
       <div className="flex flex-wrap gap-3">
         <label className="min-w-[min(10rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Naam</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Naam')}</span>
           <input
             value={naam}
             onChange={(e) => setNaam(e.target.value)}
-            placeholder="Zoals op de verpakking"
+            placeholder={tt('Zoals op de verpakking')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
         <label className="w-40">
-          <span className="text-sm font-semibold text-ink-soft">Dosis</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Dosis')}</span>
           <input
             value={dosis}
             onChange={(e) => setDosis(e.target.value)}
-            placeholder="1 tablet"
+            placeholder={tt('1 tablet')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
@@ -214,7 +214,7 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
       {m ? <VoorraadVeld m={m} onKlaar={ververs} /> : null}
 
       <div>
-        <span className="text-sm font-semibold text-ink-soft">Wanneer</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Wanneer')}</span>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {tijden.map((t, i) => (
             <span key={i} className="inline-flex items-center gap-1 rounded-pill border border-line bg-surface pl-2">
@@ -222,13 +222,13 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
                 type="time"
                 value={t}
                 onChange={(e) => setTijden(tijden.map((x, j) => (j === i ? e.target.value : x)))}
-                aria-label={`Tijdstip ${i + 1}`}
+                aria-label={tt('Tijdstip {n}', { n: i + 1 })}
                 className="min-h-[2.4rem] bg-transparent"
               />
               <button
                 type="button"
                 onClick={() => setTijden(tijden.filter((_, j) => j !== i))}
-                aria-label="Tijdstip weghalen"
+                aria-label={tt('Tijdstip weghalen')}
                 className="grid h-9 w-9 place-items-center rounded-full text-ink-faint"
               >
                 <X size={16} strokeWidth={1.75} />
@@ -240,21 +240,21 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
             onClick={() => setTijden([...tijden, '20:00'])}
             className="min-h-[2.4rem] rounded-pill border border-dashed border-line-strong px-3 text-sm font-semibold text-ink-soft"
           >
-            + Nog een tijdstip
+            {tt('+ Nog een tijdstip')}
           </button>
         </div>
       </div>
 
       <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Hoe innemen?</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Hoe innemen?')}</span>
         <input
           value={instructie}
           onChange={(e) => setInstructie(e.target.value)}
-          placeholder="Bij het ontbijt, met een glas water."
+          placeholder={tt('Bij het ontbijt, met een glas water.')}
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
         <span className="mt-1 block text-xs text-ink-faint">
-          Zo verschijnt het bij de herinnering. Neem over wat de huisarts of apotheker zei.
+          {tt('Zo verschijnt het bij de herinnering. Neem over wat de huisarts of apotheker zei.')}
         </span>
       </label>
 
@@ -271,7 +271,7 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
 
         <span className="min-w-0">
           <FotoKiezer
-            label={m?.photo_path || voorbeeld ? 'Andere foto' : 'Foto van de verpakking'}
+            label={m?.photo_path || voorbeeld ? tt('Andere foto') : tt('Foto van de verpakking')}
             onKies={async (bestand) => {
               if (m) {
                 // Bestaand medicijn: meteen bewaren, zoals bij een kamer.
@@ -293,19 +293,19 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
                   await verwijderMedicijnFoto(m.id, m.photo_path)
                   await ververs()
                 } catch (err) {
-                  setFout(err instanceof Error ? err.message : 'De foto kon niet weg.')
+                  setFout(err instanceof Error ? err.message : tt('De foto kon niet weg.'))
                 }
               }}
               className="ml-2 min-h-[2.4rem] rounded-pill px-3 text-sm font-semibold text-ink-soft underline underline-offset-4"
             >
-              Weghalen
+              {tt('Weghalen')}
             </button>
           ) : null}
 
           <span className="mt-1 block text-xs text-ink-faint">
             {voorbeeld
-              ? 'Wordt bewaard zodra je op Opslaan drukt.'
-              : 'Op je telefoon kan je kiezen tussen de camera en je fotoalbum.'}
+              ? tt('Wordt bewaard zodra je op Opslaan drukt.')
+              : tt('Op je telefoon kan je kiezen tussen de camera en je fotoalbum.')}
           </span>
         </span>
       </div>
@@ -316,7 +316,7 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
           disabled={bewaar.isPending}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {bewaar.isPending ? 'Opslaan…' : 'Opslaan'}
+          {bewaar.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
         {m ? (
           <button
@@ -324,7 +324,7 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
             onClick={() => bewaar.mutate(!m.active)}
             className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
           >
-            {m.active ? 'Stoppen' : 'Opnieuw starten'}
+            {m.active ? tt('Stoppen') : tt('Opnieuw starten')}
           </button>
         ) : null}
       </div>
@@ -335,14 +335,14 @@ function MedEditor({ hh, m, onKlaar }: { hh: string; m?: Medicijn; onKlaar: () =
           onClick={() => {
             if (
               confirm(
-                `"${m.name}" helemaal verwijderen? Ook de geschiedenis van wat wanneer genomen werd, verdwijnt. Stoppen bewaart die wel.`,
+                tt('"{naam}" helemaal verwijderen? Ook de geschiedenis van wat wanneer genomen werd, verdwijnt. Stoppen bewaart die wel.', { naam: m.name }),
               )
             )
               wis.mutate()
           }}
           className="text-sm font-semibold text-alert underline underline-offset-4"
         >
-          Verwijderen, met geschiedenis
+          {tt('Verwijderen, met geschiedenis')}
         </button>
       ) : null}
 
@@ -372,7 +372,7 @@ function VoorraadBadge({ m }: { m: Medicijn }) {
       }`}
     >
       {bijna ? <AlertTriangle size={14} strokeWidth={2} aria-hidden="true" /> : null}
-      Nog {dagen} {dagen === 1 ? 'dag' : 'dagen'} voorraad
+      {dagen === 1 ? tt('Nog {n} dag voorraad', { n: dagen }) : tt('Nog {n} dagen voorraad', { n: dagen })}
     </span>
   )
 }
@@ -392,11 +392,11 @@ function VoorraadVeld({ m, onKlaar }: { m: Medicijn; onKlaar: () => Promise<void
     setFout(null)
     try {
       const n = waarde.trim() === '' ? null : Number(waarde)
-      if (n !== null && (!Number.isFinite(n) || n < 0)) throw new Error('Geef een aantal van 0 of meer.')
+      if (n !== null && (!Number.isFinite(n) || n < 0)) throw new Error(tt('Geef een aantal van 0 of meer.'))
       await setVoorraad(m.id, n)
       await onKlaar()
     } catch (e) {
-      setFout(e instanceof Error ? e.message : 'De voorraad bijwerken lukte niet.')
+      setFout(e instanceof Error ? e.message : tt('De voorraad bijwerken lukte niet.'))
     } finally {
       setBezig(false)
     }
@@ -404,15 +404,15 @@ function VoorraadVeld({ m, onKlaar }: { m: Medicijn; onKlaar: () => Promise<void
 
   return (
     <div>
-      <span className="text-sm font-semibold text-ink-soft">Voorraad</span>
+      <span className="text-sm font-semibold text-ink-soft">{tt('Voorraad')}</span>
       <div className="mt-1 flex flex-wrap items-center gap-2">
         <input
           type="number"
           min={0}
           value={waarde}
           onChange={(e) => setWaarde(e.target.value)}
-          placeholder="aantal"
-          aria-label="Aantal doses in huis"
+          placeholder={tt('aantal')}
+          aria-label={tt('Aantal doses in huis')}
           className="min-h-touch w-28 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
         <button
@@ -421,12 +421,14 @@ function VoorraadVeld({ m, onKlaar }: { m: Medicijn; onKlaar: () => Promise<void
           disabled={bezig}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-4 font-semibold disabled:opacity-60"
         >
-          {bezig ? 'Bezig…' : 'Bijwerken'}
+          {bezig ? tt('Bezig…') : tt('Bijwerken')}
         </button>
         <span className="text-sm text-ink-faint">
           {dagen === null
-            ? 'Leeg laten als je de voorraad niet bijhoudt.'
-            : `Goed voor ${dagen} ${dagen === 1 ? 'dag' : 'dagen'}. Elke bevestiging trekt er één af.`}
+            ? tt('Leeg laten als je de voorraad niet bijhoudt.')
+            : dagen === 1
+              ? tt('Goed voor {n} dag. Elke bevestiging trekt er één af.', { n: dagen })
+              : tt('Goed voor {n} dagen. Elke bevestiging trekt er één af.', { n: dagen })}
         </span>
       </div>
       {fout ? (

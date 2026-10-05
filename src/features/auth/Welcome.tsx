@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { ArrowLeft, Heart, Mail, Tablet } from 'lucide-react'
 import { useAuth } from './AuthProvider'
 import CodeLogin from './CodeLogin'
+import TaalKiezer from '../../components/TaalKiezer'
+import { tt } from '../../lib/uiTaal'
 import TabletPair from './TabletPair'
 
 /**
@@ -13,7 +15,7 @@ import TabletPair from './TabletPair'
 export default function Welcome() {
   const { session, loading } = useAuth()
 
-  if (loading) return <p className="p-6 text-ink-soft">Even geduld…</p>
+  if (loading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>
   if (session) return <Navigate to="/" replace />
 
   return (
@@ -52,14 +54,17 @@ export default function Welcome() {
 function Deuren() {
   return (
     <>
-      <div className="grid h-14 w-14 place-items-center rounded-2xl bg-accent-ink text-2xl text-white shadow-lift">
-        🏡
+      <div className="flex items-start justify-between gap-4">
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-accent-ink text-2xl text-white shadow-lift">
+          🏡
+        </div>
+        <TaalKiezer compact />
       </div>
       <h1 className="mt-6 text-[2.2rem] font-extrabold leading-tight tracking-tight">
-        Welkom bij LifeAngle
+        {tt('Welkom bij LifeAngle')}
       </h1>
       <p className="mt-2 text-lg text-ink-soft">
-        Een eenvoudige assistent om zelfstandig te blijven wonen, samen met je familie. Hoe kom je binnen?
+        {tt('Een eenvoudige assistent om zelfstandig te blijven wonen, samen met je familie. Hoe kom je binnen?')}
       </p>
 
       <div className="mt-8 space-y-3">
@@ -69,31 +74,31 @@ function Deuren() {
         <Deur
           naar="/login/familie"
           icoon={<Heart size={24} strokeWidth={1.75} />}
-          titel="Inloggen of beginnen"
-          onder="Voor jezelf, of voor iemand voor wie je zorgt."
+          titel={tt('Inloggen of beginnen')}
+          onder={tt('Voor jezelf, of voor iemand voor wie je zorgt.')}
           hoofd
         />
         <Deur
           naar="/login/uitnodiging"
           icoon={<Mail size={24} strokeWidth={1.75} />}
-          titel="Ik heb een uitnodiging"
-          onder="Iemand heeft je een link of code gestuurd."
+          titel={tt('Ik heb een uitnodiging')}
+          onder={tt('Iemand heeft je een link of code gestuurd.')}
         />
         <Deur
           naar="/login/tablet"
           icoon={<Tablet size={24} strokeWidth={1.75} />}
-          titel="Dit is de tablet van de persoon"
-          onder="Eén keer koppelen met een code."
+          titel={tt('Dit is de tablet van de persoon')}
+          onder={tt('Eén keer koppelen met een code.')}
         />
       </div>
 
       <p className="mt-8 text-center text-sm text-ink-faint">
         <Link to="/privacy" className="underline underline-offset-4">
-          Wat LifeAngle met je gegevens doet
+          {tt('Wat LifeAngle met je gegevens doet')}
         </Link>
         <span aria-hidden="true"> · </span>
         <Link to="/prijzen" className="underline underline-offset-4">
-          Prijzen
+          {tt('Prijzen')}
         </Link>
       </p>
     </>
@@ -145,7 +150,7 @@ function Stap({ children }: { children: React.ReactNode }) {
         className="inline-flex items-center gap-1.5 font-semibold text-accent-ink"
       >
         <ArrowLeft size={18} strokeWidth={1.75} />
-        Terug
+        {tt('Terug')}
       </Link>
       <div className="mt-6">{children}</div>
     </>
@@ -168,7 +173,7 @@ function UitnodigingInvullen() {
     const uitLink = v.match(/token=([A-Za-z0-9_-]+)/)
     const token = uitLink ? uitLink[1] : /^[A-Za-z0-9_-]{16,}$/.test(v) ? v : null
     if (!token) {
-      setFout('Dat lijkt geen uitnodiging. Plak de volledige link uit de mail.')
+      setFout(tt('Dat lijkt geen uitnodiging. Plak de volledige link uit de mail.'))
       return
     }
     navigate(`/uitnodiging?token=${token}`)
@@ -176,9 +181,9 @@ function UitnodigingInvullen() {
 
   return (
     <form onSubmit={verder} className="rounded-card bg-surface p-6 shadow-lift">
-      <h2 className="text-2xl font-bold tracking-tight">Je uitnodiging</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{tt('Je uitnodiging')}</h2>
       <p className="mt-2 text-ink-soft">
-        Klik op de link in de mail. Of plak hem hier als je de mail op een ander toestel las.
+        {tt('Klik op de link in de mail. Of plak hem hier als je de mail op een ander toestel las.')}
       </p>
       <textarea
         value={waarde}
@@ -194,7 +199,7 @@ function UitnodigingInvullen() {
         type="submit"
         className="mt-4 flex min-h-[3.2rem] w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
       >
-        Verder
+        {tt('Verder')}
       </button>
       {fout ? (
         <p role="alert" className="mt-4 rounded-2xl bg-alert-soft p-3 text-sm text-alert">

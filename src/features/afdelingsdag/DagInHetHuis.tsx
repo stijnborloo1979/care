@@ -2,11 +2,12 @@ import { CalendarDays } from 'lucide-react'
 import { hhmm } from '../../lib/time'
 import { useDagVanHuis } from '../today/useVandaag'
 import type { HuisMoment } from '../../services/afdelingsdag'
+import { tt } from '../../lib/uiTaal'
 
-const DEELNAME: Record<NonNullable<HuisMoment['deelname']>, string> = {
-  ingeschreven: 'ingeschreven',
-  aanwezig: 'was erbij',
-  afwezig: 'was er niet bij',
+const DEELNAME: Record<NonNullable<HuisMoment['deelname']>, (naam: string) => string> = {
+  ingeschreven: (naam) => tt('{naam} ingeschreven', { naam }),
+  aanwezig: (naam) => tt('{naam} was erbij', { naam }),
+  afwezig: (naam) => tt('{naam} was er niet bij', { naam }),
 }
 
 const EMOJI: Record<HuisMoment['soort'], string> = {
@@ -29,7 +30,7 @@ export default function DagInHetHuis({ householdId, personName, timezone }: { ho
   return (
     <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby="huisdag-kop">
       <h2 id="huisdag-kop" className="flex items-center gap-2 text-lg font-bold">
-        <CalendarDays size={20} strokeWidth={1.75} aria-hidden="true" /> Vandaag in het woonzorgcentrum
+        <CalendarDays size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Vandaag in het woonzorgcentrum')}
       </h2>
       <ul className="mt-3 space-y-2">
         {lijst.map((m) => {
@@ -45,10 +46,10 @@ export default function DagInHetHuis({ householdId, personName, timezone }: { ho
                   {m.titel}
                 </span>
                 {m.plaats ? <span className="text-ink-soft"> · {m.plaats}</span> : null}
-                {weg ? <span className="block text-sm text-ink-faint">gaat niet door</span> : null}
+                {weg ? <span className="block text-sm text-ink-faint">{tt('gaat niet door')}</span> : null}
                 {!weg && m.deelname ? (
                   <span className="block text-sm text-ink-soft">
-                    {personName} {DEELNAME[m.deelname]}
+                    {DEELNAME[m.deelname](personName)}
                   </span>
                 ) : null}
               </span>
@@ -56,7 +57,7 @@ export default function DagInHetHuis({ householdId, personName, timezone }: { ho
           )
         })}
       </ul>
-      <p className="mt-3 text-sm text-ink-faint">Gepland door het woonzorgcentrum.</p>
+      <p className="mt-3 text-sm text-ink-faint">{tt('Gepland door het woonzorgcentrum.')}</p>
     </section>
   )
 }

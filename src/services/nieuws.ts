@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
+import { tt } from '../lib/uiTaal'
 
 /** Nieuws van het woonzorgcentrum (79): aan alle families of aan één afdeling. */
 export interface NieuwsVoorFamilie {
@@ -64,7 +65,7 @@ export async function plaatsNieuws(p: { org_id: string; department_id: string | 
 export async function wisNieuws(id: string) {
   const { data, error } = await supabase.from('org_nieuws').delete().eq('id', id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Dit bericht kan je niet wissen.')
+  if (!data || data.length === 0) throw new Error(tt('Dit bericht kan je niet wissen.'))
 }
 
 /** Nieuw = de laatste drie dagen. */
@@ -74,7 +75,7 @@ export function isNieuw(iso: string, nu: Date = new Date()): boolean {
 
 /** "Van WZC Zonnehof · afdeling Linde" */
 export function afzender(n: Pick<NieuwsVoorFamilie, 'van' | 'afdeling'>): string {
-  return n.afdeling ? `Van ${n.van} · afdeling ${n.afdeling}` : `Van ${n.van}`
+  return n.afdeling ? tt('Van {van} · afdeling {afdeling}', { van: n.van, afdeling: n.afdeling }) : tt('Van {van}', { van: n.van })
 }
 
 /** De afdelingen waar ik nu team lead ben: daar mag ik nieuws aan sturen. */

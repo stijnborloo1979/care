@@ -9,9 +9,11 @@ import {
   type Routine,
 } from '../../services/routines'
 import { useHousehold } from '../household/useHousehold'
+import { tt } from '../../lib/uiTaal'
 
 function labelVan(rrule: string) {
-  return HERHALING.find((h) => h.waarde === rrule)?.label ?? rrule
+  const label = HERHALING.find((h) => h.waarde === rrule)?.label
+  return label ? tt(label) : rrule
 }
 
 export default function Planning() {
@@ -38,14 +40,13 @@ export default function Planning() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Routines</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Routines')}</h1>
         <p className="mt-1 text-ink-soft">
-          Vaste momenten die elke dag terugkomen. De nachtelijke job zet ze om in de agenda van
-          morgen.
+          {tt('Vaste momenten die elke dag terugkomen. De nachtelijke job zet ze om in de agenda van morgen.')}
         </p>
       </header>
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {(data ?? []).map((r) => (
@@ -58,14 +59,14 @@ export default function Planning() {
                 </h2>
                 <p className="text-sm text-ink-soft">
                   {labelVan(r.rrule)}
-                  {r.active ? '' : ' — staat uit'}
+                  {r.active ? '' : tt(' — staat uit')}
                 </p>
               </div>
               <button
                 onClick={() => setOpen(open === r.id ? null : r.id)}
                 className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
               >
-                {open === r.id ? 'Sluiten' : 'Wijzigen'}
+                {open === r.id ? tt('Sluiten') : tt('Wijzigen')}
               </button>
             </div>
 
@@ -79,7 +80,7 @@ export default function Planning() {
                 </li>
               ))}
               {r.routine_step.length === 0 ? (
-                <li className="text-sm text-ink-soft">Nog geen stappen.</li>
+                <li className="text-sm text-ink-soft">{tt('Nog geen stappen.')}</li>
               ) : null}
             </ul>
 
@@ -97,22 +98,20 @@ export default function Planning() {
           onClick={() => setOpen('nieuw')}
           className="flex min-h-touch w-full max-w-sm items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
         >
-          + Routine toevoegen
+          {tt('+ Routine toevoegen')}
         </button>
       )}
 
       <div className="rounded-card border border-line bg-surface-soft p-4">
         <p className="text-sm text-ink-soft">
-          Wijzigingen gelden vanaf morgen. Wil je ze vandaag al zien, zet de routines dan nu om.
-          Items die al in de agenda staan blijven ongemoeid. Dit zet ook de medicatiemomenten van
-          vandaag en morgen klaar.
+          {tt('Wijzigingen gelden vanaf morgen. Wil je ze vandaag al zien, zet de routines dan nu om. Items die al in de agenda staan blijven ongemoeid. Dit zet ook de medicatiemomenten van vandaag en morgen klaar.')}
         </p>
         <button
           onClick={() => nuToepassen.mutate()}
           disabled={nuToepassen.isPending}
           className="mt-3 min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold disabled:opacity-60"
         >
-          {nuToepassen.isPending ? 'Bezig…' : 'Vandaag bijwerken'}
+          {nuToepassen.isPending ? tt('Bezig…') : tt('Vandaag bijwerken')}
         </button>
       </div>
     </div>
@@ -160,7 +159,7 @@ function RoutineEditor({
       await queryClient.invalidateQueries({ queryKey: ['routines', householdId] })
       onDone()
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Opslaan lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Opslaan lukte niet.')),
   })
 
   const verwijder = useMutation({
@@ -182,17 +181,17 @@ function RoutineEditor({
     >
       <div className="flex flex-wrap gap-3">
         <label className="min-w-[min(10rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Naam</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Naam')}</span>
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ochtend"
+            placeholder={tt('Ochtend')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
         <label className="min-w-[min(12rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Herhaling</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Herhaling')}</span>
           <select
             value={rrule}
             onChange={(e) => setRrule(e.target.value)}
@@ -200,7 +199,7 @@ function RoutineEditor({
           >
             {HERHALING.map((h) => (
               <option key={h.waarde} value={h.waarde}>
-                {h.label}
+                {tt(h.label)}
               </option>
             ))}
           </select>
@@ -208,16 +207,16 @@ function RoutineEditor({
       </div>
 
       <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Stappen, één per lijn</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Stappen, één per lijn')}</span>
         <textarea
           value={steps}
           onChange={(e) => setSteps(e.target.value)}
           rows={5}
-          placeholder={'07:30 Opstaan\n08:00 Ontbijt\n08:30 Medicatie'}
+          placeholder={tt('07:30 Opstaan\n08:00 Ontbijt\n08:30 Medicatie')}
           className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3 font-mono text-sm"
         />
         <span className="mt-1 block text-xs text-ink-faint">
-          Begin elke lijn met het uur. Regels zonder uur worden overgeslagen.
+          {tt('Begin elke lijn met het uur. Regels zonder uur worden overgeslagen.')}
         </span>
       </label>
 
@@ -228,7 +227,7 @@ function RoutineEditor({
           onChange={(e) => setActive(e.target.checked)}
           className="h-5 w-5"
         />
-        <span className="font-semibold">Actief</span>
+        <span className="font-semibold">{tt('Actief')}</span>
       </label>
 
       <div className="flex flex-wrap gap-2">
@@ -237,24 +236,24 @@ function RoutineEditor({
           disabled={opslaan.isPending}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {opslaan.isPending ? 'Opslaan…' : 'Opslaan'}
+          {opslaan.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
         <button
           type="button"
           onClick={onDone}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
-          Annuleren
+          {tt('Annuleren')}
         </button>
         {routine ? (
           <button
             type="button"
             onClick={() => {
-              if (confirm(`Routine "${routine.name}" verwijderen?`)) verwijder.mutate()
+              if (confirm(tt('Routine "{naam}" verwijderen?', { naam: routine.name }))) verwijder.mutate()
             }}
             className="min-h-touch rounded-pill border-[1.5px] border-alert px-5 font-semibold text-alert"
           >
-            Verwijderen
+            {tt('Verwijderen')}
           </button>
         ) : null}
       </div>

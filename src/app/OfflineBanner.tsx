@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { onlineManager, useMutationState } from '@tanstack/react-query'
+import { tt } from '../lib/uiTaal'
 
 /**
  * Eén regel bovenaan, alleen wanneer er iets aan de hand is. Familie moet
@@ -25,9 +26,13 @@ export default function OfflineBanner() {
     >
       {!online
         ? wachtend > 0
-          ? `Geen verbinding — ${wachtend} wijziging${wachtend > 1 ? 'en' : ''} wordt straks verstuurd`
-          : 'Geen verbinding — je ziet de laatst geladen gegevens'
-        : `${wachtend} wijziging${wachtend > 1 ? 'en' : ''} wordt verstuurd…`}
+          ? wachtend > 1
+            ? tt('Geen verbinding — {n} wijzigingen wordt straks verstuurd', { n: wachtend })
+            : tt('Geen verbinding — {n} wijziging wordt straks verstuurd', { n: wachtend })
+          : tt('Geen verbinding — je ziet de laatst geladen gegevens')
+        : wachtend > 1
+          ? tt('{n} wijzigingen wordt verstuurd…', { n: wachtend })
+          : tt('{n} wijziging wordt verstuurd…', { n: wachtend })}
     </div>
   )
 }

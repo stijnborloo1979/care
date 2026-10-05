@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Play, Pause } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { deleteStory, getStories, bucketVan, storyAudioUrl, type LifeStory } from '../../services/stories'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 /**
  * Wat de persoon vertelde, in zijn eigen stem. Voor familie misschien het
@@ -17,9 +18,9 @@ export default function Verhalen({ householdId, naam }: { householdId: string; n
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Verhalen van {naam}</h2>
+      <h2 className="text-lg font-bold">{tt('Verhalen van {naam}', { naam })}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Elke dag stelt de app {naam} één vraag over het eigen leven, en {naam} kan ook zelf iets vertellen in het dagboek. Wat gedeeld wordt, staat hier.
+        {tt('Elke dag stelt de app {naam} één vraag over het eigen leven, en {naam} kan ook zelf iets vertellen in het dagboek. Wat gedeeld wordt, staat hier.', { naam })}
       </p>
 
       {(data ?? []).length > 0 ? (
@@ -27,15 +28,15 @@ export default function Verhalen({ householdId, naam }: { householdId: string; n
           to="/levensboek"
           className="mt-4 inline-flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-bold text-white"
         >
-          Maak er een boek van
+          {tt('Maak er een boek van')}
         </Link>
       ) : null}
 
-      {isLoading ? <p className="mt-4 text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="mt-4 text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       {!isLoading && (data ?? []).length === 0 ? (
         <p className="mt-4 text-ink-soft">
-          Nog geen verhalen. Ze verschijnen hier zodra {naam} een vraag beantwoordt.
+          {tt('Nog geen verhalen. Ze verschijnen hier zodra {naam} een vraag beantwoordt.', { naam })}
         </p>
       ) : null}
 
@@ -75,8 +76,8 @@ function Verhaal({ verhaal, householdId }: { verhaal: LifeStory; householdId: st
     <li className="rounded-2xl bg-surface-soft p-4">
       {verhaal.soort === 'dagboek' ? (
         <p className="text-sm font-bold uppercase tracking-wide text-ink-faint">
-          Dagboek ·{' '}
-          {new Date(verhaal.created_at).toLocaleString('nl-BE', {
+          {tt('Dagboek')} ·{' '}
+          {new Date(verhaal.created_at).toLocaleString(uiLocale(), {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
@@ -94,11 +95,15 @@ function Verhaal({ verhaal, householdId }: { verhaal: LifeStory; householdId: st
             className="inline-flex min-h-[2.6rem] items-center gap-2 rounded-pill bg-accent-ink px-4 text-sm font-semibold text-white"
           >
             {speelt ? <Pause size={16} strokeWidth={2} /> : <Play size={16} strokeWidth={2} />}
-            {speelt ? 'Pauze' : `Beluisteren${verhaal.audio_seconds ? ` · ${verhaal.audio_seconds} sec` : ''}`}
+            {speelt
+              ? tt('Pauze')
+              : verhaal.audio_seconds
+                ? tt('Beluisteren · {n} sec', { n: verhaal.audio_seconds })
+                : tt('Beluisteren')}
           </button>
         ) : null}
         <span className="text-sm text-ink-faint">
-          {new Date(verhaal.created_at).toLocaleDateString('nl-BE', {
+          {new Date(verhaal.created_at).toLocaleDateString(uiLocale(), {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
@@ -106,11 +111,11 @@ function Verhaal({ verhaal, householdId }: { verhaal: LifeStory; householdId: st
         </span>
         <button
           onClick={() => {
-            if (confirm('Dit verhaal verwijderen? Dat kan niet ongedaan gemaakt worden.')) wis.mutate()
+            if (confirm(tt('Dit verhaal verwijderen? Dat kan niet ongedaan gemaakt worden.'))) wis.mutate()
           }}
           className="ml-auto text-sm font-semibold text-ink-faint underline underline-offset-4"
         >
-          Verwijderen
+          {tt('Verwijderen')}
         </button>
       </div>
     </li>

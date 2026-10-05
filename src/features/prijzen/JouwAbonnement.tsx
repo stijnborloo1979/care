@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CreditCard } from 'lucide-react'
 import { STATUS, careRaming, euro, mijnAbonnement, publiekePrijzen } from './prijzen'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 /**
  * Jouw abonnement, voor de beheerder. Zolang er niets afgedwongen wordt,
@@ -17,26 +18,28 @@ export default function JouwAbonnement({ soort, id, bewoners }: { soort: 'househ
   return (
     <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby="abo-kop">
       <h2 id="abo-kop" className="flex items-center gap-2 text-lg font-bold">
-        <CreditCard size={20} strokeWidth={1.75} aria-hidden="true" /> Jouw abonnement
+        <CreditCard size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Jouw abonnement')}
       </h2>
       {abo.data ? (
         <p className="mt-2">
           <strong>{plan?.naam ?? abo.data.plan_id}</strong> · {STATUS[abo.data.status] ?? abo.data.status}
-          {abo.data.trial_ends_at ? `, tot ${new Date(abo.data.trial_ends_at).toLocaleDateString('nl-BE')}` : ''}
+          {abo.data.trial_ends_at ? `, ${tt('tot {datum}', { datum: new Date(abo.data.trial_ends_at).toLocaleDateString(uiLocale()) })}` : ''}
         </p>
       ) : (
         <p className="mt-2 text-ink-soft">
-          Je gebruikt alles van LifeAngle, en er wordt nog niets aangerekend.
+          {tt('Je gebruikt alles van LifeAngle, en er wordt nog niets aangerekend.')}
         </p>
       )}
       {soort === 'org_id' && care && bewoners !== undefined && care.prijs_maand_cent ? (
         <p className="mt-2 text-ink-soft">
-          Met {bewoners} {bewoners === 1 ? 'bewoner' : 'bewoners'} zou Care {euro(careRaming(care, bewoners))} per maand kosten
-          {care.btw_inbegrepen ? '' : ' (excl. btw)'}.
+          {bewoners === 1
+            ? tt('Met {n} bewoner zou Care {bedrag} per maand kosten', { n: bewoners, bedrag: euro(careRaming(care, bewoners)) })
+            : tt('Met {n} bewoners zou Care {bedrag} per maand kosten', { n: bewoners, bedrag: euro(careRaming(care, bewoners)) })}
+          {care.btw_inbegrepen ? '' : ` ${tt('(excl. btw)')}`}.
         </p>
       ) : null}
       <Link to="/prijzen" className="mt-3 inline-block font-semibold text-accent-ink underline underline-offset-4">
-        Bekijk de prijzen
+        {tt('Bekijk de prijzen')}
       </Link>
     </section>
   )

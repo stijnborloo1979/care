@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, MessageCircleQuestion } from 'lucide-react'
 import { antwoordAanBewoner, berichtenVan, draden, markeerGezien } from './bewonerBerichten'
 import { Fout, Kaart, Leeg, dagEnUur, knop, knopKlein, tekstvak } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Wat de bewoner zelf vanaf zijn tablet aan het zorgteam vroeg (68).
@@ -38,15 +39,15 @@ export default function BerichtenVanBewoner({ hh, naam }: { hh: string; naam: st
     <Kaart
       titel={
         <>
-          <MessageCircleQuestion size={20} strokeWidth={1.75} aria-hidden="true" /> Vragen van {naam}
+          <MessageCircleQuestion size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Vragen van {naam}', { naam })}
           {nieuw > 0 ? (
-            <span className="ml-1 rounded-pill bg-alert px-2 py-0.5 text-xs font-bold text-white">{nieuw} nieuw</span>
+            <span className="ml-1 rounded-pill bg-alert px-2 py-0.5 text-xs font-bold text-white">{tt('{n} nieuw', { n: nieuw })}</span>
           ) : null}
         </>
       }
     >
       {lijst.data && items.length === 0 ? (
-        <Leeg>Nog geen vragen. {naam} kan op de tablet iets vragen aan het zorgteam.</Leeg>
+        <Leeg>{tt('Nog geen vragen. {naam} kan op de tablet iets vragen aan het zorgteam.', { naam })}</Leeg>
       ) : null}
       <ul className="space-y-3">
         {items.map(({ vraag, antwoorden }) => (
@@ -58,7 +59,7 @@ export default function BerichtenVanBewoner({ hh, naam }: { hh: string; naam: st
             <p className="mt-1 break-words text-lg">{vraag.body}</p>
             {antwoorden.map((a) => (
               <p key={a.id} className="mt-2 break-words rounded-xl bg-accent-soft px-3 py-2">
-                <span className="block text-xs font-semibold text-accent-ink">Antwoord · {dagEnUur(a.created_at)}</span>
+                <span className="block text-xs font-semibold text-accent-ink">{tt('Antwoord')} · {dagEnUur(a.created_at)}</span>
                 {a.body}
               </p>
             ))}
@@ -71,7 +72,7 @@ export default function BerichtenVanBewoner({ hh, naam }: { hh: string; naam: st
                 className="mt-3"
               >
                 <label className="sr-only" htmlFor={`antwoord-${vraag.id}`}>
-                  Antwoord aan {naam}
+                  {tt('Antwoord aan {naam}', { naam })}
                 </label>
                 <textarea
                   id={`antwoord-${vraag.id}`}
@@ -80,15 +81,15 @@ export default function BerichtenVanBewoner({ hh, naam }: { hh: string; naam: st
                   rows={2}
                   maxLength={1000}
                   autoFocus
-                  placeholder="Kort en eenvoudig, bv. 'Ik kom om 15 uur.'"
+                  placeholder={tt("Kort en eenvoudig, bv. 'Ik kom om 15 uur.'")}
                   className={tekstvak}
                 />
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button type="submit" disabled={!tekst.trim() || antwoord.isPending} className={knop}>
-                    Antwoord sturen
+                    {tt('Antwoord sturen')}
                   </button>
                   <button type="button" onClick={() => setOpen(null)} className={knopKlein}>
-                    Annuleren
+                    {tt('Annuleren')}
                   </button>
                 </div>
               </form>
@@ -96,11 +97,11 @@ export default function BerichtenVanBewoner({ hh, naam }: { hh: string; naam: st
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {vraag.gezien_at ? (
                   <span className="inline-flex items-center gap-1 text-sm text-ink-soft">
-                    <CheckCheck size={16} strokeWidth={2} aria-hidden="true" /> Gezien
+                    <CheckCheck size={16} strokeWidth={2} aria-hidden="true" /> {tt('Gezien')}
                   </span>
                 ) : (
                   <button onClick={() => gezien.mutate(vraag.id)} disabled={gezien.isPending} className={`${knopKlein} inline-flex items-center gap-1`}>
-                    <CheckCheck size={15} strokeWidth={2} aria-hidden="true" /> Gezien
+                    <CheckCheck size={15} strokeWidth={2} aria-hidden="true" /> {tt('Gezien')}
                   </button>
                 )}
                 <button
@@ -110,7 +111,7 @@ export default function BerichtenVanBewoner({ hh, naam }: { hh: string; naam: st
                   }}
                   className={knopKlein}
                 >
-                  Antwoorden
+                  {tt('Antwoorden')}
                 </button>
               </div>
             )}

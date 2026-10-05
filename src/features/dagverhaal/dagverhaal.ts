@@ -3,6 +3,7 @@ import type { Bezoek } from '../../services/bezoek'
 import { aanwezigBij, type HuisMoment } from '../../services/afdelingsdagPuur'
 import type { Uitstap } from '../../services/uitstapPuur'
 import { hhmm, localDateKey } from '../../lib/time'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Het dagverhaal: wat er vandaag gebeurde, in een paar gewone zinnen.
@@ -28,12 +29,12 @@ function kleinBegin(s: string): string {
 
 function lijstje(woorden: string[]): string {
   if (woorden.length <= 1) return woorden.join('')
-  return `${woorden.slice(0, -1).join(', ')} en ${woorden[woorden.length - 1]}`
+  return tt('{begin} en {laatste}', { begin: woorden.slice(0, -1).join(', '), laatste: woorden[woorden.length - 1] })
 }
 
 function dagdeel(iso: string, tz: string): string {
   const u = Number(new Intl.DateTimeFormat('nl-BE', { timeZone: tz, hour: 'numeric', hour12: false }).format(new Date(iso))) % 24
-  return u < 12 ? 'in de voormiddag' : u < 18 ? 'in de namiddag' : "'s avonds"
+  return u < 12 ? tt('in de voormiddag') : u < 18 ? tt('in de namiddag') : tt("'s avonds")
 }
 
 export interface Dagverhaal {
@@ -71,16 +72,20 @@ export function dagverhaal(input: {
     const titels = gedaan.slice(0, 3).map((e) => kleinBegin(e.title))
     const rest = gedaan.length - titels.length
     zinnen.push(
-      `${naam} vinkte vandaag ${lijstje(titels)} af${rest > 0 ? `, en nog ${rest} ander${rest === 1 ? '' : 'e'}` : ''}.`,
+      rest === 0
+        ? tt('{naam} vinkte vandaag {lijst} af.', { naam, lijst: lijstje(titels) })
+        : rest === 1
+          ? tt('{naam} vinkte vandaag {lijst} af, en nog {n} ander.', { naam, lijst: lijstje(titels), n: rest })
+          : tt('{naam} vinkte vandaag {lijst} af, en nog {n} andere.', { naam, lijst: lijstje(titels), n: rest }),
     )
   } else if (gepland.length > 0 && gepland.some((e) => new Date(e.starts_at) < nu)) {
-    zinnen.push(`Er is vandaag nog niets afgevinkt.`)
+    zinnen.push(tt('Er is vandaag nog niets afgevinkt.'))
   }
 
   // Bezoek: wie, wanneer en wat ze deden.
   const bezoekVandaag = input.bezoeken.filter((b) => localDateKey(new Date(b.visited_at), tz) === vandaag)
   for (const b of bezoekVandaag.slice(0, 3)) {
-    zinnen.push(`${b.visitor_name} was op bezoek ${dagdeel(b.visited_at, tz)}.`)
+    zinnen.push(tt('{naam} was op bezoek {dagdeel}.', { naam: b.visitor_name, dagdeel: dagdeel(b.visited_at, tz) }))
   }
 
   // Activiteiten van het woonzorgcentrum waar het team "aanwezig" aanduidde.
@@ -90,24 +95,30 @@ export function dagverhaal(input: {
   )
   if (bij.length > 0) {
     const titels = bij.slice(0, 3).map((m) => kleinBegin(m.titel))
-    zinnen.push(`${naam} was vandaag bij ${lijstje(titels)}.`)
+    zinnen.push(tt('{naam} was vandaag bij {lijst}.', { naam, lijst: lijstje(titels) }))
   }
 
   // Uitstap: met wie, en of ze al terug is. De notitie is vrije tekst en komt er niet in.
   for (const u of (input.uitstappen ?? []).filter(
     (u) => (u.status === 'weg' || u.status === 'terug') && localDateKey(new Date(u.vertrokken_at ?? u.vertrek), tz) === vandaag,
   ).slice(0, 2)) {
-    zinnen.push(u.status === 'terug' ? `${naam} was op uitstap met ${u.met_wie}.` : `${naam} is op uitstap met ${u.met_wie}.`)
+    zinnen.push(
+      u.status === 'terug'
+        ? tt('{naam} was op uitstap met {wie}.', { naam, wie: u.met_wie })
+        : tt('{naam} is op uitstap met {wie}.', { naam, wie: u.met_wie }),
+    )
   }
 
   // Medicatie: alleen of het bevestigd is. Wat ze neemt, staat er niet.
   const verlopen = summary.meds.filter((m) => new Date(m.due_at) <= nu)
   if (verlopen.length > 0) {
     const open = verlopen.filter((m) => !m.taken_at)
-    if (open.length === 0) zinnen.push('Alle medicatie tot nu toe is bevestigd.')
+    if (open.length === 0) zinnen.push(tt('Alle medicatie tot nu toe is bevestigd.'))
     else
       zinnen.push(
-        `De medicatie van ${lijstje([...new Set(open.map((m) => hhmm(new Date(m.due_at), tz)))])} is nog niet bevestigd.`,
+        tt('De medicatie van {uren} is nog niet bevestigd.', {
+          uren: lijstje([...new Set(open.map((m) => hhmm(new Date(m.due_at), tz)))]),
+        }),
       )
   }
 
@@ -127,8 +138,11 @@ export function dagverhaal(input: {
 
   // Wat er nog komt.
   const straks = gepland.find((e) => !e.done_at && new Date(e.starts_at) > nu)
-  if (straks) zinnen.push(`Nog op de planning: ${kleinBegin(straks.title)} om ${hhmm(new Date(straks.starts_at), tz)}.`)
+  if (straks)
+    zinnen.push(
+      tt('Nog op de planning: {wat} om {uur}.', { wat: kleinBegin(straks.title), uur: hhmm(new Date(straks.starts_at), tz) }),
+    )
 
-  if (zinnen.length === 0) zinnen.push(`Over vandaag staat er nog niets in de app.`)
+  if (zinnen.length === 0) zinnen.push(tt('Over vandaag staat er nog niets in de app.'))
   return { zinnen, logboek }
 }

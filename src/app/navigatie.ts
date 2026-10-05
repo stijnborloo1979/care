@@ -1,4 +1,5 @@
 import type { IconNaam } from '../components/Icon'
+import { tt } from '../lib/uiTaal'
 
 /**
  * De familienavigatie, met per item de permissie die nodig is om er iets
@@ -18,24 +19,24 @@ export interface NavItem {
 }
 
 export const NAV: NavItem[] = [
-  { to: '/familie', end: true, label: 'Dashboard', icoon: 'dashboard' },
-  { to: '/familie/kalender', label: 'Kalender', icoon: 'agenda', perm: ['agenda.read'] },
-  { to: '/familie/planning', label: 'Routines', icoon: 'planning', perm: ['routine.read'] },
-  { to: '/familie/medicatie', label: 'Medicatie', icoon: 'medicatie', perm: ['medication.read'] },
-  { to: '/familie/wie', label: 'Familie', icoon: 'wie', perm: ['people.read'] },
-  { to: '/familie/week', label: 'De week samen', icoon: 'wie', perm: ['agenda.read'] },
-  { to: '/familie/huis', label: 'Home Memory', icoon: 'vandaag' },
-  { to: '/familie/fotos', label: 'Herinneringen', icoon: 'fotos', perm: ['memories.read'] },
-  { to: '/familie/weetjes', label: 'Weetjes', icoon: 'weetjes', perm: ['notes.read'] },
-  { to: '/familie/berichten', label: 'Berichten', icoon: 'praten', perm: ['message.family.read'] },
-  { to: '/familie/taken', label: 'Taken', icoon: 'taken', perm: ['task.manage'] },
-  { to: '/familie/boodschappen', label: 'Boodschappen', icoon: 'boodschappen', perm: ['shopping.read'] },
-  { to: '/familie/analyse', label: 'Analyse', icoon: 'dashboard', perm: ['care_log.read', 'medication_log.read'] },
-  { to: '/familie/indeling', label: 'Indeling', icoon: 'instellingen', perm: ['household.write'] },
-  { to: '/familie/logboek', label: 'Zorglogboek', icoon: 'logboek', perm: ['care_log.read', 'care_log.write'] },
-  { to: '/familie/documenten', label: 'Documenten', icoon: 'documenten', perm: ['document.read'] },
-  { to: '/familie/delen', label: 'Wie ziet wat', icoon: 'wie' },
-  { to: '/familie/instellingen', label: 'Instellingen', icoon: 'instellingen' },
+  { to: '/familie', end: true, label: tt('Dashboard'), icoon: 'dashboard' },
+  { to: '/familie/kalender', label: tt('Kalender'), icoon: 'agenda', perm: ['agenda.read'] },
+  { to: '/familie/planning', label: tt('Routines'), icoon: 'planning', perm: ['routine.read'] },
+  { to: '/familie/medicatie', label: tt('Medicatie'), icoon: 'medicatie', perm: ['medication.read'] },
+  { to: '/familie/wie', label: tt('Familie'), icoon: 'wie', perm: ['people.read'] },
+  { to: '/familie/week', label: tt('De week samen'), icoon: 'wie', perm: ['agenda.read'] },
+  { to: '/familie/huis', label: tt('Home Memory'), icoon: 'vandaag' },
+  { to: '/familie/fotos', label: tt('Herinneringen'), icoon: 'fotos', perm: ['memories.read'] },
+  { to: '/familie/weetjes', label: tt('Weetjes'), icoon: 'weetjes', perm: ['notes.read'] },
+  { to: '/familie/berichten', label: tt('Berichten'), icoon: 'praten', perm: ['message.family.read'] },
+  { to: '/familie/taken', label: tt('Taken'), icoon: 'taken', perm: ['task.manage'] },
+  { to: '/familie/boodschappen', label: tt('Boodschappen'), icoon: 'boodschappen', perm: ['shopping.read'] },
+  { to: '/familie/analyse', label: tt('Analyse'), icoon: 'dashboard', perm: ['care_log.read', 'medication_log.read'] },
+  { to: '/familie/indeling', label: tt('Indeling'), icoon: 'instellingen', perm: ['household.write'] },
+  { to: '/familie/logboek', label: tt('Zorglogboek'), icoon: 'logboek', perm: ['care_log.read', 'care_log.write'] },
+  { to: '/familie/documenten', label: tt('Documenten'), icoon: 'documenten', perm: ['document.read'] },
+  { to: '/familie/delen', label: tt('Wie ziet wat'), icoon: 'wie' },
+  { to: '/familie/instellingen', label: tt('Instellingen'), icoon: 'instellingen' },
 ]
 
 /**

@@ -5,6 +5,7 @@ import { getPeople } from '../../services/people'
 import { getNotes } from '../../services/notes'
 import { getVerhalenAlleen } from '../../services/stories'
 import { Kaart } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * "Dit ben ik" voor het zorgteam: wie de bewoner is, in één blik. Wat de
@@ -26,24 +27,24 @@ export default function DitBenIkKaart({ hh, naam }: { hh: string; naam: string }
   const aanspreken = p?.noemNaam?.trim()
 
   const velden: [string, string | undefined][] = [
-    ['Zo praat je best met mij', p?.omgang],
-    ['Als ik onrustig ben, helpt dit', p?.rust],
-    ['Hier raak ik van overstuur', p?.vermijden],
+    [tt('Zo praat je best met mij'), p?.omgang],
+    [tt('Als ik onrustig ben, helpt dit'), p?.rust],
+    [tt('Hier raak ik van overstuur'), p?.vermijden],
   ]
   const ingevuld = velden.filter(([, t]) => t?.trim())
   const iets = aanspreken || ingevuld.length > 0 || familie.length > 0 || voorkeuren.length > 0 || stukje
 
   return (
-    <Kaart titel={<><Sparkles size={20} strokeWidth={1.75} aria-hidden="true" /> Dit ben ik</>}>
+    <Kaart titel={<><Sparkles size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Dit ben ik')}</>}>
       {!iets ? (
         <p className="rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">
-          De familie vulde nog niets in. Vraag hen om "Dit ben ik" aan te vullen in de app.
+          {tt('De familie vulde nog niets in. Vraag hen om "Dit ben ik" aan te vullen in de app.')}
         </p>
       ) : (
         <div className="space-y-4">
           {aanspreken ? (
             <p className="text-lg">
-              Noem mij <strong>{aanspreken}</strong>.
+              {tt('Noem mij')} <strong>{aanspreken}</strong>.
             </p>
           ) : null}
           {ingevuld.length > 0 ? (
@@ -58,13 +59,13 @@ export default function DitBenIkKaart({ hh, naam }: { hh: string; naam: string }
           ) : null}
           {familie.length > 0 ? (
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Wie bij mij hoort</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Wie bij mij hoort')}</h3>
               <p className="mt-1">{familie.map((m) => `${m.name} (${m.relation.toLowerCase()})`).join(', ')}</p>
             </div>
           ) : null}
           {voorkeuren.length > 0 ? (
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Wat ik graag heb</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Wat ik graag heb')}</h3>
               <ul className="mt-1 space-y-1">
                 {voorkeuren.map((n) => (
                   <li key={n.id}>
@@ -77,13 +78,13 @@ export default function DitBenIkKaart({ hh, naam }: { hh: string; naam: string }
           ) : null}
           {stukje ? (
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Uit mijn verhaal</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Uit mijn verhaal')}</h3>
               <p className="mt-1 line-clamp-4 italic">“{stukje.body}”</p>
             </div>
           ) : null}
         </div>
       )}
-      <p className="mt-3 text-xs text-ink-faint">Ingevuld door {naam} en de familie.</p>
+      <p className="mt-3 text-xs text-ink-faint">{tt('Ingevuld door {naam} en de familie.', { naam })}</p>
     </Kaart>
   )
 }

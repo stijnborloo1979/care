@@ -12,6 +12,7 @@ import {
   type AfdelingRij,
 } from './zorgApi'
 import { Fout, Kaart, Leeg, knop, knopKlein, knopRustig, label, veld } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /** Naam, contactadres en btw-nummer van het woonzorgcentrum. Alleen de beheerder. */
 export function Organisatie({ orgId }: { orgId: string }) {
@@ -40,7 +41,7 @@ export function Organisatie({ orgId }: { orgId: string }) {
   const gewijzigd = naam !== g.data.name || mail !== (g.data.contact_email ?? '') || btw !== (g.data.vat_number ?? '')
 
   return (
-    <Kaart titel={<><Building2 size={20} strokeWidth={1.75} aria-hidden="true" /> Organisatie</>}>
+    <Kaart titel={<><Building2 size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Organisatie')}</>}>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -49,22 +50,22 @@ export function Organisatie({ orgId }: { orgId: string }) {
         className="grid gap-3 sm:grid-cols-2"
       >
         <label className="sm:col-span-2">
-          <span className={label}>Naam</span>
+          <span className={label}>{tt('Naam')}</span>
           <input required maxLength={120} value={naam} onChange={(e) => { setNaam(e.target.value); setBewaard(false) }} className={veld} />
         </label>
         <label className="min-w-0">
-          <span className={label}>Contact-e-mail</span>
+          <span className={label}>{tt('Contact-e-mail')}</span>
           <input type="email" value={mail} onChange={(e) => { setMail(e.target.value); setBewaard(false) }} className={veld} />
         </label>
         <label className="min-w-0">
-          <span className={label}>Btw-nummer</span>
+          <span className={label}>{tt('Btw-nummer')}</span>
           <input maxLength={30} value={btw} onChange={(e) => { setBtw(e.target.value); setBewaard(false) }} placeholder="BE0123.456.789" className={veld} />
         </label>
         <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
           <button type="submit" disabled={!gewijzigd || !naam.trim() || bewaar.isPending} className={knop}>
-            Bewaren
+            {tt('Bewaren')}
           </button>
-          {bewaard && !gewijzigd ? <span role="status" className="text-sm text-ink-soft">Bewaard.</span> : null}
+          {bewaard && !gewijzigd ? <span role="status" className="text-sm text-ink-soft">{tt('Bewaard.')}</span> : null}
         </div>
       </form>
       <Fout fout={bewaar.error} />
@@ -95,8 +96,8 @@ export function Afdelingen({ orgId }: { orgId: string }) {
   const archief = (afd.data ?? []).filter((a) => a.archived_at)
 
   return (
-    <Kaart titel="Afdelingen">
-      {afd.data && actief.length === 0 ? <Leeg>Nog geen afdelingen.</Leeg> : null}
+    <Kaart titel={tt('Afdelingen')}>
+      {afd.data && actief.length === 0 ? <Leeg>{tt('Nog geen afdelingen.')}</Leeg> : null}
       <ul className="space-y-2">
         {actief.map((a) => (
           <AfdelingRegel
@@ -104,7 +105,7 @@ export function Afdelingen({ orgId }: { orgId: string }) {
             a={a}
             onVerandering={ververs}
             onArchiveer={() => {
-              if (confirm(`Afdeling ${a.name} archiveren? Medewerkers verliezen hun plaats op deze afdeling.`)) archiveer.mutate(a.id)
+              if (confirm(tt('Afdeling {naam} archiveren? Medewerkers verliezen hun plaats op deze afdeling.', { naam: a.name }))) archiveer.mutate(a.id)
             }}
           />
         ))}
@@ -117,22 +118,22 @@ export function Afdelingen({ orgId }: { orgId: string }) {
         className="mt-3 flex flex-wrap items-end gap-2"
       >
         <label className="min-w-[12rem] flex-1">
-          <span className={label}>Nieuwe afdeling</span>
-          <input maxLength={80} value={naam} onChange={(e) => setNaam(e.target.value)} placeholder="De Eik" className={veld} />
+          <span className={label}>{tt('Nieuwe afdeling')}</span>
+          <input maxLength={80} value={naam} onChange={(e) => setNaam(e.target.value)} placeholder={tt('De Eik')} className={veld} />
         </label>
         <button type="submit" disabled={!naam.trim() || maak.isPending} className={knop}>
-          Toevoegen
+          {tt('Toevoegen')}
         </button>
       </form>
       {archief.length > 0 ? (
         <details className="mt-4">
-          <summary className="cursor-pointer text-sm font-semibold text-ink-soft">Gearchiveerd ({archief.length})</summary>
+          <summary className="cursor-pointer text-sm font-semibold text-ink-soft">{tt('Gearchiveerd ({n})', { n: archief.length })}</summary>
           <ul className="mt-2 space-y-2">
             {archief.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-soft px-4 py-2">
                 <span className="min-w-0 flex-1 text-ink-soft">{a.name}</span>
                 <button onClick={() => herstel.mutate(a.id)} className={knopKlein}>
-                  Terugzetten
+                  {tt('Terugzetten')}
                 </button>
               </li>
             ))}
@@ -165,14 +166,14 @@ function AfdelingRegel({ a, onVerandering, onArchiveer }: { a: AfdelingRij; onVe
           className="flex flex-wrap items-end gap-2"
         >
           <label className="min-w-[10rem] flex-1">
-            <span className="sr-only">Nieuwe naam voor {a.name}</span>
+            <span className="sr-only">{tt('Nieuwe naam voor {naam}', { naam: a.name })}</span>
             <input autoFocus maxLength={80} value={naam} onChange={(e) => setNaam(e.target.value)} className={veld} />
           </label>
           <button type="submit" disabled={!naam.trim() || hernoem.isPending} className={knop}>
-            Bewaren
+            {tt('Bewaren')}
           </button>
           <button type="button" onClick={() => { setBewerk(false); setNaam(a.name) }} className={knopRustig}>
-            Annuleren
+            {tt('Annuleren')}
           </button>
         </form>
         <Fout fout={hernoem.error} />
@@ -182,11 +183,11 @@ function AfdelingRegel({ a, onVerandering, onArchiveer }: { a: AfdelingRij; onVe
   return (
     <li className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-soft px-4 py-2">
       <span className="min-w-0 flex-1 font-semibold">{a.name}</span>
-      <button onClick={() => setBewerk(true)} aria-label={`${a.name} hernoemen`} className={`${knopKlein} inline-flex items-center gap-1`}>
-        <Pencil size={14} strokeWidth={1.75} aria-hidden="true" /> Hernoemen
+      <button onClick={() => setBewerk(true)} aria-label={tt('{naam} hernoemen', { naam: a.name })} className={`${knopKlein} inline-flex items-center gap-1`}>
+        <Pencil size={14} strokeWidth={1.75} aria-hidden="true" /> {tt('Hernoemen')}
       </button>
-      <button onClick={onArchiveer} aria-label={`${a.name} archiveren`} className={`${knopKlein} inline-flex items-center gap-1`}>
-        <Archive size={14} strokeWidth={1.75} aria-hidden="true" /> Archiveren
+      <button onClick={onArchiveer} aria-label={tt('{naam} archiveren', { naam: a.name })} className={`${knopKlein} inline-flex items-center gap-1`}>
+        <Archive size={14} strokeWidth={1.75} aria-hidden="true" /> {tt('Archiveren')}
       </button>
     </li>
   )

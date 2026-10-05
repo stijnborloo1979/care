@@ -2,6 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useHousehold } from '../household/useHousehold'
 import { WEEKDAGEN } from '../../services/analyse'
 import { locale } from '../../lib/i18n'
+import { tt } from '../../lib/uiTaal'
 import { BLOKKEN, nietOpgenomen } from './blokken'
 import { useAnalyse } from './useAnalyse'
 
@@ -26,7 +27,7 @@ export default function Verslag() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
   const naam = household?.person_name ?? ''
-  const voornaam = naam.split(' ')[0] || 'de persoon'
+  const voornaam = naam.split(' ')[0] || tt('de persoon')
 
   const [params] = useSearchParams()
   const uitUrl = Number(params.get('dagen'))
@@ -50,69 +51,73 @@ export default function Verslag() {
       <div className="niet-printen sticky top-0 z-10 border-b border-line bg-surface px-5 py-3">
         <div className="mx-auto flex max-w-[48rem] flex-wrap items-center gap-3">
           <Link to="/familie/analyse" className="font-semibold underline underline-offset-4">
-            ‹ Terug naar analyse
+            {tt('‹ Terug naar analyse')}
           </Link>
           <span className="text-ink-soft">
-            {meeDoen.length} {meeDoen.length === 1 ? 'onderdeel' : 'onderdelen'}
+            {meeDoen.length === 1
+              ? tt('{n} onderdeel', { n: meeDoen.length })
+              : tt('{n} onderdelen', { n: meeDoen.length })}
           </span>
           <button
             onClick={() => window.print()}
             className="ml-auto min-h-touch rounded-pill bg-accent-ink px-5 font-bold text-white"
           >
-            Afdrukken of opslaan als PDF
+            {tt('Afdrukken of opslaan als PDF')}
           </button>
         </div>
       </div>
 
       <main className="mx-auto max-w-[48rem] px-6 py-10">
-        {a.bezig ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+        {a.bezig ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
         <header className="border-b-2 border-ink pb-4">
-          <h1 className="text-3xl font-extrabold tracking-tight">Verslag — {naam}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{tt('Verslag — {naam}', { naam })}</h1>
           <p className="mt-2 text-ink-soft">
-            Periode {datum(a.van)} tot {datum(a.tot)} · afgedrukt op {vandaag}
+            {tt('Periode {van} tot {tot} · afgedrukt op {vandaag}', { van: datum(a.van), tot: datum(a.tot), vandaag })}
           </p>
           <p className="text-ink-soft">
-            Samengesteld door familie via de app LifeAngle. Geen medisch document.
+            {tt('Samengesteld door familie via de app LifeAngle. Geen medisch document.')}
           </p>
         </header>
 
         {/* Dit blok gaat vóór de cijfers, niet erna. Wie de kop leest en
             doorbladert, moet de beperking al gezien hebben. */}
         <section className="kader mt-6 border-[1.5px] border-line-strong p-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider">Wat deze cijfers wel en niet zijn</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider">{tt('Wat deze cijfers wel en niet zijn')}</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.95rem]">
             <li>
-              <strong>Bevestigd is niet ingenomen.</strong> De app legt vast dat er op een knop
-              gedrukt is, door wie en wanneer. Niet of het middel geslikt werd.
+              <strong>{tt('Bevestigd is niet ingenomen.')}</strong>{' '}
+              {tt('De app legt vast dat er op een knop gedrukt is, door wie en wanneer. Niet of het middel geslikt werd.')}
             </li>
             <li>
-              Alles komt uit het gebruik van de app. Wat buiten de app gebeurde, staat er niet in.
+              {tt('Alles komt uit het gebruik van de app. Wat buiten de app gebeurde, staat er niet in.')}
             </li>
             <li>
-              De app stelt geen diagnose en meet niets medisch. Er staan hier tellingen en
-              tijdstippen, geen score en geen conclusie.
+              {tt('De app stelt geen diagnose en meet niets medisch. Er staan hier tellingen en tijdstippen, geen score en geen conclusie.')}
             </li>
           </ul>
         </section>
 
         {a.dekking ? (
           <section className="mt-6">
-            <h2 className="kop">Over hoeveel dagen dit gaat</h2>
+            <h2 className="kop">{tt('Over hoeveel dagen dit gaat')}</h2>
             <p className="mt-1">
-              De app werd gebruikt op <strong>{a.dekking.dagen_gebruik} van de{' '}
-              {a.dekking.dagen_periode} dagen</strong> in deze periode
-              {a.dekking.eerste_dag ? (
-                <>
-                  , van {datum(a.dekking.eerste_dag)} tot {datum(a.dekking.laatste_dag ?? a.tot)}
-                </>
-              ) : null}
-              . Alle percentages hieronder gaan over die dagen.
+              {a.dekking.eerste_dag
+                ? tt('De app werd gebruikt op {gebruik} van de {periode} dagen in deze periode, van {van} tot {tot}. Alle percentages hieronder gaan over die dagen.', {
+                    gebruik: a.dekking.dagen_gebruik,
+                    periode: a.dekking.dagen_periode,
+                    van: datum(a.dekking.eerste_dag),
+                    tot: datum(a.dekking.laatste_dag ?? a.tot),
+                  })
+                : tt('De app werd gebruikt op {gebruik} van de {periode} dagen in deze periode. Alle percentages hieronder gaan over die dagen.', {
+                    gebruik: a.dekking.dagen_gebruik,
+                    periode: a.dekking.dagen_periode,
+                  })}
             </p>
 
             {a.stabiel.length > 0 ? (
               <>
-                <p className="mt-3 font-semibold">Wat gelijk bleef</p>
+                <p className="mt-3 font-semibold">{tt('Wat gelijk bleef')}</p>
                 <ul className="mt-1 list-disc pl-5">
                   {a.stabiel.map((z) => (
                     <li key={z}>{z}</li>
@@ -139,38 +144,35 @@ export default function Verslag() {
 
         {!a.bezig && meeDoen.length === 0 ? (
           <p className="mt-7 text-ink-soft">
-            Er staat nog niets aangevinkt. Kies op het analysescherm wat er op het verslag moet
-            komen.
+            {tt('Er staat nog niets aangevinkt. Kies op het analysescherm wat er op het verslag moet komen.')}
           </p>
         ) : null}
 
         {/* De belangrijkste regel van het blad. */}
         <section className="heel-houden mt-7 border-t-[1.5px] border-ink pt-4">
-          <h2 className="kop">Wat er niet op dit verslag staat</h2>
+          <h2 className="kop">{tt('Wat er niet op dit verslag staat')}</h2>
           {weg.bewustWeg.length > 0 ? (
             <p className="mt-1">
-              <strong>Weggelaten door familie:</strong> {weg.bewustWeg.join(', ')}. Deze gegevens
-              bestaan wel in de app.
+              <strong>{tt('Weggelaten door familie:')}</strong>{' '}
+              {tt('{lijst}. Deze gegevens bestaan wel in de app.', { lijst: weg.bewustWeg.join(', ') })}
             </p>
           ) : null}
           {weg.geenGegevens.length > 0 ? (
             <p className="mt-1">
-              <strong>Geen gegevens over:</strong> {weg.geenGegevens.join(', ')}. Hierover is in deze
-              periode niets vastgelegd.
+              <strong>{tt('Geen gegevens over:')}</strong>{' '}
+              {tt('{lijst}. Hierover is in deze periode niets vastgelegd.', { lijst: weg.geenGegevens.join(', ') })}
             </p>
           ) : null}
           {weg.bewustWeg.length === 0 && weg.geenGegevens.length === 0 ? (
-            <p className="mt-1">Alles wat de app over deze periode heeft, staat hierboven.</p>
+            <p className="mt-1">{tt('Alles wat de app over deze periode heeft, staat hierboven.')}</p>
           ) : null}
           <p className="mt-2">
-            De app registreert geen slaap, geen schermtijd en niet wat {voornaam} aan de
-            spraakassistent vroeg.
+            {tt('De app registreert geen slaap, geen schermtijd en niet wat {voornaam} aan de spraakassistent vroeg.', { voornaam })}
           </p>
         </section>
 
         <footer className="mt-8 border-t border-line pt-3 text-sm text-ink-soft">
-          LifeAngle — een digitaal geheugen voor het dagelijkse leven. Dit verslag vervangt geen
-          professionele zorg.
+          {tt('LifeAngle — een digitaal geheugen voor het dagelijkse leven. Dit verslag vervangt geen professionele zorg.')}
         </footer>
       </main>
     </div>
@@ -231,13 +233,18 @@ function Medicatie({ a, voornaam }: { a: A; voornaam: string }) {
   return (
     <>
       <p className="mb-2">
-        In totaal <strong>{a.totaal.bevestigd} van {a.totaal.momenten} momenten</strong> bevestigd (
-        {pct(a.totaal.bevestigd, a.totaal.momenten)}), waarvan {a.totaal.zelf} door {voornaam} zelf.
-        Over {a.totaal.dagen} dagen.
+        {tt('In totaal {bevestigd} van {momenten} momenten bevestigd ({pct}), waarvan {zelf} door {voornaam} zelf. Over {dagen} dagen.', {
+          bevestigd: a.totaal.bevestigd,
+          momenten: a.totaal.momenten,
+          pct: pct(a.totaal.bevestigd, a.totaal.momenten),
+          zelf: a.totaal.zelf,
+          voornaam,
+          dagen: a.totaal.dagen,
+        })}
       </p>
 
       <Tabel
-        koppen={['Tijdstip', 'Momenten', 'Bevestigd', 'Aandeel', 'Waarvan zelf', 'Dagen']}
+        koppen={[tt('Tijdstip'), tt('Momenten'), tt('Bevestigd'), tt('Aandeel'), tt('Waarvan zelf'), tt('Dagen')]}
         rijen={a.perTijdstip.map((r) => [
           r.tijdstip,
           r.momenten,
@@ -249,9 +256,7 @@ function Medicatie({ a, voornaam }: { a: A; voornaam: string }) {
       />
 
       <p className="mt-2 text-[0.9rem]">
-        "Waarvan zelf" is het aantal momenten dat {voornaam} zelf bevestigde; de rest werd door
-        familie of een zorgverlener bevestigd. Een gelijkblijvend totaal kan dus een verschuiving
-        verbergen.
+        {tt('"Waarvan zelf" is het aantal momenten dat {voornaam} zelf bevestigde; de rest werd door familie of een zorgverlener bevestigd. Een gelijkblijvend totaal kan dus een verschuiving verbergen.', { voornaam })}
       </p>
     </>
   )
@@ -264,19 +269,18 @@ function Dagritme({ a }: { a: A }) {
   return (
     <>
       <p className="mb-2">
-        Het tijdstip van de eerste afgevinkte activiteit van de dag. Het verschil tussen de vroegste
-        en de laatste zegt meer dan de mediaan.
+        {tt('Het tijdstip van de eerste afgevinkte activiteit van de dag. Het verschil tussen de vroegste en de laatste zegt meer dan de mediaan.')}
       </p>
 
       <Tabel
-        koppen={['Maand', 'Dagen', 'Vroegste', 'Mediaan', 'Laatste', 'Spreiding']}
+        koppen={[tt('Maand'), tt('Dagen'), tt('Vroegste'), tt('Mediaan'), tt('Laatste'), tt('Spreiding')]}
         rijen={a.dagritme.map((r) => [
           maand(r.maand),
           r.dagen,
           r.vroegste,
           r.mediaan,
           r.laatste,
-          `${r.spreiding} min`,
+          tt('{n} min', { n: r.spreiding }),
         ])}
       />
     </>
@@ -287,14 +291,13 @@ function Weekpatroon({ a }: { a: A }) {
   return (
     <>
       <p className="mb-2">
-        Per dag van de week. Belangrijk bij het lezen: valt een hoog cijfer samen met de dag waarop
-        er bezoek is, dan meet het bezoek en geen zelfstandigheid.
+        {tt('Per dag van de week. Belangrijk bij het lezen: valt een hoog cijfer samen met de dag waarop er bezoek is, dan meet het bezoek en geen zelfstandigheid.')}
       </p>
 
       <Tabel
-        koppen={['Dag', 'Momenten', 'Bevestigd', 'Aandeel', 'Zelf', 'Agenda gedaan', 'Dagen']}
+        koppen={[tt('Dag'), tt('Momenten'), tt('Bevestigd'), tt('Aandeel'), tt('Zelf'), tt('Agenda gedaan'), tt('Dagen')]}
         rijen={a.week.map((r) => [
-          WEEKDAGEN[r.weekdag - 1],
+          tt(WEEKDAGEN[r.weekdag - 1]),
           r.med_momenten,
           r.med_bevestigd,
           pct(r.med_bevestigd, r.med_momenten),
@@ -311,13 +314,13 @@ function Nacht({ a }: { a: A }) {
   return (
     <>
       <p className="mb-2">
-        Handelingen in de app door de persoon zelf tussen 1 en 6 uur: {a.nachtTotaal} in deze
-        periode. <strong>Dit is geen slaapmeting</strong> — iemand kan wakker liggen zonder het
-        scherm aan te raken, dus dit telt eerder te weinig dan te veel.
+        {tt('Handelingen in de app door de persoon zelf tussen 1 en 6 uur: {n} in deze periode.', { n: a.nachtTotaal })}{' '}
+        <strong>{tt('Dit is geen slaapmeting')}</strong>{' '}
+        {tt('— iemand kan wakker liggen zonder het scherm aan te raken, dus dit telt eerder te weinig dan te veel.')}
       </p>
 
       <Tabel
-        koppen={['Uur', 'Handelingen', 'Aantal dagen']}
+        koppen={[tt('Uur'), tt('Handelingen'), tt('Aantal dagen')]}
         rijen={a.nacht.map((r) => [`${r.uur}:00`, r.aantal, r.dagen])}
       />
     </>
@@ -328,8 +331,7 @@ function Schema({ a }: { a: A }) {
   return (
     <>
       <p className="mb-2">
-        Wijzigingen aan het medicatieschema in deze periode. Een daling in de cijfers hierboven
-        betekent iets anders als er kort daarvoor een middel bijkwam of wegging.
+        {tt('Wijzigingen aan het medicatieschema in deze periode. Een daling in de cijfers hierboven betekent iets anders als er kort daarvoor een middel bijkwam of wegging.')}
       </p>
 
       <ul className="space-y-1">
@@ -351,15 +353,15 @@ function Schema({ a }: { a: A }) {
 
 function Notities({ a }: { a: A }) {
   const bron: Record<string, string> = {
-    family: 'familie',
-    caregiver: 'zorgverlener',
-    person: 'zelf',
-    system: 'app',
+    family: tt('familie'),
+    caregiver: tt('zorgverlener'),
+    person: tt('zelf'),
+    system: tt('app'),
   }
 
   return (
     <>
-      <p className="mb-2">In de woorden van familie en zorgverleners.</p>
+      <p className="mb-2">{tt('In de woorden van familie en zorgverleners.')}</p>
 
       <ul className="space-y-1.5">
         {a.notities.map((n) => (

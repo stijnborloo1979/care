@@ -7,9 +7,10 @@ import { alleBewoners, mijnBewoners, type Bewoner } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
 import { Fout, Kaart, Kop, Laden, Leeg } from './ui'
 import AfdelingNu from './AfdelingNu'
+import { tt } from '../../lib/uiTaal'
 
 function plaats(b: Pick<Bewoner, 'afdeling' | 'kamer'>) {
-  return [b.afdeling, b.kamer ? `kamer ${b.kamer}` : null].filter(Boolean).join(' · ') || 'Nog geen afdeling'
+  return [b.afdeling, b.kamer ? tt('kamer {kamer}', { kamer: b.kamer }) : null].filter(Boolean).join(' · ') || tt('Nog geen afdeling')
 }
 
 /**
@@ -35,19 +36,18 @@ export default function Bewoners() {
   return (
     <div className="space-y-6">
       <Kop
-        titel="Bewoners"
-        uitleg={org?.team_lead ? 'Jouw bewoners en die van je afdeling.' : 'De bewoners die jou zijn toegewezen.'}
+        titel={tt('Bewoners')}
+        uitleg={org?.team_lead ? tt('Jouw bewoners en die van je afdeling.') : tt('De bewoners die jou zijn toegewezen.')}
       />
 
       <AfdelingNu orgId={orgId} mijn={mijn.data ?? []} />
 
-      <Kaart titel="Mijn bewoners">
+      <Kaart titel={tt('Mijn bewoners')}>
         {mijn.isLoading ? <Laden /> : null}
         <Fout fout={mijn.error} />
         {mijn.data && mijn.data.length === 0 ? (
           <Leeg>
-            Je bent nog aan niemand toegewezen. Vraag het aan je coördinator of de beheerder van{' '}
-            {org?.naam ?? 'je organisatie'}.
+            {tt('Je bent nog aan niemand toegewezen. Vraag het aan je coördinator of de beheerder van {organisatie}.', { organisatie: org?.naam ?? tt('je organisatie') })}
           </Leeg>
         ) : null}
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -64,12 +64,12 @@ export default function Bewoners() {
                   <span className="block truncate text-lg font-semibold">{b.naam}</span>
                   <span className="block truncate text-sm text-ink-soft">
                     {plaats(b)}
-                    {b.via === 'afdeling' ? ' · via je afdeling' : ''}
+                    {b.via === 'afdeling' ? ` · ${tt('via je afdeling')}` : ''}
                   </span>
                 </span>
                 {nieuw.data?.[b.household_id] ? (
                   <span className="shrink-0 rounded-pill bg-alert px-2.5 py-1 text-xs font-bold text-white">
-                    {nieuw.data[b.household_id]} {nieuw.data[b.household_id] === 1 ? 'vraag' : 'vragen'}
+                    {nieuw.data[b.household_id] === 1 ? tt('{n} vraag', { n: 1 }) : tt('{n} vragen', { n: nieuw.data[b.household_id] })}
                   </span>
                 ) : null}
                 <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" className="text-ink-faint" />
@@ -80,18 +80,18 @@ export default function Bewoners() {
       </Kaart>
 
       {(alle.data ?? []).length > 0 ? (
-        <Kaart titel="Andere bewoners">
+        <Kaart titel={tt('Andere bewoners')}>
           <p className="text-sm text-ink-soft">
-            Je ziet hier alleen naam en kamer.
-            {org?.team_lead ? ' In een noodgeval kan je als team lead 4 uur meekijken; de familie krijgt daar meteen bericht van.' : ''}
+            {tt('Je ziet hier alleen naam en kamer.')}
+            {org?.team_lead ? ` ${tt('In een noodgeval kan je als team lead 4 uur meekijken; de familie krijgt daar meteen bericht van.')}` : ''}
           </p>
           <label className="relative mt-3 block max-w-md">
-            <span className="sr-only">Zoek een bewoner</span>
+            <span className="sr-only">{tt('Zoek een bewoner')}</span>
             <Search size={18} strokeWidth={1.75} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-faint" />
             <input
               value={zoek}
               onChange={(e) => setZoek(e.target.value)}
-              placeholder="Naam, afdeling of kamer"
+              placeholder={tt('Naam, afdeling of kamer')}
               className="min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface pl-11 pr-4"
             />
           </label>
@@ -108,13 +108,13 @@ export default function Bewoners() {
                     className="inline-flex items-center gap-1.5 rounded-pill border border-line px-3 py-1.5 text-sm font-semibold text-ink-soft hover:bg-surface-soft"
                   >
                     <TriangleAlert size={15} strokeWidth={1.75} aria-hidden="true" />
-                    Noodtoegang
+                    {tt('Noodtoegang')}
                   </Link>
                 ) : null}
               </li>
             ))}
           </ul>
-          {anderen.length === 0 ? <Leeg>Geen andere bewoners gevonden.</Leeg> : null}
+          {anderen.length === 0 ? <Leeg>{tt('Geen andere bewoners gevonden.')}</Leeg> : null}
         </Kaart>
       ) : null}
     </div>

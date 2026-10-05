@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Haalt een leesbare fout uit wat supabase.functions.invoke teruggeeft.
@@ -16,10 +17,10 @@ async function leesFout(error: unknown): Promise<string> {
 
   const status = context?.status
   if (status === 404) {
-    return 'De koppelfunctie staat nog niet online. Maak in Supabase de edge function "pair-device" aan.'
+    return tt('De koppelfunctie staat nog niet online. Maak in Supabase de edge function "pair-device" aan.')
   }
   if (status === 401) {
-    return 'De koppelfunctie weigert het verzoek. Zet "Verify JWT" uit bij de edge function "pair-device".'
+    return tt('De koppelfunctie weigert het verzoek. Zet "Verify JWT" uit bij de edge function "pair-device".')
   }
 
   if (context && typeof context.json === 'function') {
@@ -27,16 +28,16 @@ async function leesFout(error: unknown): Promise<string> {
       const body = (await (context.clone ? context.clone().json() : context.json())) as {
         error?: string
       }
-      if (body?.error) return body.error
+      if (body?.error) return tt(body.error)
     } catch {
       // Geen JSON in het antwoord; val terug op de algemene melding.
     }
   }
 
   if (!status) {
-    return 'De koppelfunctie is niet bereikbaar. Controleer of "pair-device" bestaat in Supabase en of "Verify JWT" uit staat.'
+    return tt('De koppelfunctie is niet bereikbaar. Controleer of "pair-device" bestaat in Supabase en of "Verify JWT" uit staat.')
   }
-  return error instanceof Error ? error.message : 'Koppelen lukte niet.'
+  return error instanceof Error ? error.message : tt('Koppelen lukte niet.')
 }
 
 /**
@@ -55,7 +56,7 @@ export default function TabletPair() {
   async function koppel(e: React.FormEvent) {
     e.preventDefault()
     if (cijfers.length !== 8) {
-      setFout('De code heeft acht cijfers.')
+      setFout(tt('De code heeft acht cijfers.'))
       return
     }
     setBusy(true)
@@ -65,7 +66,7 @@ export default function TabletPair() {
         body: { code: cijfers },
       })
       if (error) throw new Error(await leesFout(error))
-      if (!data?.token_hash) throw new Error(data?.error ?? 'Koppelen lukte niet.')
+      if (!data?.token_hash) throw new Error(data?.error ? tt(data.error) : tt('Koppelen lukte niet.'))
 
       const { error: sessieFout } = await supabase.auth.verifyOtp({
         token_hash: data.token_hash,
@@ -74,7 +75,7 @@ export default function TabletPair() {
       if (sessieFout) throw sessieFout
       // Ingelogd: de pagina stuurt vanzelf door naar het scherm van de persoon.
     } catch (err) {
-      setFout(err instanceof Error ? err.message : 'Koppelen lukte niet.')
+      setFout(err instanceof Error ? err.message : tt('Koppelen lukte niet.'))
     } finally {
       setBusy(false)
     }
@@ -82,10 +83,13 @@ export default function TabletPair() {
 
   return (
     <form onSubmit={koppel} className="rounded-card bg-surface p-6 shadow-lift">
-      <h2 className="text-2xl font-bold tracking-tight">Tablet koppelen</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{tt('Tablet koppelen')}</h2>
       <p className="mt-2 text-ink-soft">
-        Open LifeAngle op je eigen telefoon, ga naar <strong>Instellingen → Tablet koppelen</strong>, en
-        tik de code hier in.
+        {tt('Open LifeAngle op je eigen telefoon, ga naar {pad}, en tik de code hier in.', { pad: '\u0000' })
+          .split('\u0000')
+          .flatMap((deel, i) =>
+            i === 0 ? [deel] : [<strong key={i}>{tt('Instellingen → Tablet koppelen')}</strong>, deel],
+          )}
       </p>
 
       <input
@@ -97,7 +101,7 @@ export default function TabletPair() {
         inputMode="numeric"
         autoFocus
         placeholder="0000 0000"
-        aria-label="Koppelcode van acht cijfers"
+        aria-label={tt('Koppelcode van acht cijfers')}
         className="mt-6 min-h-[4.2rem] w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 text-center font-mono text-3xl tracking-[0.25em]"
       />
 
@@ -106,12 +110,11 @@ export default function TabletPair() {
         disabled={busy || cijfers.length !== 8}
         className="mt-4 flex min-h-[3.2rem] w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-50"
       >
-        {busy ? 'Koppelen…' : 'Koppelen'}
+        {busy ? tt('Koppelen…') : tt('Koppelen')}
       </button>
 
       <p className="mt-4 text-sm text-ink-faint">
-        De code is tien minuten geldig en werkt maar één keer. Deze tablet blijft daarna ingelogd,
-        ook na herstarten.
+        {tt('De code is tien minuten geldig en werkt maar één keer. Deze tablet blijft daarna ingelogd, ook na herstarten.')}
       </p>
 
       {fout ? (

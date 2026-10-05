@@ -4,6 +4,7 @@ import { startCall } from '../../services/calls'
 import CallScreen from './CallScreen'
 import { heeftTurn } from './useWebRTC'
 import ConnectionTest from './ConnectionTest'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * De familiekant: één knop, die de oproep aanmaakt en meteen het
@@ -27,7 +28,7 @@ export default function StartCall({
     try {
       setCallId(await startCall(householdId))
     } catch (e) {
-      setFout(e instanceof Error ? e.message : 'Bellen lukte niet.')
+      setFout(e instanceof Error ? e.message : tt('Bellen lukte niet.'))
     } finally {
       setBezig(false)
     }
@@ -41,10 +42,9 @@ export default function StartCall({
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Videobellen met {metWie}</h2>
+      <h2 className="text-lg font-bold">{tt('Videobellen met {naam}', { naam: metWie })}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Het beeld gaat rechtstreeks van toestel naar toestel, versleuteld. Er komt geen dienst van
-        buitenaf aan te pas en er wordt niets opgenomen.
+        {tt('Het beeld gaat rechtstreeks van toestel naar toestel, versleuteld. Er komt geen dienst van buitenaf aan te pas en er wordt niets opgenomen.')}
       </p>
 
       <button
@@ -53,19 +53,19 @@ export default function StartCall({
         className="mt-4 flex min-h-touch w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
       >
         {bezig ? (
-          'Bezig…'
+          tt('Bezig…')
         ) : (
           <>
             <Icon naam="bellen" size={20} />
-            Bel {metWie}
+            {tt('Bel {naam}', { naam: metWie })}
           </>
         )}
       </button>
 
       {!heeftTurn() ? (
         <p className="mt-3 text-sm text-ink-faint">
-          Er is nog geen TURN-server ingesteld. Bellen werkt dan op wifi, maar meestal niet op 4G
-          of 5G. Zie de edge function <code>turn-credentials</code>.
+          {tt('Er is nog geen TURN-server ingesteld. Bellen werkt dan op wifi, maar meestal niet op 4G of 5G. Zie de edge function')}{' '}
+          <code>turn-credentials</code>.
         </p>
       ) : null}
 

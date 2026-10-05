@@ -44,6 +44,7 @@ import {
   type OrgRol,
 } from './zorgApi'
 import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, knopRustig, label, veld } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Wat een beheerder of coördinator regelt: wie voor wie zorgt, waar een
@@ -58,7 +59,7 @@ export default function Beheer() {
 
   return (
     <div className="space-y-6">
-      <Kop titel="Beheer" uitleg={`${org.naam} · ${ROLNAAM[org.rol]}`} />
+      <Kop titel={tt('Beheer')} uitleg={`${org.naam} · ${ROLNAAM[org.rol]}`} />
       <Overzicht orgId={orgId} isBeheerder={isBeheerder} />
       <Koppelcode orgId={orgId} isBeheerder={isBeheerder} />
       <Toewijzingen orgId={orgId} />
@@ -91,10 +92,9 @@ function Koppelcode({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolea
   const leesbaar = `${code.data.slice(0, 4)} ${code.data.slice(4)}`
 
   return (
-    <Kaart titel={<><KeyRound size={20} strokeWidth={1.75} aria-hidden="true" /> Koppelcode voor familie</>}>
+    <Kaart titel={<><KeyRound size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Koppelcode voor familie')}</>}>
       <p className="text-ink-soft">
-        Geef deze code aan de familie van een nieuwe bewoner. De familiebeheerder koppelt er zelf het huishouden
-        mee, bij "Wie ziet wat". Een woonzorgcentrum kan nooit zelf een bewoner toevoegen.
+        {tt('Geef deze code aan de familie van een nieuwe bewoner. De familiebeheerder koppelt er zelf het huishouden mee, bij "Wie ziet wat". Een woonzorgcentrum kan nooit zelf een bewoner toevoegen.')}
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <span className="rounded-2xl bg-surface-soft px-5 py-3 font-mono text-2xl font-bold tracking-[0.2em]">{leesbaar}</span>
@@ -106,16 +106,16 @@ function Koppelcode({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolea
           }}
           className={knopRustig}
         >
-          <Copy size={16} strokeWidth={1.75} aria-hidden="true" /> {gekopieerd ? 'Gekopieerd' : 'Kopiëren'}
+          <Copy size={16} strokeWidth={1.75} aria-hidden="true" /> {gekopieerd ? tt('Gekopieerd') : tt('Kopiëren')}
         </button>
         {isBeheerder ? (
           <button
             onClick={() => {
-              if (confirm('Een nieuwe code maken? De oude werkt dan niet meer.')) nieuw.mutate()
+              if (confirm(tt('Een nieuwe code maken? De oude werkt dan niet meer.'))) nieuw.mutate()
             }}
             className="text-sm font-semibold text-ink-soft underline underline-offset-4"
           >
-            Nieuwe code
+            {tt('Nieuwe code')}
           </button>
         ) : null}
       </div>
@@ -130,7 +130,7 @@ function Koppelcode({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolea
  * Bovenaan: hoe staat het ervoor, en wat vraagt aandacht. Alleen wie waar
  * verblijft en wie voor wie zorgt; nooit inhoud over een bewoner.
  */
-function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean }) {
+export function Overzicht({ orgId, isBeheerder, alleenAandacht = false }: { orgId: string; isBeheerder: boolean; alleenAandacht?: boolean }) {
   const bewoners = useQuery({ queryKey: ['zorg', 'alle-bewoners', orgId], queryFn: () => alleBewoners(orgId) })
   const team = useQuery({ queryKey: ['zorg', 'medewerkers', orgId], queryFn: () => medewerkers(orgId) })
   const toe = useQuery({ queryKey: ['zorg', 'toewijzingen', orgId], queryFn: () => toewijzingen(orgId) })
@@ -153,14 +153,15 @@ function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean
   const c = cijfers(invoer)
   const punten = aandachtspunten(invoer)
   const tegels: [string, number | null][] = [
-    ['Bewoners', c.bewoners],
-    ['Medewerkers', c.medewerkers],
-    ['Afdelingen', c.afdelingen],
-    ['Open uitnodigingen', c.uitnodigingen],
+    [tt('Bewoners'), c.bewoners],
+    [tt('Medewerkers'), c.medewerkers],
+    [tt('Afdelingen'), c.afdelingen],
+    [tt('Open uitnodigingen'), c.uitnodigingen],
   ]
 
   return (
-    <Kaart titel="Overzicht">
+    <Kaart titel={alleenAandacht ? tt('Vraagt aandacht') : tt('Overzicht')}>
+      {alleenAandacht ? null : (
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tegels
           .filter(([, n]) => n !== null)
@@ -171,15 +172,18 @@ function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean
             </div>
           ))}
       </dl>
+      )}
 
-      <h3 className="mt-5 text-sm font-semibold uppercase tracking-wide text-ink-faint">Vraagt aandacht</h3>
+      {alleenAandacht ? null : (
+        <h3 className="mt-5 text-sm font-semibold uppercase tracking-wide text-ink-faint">{tt('Vraagt aandacht')}</h3>
+      )}
       {punten.length === 0 ? (
-        <p className="mt-2 flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">
+        <p className={`${alleenAandacht ? '' : 'mt-2 '}flex items-center gap-2 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft`}>
           <CircleCheck size={18} strokeWidth={1.75} className="shrink-0 text-accent-ink" aria-hidden="true" />
-          Alles in orde: elke bewoner wordt gevolgd en heeft een plaats.
+          {tt('Alles in orde: elke bewoner wordt gevolgd en heeft een plaats.')}
         </p>
       ) : (
-        <ul className="mt-2 space-y-2">
+        <ul className={`${alleenAandacht ? '' : 'mt-2 '}space-y-2`}>
           {punten.slice(0, 8).map((p) => (
             <li key={p.sleutel} className="flex items-start gap-3 rounded-2xl bg-surface-soft px-4 py-3">
               <TriangleAlert
@@ -189,12 +193,12 @@ function Overzicht({ orgId, isBeheerder }: { orgId: string; isBeheerder: boolean
                 className={`mt-0.5 shrink-0 ${p.ernst === 'hoog' ? 'text-alert' : 'text-ink-faint'}`}
               />
               <span className="min-w-0">
-                {p.ernst === 'hoog' ? <span className="sr-only">Belangrijk: </span> : null}
+                {p.ernst === 'hoog' ? <span className="sr-only">{tt('Belangrijk:')} </span> : null}
                 {p.tekst}
               </span>
             </li>
           ))}
-          {punten.length > 8 ? <li className="px-4 text-sm text-ink-soft">En nog {punten.length - 8} andere.</li> : null}
+          {punten.length > 8 ? <li className="px-4 text-sm text-ink-soft">{tt('En nog {n} andere.', { n: punten.length - 8 })}</li> : null}
         </ul>
       )}
     </Kaart>
@@ -234,23 +238,22 @@ function Toewijzingen({ orgId }: { orgId: string }) {
   )
 
   return (
-    <Kaart titel="Bewoners en wie voor hen zorgt">
+    <Kaart titel={tt('Bewoners en wie voor hen zorgt')}>
       <p className="text-sm text-ink-soft">
-        Wie toegewezen is, ziet de agenda, de zorgnotities en de contactpersonen van die bewoner. Een team lead ziet
-        alle bewoners van zijn afdeling.
+        {tt('Wie toegewezen is, ziet de agenda, de zorgnotities en de contactpersonen van die bewoner. Een team lead ziet alle bewoners van zijn afdeling.')}
       </p>
       {(bewoners.data ?? []).length > 6 ? (
         <input
           value={zoek}
           onChange={(e) => setZoek(e.target.value)}
-          placeholder="Zoek een bewoner"
+          placeholder={tt('Zoek een bewoner')}
           className={`${veld} max-w-md`}
         />
       ) : null}
       {bewoners.isLoading ? <Laden /> : null}
       {bewoners.data && bewoners.data.length === 0 ? (
         <div className="mt-3">
-          <Leeg>Nog geen bewoners. Een bewoner verschijnt hier zodra de familie koppelt met de code hierboven.</Leeg>
+          <Leeg>{tt('Nog geen bewoners. Een bewoner verschijnt hier zodra de familie koppelt met de code hierboven.')}</Leeg>
         </div>
       ) : null}
       <ul className="mt-3 space-y-3">
@@ -269,10 +272,10 @@ function Toewijzingen({ orgId }: { orgId: string }) {
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {mijnToe.map((t) => (
                   <span key={t.id} className="inline-flex items-center gap-1 rounded-pill bg-accent-soft py-1 pl-3 pr-1 text-sm font-semibold text-accent-ink">
-                    {namen[t.profile_id] ?? 'Medewerker'}
+                    {namen[t.profile_id] ?? tt('Medewerker')}
                     <button
                       onClick={() => stoppen.mutate(t.id)}
-                      aria-label={`Toewijzing van ${namen[t.profile_id] ?? 'medewerker'} stoppen`}
+                      aria-label={tt('Toewijzing van {naam} stoppen', { naam: namen[t.profile_id] ?? tt('medewerker') })}
                       className="grid h-6 w-6 place-items-center rounded-full hover:bg-surface"
                     >
                       <X size={14} strokeWidth={2} aria-hidden="true" />
@@ -282,10 +285,10 @@ function Toewijzingen({ orgId }: { orgId: string }) {
                 <select
                   value=""
                   onChange={(e) => e.target.value && toewijzen.mutate({ hh: b.household_id, profiel: e.target.value })}
-                  aria-label={`Medewerker toewijzen aan ${b.naam}`}
+                  aria-label={tt('Medewerker toewijzen aan {naam}', { naam: b.naam })}
                   className="min-h-[2.25rem] rounded-pill border border-line bg-surface px-3 text-sm font-semibold text-ink-soft"
                 >
-                  <option value="">+ Toewijzen</option>
+                  <option value="">{tt('+ Toewijzen')}</option>
                   {zorgers.filter((m) => !al.has(m.profile_id)).map((m) => (
                     <option key={m.profile_id} value={m.profile_id}>
                       {m.naam}
@@ -318,11 +321,11 @@ function Verblijf({ bewoner, afdelingen, orgId }: { bewoner: Bewoner; afdelingen
   if (!bewerk) {
     return (
       <p className="text-sm text-ink-soft">
-        {[bewoner.afdeling ? `Afdeling ${bewoner.afdeling}` : 'Geen afdeling', bewoner.kamer ? `kamer ${bewoner.kamer}` : null]
+        {[bewoner.afdeling ? tt('Afdeling {naam}', { naam: bewoner.afdeling }) : tt('Geen afdeling'), bewoner.kamer ? tt('kamer {kamer}', { kamer: bewoner.kamer }) : null]
           .filter(Boolean)
           .join(' · ')}{' '}
         <button onClick={() => setBewerk(true)} className="font-semibold text-accent-ink underline underline-offset-4">
-          aanpassen
+          {tt('aanpassen')}
         </button>
       </p>
     )
@@ -336,9 +339,9 @@ function Verblijf({ bewoner, afdelingen, orgId }: { bewoner: Bewoner; afdelingen
       className="mt-2 flex flex-wrap items-end gap-2"
     >
       <label>
-        <span className={label}>Afdeling</span>
+        <span className={label}>{tt('Afdeling')}</span>
         <select value={afdeling} onChange={(e) => setAfdeling(e.target.value)} className={veld}>
-          <option value="">Geen</option>
+          <option value="">{tt('Geen')}</option>
           {afdelingen.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
@@ -347,14 +350,14 @@ function Verblijf({ bewoner, afdelingen, orgId }: { bewoner: Bewoner; afdelingen
         </select>
       </label>
       <label className="w-28">
-        <span className={label}>Kamer</span>
+        <span className={label}>{tt('Kamer')}</span>
         <input value={kamer} onChange={(e) => setKamer(e.target.value)} className={veld} />
       </label>
       <button type="submit" disabled={bewaar.isPending} className={knop}>
-        Bewaren
+        {tt('Bewaren')}
       </button>
       <button type="button" onClick={() => setBewerk(false)} className={knopRustig}>
-        Annuleren
+        {tt('Annuleren')}
       </button>
       <Fout fout={bewaar.error} />
     </form>
@@ -392,7 +395,7 @@ function Medewerkers({ orgId }: { orgId: string }) {
   })
 
   return (
-    <Kaart titel="Medewerkers">
+    <Kaart titel={tt('Medewerkers')}>
       {team.isLoading ? <Laden /> : null}
       <ul className="space-y-2">
         {(team.data ?? []).map((m) => (
@@ -401,7 +404,7 @@ function Medewerkers({ orgId }: { orgId: string }) {
               <span className="font-semibold">{m.naam}</span>
               <span className="text-sm text-ink-soft">
                 {ROLNAAM[m.rol]}
-                {m.actief ? '' : ' · niet actief'}
+                {m.actief ? '' : ` · ${tt('niet actief')}`}
               </span>
               {m.email ? <span className="min-w-0 truncate text-sm text-ink-faint">{m.email}</span> : null}
             </div>
@@ -409,10 +412,10 @@ function Medewerkers({ orgId }: { orgId: string }) {
               {m.afdelingen.map((a) => (
                 <span key={a.rij} className="inline-flex items-center gap-1 rounded-pill bg-surface py-1 pl-3 pr-1 text-sm">
                   {a.naam}
-                  {a.rol === 'team_lead' ? <strong className="ml-1">team lead</strong> : null}
+                  {a.rol === 'team_lead' ? <strong className="ml-1">{tt('team lead')}</strong> : null}
                   <button
                     onClick={() => vanAfdeling.mutate(a.rij)}
-                    aria-label={`${m.naam} van afdeling ${a.naam} halen`}
+                    aria-label={tt('{naam} van afdeling {afdeling} halen', { naam: m.naam, afdeling: a.naam })}
                     className="grid h-6 w-6 place-items-center rounded-full hover:bg-surface-soft"
                   >
                     <X size={14} strokeWidth={2} aria-hidden="true" />
@@ -427,10 +430,10 @@ function Medewerkers({ orgId }: { orgId: string }) {
                     const [afdeling, r] = e.target.value.split('|')
                     if (afdeling) opAfdeling.mutate({ afdeling, profiel: m.profile_id, rol: r as 'team_lead' | 'staff' })
                   }}
-                  aria-label={`${m.naam} op een afdeling zetten`}
+                  aria-label={tt('{naam} op een afdeling zetten', { naam: m.naam })}
                   className="min-h-[2.25rem] rounded-pill border border-line bg-surface px-3 text-sm font-semibold text-ink-soft"
                 >
-                  <option value="">+ Afdeling</option>
+                  <option value="">{tt('+ Afdeling')}</option>
                   {(afd.data ?? [])
                     .filter((a) => !m.afdelingen.some((x) => x.id === a.id))
                     .flatMap((a) => [
@@ -438,7 +441,7 @@ function Medewerkers({ orgId }: { orgId: string }) {
                         {a.name}
                       </option>,
                       <option key={`${a.id}t`} value={`${a.id}|team_lead`}>
-                        {a.name} (team lead)
+                        {tt('{naam} (team lead)', { naam: a.name })}
                       </option>,
                     ])}
                 </select>
@@ -459,23 +462,23 @@ function Medewerkers({ orgId }: { orgId: string }) {
         className="mt-5 rounded-2xl border border-line p-4"
       >
         <h3 className="flex items-center gap-2 font-bold">
-          <UserPlus size={18} strokeWidth={1.75} aria-hidden="true" /> Medewerker uitnodigen
+          <UserPlus size={18} strokeWidth={1.75} aria-hidden="true" /> {tt('Medewerker uitnodigen')}
         </h3>
         <div className="mt-2 flex flex-wrap items-end gap-2">
           <label className="min-w-[14rem] flex-1">
-            <span className={label}>E-mailadres</span>
+            <span className={label}>{tt('E-mailadres')}</span>
             <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={veld} />
           </label>
           <label>
-            <span className={label}>Rol</span>
+            <span className={label}>{tt('Rol')}</span>
             <select value={rol} onChange={(e) => setRol(e.target.value as OrgRol)} className={veld}>
-              <option value="caregiver">Zorgmedewerker</option>
-              <option value="coordinator">Coördinator</option>
-              <option value="org_admin">Beheerder</option>
+              <option value="caregiver">{tt('Zorgmedewerker')}</option>
+              <option value="coordinator">{tt('Coördinator')}</option>
+              <option value="org_admin">{tt('Beheerder')}</option>
             </select>
           </label>
           <button type="submit" disabled={uitnodigen.isPending} className={knop}>
-            Uitnodiging maken
+            {tt('Uitnodiging maken')}
           </button>
         </div>
         <Fout fout={uitnodigen.error} />
@@ -483,9 +486,9 @@ function Medewerkers({ orgId }: { orgId: string }) {
           <div className="mt-3 rounded-2xl bg-surface-soft p-3">
             <p className="text-sm text-ink-soft">
               {gemaild
-                ? 'De uitnodiging is gemaild. Je kan de link ook zelf doorsturen.'
-                : 'Stuur deze link naar de medewerker.'}{' '}
-              Hij werkt alleen voor wie inlogt met dat e-mailadres, 14 dagen lang.
+                ? tt('De uitnodiging is gemaild. Je kan de link ook zelf doorsturen.')
+                : tt('Stuur deze link naar de medewerker.')}{' '}
+              {tt('Hij werkt alleen voor wie inlogt met dat e-mailadres, 14 dagen lang.')}
             </p>
             <p className="mt-1 break-all font-mono text-sm">{link}</p>
             <button
@@ -495,7 +498,7 @@ function Medewerkers({ orgId }: { orgId: string }) {
               }}
               className={`${knopKlein} mt-2`}
             >
-              {gekopieerd ? 'Gekopieerd' : 'Link kopiëren'}
+              {gekopieerd ? tt('Gekopieerd') : tt('Link kopiëren')}
             </button>
           </div>
         ) : null}
@@ -515,15 +518,15 @@ function Telling({ orgId }: { orgId: string }) {
   const vandaag = rijen[rijen.length - 1]?.aantal ?? 0
   const dagen = rijen.reduce((s, r) => s + Number(r.aantal), 0)
   return (
-    <Kaart titel="Actieve bewoners">
-      <p className="text-ink-soft">Een bewoner telt op elke dag met een lopend verblijf, niet op hoe vaak de app gebruikt wordt.</p>
+    <Kaart titel={tt('Actieve bewoners')}>
+      <p className="text-ink-soft">{tt('Een bewoner telt op elke dag met een lopend verblijf, niet op hoe vaak de app gebruikt wordt.')}</p>
       <dl className="mt-3 grid grid-cols-2 gap-3">
         <div className="rounded-2xl bg-surface-soft p-4">
-          <dt className="text-sm text-ink-soft">Vandaag</dt>
+          <dt className="text-sm text-ink-soft">{tt('Vandaag')}</dt>
           <dd className="text-3xl font-bold tabular-nums">{vandaag}</dd>
         </div>
         <div className="rounded-2xl bg-surface-soft p-4">
-          <dt className="text-sm text-ink-soft">Bewonersdagen deze maand</dt>
+          <dt className="text-sm text-ink-soft">{tt('Bewonersdagen deze maand')}</dt>
           <dd className="text-3xl font-bold tabular-nums">{dagen}</dd>
         </div>
       </dl>
@@ -539,17 +542,17 @@ function Noodtoegangen({ orgId }: { orgId: string }) {
   const bew = Object.fromEntries((bewoners.data ?? []).map((b) => [b.household_id, b.naam]))
   if (!lijst.data || lijst.data.length === 0) return null
   return (
-    <Kaart titel={<><TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" /> Noodtoegang</>}>
+    <Kaart titel={<><TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Noodtoegang')}</>}>
       <ul className="space-y-2">
         {lijst.data.map((n) => {
           const loopt = !n.ended_at && new Date(n.expires_at) > new Date()
           return (
             <li key={n.id} className={`rounded-2xl bg-surface-soft px-4 py-3 ${loopt ? 'ring-2 ring-warn' : ''}`}>
               <p className="font-semibold">
-                {namen[n.profile_id] ?? 'Een team lead'} → {bew[n.household_id] ?? 'een bewoner'}
+                {namen[n.profile_id] ?? tt('Een team lead')} → {bew[n.household_id] ?? tt('een bewoner')}
               </p>
               <p className="text-sm text-ink-soft">
-                {dagEnUur(n.started_at)} · {loopt ? 'loopt nog' : n.ended_at ? 'gestopt' : 'afgelopen'}
+                {dagEnUur(n.started_at)} · {loopt ? tt('loopt nog') : n.ended_at ? tt('gestopt') : tt('afgelopen')}
               </p>
               <p className="mt-1 break-words">„{n.reason}”</p>
             </li>
@@ -570,7 +573,9 @@ function Bewaartermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boo
       if (
         gevolg > 0 &&
         !confirm(
-          `Met ${termijnTekst(maanden)} worden ${gevolg} ${gevolg === 1 ? 'notitie' : 'notities'} van bewoners die lang geleden vertrokken binnen de week gewist. Doorgaan?`,
+          gevolg === 1
+            ? tt('Met {termijn} worden {n} notitie van bewoners die lang geleden vertrokken binnen de week gewist. Doorgaan?', { termijn: termijnTekst(maanden), n: gevolg })
+            : tt('Met {termijn} worden {n} notities van bewoners die lang geleden vertrokken binnen de week gewist. Doorgaan?', { termijn: termijnTekst(maanden), n: gevolg }),
         )
       )
         return null
@@ -579,21 +584,20 @@ function Bewaartermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boo
     },
     onSuccess: (m) => {
       if (m === null) return
-      setMelding(`Bewaard: ${termijnTekst(m)}.`)
+      setMelding(tt('Bewaard: {termijn}.', { termijn: termijnTekst(m) }))
       queryClient.invalidateQueries({ queryKey: ['zorg', 'bewaartermijn', orgId] })
     },
   })
   if (termijn.data == null) return null
 
   return (
-    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> Bewaartermijn zorgnotities</>}>
+    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Bewaartermijn zorgnotities')}</>}>
       <p className="text-ink-soft">
-        Zolang een bewoner hier woont, blijven de zorgnotities bewaard. Na het vertrek worden ze na deze termijn
-        automatisch gewist. De termijn geldt ook voor wie al vertrokken is, gerekend vanaf het vertrek.
+        {tt('Zolang een bewoner hier woont, blijven de zorgnotities bewaard. Na het vertrek worden ze na deze termijn automatisch gewist. De termijn geldt ook voor wie al vertrokken is, gerekend vanaf het vertrek.')}
       </p>
       {isBeheerder ? (
         <label className="mt-3 block max-w-xs">
-          <span className={label}>Bewaren na vertrek</span>
+          <span className={label}>{tt('Bewaren na vertrek')}</span>
           <select
             value={termijn.data}
             disabled={zet.isPending}
@@ -611,7 +615,7 @@ function Bewaartermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder: boo
           </select>
         </label>
       ) : (
-        <p className="mt-3 text-lg font-semibold">{termijnTekst(termijn.data)} na vertrek</p>
+        <p className="mt-3 text-lg font-semibold">{tt('{termijn} na vertrek', { termijn: termijnTekst(termijn.data) })}</p>
       )}
       {melding ? <p className="mt-2 text-sm font-semibold text-accent-ink">{melding}</p> : null}
       <Fout fout={zet.error} />
@@ -629,7 +633,9 @@ function OverdrachtTermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder:
       if (
         gevolg > 0 &&
         !confirm(
-          `Met ${dagenTekst(dagen)} verdwijnen vannacht ${gevolg} ${gevolg === 1 ? 'oudere overdracht' : 'oudere overdrachten'}. Doorgaan?`,
+          gevolg === 1
+            ? tt('Met {termijn} verdwijnen vannacht {n} oudere overdracht. Doorgaan?', { termijn: dagenTekst(dagen), n: gevolg })
+            : tt('Met {termijn} verdwijnen vannacht {n} oudere overdrachten. Doorgaan?', { termijn: dagenTekst(dagen), n: gevolg }),
         )
       )
         return null
@@ -638,21 +644,20 @@ function OverdrachtTermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder:
     },
     onSuccess: (d) => {
       if (d === null) return
-      setMelding(`Bewaard: ${dagenTekst(d)}.`)
+      setMelding(tt('Bewaard: {termijn}.', { termijn: dagenTekst(d) }))
       queryClient.invalidateQueries({ queryKey: ['zorg', 'overdracht-termijn', orgId] })
     },
   })
   if (termijn.data == null) return null
 
   return (
-    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> Bewaartermijn overdracht</>}>
+    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Bewaartermijn overdracht')}</>}>
       <p className="text-ink-soft">
-        Een overdracht gaat over een dienst. Ze wordt elke nacht gewist zodra ze ouder is dan deze termijn. Wat blijvend
-        belangrijk is over een bewoner, hoort in een zorgnotitie.
+        {tt('Een overdracht gaat over een dienst. Ze wordt elke nacht gewist zodra ze ouder is dan deze termijn. Wat blijvend belangrijk is over een bewoner, hoort in een zorgnotitie.')}
       </p>
       {isBeheerder ? (
         <label className="mt-3 block max-w-xs">
-          <span className={label}>Bewaren</span>
+          <span className={label}>{tt('Bewaren')}</span>
           <select
             value={termijn.data}
             disabled={zet.isPending}
@@ -685,25 +690,25 @@ function TeamberichtTermijn({ orgId, isBeheerder }: { orgId: string; isBeheerder
   const zet = useMutation({
     mutationFn: async (dagen: number) => {
       const gevolg = await teamberichtTermijnGevolg(orgId, dagen)
-      if (gevolg > 0 && !confirm(`Met ${dagenTekst(dagen)} verdwijnen vannacht ${gevolg} oudere teamberichten. Doorgaan?`))
+      if (gevolg > 0 && !confirm(tt('Met {termijn} verdwijnen vannacht {n} oudere teamberichten. Doorgaan?', { termijn: dagenTekst(dagen), n: gevolg })))
         return null
       await zetTeamberichtTermijn(orgId, dagen)
       return dagen
     },
     onSuccess: (d) => {
       if (d === null) return
-      setMelding(`Bewaard: ${dagenTekst(d)}.`)
+      setMelding(tt('Bewaard: {termijn}.', { termijn: dagenTekst(d) }))
       queryClient.invalidateQueries({ queryKey: ['zorg', 'team-termijn', orgId] })
     },
   })
   if (termijn.data == null) return null
 
   return (
-    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> Bewaartermijn teamberichten</>}>
-      <p className="text-ink-soft">Teamberichten worden elke nacht gewist zodra ze ouder zijn dan deze termijn.</p>
+    <Kaart titel={<><Archive size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Bewaartermijn teamberichten')}</>}>
+      <p className="text-ink-soft">{tt('Teamberichten worden elke nacht gewist zodra ze ouder zijn dan deze termijn.')}</p>
       {isBeheerder ? (
         <label className="mt-3 block max-w-xs">
-          <span className={label}>Bewaren</span>
+          <span className={label}>{tt('Bewaren')}</span>
           <select
             value={termijn.data}
             disabled={zet.isPending}

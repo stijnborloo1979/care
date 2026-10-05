@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Tablet } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Familie maakt hier een code, en tikt die in op de tablet onder
@@ -37,6 +38,10 @@ export default function PairTablet({
   }, [code])
 
   const verlopen = code && rest <= 0
+  const [uitlegVoor, uitlegNa] = tt(
+    'Open LifeAngle op de tablet van {naam}, kies {knop}, en tik daar deze code in. {naam} hoeft geen mail of wachtwoord te hebben.',
+    { naam: personName },
+  ).split('{knop}')
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
@@ -44,11 +49,12 @@ export default function PairTablet({
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-accent-soft text-accent-ink">
           <Tablet size={20} strokeWidth={1.75} />
         </span>
-        <h2 className="text-lg font-bold">Tablet koppelen</h2>
+        <h2 className="text-lg font-bold">{tt('Tablet koppelen')}</h2>
       </div>
       <p className="mt-3 text-sm text-ink-soft">
-        Open LifeAngle op de tablet van {personName}, kies <em>Dit is de tablet van de persoon</em>, en
-        tik daar deze code in. {personName} hoeft geen mail of wachtwoord te hebben.
+        {uitlegVoor}
+        <em>{tt('Dit is de tablet van de persoon')}</em>
+        {uitlegNa}
       </p>
 
       {code && !verlopen ? (
@@ -57,7 +63,7 @@ export default function PairTablet({
             {code.code.slice(0, 4)} {code.code.slice(4)}
           </p>
           <p className="mt-2 text-sm text-ink-soft">
-            Nog {Math.floor(rest / 60)}:{String(rest % 60).padStart(2, '0')} geldig
+            {tt('Nog {tijd} geldig', { tijd: `${Math.floor(rest / 60)}:${String(rest % 60).padStart(2, '0')}` })}
           </p>
         </div>
       ) : null}
@@ -67,12 +73,12 @@ export default function PairTablet({
         disabled={maak.isPending}
         className="mt-5 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
       >
-        {maak.isPending ? 'Bezig…' : code ? 'Nieuwe code' : 'Code maken'}
+        {maak.isPending ? tt('Bezig…') : code ? tt('Nieuwe code') : tt('Code maken')}
       </button>
 
       {maak.error ? (
         <p role="alert" className="mt-3 text-sm text-alert">
-          {maak.error instanceof Error ? maak.error.message : 'Code maken lukte niet.'}
+          {maak.error instanceof Error ? maak.error.message : tt('Code maken lukte niet.')}
         </p>
       ) : null}
     </section>

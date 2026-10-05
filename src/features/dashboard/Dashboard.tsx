@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { dismissAlert, getSummary, type Summary } from '../../services/dashboard'
-import { dateLine, greeting, hhmm } from '../../lib/time'
+import { hhmm } from '../../lib/time'
 import { useNow } from '../today/useAgenda'
 import Icon from '../../components/Icon'
 import Skeleton from '../../components/Skeleton'
@@ -13,6 +13,21 @@ import DagInHetHuis from '../afdelingsdag/DagInHetHuis'
 import NieuwsVanHetHuis from '../nieuws/NieuwsVanHetHuis'
 import UitstapKaart from '../uitstap/UitstapKaart'
 import SpullenKaart from '../spullen/SpullenKaart'
+import { tt, uiLocale } from '../../lib/uiTaal'
+
+/** Groet en datum in de taal van de familie (niet die van de tablet). */
+function uiGroet(d: Date, tz: string): string {
+  const uur = Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', hourCycle: 'h23' }).format(d))
+  if (uur < 6) return tt('Goedenacht')
+  if (uur < 12) return tt('Goedemorgen')
+  if (uur < 18) return tt('Goedemiddag')
+  return tt('Goedenavond')
+}
+
+function uiDatum(d: Date, tz: string): string {
+  const s = new Intl.DateTimeFormat(uiLocale(), { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' }).format(d)
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 
 interface Props {
   householdId: string
@@ -35,8 +50,11 @@ function toestandVan(s: Summary, now: Date): Toestand {
   if (medLaat.length > 0) {
     return {
       kleur: 'var(--warn)',
-      titel: 'Eén punt van aandacht',
-      onder: `${medLaat.length} medicatiemoment${medLaat.length > 1 ? 'en' : ''} niet bevestigd`,
+      titel: tt('Eén punt van aandacht'),
+      onder:
+        medLaat.length > 1
+          ? tt('{n} medicatiemomenten niet bevestigd', { n: medLaat.length })
+          : tt('{n} medicatiemoment niet bevestigd', { n: medLaat.length }),
       ok: false,
     }
   }
@@ -47,16 +65,16 @@ function toestandVan(s: Summary, now: Date): Toestand {
   if (gemist.length >= 3) {
     return {
       kleur: 'var(--warn)',
-      titel: 'De dag wijkt af',
-      onder: `${gemist.length} momenten zijn niet afgevinkt`,
+      titel: tt('De dag wijkt af'),
+      onder: tt('{n} momenten zijn niet afgevinkt', { n: gemist.length }),
       ok: false,
     }
   }
 
   return {
     kleur: 'var(--ok)',
-    titel: 'Vandaag verloopt normaal',
-    onder: 'Geen bijzonderheden',
+    titel: tt('Vandaag verloopt normaal'),
+    onder: tt('Geen bijzonderheden'),
     ok: true,
   }
 }
@@ -92,7 +110,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
         </div>
       </div>
     )
-  if (isError || !data) return <p className="text-ink-soft">Het overzicht is nu niet te laden.</p>
+  if (isError || !data) return <p className="text-ink-soft">{tt('Het overzicht is nu niet te laden.')}</p>
 
   const t = toestandVan(data, now)
   const niveau = household?.support_level ?? 'ondersteund'
@@ -107,27 +125,26 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
     <div className="space-y-6">
       <header>
         <h1 className="text-[2rem] font-extrabold leading-tight tracking-tight">
-          {greeting(now, timezone)}, {viewerName}
+          {uiGroet(now, timezone)}, {viewerName}
         </h1>
         <p className="mt-1 text-lg text-ink-soft">
-          {personName} — {dateLine(now, timezone)}
+          {personName} — {uiDatum(now, timezone)}
         </p>
       </header>
 
       {niveau === 'zelf' && !household?.is_self ? (
         <div className="rounded-[28px] bg-surface p-7 shadow-card">
           <p className="text-2xl font-extrabold tracking-tight">
-            {personName} gebruikt LifeAngle zelfstandig
+            {tt('{naam} gebruikt LifeAngle zelfstandig', { naam: personName })}
           </p>
           <p className="mt-2 text-lg text-ink-soft">
-            Je kan mee plannen en berichten sturen. Medicatie, het logboek en persoonlijke notities
-            ziet alleen {personName}, tot {personName} zelf meer deelt.
+            {tt('Je kan mee plannen en berichten sturen. Medicatie, het logboek en persoonlijke notities ziet alleen {naam}, tot {naam} zelf meer deelt.', { naam: personName })}
           </p>
           <Link
             to="/familie/delen"
             className="mt-4 inline-flex min-h-touch items-center rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
           >
-            Meer hulp voorstellen
+            {tt('Meer hulp voorstellen')}
           </Link>
         </div>
       ) : null}
@@ -159,7 +176,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           />
           {/* Nooit alleen kleur: het woord staat er altijd bij. */}
           <span className="text-sm font-bold uppercase tracking-wide text-ink-faint">
-            {t.ok ? 'rustig' : 'opvolgen'}
+            {t.ok ? tt('rustig') : tt('opvolgen')}
           </span>
         </div>
 
@@ -188,18 +205,18 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-card bg-surface p-6 shadow-card">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Vandaag</h2>
+            <h2 className="text-lg font-bold">{tt('Vandaag')}</h2>
             <Link
               to="/persoon"
               className="flex items-center gap-1 text-sm font-semibold text-accent-ink"
             >
-              Scherm van {personName}
+              {tt('Scherm van {naam}', { naam: personName })}
               <Icon naam="verder" size={16} />
             </Link>
           </div>
 
           {data.log.length === 0 && data.events.length === 0 ? (
-            <p className="mt-3 text-ink-soft">Er staat vandaag nog niets ingepland.</p>
+            <p className="mt-3 text-ink-soft">{tt('Er staat vandaag nog niets ingepland.')}</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {data.log.slice(0, 6).map((l) => (
@@ -217,14 +234,14 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           )}
 
           <p className="mt-4 text-sm text-ink-faint">
-            {data.events.filter((e) => e.done_at).length} van {data.events.length} afgevinkt
+            {tt('{n} van {totaal} afgevinkt', { n: data.events.filter((e) => e.done_at).length, totaal: data.events.length })}
           </p>
         </section>
 
         <section className="rounded-card bg-surface p-6 shadow-card">
-          <h2 className="text-lg font-bold">Aandacht</h2>
+          <h2 className="text-lg font-bold">{tt('Aandacht')}</h2>
           {data.alerts.length === 0 ? (
-            <p className="mt-3 text-ink-soft">Niets dat opvolging vraagt.</p>
+            <p className="mt-3 text-ink-soft">{tt('Niets dat opvolging vraagt.')}</p>
           ) : (
             <ul className="mt-3 space-y-3">
               {data.alerts.map((a) => (
@@ -242,7 +259,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
                     onClick={() => wegklikken.mutate(a.id)}
                     className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold"
                   >
-                    Gezien
+                    {tt('Gezien')}
                   </button>
                 </li>
               ))}
@@ -252,9 +269,9 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
       </div>
 
       <section className="rounded-card bg-surface p-6 shadow-card">
-        <h2 className="text-lg font-bold">Medicatie vandaag</h2>
+        <h2 className="text-lg font-bold">{tt('Medicatie vandaag')}</h2>
         {data.meds.length === 0 ? (
-          <p className="mt-3 text-ink-soft">Geen medicatie ingepland.</p>
+          <p className="mt-3 text-ink-soft">{tt('Geen medicatie ingepland.')}</p>
         ) : (
           <ul className="mt-3 space-y-2">
             {data.meds.map((m) => {
@@ -280,13 +297,13 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
                           : 'border-line text-ink-soft'
                     }`}
                   >
-                    {m.taken_at ? '✅ genomen' : laat ? '⚠️ niet bevestigd' : '🕒 later'}
+                    {m.taken_at ? tt('✅ genomen') : laat ? tt('⚠️ niet bevestigd') : tt('🕒 later')}
                   </span>
                   <button
                     onClick={() => bevestig.mutate({ id: m.id, taken: !m.taken_at, householdId })}
                     className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
                   >
-                    {m.taken_at ? 'Ongedaan' : 'Bevestigen'}
+                    {m.taken_at ? tt('Ongedaan') : tt('Bevestigen')}
                   </button>
                 </li>
               )
@@ -294,8 +311,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
           </ul>
         )}
         <p className="mt-4 text-sm text-ink-faint">
-          LifeAngle stelt geen diagnose en vervangt geen professionele zorg. Bij twijfel over medicatie:
-          bel de huisarts.
+          {tt('LifeAngle stelt geen diagnose en vervangt geen professionele zorg. Bij twijfel over medicatie: bel de huisarts.')}
         </p>
       </section>
       </>

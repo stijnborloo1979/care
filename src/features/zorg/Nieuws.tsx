@@ -6,6 +6,7 @@ import { useOrganisatie } from './useOrganisatie'
 import { afdelingen as haalAfdelingen } from './zorgApi'
 import { mijnLeidAfdelingen, orgNieuws, plaatsNieuws, wisNieuws } from '../../services/nieuws'
 import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, label, veld } from './ui'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Nieuws van het woonzorgcentrum aan de families (79): aan iedereen, of aan
@@ -32,7 +33,7 @@ export default function Nieuws() {
 
   return (
     <div className="space-y-6">
-      <Kop titel="Nieuws voor de families" uitleg="Eén bericht, bij elke familie in de app. Met de naam van het woonzorgcentrum erbij." />
+      <Kop titel={tt('Nieuws voor de families')} uitleg={tt('Eén bericht, bij elke familie in de app. Met de naam van het woonzorgcentrum erbij.')} />
       {magSchrijven ? (
         <NieuwBericht
           orgId={orgId}
@@ -42,10 +43,10 @@ export default function Nieuws() {
           onKlaar={() => queryClient.invalidateQueries({ queryKey: sleutel })}
         />
       ) : null}
-      <Kaart titel="Verstuurd">
+      <Kaart titel={tt('Verstuurd')}>
         {lijst.isLoading ? <Laden /> : null}
         <Fout fout={lijst.error ?? wis.error} />
-        {lijst.data && lijst.data.length === 0 ? <Leeg>Nog geen nieuws verstuurd.</Leeg> : null}
+        {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Nog geen nieuws verstuurd.')}</Leeg> : null}
         <ul className="space-y-3">
           {(lijst.data ?? []).map((n) => (
             <li key={n.id} className="rounded-2xl border border-line p-4">
@@ -54,16 +55,16 @@ export default function Nieuws() {
                   <p className="text-lg font-semibold">{n.titel}</p>
                   <p className="mt-1 whitespace-pre-line">{n.tekst}</p>
                   <p className="mt-1 text-sm text-ink-faint">
-                    {n.department_id ? `Aan de families van afdeling ${namen[n.department_id] ?? '…'}` : 'Aan alle families'} ·{' '}
+                    {n.department_id ? tt('Aan de families van afdeling {naam}', { naam: namen[n.department_id] ?? '…' }) : tt('Aan alle families')} ·{' '}
                     {dagEnUur(n.created_at)}
                   </p>
                 </div>
                 {n.author_id === ik || isBeheerder ? (
                   <button
                     onClick={() => {
-                      if (confirm(`"${n.titel}" wissen? De families zien het dan niet meer.`)) wis.mutate(n.id)
+                      if (confirm(tt('"{titel}" wissen? De families zien het dan niet meer.', { titel: n.titel }))) wis.mutate(n.id)
                     }}
-                    aria-label={`${n.titel} wissen`}
+                    aria-label={tt('{titel} wissen', { titel: n.titel })}
                     className={knopKlein}
                   >
                     <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -73,7 +74,7 @@ export default function Nieuws() {
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-sm text-ink-faint">Nieuws blijft 180 dagen staan.</p>
+        <p className="mt-3 text-sm text-ink-faint">{tt('Nieuws blijft 180 dagen staan.')}</p>
       </Kaart>
     </div>
   )
@@ -106,47 +107,47 @@ function NieuwBericht({
   })
 
   return (
-    <Kaart titel="Nieuw bericht">
+    <Kaart titel={tt('Nieuw bericht')}>
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          if (confirm(doel ? 'Versturen naar de families van deze afdeling?' : 'Versturen naar alle families?')) bewaar.mutate()
+          if (confirm(doel ? tt('Versturen naar de families van deze afdeling?') : tt('Versturen naar alle families?'))) bewaar.mutate()
         }}
         className="grid gap-3"
       >
         <label>
-          <span className={label}>Aan</span>
+          <span className={label}>{tt('Aan wie')}</span>
           <select value={doel} onChange={(e) => setAfdeling(e.target.value)} className={veld}>
-            {aanIedereen ? <option value="">Alle families</option> : null}
+            {aanIedereen ? <option value="">{tt('Alle families')}</option> : null}
             {afdelingen.map((a) => (
               <option key={a.id} value={a.id}>
-                De families van afdeling {a.name}
+                {tt('De families van afdeling {naam}', { naam: a.name })}
               </option>
             ))}
           </select>
         </label>
         <label>
-          <span className={label}>Titel</span>
-          <input required maxLength={120} value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="Zomerfeest zaterdag" className={veld} />
+          <span className={label}>{tt('Titel')}</span>
+          <input required maxLength={120} value={titel} onChange={(e) => setTitel(e.target.value)} placeholder={tt('Zomerfeest zaterdag')} className={veld} />
         </label>
         <label>
-          <span className={label}>Bericht</span>
+          <span className={label}>{tt('Bericht')}</span>
           <textarea
             required
             maxLength={2000}
             rows={4}
             value={tekst}
             onChange={(e) => setTekst(e.target.value)}
-            placeholder="Zaterdag om 14 uur in de tuin. Iedereen welkom."
+            placeholder={tt('Zaterdag om 14 uur in de tuin. Iedereen welkom.')}
             className={veld}
           />
         </label>
         <p className="rounded-2xl bg-surface-soft p-3 text-sm text-ink-soft">
-          Schrijf hier nooit iets over één bewoner. Dit lezen alle families{doel ? ' van die afdeling' : ''}.
+          {doel ? tt('Schrijf hier nooit iets over één bewoner. Dit lezen alle families van die afdeling.') : tt('Schrijf hier nooit iets over één bewoner. Dit lezen alle families.')}
         </p>
         <div>
           <button type="submit" disabled={bewaar.isPending} className={`${knop} w-full sm:w-auto`}>
-            {bewaar.isPending ? 'Bezig…' : 'Versturen'}
+            {bewaar.isPending ? tt('Bezig…') : tt('Versturen')}
           </button>
           <Fout fout={bewaar.error} />
         </div>

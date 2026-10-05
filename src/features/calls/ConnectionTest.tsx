@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { GEEN_TURN, ijsservers } from './useWebRTC'
+import { tt } from '../../lib/uiTaal'
 
 type Uitslag = {
   servers: number
@@ -73,39 +74,39 @@ export default function ConnectionTest() {
         disabled={bezig}
         className="min-h-[2.6rem] rounded-pill border-[1.5px] border-line-strong bg-surface px-4 text-sm font-semibold disabled:opacity-60"
       >
-        {bezig ? 'Bezig met testen… (6 sec)' : 'Verbinding testen'}
+        {bezig ? tt('Bezig met testen… (6 sec)') : tt('Verbinding testen')}
       </button>
 
       {uitslag ? (
         <ul className="mt-4 space-y-3">
           <Rij
             ok={uitslag.lokaal}
-            tekst="Lokaal netwerk"
-            uitleg="Nodig om überhaupt te bellen. Mislukt dit, dan blokkeert de browser camera of netwerk."
+            tekst={tt('Lokaal netwerk')}
+            uitleg={tt('Nodig om überhaupt te bellen. Mislukt dit, dan blokkeert de browser camera of netwerk.')}
           />
           <Rij
             ok={uitslag.stun}
-            tekst="STUN — tussen verschillende netwerken"
-            uitleg="Werkt dit, dan lukt bellen tussen twee wifi-netwerken."
+            tekst={tt('STUN — tussen verschillende netwerken')}
+            uitleg={tt('Werkt dit, dan lukt bellen tussen twee wifi-netwerken.')}
           />
           <Rij
             ok={uitslag.turnGeleverd}
-            tekst="TURN-gegevens ontvangen"
+            tekst={tt('TURN-gegevens ontvangen')}
             uitleg={
               uitslag.turnGeleverd
-                ? 'De edge function turn-credentials gaf gegevens terug.'
-                : 'De edge function turn-credentials bestaat niet, of de secrets CF_TURN_KEY_ID en CF_TURN_API_TOKEN kloppen niet.'
+                ? tt('De edge function turn-credentials gaf gegevens terug.')
+                : tt('De edge function turn-credentials bestaat niet, of de secrets CF_TURN_KEY_ID en CF_TURN_API_TOKEN kloppen niet.')
             }
           />
           <Rij
             ok={uitslag.turn}
-            tekst="TURN — ook op 4G en 5G"
+            tekst={tt('TURN — ook op 4G en 5G')}
             uitleg={
               uitslag.turn
-                ? 'Alles in orde: bellen hoort nu ook op mobiel internet te werken.'
+                ? tt('Alles in orde: bellen hoort nu ook op mobiel internet te werken.')
                 : uitslag.turnGeleverd
-                  ? 'Gegevens ontvangen, maar de TURN-server antwoordt niet. Controleer het token bij Cloudflare.'
-                  : 'Zonder TURN-gegevens kan dit niet lukken.'
+                  ? tt('Gegevens ontvangen, maar de TURN-server antwoordt niet. Controleer het token bij Cloudflare.')
+                  : tt('Zonder TURN-gegevens kan dit niet lukken.')
             }
           />
         </ul>

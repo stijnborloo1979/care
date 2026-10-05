@@ -12,11 +12,12 @@ import {
 } from '../../services/medicationHistory'
 import { hhmm } from '../../lib/time'
 import { locale } from '../../lib/i18n'
+import { tt } from '../../lib/uiTaal'
 
 const PERIODES = [
-  { dagen: 30, label: '30 dagen' },
-  { dagen: 90, label: '3 maanden' },
-  { dagen: 365, label: '1 jaar' },
+  { dagen: 30, label: tt('30 dagen') },
+  { dagen: 90, label: tt('3 maanden') },
+  { dagen: 365, label: tt('1 jaar') },
 ]
 
 /**
@@ -35,7 +36,7 @@ export default function Innamegeschiedenis() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
   const tz = household?.timezone ?? 'Europe/Brussels'
-  const voornaam = household?.person_name.split(' ')[0] ?? 'de persoon'
+  const voornaam = household?.person_name.split(' ')[0] ?? tt('de persoon')
   const [dagen, setDagen] = useState(30)
 
   const { van, tot } = useMemo(() => periode(dagen), [dagen])
@@ -65,9 +66,9 @@ export default function Innamegeschiedenis() {
     <section className="space-y-4 rounded-card bg-surface p-6 shadow-card">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold">Wat er bevestigd werd</h2>
+          <h2 className="text-lg font-bold">{tt('Wat er bevestigd werd')}</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Per moment van de dag, en door wie het bevestigd werd.
+            {tt('Per moment van de dag, en door wie het bevestigd werd.')}
           </p>
         </div>
 
@@ -87,12 +88,11 @@ export default function Innamegeschiedenis() {
         </div>
       </header>
 
-      {isLoading ? <p className="text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       {!isLoading && !totaal ? (
         <p className="text-ink-soft">
-          Er zijn in deze periode nog geen medicatiemomenten. Ze verschijnen zodra er een schema
-          staat en de nachtelijke job gedraaid heeft.
+          {tt('Er zijn in deze periode nog geen medicatiemomenten. Ze verschijnen zodra er een schema staat en de nachtelijke job gedraaid heeft.')}
         </p>
       ) : null}
 
@@ -109,9 +109,7 @@ export default function Innamegeschiedenis() {
           ) : null}
 
           <p className="text-sm text-ink-faint">
-            Bevestigd wil zeggen: er is op de knop gedrukt, door {voornaam} zelf of door iemand die
-            meezorgt. Het betekent niet dat de medicatie genomen is, en een ontbrekende bevestiging
-            betekent niet dat ze overgeslagen werd.
+            {tt('Bevestigd wil zeggen: er is op de knop gedrukt, door {voornaam} zelf of door iemand die meezorgt. Het betekent niet dat de medicatie genomen is, en een ontbrekende bevestiging betekent niet dat ze overgeslagen werd.', { voornaam })}
           </p>
         </>
       ) : null}
@@ -144,7 +142,7 @@ function Blok({
   return (
     <div className={`rounded-2xl border border-line bg-surface-soft p-4 ${groot ? 'sm:p-5' : ''}`}>
       <div className="flex items-baseline justify-between gap-3">
-        <span className="font-bold">{rij.tijdstip === 'alles' ? 'Alle momenten' : rij.tijdstip}</span>
+        <span className="font-bold">{rij.tijdstip === 'alles' ? tt('Alle momenten') : rij.tijdstip}</span>
         <span className={`font-extrabold tabular-nums ${groot ? 'text-3xl' : 'text-xl'}`}>
           {pct} %
         </span>
@@ -155,17 +153,16 @@ function Blok({
       <div
         className="mt-3 flex h-3 overflow-hidden rounded-pill bg-surface-deep"
         role="img"
-        aria-label={`${rij.bevestigd} van ${rij.momenten} bevestigd, waarvan ${rij.zelf} door ${voornaam} zelf`}
+        aria-label={tt('{bevestigd} van {momenten} bevestigd, waarvan {zelf} door {voornaam} zelf', { bevestigd: rij.bevestigd, momenten: rij.momenten, zelf: rij.zelf, voornaam })}
       >
         <span className="bg-accent-ink" style={{ width: `${zelfPct}%` }} />
         <span className="bg-accent" style={{ width: `${anderPct}%` }} />
       </div>
 
       <p className="mt-2 text-sm text-ink-soft">
-        {rij.bevestigd} van {rij.momenten} bevestigd, waarvan{' '}
-        <strong className="text-ink">{rij.zelf}</strong> door {voornaam} zelf
+        {tt('{bevestigd} van {momenten} bevestigd, waarvan {zelf} door {voornaam} zelf', { bevestigd: rij.bevestigd, momenten: rij.momenten, zelf: rij.zelf, voornaam })}
       </p>
-      <p className="text-sm text-ink-faint">over {rij.dagen} {rij.dagen === 1 ? 'dag' : 'dagen'}</p>
+      <p className="text-sm text-ink-faint">{rij.dagen === 1 ? tt('over {n} dag', { n: rij.dagen }) : tt('over {n} dagen', { n: rij.dagen })}</p>
     </div>
   )
 }
@@ -181,7 +178,7 @@ function Wijzigingen({ lijst }: { lijst: SchemaWijziging[] }) {
   return (
     <details className="rounded-2xl border border-line bg-surface-soft p-4">
       <summary className="cursor-pointer font-bold">
-        Wijzigingen aan het schema{' '}
+        {tt('Wijzigingen aan het schema')}{' '}
         <span className="font-semibold text-ink-faint">{lijst.length}</span>
       </summary>
       <ul className="mt-3 space-y-2">
@@ -224,15 +221,15 @@ function PerDag({
 
   const label: Record<string, string> = {
     zelf: voornaam,
-    familie: 'familie',
-    zorgverlener: 'zorgverlener',
-    onbekend: 'iemand',
-    open: 'niet bevestigd',
+    familie: tt('familie'),
+    zorgverlener: tt('zorgverlener'),
+    onbekend: tt('iemand'),
+    open: tt('niet bevestigd'),
   }
 
   return (
     <details className="rounded-2xl border border-line bg-surface-soft p-4">
-      <summary className="cursor-pointer font-bold">Alle momenten</summary>
+      <summary className="cursor-pointer font-bold">{tt('Alle momenten')}</summary>
 
       <div className="mt-3 space-y-4">
         {[...perDag.entries()].slice(0, 31).map(([dag, momenten]) => (

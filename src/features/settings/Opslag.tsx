@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Hoeveel plaats de bewaarde foto's innemen, en een knop om ze weg te doen.
@@ -57,11 +58,9 @@ export default function Opslag() {
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Opslag op dit toestel</h2>
+      <h2 className="text-lg font-bold">{tt('Opslag op dit toestel')}</h2>
       <p className="mt-1 max-w-[62ch] text-ink-soft">
-        Foto's en ingesproken berichten blijven bewaard, zodat ze ook zonder wifi te zien zijn. Dat
-        loopt op. Opruimen kan altijd: alles komt daarna gewoon opnieuw van de server, alleen duurt
-        de eerste keer kijken dan weer even.
+        {tt("Foto's en ingesproken berichten blijven bewaard, zodat ze ook zonder wifi te zien zijn. Dat loopt op. Opruimen kan altijd: alles komt daarna gewoon opnieuw van de server, alleen duurt de eerste keer kijken dan weer even.")}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -74,19 +73,18 @@ export default function Opslag() {
           disabled={bezig}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold disabled:opacity-60"
         >
-          {bezig ? 'Bezig…' : 'Bewaarde foto’s opruimen'}
+          {bezig ? tt('Bezig…') : tt('Bewaarde foto’s opruimen')}
         </button>
       </div>
 
       {klaar ? (
         <p aria-live="polite" className="mt-2 text-sm text-ink-soft">
-          Opgeruimd.
+          {tt('Opgeruimd.')}
         </p>
       ) : null}
 
       <p className="mt-3 max-w-[62ch] text-sm text-ink-faint">
-        Gebruik hiervoor niet de knop van de browser zelf ("Gegevens verwijderen en rechten
-        resetten"). Die wist ook de aanmelding, en op de tablet de koppeling met dit huishouden.
+        {tt('Gebruik hiervoor niet de knop van de browser zelf ("Gegevens verwijderen en rechten resetten"). Die wist ook de aanmelding, en op de tablet de koppeling met dit huishouden.')}
       </p>
     </section>
   )

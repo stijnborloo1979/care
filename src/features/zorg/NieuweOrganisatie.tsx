@@ -5,6 +5,8 @@ import { Building2 } from 'lucide-react'
 import { maakOrganisatie } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
 import { Fout, knop, label, veld } from './ui'
+import { tt } from '../../lib/uiTaal'
+import { DemoKnop } from './Demo'
 
 /**
  * Een woonzorgcentrum registreren. Wie dit doet, wordt er beheerder van.
@@ -23,7 +25,7 @@ export default function NieuweOrganisatie() {
     },
   })
 
-  if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
+  if (isLoading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>
   // Wie al ergens werkt en hier per ongeluk landt, gaat gewoon naar zijn scherm.
   if (org && !maak.isPending) return <Navigate to="/zorg" replace />
 
@@ -32,12 +34,12 @@ export default function NieuweOrganisatie() {
       <span className="grid h-14 w-14 place-items-center rounded-2xl bg-accent-soft text-accent-ink">
         <Building2 size={28} strokeWidth={1.75} aria-hidden="true" />
       </span>
-      <h1 className="mt-5 text-[1.9rem] font-extrabold leading-tight tracking-tight">Een woonzorgcentrum registreren</h1>
+      <h1 className="mt-5 text-[1.9rem] font-extrabold leading-tight tracking-tight">{tt('Een woonzorgcentrum registreren')}</h1>
       <p className="mt-2 text-lg text-ink-soft">
-        Je wordt beheerder. Daarna nodig je medewerkers uit en krijg je een code voor de familie van je bewoners.
+        {tt('Je wordt beheerder. Daarna nodig je medewerkers uit en krijg je een code voor de familie van je bewoners.')}
       </p>
       <p className="mt-2 text-ink-soft">
-        Werk je in een woonzorgcentrum dat al LifeAngle gebruikt? Dan heb je een uitnodiging nodig van je beheerder.
+        {tt('Werk je in een woonzorgcentrum dat al LifeAngle gebruikt? Dan heb je een uitnodiging nodig van je beheerder.')}
       </p>
 
       <form
@@ -48,17 +50,27 @@ export default function NieuweOrganisatie() {
         className="mt-6"
       >
         <label className="block">
-          <span className={label}>Naam van het woonzorgcentrum</span>
-          <input required value={naam} onChange={(e) => setNaam(e.target.value)} placeholder="WZC De Linde" className={veld} />
+          <span className={label}>{tt('Naam van het woonzorgcentrum')}</span>
+          <input required value={naam} onChange={(e) => setNaam(e.target.value)} placeholder={tt('WZC De Linde')} className={veld} />
         </label>
         <button type="submit" disabled={!naam.trim() || maak.isPending} className={`${knop} mt-4 w-full text-lg`}>
-          {maak.isPending ? 'Bezig…' : 'Registreren'}
+          {maak.isPending ? tt('Bezig…') : tt('Registreren')}
         </button>
         <Fout fout={maak.error} />
       </form>
 
+      <div className="mt-8 rounded-card border-[1.5px] border-dashed border-accent bg-accent-soft p-5">
+        <h2 className="text-lg font-bold">{tt('Eerst rondkijken?')}</h2>
+        <p className="mt-1 text-ink-soft">
+          {tt('Open een demo-woonzorgcentrum met afdelingen, kamers en acht verzonnen bewoners. Je kan het daarna met één klik wissen.')}
+        </p>
+        <div className="mt-3">
+          <DemoKnop groot />
+        </div>
+      </div>
+
       <Link to="/" className="mt-6 block text-center font-semibold text-ink-faint underline underline-offset-4">
-        Terug
+        {tt('Terug')}
       </Link>
     </main>
   )

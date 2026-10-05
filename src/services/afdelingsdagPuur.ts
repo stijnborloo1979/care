@@ -1,4 +1,5 @@
 import type { AgendaEvent } from './agenda'
+import { tt } from '../lib/uiTaal'
 
 /**
  * De dag van de afdeling (78): de vaste dag van het woonzorgcentrum
@@ -76,26 +77,40 @@ export function aanwezigBij(lijst: HuisMoment[]): HuisMoment[] {
 }
 
 export const WEEKDAGEN: { nr: number; kort: string }[] = [
-  { nr: 1, kort: 'ma' },
-  { nr: 2, kort: 'di' },
-  { nr: 3, kort: 'wo' },
-  { nr: 4, kort: 'do' },
-  { nr: 5, kort: 'vr' },
-  { nr: 6, kort: 'za' },
-  { nr: 7, kort: 'zo' },
+  { nr: 1, kort: tt('ma') },
+  { nr: 2, kort: tt('di') },
+  { nr: 3, kort: tt('wo') },
+  { nr: 4, kort: tt('do') },
+  { nr: 5, kort: tt('vr') },
+  { nr: 6, kort: tt('za') },
+  { nr: 7, kort: tt('zo') },
 ]
 
 /** "elke dag", "weekdagen", "weekend" of "ma, wo, vr". */
 export function dagenTekst(dagen: number[]): string {
   const set = [...new Set(dagen)].sort()
   const s = set.join(',')
-  if (s === '1,2,3,4,5,6,7') return 'elke dag'
-  if (s === '1,2,3,4,5') return 'weekdagen'
-  if (s === '6,7') return 'weekend'
+  if (s === '1,2,3,4,5,6,7') return tt('elke dag')
+  if (s === '1,2,3,4,5') return tt('weekdagen')
+  if (s === '6,7') return tt('weekend')
   return set.map((d) => WEEKDAGEN.find((w) => w.nr === d)?.kort ?? '?').join(', ')
 }
 
 /** "12:00:00" → "12:00" */
 export function uurKort(t: string | null): string {
   return t ? t.slice(0, 5) : ''
+}
+
+/** Eén moment van de vaste dag (78), zoals het WZC het beheert. */
+export interface VastMoment {
+  id: string
+  org_id: string
+  department_id: string | null
+  titel: string
+  soort: HuisMoment['soort']
+  emoji: string | null
+  begint: string
+  eindigt: string | null
+  dagen: number[]
+  actief: boolean
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useHouseholds } from '../household/useHousehold'
 import { kiesHuisgenoten, samenvattingInWoorden, zetHuisgenoot } from '../../services/huis'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * "Woont samen met" — één keuken voor twee mensen.
@@ -44,7 +45,7 @@ export default function SamenWonen({ hh }: { hh: string }) {
       await queryClient.invalidateQueries({ queryKey: ['rooms'] })
       await queryClient.invalidateQueries({ queryKey: ['items'] })
     } catch (e) {
-      setFout(e instanceof Error ? e.message : 'Dat lukte niet.')
+      setFout(e instanceof Error ? e.message : tt('Dat lukte niet.'))
     } finally {
       setBezig(false)
       setVraagLos(false)
@@ -53,33 +54,28 @@ export default function SamenWonen({ hh }: { hh: string }) {
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Woont samen</h2>
+      <h2 className="text-lg font-bold">{tt('Woont samen')}</h2>
       <p className="mt-1 max-w-[62ch] text-ink-soft">
-        Woont {voornaam} in hetzelfde huis als iemand anders voor wie je zorgt? Dan is er één
-        keuken, en hoef je de wasmachine maar één keer uit te leggen.
+        {tt('Woont {voornaam} in hetzelfde huis als iemand anders voor wie je zorgt? Dan is er één keuken, en hoef je de wasmachine maar één keer uit te leggen.', { voornaam })}
       </p>
 
       <p className="mt-3 max-w-[62ch] text-sm text-ink-faint">
-        Gedeeld wordt alleen het huis: kamers, apparaten, waar dingen liggen en hoe ze werken.
-        Niet de familie, de herinneringen, de medicatie, de agenda of het zorglogboek — die
-        blijven per persoon.
+        {tt('Gedeeld wordt alleen het huis: kamers, apparaten, waar dingen liggen en hoe ze werken. Niet de familie, de herinneringen, de medicatie, de agenda of het zorglogboek — die blijven per persoon.')}
       </p>
 
       {gedeeld ? (
         <div className="mt-4 rounded-2xl border-[1.5px] border-line-strong bg-surface-soft p-4">
           <p className="font-semibold">
-            {voornaam} woont in huis bij {dit.home_name ?? 'iemand anders'}.
+            {tt('{voornaam} woont in huis bij {bij}.', { voornaam, bij: dit.home_name ?? tt('iemand anders') })}
           </p>
           <p className="mt-1 text-sm text-ink-soft">
-            Home Memory is voor beiden hetzelfde. Wat je aan de keuken wijzigt, zien ze allebei.
+            {tt('Home Memory is voor beiden hetzelfde. Wat je aan de keuken wijzigt, zien ze allebei.')}
           </p>
 
           {vraagLos ? (
             <div className="mt-4">
               <p className="text-sm">
-                Als je losmaakt, blijven de kamers en apparaten bij{' '}
-                {dit.home_name ?? 'het andere huishouden'} staan. {voornaam} begint dan met een
-                leeg Home Memory.
+                {tt('Als je losmaakt, blijven de kamers en apparaten bij {bij} staan. {voornaam} begint dan met een leeg Home Memory.', { voornaam, bij: dit.home_name ?? tt('het andere huishouden') })}
               </p>
               <div className="mt-3 flex flex-wrap gap-3">
                 <button
@@ -87,13 +83,13 @@ export default function SamenWonen({ hh }: { hh: string }) {
                   disabled={bezig}
                   className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold disabled:opacity-60"
                 >
-                  Toch losmaken
+                  {tt('Toch losmaken')}
                 </button>
                 <button
                   onClick={() => setVraagLos(false)}
                   className="min-h-touch rounded-pill px-5 font-semibold text-ink-soft"
                 >
-                  Laat maar
+                  {tt('Laat maar')}
                 </button>
               </div>
             </div>
@@ -102,14 +98,13 @@ export default function SamenWonen({ hh }: { hh: string }) {
               onClick={() => setVraagLos(true)}
               className="mt-3 min-h-touch rounded-pill border border-line px-5 font-semibold"
             >
-              Losmaken
+              {tt('Losmaken')}
             </button>
           )}
         </div>
       ) : kandidaten.length === 0 ? (
         <p className="mt-4 text-ink-soft">
-          Je beheert nog geen tweede huishouden dat op zichzelf woont. Zodra dat er is, kan je het
-          hier samenvoegen.
+          {tt('Je beheert nog geen tweede huishouden dat op zichzelf woont. Zodra dat er is, kan je het hier samenvoegen.')}
         </p>
       ) : (
         <ul className="mt-4 space-y-3">
@@ -124,7 +119,7 @@ export default function SamenWonen({ hh }: { hh: string }) {
                 disabled={bezig}
                 className="min-h-touch shrink-0 rounded-pill border-[1.5px] border-accent bg-accent-soft px-5 font-semibold disabled:opacity-60"
               >
-                Zelfde huis
+                {tt('Zelfde huis')}
               </button>
             </li>
           ))}

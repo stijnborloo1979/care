@@ -261,9 +261,34 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     naam, kenmerk, bewoner en kamer); elk van hen kan "gevonden" aanduiden.
     Draai daarna `76_systeemcontrole.sql` opnieuw als je die al eerder
     draaide.
+82. `82_kamers.sql` — kamers per afdeling (met aantal bedden) en
+    `bezetting(org)`: het scherm Kamers toont wie waar woont en wat vrij is.
+    Een bewoner een kamer geven gebeurt met het bestaande `zet_verblijf`.
+83. `83_rapport.sql` — `org_rapport(org, van, tot)`: alleen aantallen
+    (bewoners, opnames, vertrekken, activiteiten, aanwezigheden, bezoeken,
+    uitstappen, nieuws). Bezoeken en uitstappen pas vanaf vijf bewoners in
+    die periode en over minstens 28 dagen. Draai daarna
+    `76_systeemcontrole.sql` opnieuw.
+84. `84_import.sql` — bewoners importeren uit Excel (Care → Importeren):
+    eerst nakijken, dan bewaren. Elke bewoner krijgt een eigen huishouden
+    met een open verblijf. Het WZC kan voor zo'n zelf geïmporteerde bewoner
+    de eerste familiebeheerder uitnodigen (nooit voor een huishouden van
+    een familie, nooit naar het adres van een medewerker). Medewerkers
+    importeren gebeurt met de bestaande uitnodigingen.
+85. `85_demo_wzc.sql` — een demo-woonzorgcentrum met één klik, met
+    verzonnen bewoners. In je eigen demo wissel je tussen coördinator en
+    beheerder en wis je alles weer. Een familie kan nooit aan een demo
+    koppelen. Draai daarna `76_systeemcontrole.sql` opnieuw.
 
-Voor 47 tot 81 staat een terugdraaiscript in `supabase/rollback/`.
-Terugdraaien gebeurt in omgekeerde volgorde (81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
+**Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
+Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
+Franstalig toestel begint in het Frans). De tablet van de bewoner volgt
+nog altijd de taal van het huishouden. Vertalingen staan in
+`src/lib/vertalingen/`; de test `src/lib/uiTaal.test.ts` zakt als een tekst
+in `tt()` geen Franse of Engelse vertaling heeft.
+
+Voor 47 tot 85 staat een terugdraaiscript in `supabase/rollback/`.
+Terugdraaien gebeurt in omgekeerde volgorde (85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47).
 De terugdraaiscripts van 56 en 59 weigeren zodra er gegevens zijn die ze zouden wissen.
 Het terugdraaiscript van 56 weigert zodra er een opname in `diary` staat.
 50 en 51 slaan een tabel over die in jouw project niet bestaat.
@@ -491,6 +516,10 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_79_nieuws_wzc.sql` — nieuws per organisatie en afdeling, team lead alleen aan de eigen afdeling, geen aanpassen, de tijd van de server, opruimen na 180 dagen.
 - `test_80_uitstap.sql` — melden door familie en toegewezen team, niet door tablet, collega of beheerder; vertrokken en terug in volgorde; melding aan de familie; opruimen na 90 dagen.
 - `test_81_spullen.sql` — spullen alleen voor bewoner, familie en toegewezen team; kwijt-lijst voor de afdeling zonder foto, niet voor een andere afdeling of de beheerder; gevonden door een collega; geen reeks meldingen.
+- `test_82_kamers.sql` — kamers zien alle medewerkers, beheren alleen beheerder en coördinator; geen afdeling van een ander huis; geen kamers of bezetting voor familie of een ander huis.
+- `test_83_rapport.sql` — alleen beheerder en coördinator; persoonlijke cijfers pas vanaf vijf bewoners in de periode en 28 dagen; nooit "families in de app".
+- `test_84_import.sql` — importeren alleen door beheerder of coördinator; proef bewaart niets; dubbel en "woont hier al" overgeslagen; familie uitnodigen alleen voor eigen import, nooit voor een familie-huishouden of naar een medewerker.
+- `test_85_demo_wzc.sql` — demo met acht bewoners; rol wisselen en wissen alleen door de eigenaar; geen koppeling van een echte familie; wissen laat een huishouden met een lid staan.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

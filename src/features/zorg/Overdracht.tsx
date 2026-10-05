@@ -5,9 +5,10 @@ import { useOrganisatie } from './useOrganisatie'
 import OpenVragen from './OpenVragen'
 import { DIENSTEN, dienstDatum, huidigeDienst, medewerkers, nieuweOverdracht, overdrachten, type Dienst } from './zorgApi'
 import { Fout, Kaart, Kop, Laden, Leeg, knop, label, tekstvak, uur } from './ui'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 const datumLabel = (d: string) =>
-  new Date(`${d}T12:00:00`).toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+  new Date(`${d}T12:00:00`).toLocaleDateString(uiLocale(), { weekday: 'long', day: 'numeric', month: 'long' })
 
 /**
  * Wat de volgende dienst moet weten. Per afdeling, alleen voor wie er
@@ -57,8 +58,8 @@ export default function Overdracht() {
   if (afdelingen.length === 0) {
     return (
       <div className="space-y-6">
-        <Kop titel="Overdracht" />
-        <Leeg>Je staat nog op geen afdeling. De beheerder van {org.naam} zet je op een afdeling.</Leeg>
+        <Kop titel={tt('Overdracht')} />
+        <Leeg>{tt('Je staat nog op geen afdeling. De beheerder van {org} zet je op een afdeling.', { org: org.naam })}</Leeg>
       </div>
     )
   }
@@ -74,14 +75,14 @@ export default function Overdracht() {
   return (
     <div className="space-y-6">
       <Kop
-        titel="Overdracht"
-        uitleg="Wat de volgende dienst moet weten. Een overdracht wordt na een tijd automatisch gewist; wat blijvend belangrijk is, schrijf je in een zorgnotitie."
+        titel={tt('Overdracht')}
+        uitleg={tt('Wat de volgende dienst moet weten. Een overdracht wordt na een tijd automatisch gewist; wat blijvend belangrijk is, schrijf je in een zorgnotitie.')}
       />
 
       <OpenVragen orgId={org.org_id} />
 
       {afdelingen.length > 1 ? (
-        <div role="tablist" aria-label="Afdeling" className="flex flex-wrap gap-2">
+        <div role="tablist" aria-label={tt('Afdeling')} className="flex flex-wrap gap-2">
           {afdelingen.map((a) => (
             <button
               key={a.id}
@@ -98,7 +99,7 @@ export default function Overdracht() {
         </div>
       ) : null}
 
-      <Kaart titel={`Nieuwe overdracht · ${afdeling?.naam ?? ''}`}>
+      <Kaart titel={tt('Nieuwe overdracht · {afdeling}', { afdeling: afdeling?.naam ?? '' })}>
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -106,7 +107,7 @@ export default function Overdracht() {
           }}
         >
           <fieldset>
-            <legend className={label}>Dienst</legend>
+            <legend className={label}>{tt('Dienst')}</legend>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {DIENSTEN.map((d) => (
                 <button
@@ -124,20 +125,20 @@ export default function Overdracht() {
             </div>
           </fieldset>
           <label className="mt-3 block">
-            <span className={label}>Wat moet de volgende dienst weten?</span>
+            <span className={label}>{tt('Wat moet de volgende dienst weten?')}</span>
             <textarea rows={5} maxLength={8000} value={tekst} onChange={(e) => setTekst(e.target.value)} className={tekstvak} />
           </label>
           <button type="submit" disabled={!tekst.trim() || bewaar.isPending} className={`${knop} mt-3 w-full sm:w-auto`}>
-            {bewaar.isPending ? 'Bezig…' : 'Overdracht bewaren'}
+            {bewaar.isPending ? tt('Bezig…') : tt('Overdracht bewaren')}
           </button>
           <Fout fout={bewaar.error} />
         </form>
       </Kaart>
 
-      <Kaart titel="De laatste dagen">
+      <Kaart titel={tt('De laatste dagen')}>
         {lijst.isLoading ? <Laden /> : null}
         <Fout fout={lijst.error} />
-        {lijst.data && lijst.data.length === 0 ? <Leeg>Nog geen overdracht de laatste dagen.</Leeg> : null}
+        {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Nog geen overdracht de laatste dagen.')}</Leeg> : null}
         <div className="space-y-5">
           {[...groepen.entries()].map(([k, rijen]) => {
             const [datum, d] = k.split('|')
@@ -151,7 +152,7 @@ export default function Overdracht() {
                     <li key={o.id} className="rounded-2xl bg-surface-soft px-4 py-3">
                       <p className="whitespace-pre-wrap break-words">{o.body}</p>
                       <p className="mt-1 text-sm text-ink-faint">
-                        {(o.author_id && namen[o.author_id]) || 'Een collega'} · {uur(o.created_at)}
+                        {(o.author_id && namen[o.author_id]) || tt('Een collega')} · {uur(o.created_at)}
                       </p>
                     </li>
                   ))}

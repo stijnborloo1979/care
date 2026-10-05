@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { tt, uiLocale } from '../../lib/uiTaal'
 
 export interface Plan {
   id: string
@@ -28,7 +29,7 @@ export async function publiekePrijzen(): Promise<Plan[] | null> {
 /** € 9,99 — of € 9 als er geen centen zijn. Altijd Belgische notatie. */
 export function euro(cent: number): string {
   const heel = cent % 100 === 0
-  return new Intl.NumberFormat('nl-BE', {
+  return new Intl.NumberFormat(uiLocale(), {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: heel ? 0 : 2,
@@ -49,12 +50,12 @@ export function careRaming(p: Pick<Plan, 'prijs_maand_cent' | 'minimum_maand_cen
 }
 
 export const STATUS: Record<string, string> = {
-  trial: 'Proefperiode',
-  pilot: 'Pilot',
-  active: 'Actief',
-  past_due: 'Betaling openstaand',
-  paused: 'Gepauzeerd',
-  cancelled: 'Stopgezet',
+  trial: tt('Proefperiode'),
+  pilot: tt('Pilot'),
+  active: tt('Actief'),
+  past_due: tt('Betaling openstaand'),
+  paused: tt('Gepauzeerd'),
+  cancelled: tt('Stopgezet'),
 }
 
 export interface MijnAbonnement {

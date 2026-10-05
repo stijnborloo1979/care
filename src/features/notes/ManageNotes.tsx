@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CATEGORIEEN, deleteNote, saveNote, type MemoryNote } from '../../services/notes'
 import { useNotes } from './useNotes'
 import DictateButton from '../../components/DictateButton'
+import { tt } from '../../lib/uiTaal'
 
 export default function ManageNotes({ householdId }: { householdId: string }) {
   const { data } = useNotes(householdId)
@@ -11,10 +12,9 @@ export default function ManageNotes({ householdId }: { householdId: string }) {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Memory Bank</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Memory Bank')}</h1>
         <p className="mt-1 text-ink-soft">
-          Korte antwoorden op vragen die terugkomen. De spraakassistent gebruikt precies deze
-          weetjes — en niets anders.
+          {tt('Korte antwoorden op vragen die terugkomen. De spraakassistent gebruikt precies deze weetjes — en niets anders.')}
         </p>
       </header>
 
@@ -25,7 +25,7 @@ export default function ManageNotes({ householdId }: { householdId: string }) {
           onClick={() => setOpen('nieuw')}
           className="flex min-h-touch w-full max-w-sm items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
         >
-          + Weetje toevoegen
+          {tt('+ Weetje toevoegen')}
         </button>
       )}
 
@@ -36,7 +36,7 @@ export default function ManageNotes({ householdId }: { householdId: string }) {
             <section key={c.waarde} className="rounded-card bg-surface p-6 shadow-card">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold">
-                  {c.emoji} {c.label}
+                  {c.emoji} {tt(c.label)}
                 </h2>
                 <span className="rounded-pill border border-line px-3 py-0.5 text-sm font-semibold text-ink-soft">
                   {notities.length}
@@ -44,7 +44,7 @@ export default function ManageNotes({ householdId }: { householdId: string }) {
               </div>
 
               {notities.length === 0 ? (
-                <p className="mt-3 text-sm text-ink-soft">Nog niets in deze categorie.</p>
+                <p className="mt-3 text-sm text-ink-soft">{tt('Nog niets in deze categorie.')}</p>
               ) : (
                 <ul className="mt-3 space-y-2">
                   {notities.map((n) => (
@@ -70,7 +70,7 @@ export default function ManageNotes({ householdId }: { householdId: string }) {
                           onClick={() => setOpen(open === n.id ? null : n.id)}
                           className="min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
                         >
-                          {open === n.id ? 'Sluiten' : 'Wijzigen'}
+                          {open === n.id ? tt('Sluiten') : tt('Wijzigen')}
                         </button>
                       </div>
                       {open === n.id ? (
@@ -127,7 +127,7 @@ function NoteEditor({
       await ververs()
       onDone()
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Opslaan lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Opslaan lukte niet.')),
   })
 
   const verwijder = useMutation({
@@ -149,7 +149,7 @@ function NoteEditor({
     >
       <div className="flex flex-wrap gap-3">
         <label className="min-w-[min(9rem,100%)]">
-          <span className="text-sm font-semibold text-ink-soft">Categorie</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Categorie')}</span>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -157,18 +157,18 @@ function NoteEditor({
           >
             {CATEGORIEEN.map((c) => (
               <option key={c.waarde} value={c.waarde}>
-                {c.label}
+                {tt(c.label)}
               </option>
             ))}
           </select>
         </label>
         <label className="min-w-[min(10rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Waarover gaat het?</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Waarover gaat het?')}</span>
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Reservehuissleutel"
+            placeholder={tt('Reservehuissleutel')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
@@ -176,7 +176,7 @@ function NoteEditor({
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-ink-soft">Het antwoord, in gewone taal</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Het antwoord, in gewone taal')}</span>
           <DictateButton onTekst={(t) => setBody(t)} />
         </div>
         <textarea
@@ -184,20 +184,20 @@ function NoteEditor({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={2}
-          placeholder="Bij de buurvrouw, Rita."
+          placeholder={tt('Bij de buurvrouw, Rita.')}
           className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
         />
         <span className="mt-1 block text-xs text-ink-faint">
-          Zo kort mogelijk. Dit wordt voorgelezen als antwoord op een vraag.
+          {tt('Zo kort mogelijk. Dit wordt voorgelezen als antwoord op een vraag.')}
         </span>
       </div>
 
       <label className="block">
-        <span className="text-sm font-semibold text-ink-soft">Labels, gescheiden door komma&rsquo;s</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Labels, gescheiden door komma’s')}</span>
         <input
           value={tags}
           onChange={(e) => setTags(e.target.value)}
-          placeholder="huis, dagelijks"
+          placeholder={tt('huis, dagelijks')}
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
       </label>
@@ -208,24 +208,24 @@ function NoteEditor({
           disabled={opslaan.isPending}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {opslaan.isPending ? 'Opslaan…' : 'Opslaan'}
+          {opslaan.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
         <button
           type="button"
           onClick={onDone}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
-          Annuleren
+          {tt('Annuleren')}
         </button>
         {note ? (
           <button
             type="button"
             onClick={() => {
-              if (confirm(`"${note.title}" verwijderen?`)) verwijder.mutate()
+              if (confirm(tt('"{naam}" verwijderen?', { naam: note.title }))) verwijder.mutate()
             }}
             className="min-h-touch rounded-pill border-[1.5px] border-alert px-5 font-semibold text-alert"
           >
-            Verwijderen
+            {tt('Verwijderen')}
           </button>
         ) : null}
       </div>

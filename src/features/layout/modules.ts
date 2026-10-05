@@ -1,4 +1,5 @@
 import type { IconNaam } from '../../components/Icon'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * De indeling van het scherm van de persoon.
@@ -79,8 +80,8 @@ export const RUSTIG_TOT = 6
 export const MODULES: ModuleDef[] = [
   {
     id: 'nu',
-    naam: 'Wat nu?',
-    uitleg: 'Wat er op dit moment moet gebeuren, met een knop om het af te vinken.',
+    naam: tt('Wat nu?'),
+    uitleg: tt('Wat er op dit moment moet gebeuren, met een knop om het af te vinken.'),
     icoon: 'vandaag',
     // Altijd bovenaan, maar niet per se vol-breed. Half zetten laat de
     // kaart bovenaan de linkerkolom staan, met de dag eronder — precies
@@ -90,68 +91,68 @@ export const MODULES: ModuleDef[] = [
   },
   {
     id: 'daarna',
-    naam: 'Daarna',
-    uitleg: 'Het eerstvolgende dat eraan komt.',
+    naam: tt('Daarna'),
+    uitleg: tt('Het eerstvolgende dat eraan komt.'),
     icoon: 'verder',
   },
   {
     id: 'vandaag',
-    naam: 'Vandaag',
-    uitleg: 'De hele dag als tijdlijn, met wat al gedaan is.',
+    naam: tt('Vandaag'),
+    uitleg: tt('De hele dag als tijdlijn, met wat al gedaan is.'),
     icoon: 'agenda',
   },
   {
     id: 'berichten',
-    naam: 'Berichten',
-    uitleg: 'Wat familie stuurde, met de mogelijkheid te antwoorden.',
+    naam: tt('Berichten'),
+    uitleg: tt('Wat familie stuurde, met de mogelijkheid te antwoorden.'),
     icoon: 'bellen',
   },
   {
     id: 'medicatie',
-    naam: 'Medicatie',
-    uitleg: 'Het eerstvolgende moment met de foto van de doos, en een knop om te bevestigen.',
+    naam: tt('Medicatie'),
+    uitleg: tt('Het eerstvolgende moment met de foto van de doos, en een knop om te bevestigen.'),
     icoon: 'medicatie',
   },
   {
     id: 'onthoud',
-    naam: 'Onthoud dit',
-    uitleg: 'Iets laten onthouden: waar iets ligt, wat er gezegd is.',
+    naam: tt('Onthoud dit'),
+    uitleg: tt('Iets laten onthouden: waar iets ligt, wat er gezegd is.'),
     icoon: 'weetjes',
   },
   {
     id: 'radio',
-    naam: 'Muziek',
-    uitleg: 'De radio of de muziek van vroeger, met één knop aan.',
+    naam: tt('Muziek'),
+    uitleg: tt('De radio of de muziek van vroeger, met één knop aan.'),
     icoon: 'afspelen',
   },
   {
     id: 'vroeger',
-    naam: 'Vandaag vroeger',
-    uitleg: 'Een foto van deze dag in een ander jaar. Blijft weg op dagen waar niets bij past.',
+    naam: tt('Vandaag vroeger'),
+    uitleg: tt('Een foto van deze dag in een ander jaar. Blijft weg op dagen waar niets bij past.'),
     icoon: 'fotos',
   },
   {
     id: 'herinneringen',
-    naam: 'Herinneringen',
-    uitleg: 'De nieuwste foto, met een weg naar de hele tijdlijn. Staat er elke dag.',
+    naam: tt('Herinneringen'),
+    uitleg: tt('De nieuwste foto, met een weg naar de hele tijdlijn. Staat er elke dag.'),
     icoon: 'fotos',
   },
   {
     id: 'weetjes',
-    naam: 'Weetjes',
-    uitleg: 'Antwoorden op vragen die terugkomen: waar iets ligt, hoe iets moet.',
+    naam: tt('Weetjes'),
+    uitleg: tt('Antwoorden op vragen die terugkomen: waar iets ligt, hoe iets moet.'),
     icoon: 'weetjes',
   },
   {
     id: 'vertellen',
-    naam: 'Vertel eens',
-    uitleg: 'Elke dag één vraag over vroeger, voor het levensboek.',
+    naam: tt('Vertel eens'),
+    uitleg: tt('Elke dag één vraag over vroeger, voor het levensboek.'),
     icoon: 'praten',
   },
   {
     id: 'knoppen',
-    naam: 'Grote knoppen',
-    uitleg: 'Wat nu?, Familie en Help als drie grote knoppen.',
+    naam: tt('Grote knoppen'),
+    uitleg: tt('Wat nu?, Familie en Help als drie grote knoppen.'),
     icoon: 'help',
     altijdVol: true,
   },
@@ -206,21 +207,21 @@ const vol = (id: ModuleId): Tegel => ({ id, maat: 'vol' })
 export const SJABLONEN: Sjabloon[] = [
   {
     id: 'rustig',
-    naam: 'Rustig',
-    uitleg: 'Drie blokken. Eén ding tegelijk, elke dag op dezelfde plek.',
+    naam: tt('Rustig'),
+    uitleg: tt('Drie blokken. Eén ding tegelijk, elke dag op dezelfde plek.'),
     tegels: [vol('nu'), vol('daarna'), vol('knoppen')],
   },
   {
     id: 'standaard',
-    naam: 'Standaard',
-    uitleg: 'De dag en wat familie stuurt, met de grote kaart bovenaan.',
+    naam: tt('Standaard'),
+    uitleg: tt('De dag en wat familie stuurt, met de grote kaart bovenaan.'),
     tegels: [vol('nu'), half('daarna'), half('berichten'), half('vandaag'), half('onthoud'), vol('knoppen')],
   },
   {
     id: 'twee-kolommen',
-    naam: 'Twee kolommen',
+    naam: tt('Twee kolommen'),
     uitleg:
-      'Zoals het scherm er vroeger liggend uitzag: links de dag, rechts wat er te doen en te zien is. Op een tablet loopt alles door in twee kolommen.',
+      tt('Zoals het scherm er vroeger liggend uitzag: links de dag, rechts wat er te doen en te zien is. Op een tablet loopt alles door in twee kolommen.'),
     tegels: [
       half('nu'),
       half('daarna'),
@@ -234,8 +235,8 @@ export const SJABLONEN: Sjabloon[] = [
   },
   {
     id: 'alles',
-    naam: 'Alles',
-    uitleg: 'Elke module, om te zien wat er bestaat. Daarna weghalen wat niet past.',
+    naam: tt('Alles'),
+    uitleg: tt('Elke module, om te zien wat er bestaat. Daarna weghalen wat niet past.'),
     // Half waar het kan: zo loopt alles door in twee kolommen. Wat nooit
     // half kan, blijft vol — anders zet normaliseer() het meteen terug en
     // lijkt het sjabloon niet te werken.

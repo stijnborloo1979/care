@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { toonNaam } from '../messages/messages'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Je eigen naam.
@@ -63,10 +64,9 @@ export default function JouwNaam() {
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Jouw naam</h2>
+      <h2 className="text-lg font-bold">{tt('Jouw naam')}</h2>
       <p className="mt-1 max-w-[60ch] text-ink-soft">
-        Zo staat het bij een bericht of een foto die je stuurt. Zet wat zij zou zeggen — "Els" of
-        "mama" — en niet je volledige naam.
+        {tt('Zo staat het bij een bericht of een foto die je stuurt. Zet wat zij zou zeggen — "Els" of "mama" — en niet je volledige naam.')}
       </p>
 
       <form
@@ -78,7 +78,7 @@ export default function JouwNaam() {
         className="mt-4 flex flex-wrap items-end gap-3"
       >
         <label className="min-w-[min(14rem,100%)] flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Naam</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Naam')}</span>
           <input
             value={waarde}
             onChange={(e) => setNaam(e.target.value)}
@@ -92,25 +92,25 @@ export default function JouwNaam() {
           disabled={bewaar.isPending || !waarde.trim()}
           className="min-h-touch rounded-pill bg-accent-ink px-6 font-semibold text-white disabled:opacity-60"
         >
-          {bewaar.isPending ? 'Opslaan…' : 'Opslaan'}
+          {bewaar.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
       </form>
 
       {isAdres ? (
         <p className="mt-2 text-sm text-ink-soft">
-          Er staat nu je e-mailadres. De app toont voorlopig "{toonNaam(naam)}".
+          {tt('Er staat nu je e-mailadres. De app toont voorlopig "{naam}".', { naam: toonNaam(naam) })}
         </p>
       ) : null}
 
       {bewaardNaam ? (
         <p aria-live="polite" className="mt-2 text-sm font-semibold text-ok">
-          Opgeslagen. Het geldt vanaf je volgende bericht.
+          {tt('Opgeslagen. Het geldt vanaf je volgende bericht.')}
         </p>
       ) : null}
 
       {bewaar.isError ? (
         <p role="alert" className="mt-2 text-sm text-alert">
-          Dat lukte niet. Probeer het straks nog eens.
+          {tt('Dat lukte niet. Probeer het straks nog eens.')}
         </p>
       ) : null}
     </section>

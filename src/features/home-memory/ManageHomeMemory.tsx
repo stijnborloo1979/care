@@ -14,6 +14,7 @@ import {
 import { useItem, useItems, useRooms } from './useHomeMemory'
 import { SJABLONEN } from './sjablonen'
 import DictateButton from '../../components/DictateButton'
+import { tt } from '../../lib/uiTaal'
 
 interface Props {
   householdId: string
@@ -35,9 +36,9 @@ export default function ManageHomeMemory({ householdId }: Props) {
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Home Memory</h2>
+      <h2 className="text-lg font-bold">{tt('Home Memory')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Wat er in huis staat, waar het ligt en hoe het werkt.
+        {tt('Wat er in huis staat, waar het ligt en hoe het werkt.')}
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -79,7 +80,7 @@ export default function ManageHomeMemory({ householdId }: Props) {
         ))}
         {lijst.length === 0 ? (
           <li className="rounded-2xl border-[1.5px] border-dashed border-line-strong p-4 text-sm text-ink-soft">
-            Nog niets in deze kamer. Voeg toe wat Maria het vaakst zoekt of niet meer kan bedienen.
+            {tt('Nog niets in deze kamer. Voeg toe wat Maria het vaakst zoekt of niet meer kan bedienen.')}
           </li>
         ) : null}
       </ul>
@@ -97,7 +98,7 @@ export default function ManageHomeMemory({ householdId }: Props) {
               onClick={() => setEditing('nieuw')}
               className="flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
             >
-              + Ding toevoegen
+              {tt('+ Ding toevoegen')}
             </button>
           )}
         </div>
@@ -121,10 +122,10 @@ function KamerFoto({ householdId, kamer }: { householdId: string; kamer?: Room }
         <StoragePhoto path={kamer.photo_path} emoji={kamer.emoji} alt={kamer.name} />
       </div>
       <div>
-        <p className="font-semibold">Foto van {kamer.name}</p>
+        <p className="font-semibold">{tt('Foto van {kamer}', { kamer: kamer.name })}</p>
         <FotoKiezer
           className="mt-1 block"
-          label={kamer.photo_path ? 'Andere foto' : 'Foto kiezen'}
+          label={kamer.photo_path ? tt('Andere foto') : tt('Foto kiezen')}
           onKies={async (bestand) => {
             await uploadRoomPhoto(householdId, kamer.id, bestand)
             await queryClient.invalidateQueries({ queryKey: ['rooms', householdId] })
@@ -181,7 +182,7 @@ function ItemRow({
           onClick={onToggle}
           className="min-h-[2.4rem] rounded-pill border-[1.5px] border-line-strong px-3 text-sm font-semibold"
         >
-          {open ? 'Sluiten' : 'Wijzigen'}
+          {open ? tt('Sluiten') : tt('Wijzigen')}
         </button>
       </div>
 
@@ -193,7 +194,7 @@ function ItemRow({
 
           <div className="flex flex-wrap gap-2">
             <label className="relative min-h-[2.4rem] cursor-pointer overflow-hidden rounded-pill border-[1.5px] border-line-strong px-4 py-1 text-sm font-semibold">
-              {uploading ? 'Bezig…' : 'Foto kiezen'}
+              {uploading ? tt('Bezig…') : tt('Foto kiezen')}
               <input
                 type="file"
                 accept="image/*"
@@ -203,11 +204,11 @@ function ItemRow({
             </label>
             <button
               onClick={() => {
-                if (confirm(`"${item.name}" verwijderen?`)) verwijder.mutate()
+                if (confirm(tt('"{naam}" verwijderen?', { naam: item.name }))) verwijder.mutate()
               }}
               className="min-h-[2.4rem] rounded-pill border-[1.5px] border-alert px-4 text-sm font-semibold text-alert"
             >
-              Verwijderen
+              {tt('Verwijderen')}
             </button>
           </div>
 
@@ -270,7 +271,7 @@ function ItemForm({
       if (itemId) await queryClient.invalidateQueries({ queryKey: ['item', itemId] })
       onDone()
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Opslaan lukte niet.'),
+    onError: (e) => setError(e instanceof Error ? e.message : tt('Opslaan lukte niet.')),
   })
 
   return (
@@ -285,7 +286,7 @@ function ItemForm({
       {!itemId ? (
         <div>
           <span className="text-sm font-semibold text-ink-soft">
-            Begin met een sjabloon, of typ het zelf
+            {tt('Begin met een sjabloon, of typ het zelf')}
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
             {SJABLONEN.map((t) => (
@@ -304,7 +305,7 @@ function ItemForm({
 
       <div className="flex gap-3">
         <label className="w-20">
-          <span className="text-sm font-semibold text-ink-soft">Icoon</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Icoon')}</span>
           <input
             value={emoji}
             onChange={(e) => setEmoji(e.target.value)}
@@ -313,12 +314,12 @@ function ItemForm({
           />
         </label>
         <label className="flex-1">
-          <span className="text-sm font-semibold text-ink-soft">Wat is het?</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Wat is het?')}</span>
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Microgolfoven"
+            placeholder={tt('Microgolfoven')}
             className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
         </label>
@@ -326,23 +327,23 @@ function ItemForm({
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-ink-soft">Waar ligt of staat het?</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Waar ligt of staat het?')}</span>
           <DictateButton onTekst={(t) => setWhere(t)} />
         </div>
         <input
           value={where}
           onChange={(e) => setWhere(e.target.value)}
-          placeholder="Op het aanrecht, rechts van de gootsteen."
+          placeholder={tt('Op het aanrecht, rechts van de gootsteen.')}
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
       </div>
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-ink-soft">Stappen, één per lijn</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Stappen, één per lijn')}</span>
           {/* Elke ingesproken zin wordt een eigen stap. */}
           <DictateButton
-            label="Stap inspreken"
+            label={tt('Stap inspreken')}
             onTekst={(t) => setSteps((v) => (v ? v + '\n' + t : t))}
           />
         </div>
@@ -350,17 +351,17 @@ function ItemForm({
           value={steps}
           onChange={(e) => setSteps(e.target.value)}
           rows={4}
-          placeholder={'Doe de deur open.\nDruk op de knop links.'}
+          placeholder={tt('Doe de deur open.\nDruk op de knop links.')}
           className="mt-1 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3"
         />
         <span className="mt-1 block text-xs text-ink-faint">
-          Korte zinnen, één handeling per lijn. Ze worden als losse kaarten getoond.
+          {tt('Korte zinnen, één handeling per lijn. Ze worden als losse kaarten getoond.')}
         </span>
       </div>
 
       {(bestaand?.item_step ?? []).length > 0 ? (
         <div>
-          <span className="text-sm font-semibold text-ink-soft">Foto bij een stap</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('Foto bij een stap')}</span>
           <ul className="mt-2 space-y-2">
             {(bestaand?.item_step ?? []).map((stap) => (
               <li
@@ -372,7 +373,7 @@ function ItemForm({
                 </div>
                 <span className="min-w-[min(8rem,100%)] flex-1 text-sm">{stap.body}</span>
                 <FotoKiezer
-                  label={stap.photo_path ? 'Andere foto' : 'Foto'}
+                  label={stap.photo_path ? tt('Andere foto') : tt('Foto')}
                   onKies={async (bestand) => {
                     await uploadStepPhoto(householdId, stap.id, bestand)
                     if (itemId) await queryClient.invalidateQueries({ queryKey: ['item', itemId] })
@@ -382,8 +383,7 @@ function ItemForm({
             ))}
           </ul>
           <span className="mt-1 block text-xs text-ink-faint">
-            Een foto hoort bij de tekst van die stap. Herschrijf je de zin, dan hoort de foto er
-            niet meer bij en kies je een nieuwe.
+            {tt('Een foto hoort bij de tekst van die stap. Herschrijf je de zin, dan hoort de foto er niet meer bij en kies je een nieuwe.')}
           </span>
         </div>
       ) : null}
@@ -394,14 +394,14 @@ function ItemForm({
           disabled={opslaan.isPending}
           className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {opslaan.isPending ? 'Opslaan…' : 'Opslaan'}
+          {opslaan.isPending ? tt('Opslaan…') : tt('Opslaan')}
         </button>
         <button
           type="button"
           onClick={onDone}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
-          Annuleren
+          {tt('Annuleren')}
         </button>
       </div>
 

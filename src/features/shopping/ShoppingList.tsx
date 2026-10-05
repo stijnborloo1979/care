@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Mic, Trash2 } from 'lucide-react'
 import { t } from '../../lib/i18n'
+import { tt } from '../../lib/uiTaal'
 import { useHousehold } from '../household/useHousehold'
 import { addShoppingItems, deleteShoppingItem, getShopping, setBought, type ShoppingItem } from '../../services/shopping'
 import { useVoice } from '../voice-assistant/voiceStore'
@@ -62,10 +63,10 @@ export default function ShoppingList({ familie = false }: { familie?: boolean })
         </button>
       ) : null}
 
-      {isLoading ? <p className="mt-6 text-lg text-ink-soft">Even geduld…</p> : null}
+      {isLoading ? <p className="mt-6 text-lg text-ink-soft">{familie ? tt('Even geduld…') : 'Even geduld…'}</p> : null}
       {isError ? (
         <p role="alert" className="mt-6 text-lg text-alert">
-          De lijst kon niet geladen worden.
+          {familie ? tt('De lijst kon niet geladen worden.') : 'De lijst kon niet geladen worden.'}
         </p>
       ) : null}
 
@@ -101,8 +102,8 @@ export default function ShoppingList({ familie = false }: { familie?: boolean })
         <input
           value={nieuw}
           onChange={(e) => setNieuw(e.target.value)}
-          placeholder="Bijvoorbeeld: melk, brood"
-          aria-label="Product toevoegen"
+          placeholder={familie ? tt('Bijvoorbeeld: melk, brood') : 'Bijvoorbeeld: melk, brood'}
+          aria-label={familie ? tt('Product toevoegen') : 'Product toevoegen'}
           className="min-h-touch min-w-0 flex-1 rounded-pill border-[1.5px] border-line-strong bg-surface px-5 text-lg"
         />
         <button
@@ -110,12 +111,12 @@ export default function ShoppingList({ familie = false }: { familie?: boolean })
           disabled={voegToe.isPending}
           className="min-h-touch rounded-pill bg-accent-ink px-5 text-lg font-bold text-white disabled:opacity-60"
         >
-          Toevoegen
+          {familie ? tt('Toevoegen') : 'Toevoegen'}
         </button>
       </form>
       {voegToe.isError ? (
         <p role="alert" className="mt-2 text-alert">
-          Dat is niet gelukt. Probeer het opnieuw.
+          {familie ? tt('Dat is niet gelukt. Probeer het opnieuw.') : 'Dat is niet gelukt. Probeer het opnieuw.'}
         </p>
       ) : null}
     </main>
@@ -143,10 +144,11 @@ function Rij({ item, onVink, onWis }: { item: ShoppingItem; onVink: () => void; 
         </span>
         {item.name}
       </button>
+      {/* Alleen familie krijgt een wisknop, dus deze tekst volgt de taal van familie. */}
       {onWis ? (
         <button
           onClick={onWis}
-          aria-label={`${item.name} verwijderen`}
+          aria-label={tt('{naam} verwijderen', { naam: item.name })}
           className="grid min-h-touch min-w-[3rem] place-items-center rounded-full text-ink-faint"
         >
           <Trash2 size={20} aria-hidden="true" />

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { tt } from '../../lib/uiTaal'
 
 interface Props {
   householdId: string
@@ -48,7 +49,7 @@ export default function InviteMember({ householdId, personName }: Props) {
         setVerstuurd(false)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Uitnodigen lukte niet.')
+      setError(err instanceof Error ? err.message : tt('Uitnodigen lukte niet.'))
     } finally {
       setBusy(false)
     }
@@ -56,15 +57,14 @@ export default function InviteMember({ householdId, personName }: Props) {
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Iemand uitnodigen</h2>
+      <h2 className="text-lg font-bold">{tt('Iemand uitnodigen')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Voor wie mee wil zorgen voor {personName}. De link werkt alleen voor het adres dat je hier
-        invult.
+        {tt('Voor wie mee wil zorgen voor {naam}. De link werkt alleen voor het adres dat je hier invult.', { naam: personName })}
       </p>
 
       <form onSubmit={maak} className="mt-4 space-y-3">
         <label className="block">
-          <span className="text-sm font-semibold text-ink-soft">E-mailadres</span>
+          <span className="text-sm font-semibold text-ink-soft">{tt('E-mailadres')}</span>
           <input
             type="email"
             required
@@ -76,25 +76,25 @@ export default function InviteMember({ householdId, personName }: Props) {
 
         <div className="flex flex-wrap gap-3">
           <label className="min-w-[min(10rem,100%)] flex-1">
-            <span className="text-sm font-semibold text-ink-soft">Rol</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Rol')}</span>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             >
-              <option value="member">Familielid</option>
-              <option value="admin">Familiebeheerder</option>
-              <option value="caregiver">Zorgverlener</option>
-              <option value="person">De persoon zelf</option>
+              <option value="member">{tt('Familielid')}</option>
+              <option value="admin">{tt('Familiebeheerder')}</option>
+              <option value="caregiver">{tt('Zorgverlener')}</option>
+              <option value="person">{tt('De persoon zelf')}</option>
             </select>
           </label>
 
           <label className="min-w-[min(10rem,100%)] flex-1">
-            <span className="text-sm font-semibold text-ink-soft">Relatie</span>
+            <span className="text-sm font-semibold text-ink-soft">{tt('Relatie')}</span>
             <input
               value={relation}
               onChange={(e) => setRelation(e.target.value)}
-              placeholder="Zoon"
+              placeholder={tt('Zoon')}
               className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             />
           </label>
@@ -105,7 +105,7 @@ export default function InviteMember({ householdId, personName }: Props) {
           disabled={busy}
           className="flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
         >
-          {busy ? 'Bezig…' : 'Uitnodiging maken'}
+          {busy ? tt('Bezig…') : tt('Uitnodiging maken')}
         </button>
       </form>
 
@@ -113,8 +113,8 @@ export default function InviteMember({ householdId, personName }: Props) {
         <div className="mt-4 rounded-2xl border border-accent bg-accent-soft p-4">
           <p className="text-sm font-semibold">
             {verstuurd
-              ? `Verstuurd naar ${email}. Of geef de link zelf door:`
-              : `Klaar. Stuur deze link naar ${email}:`}
+              ? tt('Verstuurd naar {email}. Of geef de link zelf door:', { email })
+              : tt('Klaar. Stuur deze link naar {email}:', { email })}
           </p>
           <p className="mt-2 break-all text-sm">{link}</p>
           <button
@@ -123,9 +123,9 @@ export default function InviteMember({ householdId, personName }: Props) {
             }}
             className="mt-3 min-h-touch rounded-pill border-[1.5px] border-line-strong px-4 font-semibold"
           >
-            {copied ? 'Gekopieerd' : 'Kopieer link'}
+            {copied ? tt('Gekopieerd') : tt('Kopieer link')}
           </button>
-          <p className="mt-2 text-xs text-ink-soft">Zeven dagen geldig, eenmalig te gebruiken.</p>
+          <p className="mt-2 text-xs text-ink-soft">{tt('Zeven dagen geldig, eenmalig te gebruiken.')}</p>
         </div>
       ) : null}
 

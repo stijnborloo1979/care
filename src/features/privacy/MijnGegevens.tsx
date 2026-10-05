@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Download, Trash2 } from 'lucide-react'
 import { exporteer, verwijderAccount } from '../../services/export'
 import { useAuth } from '../auth/AuthProvider'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * De twee rechten uit de AVG die in de app zelf moeten kunnen: inzage en
@@ -29,7 +30,7 @@ export default function MijnGegevens() {
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) {
-      setFout(e instanceof Error ? e.message : 'Downloaden lukte niet.')
+      setFout(e instanceof Error ? e.message : tt('Downloaden lukte niet.'))
     } finally {
       setBezig(null)
     }
@@ -43,21 +44,26 @@ export default function MijnGegevens() {
       await signOut()
       navigate('/login', { replace: true })
     } catch (e) {
-      setFout(e instanceof Error ? e.message : 'Verwijderen lukte niet.')
+      setFout(e instanceof Error ? e.message : tt('Verwijderen lukte niet.'))
     } finally {
       setBezig(null)
     }
   }
 
+  const [verklaringVoor, verklaringNa] = tt(
+    'Wat LifeAngle bewaart, waarom, en hoe lang, staat in de {link}.',
+  ).split('{link}')
+  const [typVoor, typNa] = tt('Typ {woord} om te bevestigen').split('{woord}')
+
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Mijn gegevens</h2>
+      <h2 className="text-lg font-bold">{tt('Mijn gegevens')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Wat LifeAngle bewaart, waarom, en hoe lang, staat in de{' '}
+        {verklaringVoor}
         <Link to="/privacy" className="font-semibold text-accent-ink underline underline-offset-4">
-          privacyverklaring
+          {tt('privacyverklaring')}
         </Link>
-        .
+        {verklaringNa}
       </p>
 
       <button
@@ -66,11 +72,10 @@ export default function MijnGegevens() {
         className="mt-4 flex min-h-touch items-center gap-2 rounded-pill border-[1.5px] border-line-strong px-5 font-semibold disabled:opacity-60"
       >
         <Download size={18} strokeWidth={1.75} />
-        {bezig === 'export' ? 'Bezig met verzamelen…' : 'Download mijn gegevens'}
+        {bezig === 'export' ? tt('Bezig met verzamelen…') : tt('Download mijn gegevens')}
       </button>
       <p className="mt-2 text-xs text-ink-faint">
-        Eén bestand met alles wat jij in de app kan zien. Foto&rsquo;s, opnames en documenten staan
-        erin als verwijzing.
+        {tt('Eén bestand met alles wat jij in de app kan zien. Foto’s, opnames en documenten staan erin als verwijzing.')}
       </p>
 
       <div className="mt-6 border-t border-line pt-5">
@@ -80,22 +85,20 @@ export default function MijnGegevens() {
             className="flex items-center gap-2 font-semibold text-alert"
           >
             <Trash2 size={18} strokeWidth={1.75} />
-            Mijn account verwijderen
+            {tt('Mijn account verwijderen')}
           </button>
         ) : (
           <div className="space-y-3">
-            <p className="font-semibold">Je account verwijderen</p>
+            <p className="font-semibold">{tt('Je account verwijderen')}</p>
             <ul className="list-disc space-y-1 pl-5 text-sm text-ink-soft">
-              <li>Je kan niet meer inloggen, en je profiel verdwijnt.</li>
+              <li>{tt('Je kan niet meer inloggen, en je profiel verdwijnt.')}</li>
               <li>
-                Gaat een huishouden over jou, of ben je er alleen in, dan verdwijnt het mee — met alle
-                foto&rsquo;s, verhalen en documenten.
+                {tt('Gaat een huishouden over jou, of ben je er alleen in, dan verdwijnt het mee — met alle foto’s, verhalen en documenten.')}
               </li>
               <li>
-                Zijn er nog anderen, dan blijft het huishouden bestaan. Wat je schreef, blijft staan
-                zonder je naam.
+                {tt('Zijn er nog anderen, dan blijft het huishouden bestaan. Wat je schreef, blijft staan zonder je naam.')}
               </li>
-              <li>Dit kan niet ongedaan gemaakt worden. Download eerst je gegevens als je ze wil houden.</li>
+              <li>{tt('Dit kan niet ongedaan gemaakt worden. Download eerst je gegevens als je ze wil houden.')}</li>
             </ul>
 
             <label className="flex items-start gap-3 text-sm">
@@ -105,13 +108,14 @@ export default function MijnGegevens() {
                 onChange={(e) => setOokHuishouden(e.target.checked)}
                 className="mt-0.5 h-5 w-5"
               />
-              Ben ik de enige beheerder van een huishouden waar nog anderen in zitten, verwijder dat
-              huishouden dan ook.
+              {tt('Ben ik de enige beheerder van een huishouden waar nog anderen in zitten, verwijder dat huishouden dan ook.')}
             </label>
 
             <label className="block">
               <span className="text-sm font-semibold text-ink-soft">
-                Typ <strong>VERWIJDER</strong> om te bevestigen
+                {typVoor}
+                <strong>VERWIJDER</strong>
+                {typNa}
               </span>
               <input
                 value={bevestig}
@@ -126,7 +130,7 @@ export default function MijnGegevens() {
                 disabled={bevestig.trim().toUpperCase() !== 'VERWIJDER' || bezig !== null}
                 className="min-h-touch rounded-pill bg-alert px-5 font-semibold text-white disabled:opacity-40"
               >
-                {bezig === 'wis' ? 'Bezig…' : 'Definitief verwijderen'}
+                {bezig === 'wis' ? tt('Bezig…') : tt('Definitief verwijderen')}
               </button>
               <button
                 onClick={() => {
@@ -135,7 +139,7 @@ export default function MijnGegevens() {
                 }}
                 className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
               >
-                Annuleren
+                {tt('Annuleren')}
               </button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import type { MemoryPhoto } from '../../services/memories'
 import type { LifeStory } from '../../services/stories'
+import { tt } from '../../lib/uiTaal'
 
 export interface Starter {
   sleutel: string
@@ -26,14 +27,17 @@ export function gespreksstarters(fotos: MemoryPhoto[], verhalen: LifeStory[], da
     const f = metFoto[hash(`f${dag}`) % metFoto.length]
     uit.push({
       sleutel: `f${f.id}`,
-      tekst: `${f.title}${f.year ? ` (${f.year})` : ''}. Toon de foto en vraag wat ${naam} zich ervan herinnert.`,
+      tekst: tt('{titel}. Toon de foto en vraag wat {naam} zich ervan herinnert.', {
+        titel: `${f.title}${f.year ? ` (${f.year})` : ''}`,
+        naam,
+      }),
       foto: f.photo_path,
     })
   }
   const verteld = verhalen.filter((v) => (v.soort ?? 'verhaal') === 'verhaal' && v.shared !== false && (v.body?.trim() || v.audio_path))
   if (verteld.length > 0) {
     const v = verteld[hash(`v${dag}`) % verteld.length]
-    uit.push({ sleutel: `v${v.id}`, tekst: `${naam} vertelde over "${v.question}". Vraag er eens meer over.` })
+    uit.push({ sleutel: `v${v.id}`, tekst: tt('{naam} vertelde over "{vraag}". Vraag er eens meer over.', { naam, vraag: v.question }) })
   }
   return uit
 }

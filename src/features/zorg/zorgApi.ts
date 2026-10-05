@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase'
 import { ontbrekendeFunctie } from '../../lib/ontbrekendeFunctie'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Alles wat de schermen voor een woonzorgcentrum aan de database vragen.
@@ -56,20 +57,20 @@ export interface Zorgnotitie {
 export type Categorie = 'observatie' | 'zorg' | 'maaltijd' | 'slaap' | 'stemming' | 'incident' | 'overig'
 
 export const CATEGORIEEN: { waarde: Categorie; label: string }[] = [
-  { waarde: 'observatie', label: 'Observatie' },
-  { waarde: 'zorg', label: 'Zorg' },
-  { waarde: 'maaltijd', label: 'Maaltijd' },
-  { waarde: 'slaap', label: 'Slaap' },
-  { waarde: 'stemming', label: 'Stemming' },
-  { waarde: 'incident', label: 'Incident' },
-  { waarde: 'overig', label: 'Overig' },
+  { waarde: 'observatie', label: tt('Observatie') },
+  { waarde: 'zorg', label: tt('Zorg') },
+  { waarde: 'maaltijd', label: tt('Maaltijd') },
+  { waarde: 'slaap', label: tt('Slaap') },
+  { waarde: 'stemming', label: tt('Stemming') },
+  { waarde: 'incident', label: tt('Incident') },
+  { waarde: 'overig', label: tt('Overig') },
 ]
 
 export type Dienst = 'vroeg' | 'laat' | 'nacht'
 export const DIENSTEN: { waarde: Dienst; label: string }[] = [
-  { waarde: 'vroeg', label: 'Vroege dienst' },
-  { waarde: 'laat', label: 'Late dienst' },
-  { waarde: 'nacht', label: 'Nachtdienst' },
+  { waarde: 'vroeg', label: tt('Vroege dienst') },
+  { waarde: 'laat', label: tt('Late dienst') },
+  { waarde: 'nacht', label: tt('Nachtdienst') },
 ]
 
 export interface Overdracht {
@@ -390,7 +391,7 @@ export async function afdelingen(org: string): Promise<{ id: string; name: strin
 export async function hernoemAfdeling(id: string, naam: string): Promise<void> {
   const { data, error } = await supabase.from('department').update({ name: naam.trim() }).eq('id', id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan een afdeling hernoemen.')
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan een afdeling hernoemen.'))
 }
 
 export async function archiveerAfdeling(id: string): Promise<void> {
@@ -424,7 +425,7 @@ export async function zetOrgGegevens(org: string, g: OrgGegevens): Promise<void>
     .eq('id', org)
     .select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan de gegevens aanpassen.')
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan de gegevens aanpassen.'))
 }
 
 export async function nieuweAfdeling(org: string, naam: string) {
@@ -487,8 +488,8 @@ export async function zetBewaartermijn(org: string, maanden: number): Promise<nu
 }
 
 export function termijnTekst(maanden: number): string {
-  if (maanden % 12 === 0) return maanden === 12 ? '1 jaar' : `${maanden / 12} jaar`
-  return `${maanden} maanden`
+  if (maanden % 12 === 0) return maanden === 12 ? tt('1 jaar') : tt('{n} jaar', { n: maanden / 12 })
+  return tt('{n} maanden', { n: maanden })
 }
 
 /** Open uitnodigingen van de organisatie; alleen de beheerder mag ze lezen (60). */
@@ -514,7 +515,7 @@ export async function zetMedewerkerRol(org: string, profiel: string, rol: OrgRol
     .eq('profile_id', profiel)
     .select('profile_id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan dit aanpassen.')
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan dit aanpassen.'))
 }
 
 export async function zetMedewerkerActief(org: string, profiel: string, actief: boolean): Promise<void> {
@@ -525,7 +526,7 @@ export async function zetMedewerkerActief(org: string, profiel: string, actief: 
     .eq('profile_id', profiel)
     .select('profile_id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Alleen de beheerder kan dit aanpassen.')
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan dit aanpassen.'))
 }
 
 export async function trekUitnodigingIn(id: string): Promise<void> {
@@ -629,7 +630,7 @@ export async function mijnWzc(hh: string) {
 }
 
 export const ONBEKENDE_CODE =
-  'Deze code kennen we niet. Kijk ze na of vraag ze opnieuw aan het woonzorgcentrum.'
+  tt('Deze code kennen we niet. Kijk ze na of vraag ze opnieuw aan het woonzorgcentrum.')
 
 export async function koppelMetWzc(hh: string, code: string): Promise<string> {
   const { data, error } = await supabase.rpc('koppel_met_wzc', { hh, code })
@@ -646,9 +647,9 @@ export async function ontkoppelWzc(hh: string) {
 }
 
 export const ROLNAAM: Record<OrgRol, string> = {
-  org_admin: 'Beheerder',
-  coordinator: 'Coördinator',
-  caregiver: 'Zorgmedewerker',
+  org_admin: tt('Beheerder'),
+  coordinator: tt('Coördinator'),
+  caregiver: tt('Zorgmedewerker'),
 }
 
 // ---- Bewaartermijn overdracht (62) ---------------------------------------
@@ -656,10 +657,10 @@ export const ROLNAAM: Record<OrgRol, string> = {
 export const OVERDRACHT_OPTIES = [7, 14, 30, 60, 90, 180, 365]
 
 export function dagenTekst(dagen: number): string {
-  if (dagen === 7) return '1 week'
-  if (dagen === 14) return '2 weken'
-  if (dagen === 365) return '1 jaar'
-  return `${dagen} dagen`
+  if (dagen === 7) return tt('1 week')
+  if (dagen === 14) return tt('2 weken')
+  if (dagen === 365) return tt('1 jaar')
+  return tt('{n} dagen', { n: dagen })
 }
 
 export async function overdrachtTermijn(org: string): Promise<number | null> {

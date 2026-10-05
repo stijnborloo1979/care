@@ -736,3 +736,15 @@ h3 {
   }
   .voice-draait { animation: none; }
 }
+
+/* Weekplanning van Care: liggend A4, zeven kolommen, voor op de gang. */
+@media print {
+  @page weekplanning {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+  .weekplanning {
+    page: weekplanning;
+    font-size: 10pt;
+  }
+}

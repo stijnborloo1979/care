@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useVoiceRecorder } from './useVoiceRecorder'
 import { sendVoiceMessage, type Channel } from './messages'
+import { tt } from '../../lib/uiTaal'
 
 interface Props {
   householdId: string
@@ -42,7 +43,7 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
       await queryClient.invalidateQueries({ queryKey: ['inbox', householdId] })
     } catch (e) {
       setSendError(
-        e instanceof Error ? e.message : 'Versturen lukte niet. Controleer je verbinding.',
+        e instanceof Error ? e.message : tt('Versturen lukte niet. Controleer je verbinding.'),
       )
     } finally {
       setSending(false)
@@ -51,9 +52,9 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
 
   return (
     <div className="rounded-card bg-surface p-6 shadow-card">
-      <h3 className="text-lg font-bold">Spreek een bericht in voor {recipient}</h3>
+      <h3 className="text-lg font-bold">{tt('Spreek een bericht in voor {naam}', { naam: recipient })}</h3>
       <p className="mt-1 text-sm text-ink-soft">
-        Maximaal {maxSeconds} seconden. {recipient} hoort je stem, en hoeft niets te lezen.
+        {tt('Maximaal {max} seconden. {naam} hoort je stem, en hoeft niets te lezen.', { max: maxSeconds, naam: recipient })}
       </p>
 
       {state === 'idle' || state === 'error' ? (
@@ -61,12 +62,12 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
           onClick={start}
           className="mt-4 flex min-h-touch w-full items-center justify-center gap-3 rounded-pill bg-accent-ink px-5 font-semibold text-white"
         >
-          <span aria-hidden="true">🎤</span> Opnemen
+          <span aria-hidden="true">🎤</span> {tt('Opnemen')}
         </button>
       ) : null}
 
       {state === 'requesting' ? (
-        <p className="mt-4 text-ink-soft">Microfoon wordt gevraagd…</p>
+        <p className="mt-4 text-ink-soft">{tt('Microfoon wordt gevraagd…')}</p>
       ) : null}
 
       {state === 'recording' ? (
@@ -74,7 +75,7 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
           <div className="flex items-center gap-3">
             <span className="h-3 w-3 shrink-0 animate-pulse rounded-full bg-alert" aria-hidden="true" />
             <span className="text-xl font-bold tabular-nums">{klok(seconds)}</span>
-            <span className="text-sm text-ink-soft">aan het opnemen</span>
+            <span className="text-sm text-ink-soft">{tt('aan het opnemen')}</span>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-pill bg-surface-deep">
             <div
@@ -86,7 +87,7 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
             onClick={stop}
             className="mt-4 flex min-h-touch w-full items-center justify-center rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
           >
-            Stoppen
+            {tt('Stoppen')}
           </button>
         </div>
       ) : null}
@@ -95,21 +96,21 @@ export default function VoiceRecorder({ householdId, channel = 'person', recipie
         <div className="mt-4 space-y-3">
           {/* Altijd eerst terugluisteren: een half opgenomen zin wil je niet versturen. */}
           <audio src={recording.url} controls className="w-full" />
-          <p className="text-sm text-ink-soft">{klok(recording.seconds)} opgenomen</p>
+          <p className="text-sm text-ink-soft">{tt('{duur} opgenomen', { duur: klok(recording.seconds) })}</p>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={verstuur}
               disabled={sending}
               className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-60"
             >
-              {sending ? 'Versturen…' : `Versturen naar ${recipient}`}
+              {sending ? tt('Versturen…') : tt('Versturen naar {naam}', { naam: recipient })}
             </button>
             <button
               onClick={reset}
               disabled={sending}
               className="flex min-h-touch items-center justify-center rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
             >
-              Opnieuw
+              {tt('Opnieuw')}
             </button>
           </div>
         </div>

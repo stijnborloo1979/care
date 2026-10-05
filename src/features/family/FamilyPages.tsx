@@ -15,6 +15,7 @@ import Verhalen from '../stories/Verhalen'
 import InviteMember from './InviteMember'
 import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from '../household/useHousehold'
+import { tt } from '../../lib/uiTaal'
 
 /** Elke familiepagina heeft hetzelfde nodig: het huishouden en de rol. */
 function useContext() {
@@ -31,7 +32,7 @@ function useContext() {
     volledig: household?.person_name ?? '',
     tz: household?.timezone ?? 'Europe/Brussels',
     role: household?.role ?? 'member',
-    viewer: (session?.user.email ?? 'daar').split('@')[0],
+    viewer: (session?.user.email ?? tt('daar')).split('@')[0],
   }
 }
 
@@ -55,8 +56,8 @@ export function PeoplePage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Familie en contacten</h1>
-        <p className="mt-1 text-ink-soft">Wie er is, en wie mee kan zorgen.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Familie en contacten')}</h1>
+        <p className="mt-1 text-ink-soft">{tt('Wie er is, en wie mee kan zorgen.')}</p>
       </header>
       <ManagePeople householdId={c.hh} />
       <ProfielVelden />
@@ -71,16 +72,16 @@ export function HomeMemoryPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Home Memory</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Home Memory')}</h1>
         <p className="mt-1 text-ink-soft">
-          Waar dingen liggen en hoe ze werken. Dit is het invulwerk dat het verschil maakt.
+          {tt('Waar dingen liggen en hoe ze werken. Dit is het invulwerk dat het verschil maakt.')}
         </p>
         {/* Wie in een gedeeld huis wijzigt, wijzigt het ook voor de ander.
             Dat hoort te staan waar je aan het typen bent, niet alleen in de
             instellingen waar je het één keer aangezet hebt. */}
         {c.huisVan ? (
           <p className="mt-2 font-semibold text-accent-ink">
-            Dit huis is gedeeld met {c.huisVan}. Wat je hier wijzigt, zien zij ook.
+            {tt('Dit huis is gedeeld met {naam}. Wat je hier wijzigt, zien zij ook.', { naam: c.huisVan })}
           </p>
         ) : null}
       </header>
@@ -95,8 +96,8 @@ export function MemoriesPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Herinneringen</h1>
-        <p className="mt-1 text-ink-soft">Foto&rsquo;s met een jaartal en het verhaal erbij.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Herinneringen')}</h1>
+        <p className="mt-1 text-ink-soft">{tt('Foto’s met een jaartal en het verhaal erbij.')}</p>
       </header>
       <Verhalen householdId={c.hh} naam={c.voornaam} />
       <ManageMemories householdId={c.hh} />
@@ -110,10 +111,9 @@ export function MessagesPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">Berichten</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt('Berichten')}</h1>
         <p className="mt-1 text-ink-soft">
-          Bellen gaat rechtstreeks. Een ingesproken bericht verschijnt bovenaan het scherm van{' '}
-          {c.voornaam}, ook als ze nu niet kan opnemen.
+          {tt('Bellen gaat rechtstreeks. Een ingesproken bericht verschijnt bovenaan het scherm van {naam}, ook als ze nu niet kan opnemen.', { naam: c.voornaam })}
         </p>
       </header>
       <div className="grid max-w-3xl gap-5 md:grid-cols-2">
@@ -140,28 +140,28 @@ function FotoBericht({ householdId, recipient }: { householdId: string; recipien
 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card">
-      <h2 className="text-lg font-bold">Foto sturen</h2>
+      <h2 className="text-lg font-bold">{tt('Foto sturen')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Eén foto, met een korte zin erbij. Die komt bovenaan het scherm van {recipient}.
+        {tt('Eén foto, met een korte zin erbij. Die komt bovenaan het scherm van {naam}.', { naam: recipient })}
       </p>
 
       <label className="mt-3 block">
-        <span className="text-sm font-semibold text-ink-soft">Wat staat erop?</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Wat staat erop?')}</span>
         <input
           value={zin}
           onChange={(e) => {
             setZin(e.target.value)
             setGelukt(false)
           }}
-          placeholder="Lotte op het strand in Oostende"
+          placeholder={tt('Lotte op het strand in Oostende')}
           className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
       </label>
 
       <FotoKiezer
         className="mt-3 block"
-        label="Foto kiezen en sturen"
-        bezigLabel="Bezig met sturen…"
+        label={tt('Foto kiezen en sturen')}
+        bezigLabel={tt('Bezig met sturen…')}
         onKies={async (bestand) => {
           await sendPhotoMessage({ householdId, channel: 'person', file: bestand, body: zin })
           setZin('')
@@ -169,7 +169,7 @@ function FotoBericht({ householdId, recipient }: { householdId: string; recipien
         }}
       />
 
-      {gelukt ? <p className="mt-2 text-sm font-semibold text-ok">Verstuurd.</p> : null}
+      {gelukt ? <p className="mt-2 text-sm font-semibold text-ok">{tt('Verstuurd.')}</p> : null}
     </section>
   )
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isWeggeklikt, onthoudWeggeklikt, useInstall } from './useInstall'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Eén regel bovenaan, alleen zolang de app nog niet op het beginscherm
@@ -25,26 +26,26 @@ export default function InstallPrompt({ compact = false }: { compact?: boolean }
         compact ? 'py-1.5 text-sm' : 'py-2.5'
       }`}
     >
-      <span className="font-semibold">Zet LifeAngle op het beginscherm van dit toestel</span>
+      <span className="font-semibold">{tt('Zet LifeAngle op het beginscherm van dit toestel')}</span>
 
       {kanInstalleren ? (
         <button
           onClick={installeer}
           className="min-h-[2.4rem] rounded-pill bg-accent-ink px-4 font-semibold text-white"
         >
-          Installeren
+          {tt('Installeren')}
         </button>
       ) : (
         <Link
           to="/installeren"
           className="min-h-[2.4rem] rounded-pill border-[1.5px] border-accent-ink px-4 py-1 font-semibold"
         >
-          Hoe doe ik dat?
+          {tt('Hoe doe ik dat?')}
         </Link>
       )}
 
-      <button onClick={wegklikken} className="underline underline-offset-4" aria-label="Verbergen">
-        Later
+      <button onClick={wegklikken} className="underline underline-offset-4" aria-label={tt('Verbergen')}>
+        {tt('Later')}
       </button>
     </div>
   )

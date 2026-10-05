@@ -6,6 +6,8 @@
  * is erger dan een afspraak die je zelf moet invullen.
  */
 
+import { tt } from '../../lib/uiTaal'
+
 export interface QuickAddResultaat {
   startsAt: Date
   titel: string
@@ -136,6 +138,6 @@ export function quickAdd(invoer: string, nu = new Date()): QuickAddResultaat | n
   return {
     startsAt: resultaat,
     titel: titel.charAt(0).toUpperCase() + titel.slice(1),
-    uitleg: `${dagUitleg || 'vandaag'} om ${tijdUitleg}`,
+    uitleg: tt('{dag} om {uur}', { dag: tt(dagUitleg || 'vandaag'), uur: tijdUitleg }),
   }
 }

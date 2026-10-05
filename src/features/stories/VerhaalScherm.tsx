@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getStories, bucketVan, storyAudioUrl } from '../../services/stories'
 import { useHousehold } from '../household/useHousehold'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Eén verhaal, na het scannen van de code in het boek.
@@ -28,14 +29,14 @@ export default function VerhaalScherm() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 py-10">
       <Link to="/levensboek" className="font-semibold underline underline-offset-4">
-        ‹ Het boek
+        ‹ {tt('Het boek')}
       </Link>
 
-      {isLoading ? <p className="mt-8 text-ink-soft">Bezig met laden…</p> : null}
+      {isLoading ? <p className="mt-8 text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
       {!isLoading && !verhaal ? (
         <p className="mt-8 text-ink-soft">
-          Dit verhaal is er niet meer, of het hoort bij een ander huishouden.
+          {tt('Dit verhaal is er niet meer, of het hoort bij een ander huishouden.')}
         </p>
       ) : null}
 
@@ -99,9 +100,9 @@ function Speler({ id, pad, bucket, seconden }: { id: string; pad: string; bucket
       </span>
       <span>
         <span className="block text-xl font-bold">
-          {speelt ? 'Aan het spelen' : 'In eigen stem'}
+          {speelt ? tt('Aan het spelen') : tt('In eigen stem')}
         </span>
-        {seconden ? <span className="text-ink-soft">{seconden} seconden</span> : null}
+        {seconden ? <span className="text-ink-soft">{tt('{n} seconden', { n: seconden })}</span> : null}
       </span>
     </button>
   )

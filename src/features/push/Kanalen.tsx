@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { telegramChats, zetKanaal, type Kanaal, type PushStatus } from './pushStatus'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Waar wil jij een dringend bericht krijgen?
@@ -19,12 +20,12 @@ import { telegramChats, zetKanaal, type Kanaal, type PushStatus } from './pushSt
 const UITLEG: Record<Kanaal, { label: string; onder: string; plaats: string }> = {
   whatsapp: {
     label: 'WhatsApp',
-    onder: 'Je telefoonnummer. Komt op je vergrendelscherm, ook met de app dicht.',
+    onder: tt('Je telefoonnummer. Komt op je vergrendelscherm, ook met de app dicht.'),
     plaats: '+32475123456',
   },
   telegram: {
     label: 'Telegram',
-    onder: 'Stuur de bot eerst "start" in Telegram, en zoek dan hieronder je chat-id op.',
+    onder: tt('Stuur de bot eerst "start" in Telegram, en zoek dan hieronder je chat-id op.'),
     plaats: '123456789',
   },
 }
@@ -103,7 +104,7 @@ function KanaalRij({
             disabled={bewaar.isPending || !gewijzigd}
             className="min-h-touch shrink-0 rounded-pill border-[1.5px] border-line-strong px-5 font-semibold disabled:opacity-40"
           >
-            {bewaar.isPending ? 'Bezig…' : huidig && !waarde.trim() ? 'Weghalen' : 'Bewaren'}
+            {bewaar.isPending ? tt('Bezig…') : huidig && !waarde.trim() ? tt('Weghalen') : tt('Bewaren')}
           </button>
         </span>
       </label>
@@ -112,7 +113,7 @@ function KanaalRij({
           internationaal formaat" — dus die tonen we gewoon. */}
       {bewaar.isError ? (
         <p role="alert" className="mt-2 text-sm text-alert">
-          {bewaar.error instanceof Error ? bewaar.error.message : 'Dat lukte niet.'}
+          {bewaar.error instanceof Error ? bewaar.error.message : tt('Dat lukte niet.')}
         </p>
       ) : null}
 
@@ -124,7 +125,7 @@ function KanaalRij({
             disabled={zoek.isPending}
             className="min-h-touch rounded-pill border border-line px-4 text-sm font-semibold disabled:opacity-60"
           >
-            {zoek.isPending ? 'Zoeken…' : 'Zoek mijn chat-id'}
+            {zoek.isPending ? tt('Zoeken…') : tt('Zoek mijn chat-id')}
           </button>
 
           {zoek.data?.length ? (
@@ -145,14 +146,13 @@ function KanaalRij({
 
           {zoek.isSuccess && zoek.data.length === 0 ? (
             <p className="mt-2 text-sm text-ink-soft">
-              Niemand gevonden. Stuur de bot eerst "start" in Telegram en probeer het opnieuw —
-              of TG_BOT_TOKEN ontbreekt nog bij de secrets in Supabase.
+              {tt('Niemand gevonden. Stuur de bot eerst "start" in Telegram en probeer het opnieuw — of TG_BOT_TOKEN ontbreekt nog bij de secrets in Supabase.')}
             </p>
           ) : null}
 
           {zoek.isError ? (
             <p role="alert" className="mt-2 text-sm text-alert">
-              Dat lukte niet. Draait push-notify al met de nieuwe code?
+              {tt('Dat lukte niet. Draait push-notify al met de nieuwe code?')}
             </p>
           ) : null}
         </div>
@@ -160,7 +160,7 @@ function KanaalRij({
 
       {bewaar.isSuccess && !gewijzigd ? (
         <p aria-live="polite" className="mt-2 text-sm text-ink-soft">
-          {huidig ? 'Bewaard.' : 'Weggehaald.'}
+          {huidig ? tt('Bewaard.') : tt('Weggehaald.')}
         </p>
       ) : null}
     </div>

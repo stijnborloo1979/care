@@ -5,6 +5,7 @@ import { getPhotos } from '../../services/memories'
 import { getVerhalenAlleen } from '../../services/stories'
 import { localDateKey } from '../../lib/time'
 import { gespreksstarters } from './gespreksstarters'
+import { tt } from '../../lib/uiTaal'
 
 /** "Om over te praten": voor wie langsgaat en niet goed weet waarover. */
 export default function GespreksStarters({ householdId, personName, timezone }: { householdId: string; personName: string; timezone: string }) {
@@ -15,9 +16,9 @@ export default function GespreksStarters({ householdId, personName, timezone }: 
   return (
     <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby="praten-kop">
       <h2 id="praten-kop" className="flex items-center gap-2 text-lg font-bold">
-        <MessagesSquare size={20} strokeWidth={1.75} aria-hidden="true" /> Om over te praten
+        <MessagesSquare size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Om over te praten')}
       </h2>
-      <p className="mt-1 text-ink-soft">Ga je langs? Vandaag twee ideeën. Morgen andere.</p>
+      <p className="mt-1 text-ink-soft">{tt('Ga je langs? Vandaag twee ideeën. Morgen andere.')}</p>
       <ul className="mt-3 space-y-2">
         {lijst.map((s) => (
           <li key={s.sleutel} className="flex items-center gap-3 rounded-2xl bg-surface-soft p-3">

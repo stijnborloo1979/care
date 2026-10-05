@@ -1,4 +1,5 @@
 import type { Bewoner, Medewerker } from './zorgApi'
+import { tt } from '../../lib/uiTaal'
 
 export interface OpenOrgUitnodiging {
   id: string
@@ -48,26 +49,26 @@ export function aandachtspunten(input: {
   for (const b of input.bewoners) {
     const lead = b.afdeling ? metLead.has(afdelingId[b.afdeling] ?? '') : false
     if (!toegewezen.has(b.household_id) && !lead)
-      punten.push({ sleutel: `niemand-${b.household_id}`, ernst: 'hoog', tekst: `Niemand volgt ${b.naam}. Wijs een medewerker toe.` })
+      punten.push({ sleutel: `niemand-${b.household_id}`, ernst: 'hoog', tekst: tt('Niemand volgt {naam}. Wijs een medewerker toe.', { naam: b.naam }) })
     if (!b.afdeling)
-      punten.push({ sleutel: `afd-${b.household_id}`, ernst: 'middel', tekst: `${b.naam} heeft nog geen afdeling.` })
+      punten.push({ sleutel: `afd-${b.household_id}`, ernst: 'middel', tekst: tt('{naam} heeft nog geen afdeling.', { naam: b.naam }) })
     else if (!b.kamer)
-      punten.push({ sleutel: `kamer-${b.household_id}`, ernst: 'middel', tekst: `${b.naam} heeft nog geen kamer.` })
+      punten.push({ sleutel: `kamer-${b.household_id}`, ernst: 'middel', tekst: tt('{naam} heeft nog geen kamer.', { naam: b.naam }) })
   }
 
   for (const a of input.afdelingen)
     if (!metLead.has(a.id))
-      punten.push({ sleutel: `lead-${a.id}`, ernst: 'middel', tekst: `Afdeling ${a.name} heeft geen team lead.` })
+      punten.push({ sleutel: `lead-${a.id}`, ernst: 'middel', tekst: tt('Afdeling {naam} heeft geen team lead.', { naam: a.name }) })
 
   for (const m of actief)
     if (m.rol === 'caregiver' && m.afdelingen.length === 0)
-      punten.push({ sleutel: `zonder-${m.profile_id}`, ernst: 'middel', tekst: `${m.naam} staat op geen enkele afdeling.` })
+      punten.push({ sleutel: `zonder-${m.profile_id}`, ernst: 'middel', tekst: tt('{naam} staat op geen enkele afdeling.', { naam: m.naam }) })
 
   for (const u of input.uitnodigingen ?? []) {
     const over = new Date(u.expires_at).getTime() - nu
     if (over <= 0) continue
     if (over < 3 * DAG)
-      punten.push({ sleutel: `inv-${u.id}`, ernst: 'middel', tekst: `De uitnodiging voor ${u.email} verloopt binnenkort en is nog niet aanvaard.` })
+      punten.push({ sleutel: `inv-${u.id}`, ernst: 'middel', tekst: tt('De uitnodiging voor {email} verloopt binnenkort en is nog niet aanvaard.', { email: u.email }) })
   }
 
   return punten.sort((x, y) => (x.ernst === y.ernst ? 0 : x.ernst === 'hoog' ? -1 : 1))

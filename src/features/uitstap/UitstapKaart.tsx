@@ -4,13 +4,14 @@ import { Car } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { actueel, meldUitstap, naarLokaleTijd, toestand, uitLokaleTijd, uitstapStap, uitstappen, vanTot, type Uitstap } from '../../services/uitstap'
 import { foutTekst } from '../zorg/ui'
+import { tt } from '../../lib/uiTaal'
 
 const WOORD: Record<ReturnType<typeof toestand>, string> = {
-  gepland: 'gepland',
-  weg: 'vertrokken',
-  'te-laat': 'nog niet terug',
-  terug: 'terug',
-  geannuleerd: 'geannuleerd',
+  gepland: tt('gepland'),
+  weg: tt('vertrokken'),
+  'te-laat': tt('nog niet terug'),
+  terug: tt('terug'),
+  geannuleerd: tt('geannuleerd'),
 }
 
 /**
@@ -45,12 +46,12 @@ export default function UitstapKaart({
   return (
     <section className="rounded-card bg-surface p-6 shadow-card" aria-labelledby={`uitstap-${vorm}`}>
       <h2 id={`uitstap-${vorm}`} className="flex items-center gap-2 text-lg font-bold">
-        <Car size={20} strokeWidth={1.75} aria-hidden="true" /> Uitstap
+        <Car size={20} strokeWidth={1.75} aria-hidden="true" /> {tt('Uitstap')}
       </h2>
       <p className="mt-1 text-ink-soft">
         {vorm === 'familie'
-          ? `Neem je ${personName} mee? Meld het hier, dan weet het zorgteam waar ${personName} is en zegt de tablet wie er komt.`
-          : `Wie ${personName} meeneemt, en wanneer ze terug is.`}
+          ? tt('Neem je {naam} mee? Meld het hier, dan weet het zorgteam waar {naam} is en zegt de tablet wie er komt.', { naam: personName })
+          : tt('Wie {naam} meeneemt, en wanneer ze terug is.', { naam: personName })}
       </p>
 
       {lopend.length > 0 ? (
@@ -69,7 +70,7 @@ export default function UitstapKaart({
           onClick={() => setOpen(true)}
           className="mt-4 inline-flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
         >
-          Uitstap melden
+          {tt('Uitstap melden')}
         </button>
       )}
     </section>
@@ -81,7 +82,7 @@ function Rij({ u, tz, nu, bezig, onStap }: { u: Uitstap; tz: string; nu: Date; b
   return (
     <li className={`rounded-2xl px-4 py-3 ${tst === 'te-laat' ? 'bg-alert-soft ring-1 ring-alert' : 'bg-surface-soft'}`}>
       <p className="font-semibold">
-        Met {u.met_wie} · {vanTot(u, tz, nu)}
+        {tt('Met {wie}', { wie: u.met_wie })} · {vanTot(u, tz, nu)}
       </p>
       {u.notitie ? <p className="text-ink-soft">{u.notitie}</p> : null}
       <p className={`text-sm ${tst === 'te-laat' ? 'font-semibold text-alert' : 'text-ink-faint'}`}>{WOORD[tst]}</p>
@@ -89,20 +90,20 @@ function Rij({ u, tz, nu, bezig, onStap }: { u: Uitstap; tz: string; nu: Date; b
         {u.status === 'gepland' ? (
           <>
             <button disabled={bezig} onClick={() => onStap('weg')} className="min-h-[2.5rem] rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold">
-              Vertrokken
+              {tt('Vertrokken')}
             </button>
             <button
               disabled={bezig}
-              onClick={() => { if (confirm('Deze uitstap annuleren?')) onStap('geannuleerd') }}
+              onClick={() => { if (confirm(tt('Deze uitstap annuleren?'))) onStap('geannuleerd') }}
               className="min-h-[2.5rem] rounded-pill px-3 text-sm font-semibold text-ink-soft underline underline-offset-4"
             >
-              Annuleren
+              {tt('Annuleren')}
             </button>
           </>
         ) : null}
         {u.status === 'weg' ? (
           <button disabled={bezig} onClick={() => onStap('terug')} className="min-h-[2.5rem] rounded-pill bg-accent-ink px-4 text-sm font-semibold text-white">
-            Is terug
+            {tt('Is terug')}
           </button>
         ) : null}
       </div>
@@ -131,35 +132,35 @@ function Melden({ householdId, tz, onKlaar, onStop }: { householdId: string; tz:
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        if (uitLokaleTijd(terug, tz) <= uitLokaleTijd(vertrek, tz)) return setFout('Terug moet na het vertrek liggen.')
+        if (uitLokaleTijd(terug, tz) <= uitLokaleTijd(vertrek, tz)) return setFout(tt('Terug moet na het vertrek liggen.'))
         setFout(null)
         bewaar.mutate()
       }}
       className="mt-4 grid gap-3 sm:grid-cols-2"
     >
       <label className="sm:col-span-2">
-        <span className="text-sm font-semibold text-ink-soft">Met wie</span>
-        <input required maxLength={80} value={metWie} onChange={(e) => setMetWie(e.target.value)} placeholder="Els" className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
+        <span className="text-sm font-semibold text-ink-soft">{tt('Met wie')}</span>
+        <input required maxLength={80} value={metWie} onChange={(e) => setMetWie(e.target.value)} placeholder={tt('Els')} className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
       </label>
       <label>
-        <span className="text-sm font-semibold text-ink-soft">Vertrek</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Vertrek')}</span>
         <input required type="datetime-local" value={vertrek} onChange={(e) => setVertrek(e.target.value)} className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
       </label>
       <label>
-        <span className="text-sm font-semibold text-ink-soft">Terug</span>
+        <span className="text-sm font-semibold text-ink-soft">{tt('Terug')}</span>
         <input required type="datetime-local" value={terug} onChange={(e) => setTerug(e.target.value)} className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
       </label>
       <label className="sm:col-span-2">
-        <span className="text-sm font-semibold text-ink-soft">Waar naartoe (mag leeg)</span>
-        <input maxLength={300} value={notitie} onChange={(e) => setNotitie(e.target.value)} placeholder="Naar de markt en daarna bij ons eten" className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
+        <span className="text-sm font-semibold text-ink-soft">{tt('Waar naartoe (mag leeg)')}</span>
+        <input maxLength={300} value={notitie} onChange={(e) => setNotitie(e.target.value)} placeholder={tt('Naar de markt en daarna bij ons eten')} className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
       </label>
       {fout ? <p className="text-sm text-alert sm:col-span-2">{fout}</p> : null}
       <div className="flex flex-wrap gap-2 sm:col-span-2">
         <button type="submit" disabled={bewaar.isPending} className="min-h-touch rounded-pill bg-accent-ink px-5 font-semibold text-white">
-          {bewaar.isPending ? 'Bezig…' : 'Melden'}
+          {bewaar.isPending ? tt('Bezig…') : tt('Melden')}
         </button>
         <button type="button" onClick={onStop} className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold">
-          Annuleren
+          {tt('Annuleren')}
         </button>
       </div>
     </form>
