@@ -18,6 +18,10 @@ begin
   select org, v, r::public.org_role from (values ('oa', 'org_admin'), ('co', 'coordinator'), ('c1', 'caregiver')) x(k, r) join t_ids using (k);
   insert into public.org_membership (org_id, profile_id, role) values (org2, (select v from t_ids where k = 'ander'), 'org_admin');
   insert into public.department (org_id, name) values (org, 'Linde');
+  -- Een familie die zelf koppelde (zoals met de koppelcode)
+  insert into public.household (person_name) values ('Familie Jansen');
+  insert into t_ids select 'gezin', id from public.household where person_name = 'Familie Jansen';
+  update public.household set org_id = org where person_name = 'Familie Jansen';
 end $$;
 create function pg_temp.als(k text) returns void language plpgsql as $$
 begin
@@ -38,7 +42,8 @@ end $$;
 create function pg_temp.lijst() returns jsonb language sql as $$
   select '[{"naam":"Rita Peeters","afdeling":"linde","kamer":"12"},{"naam":"Jos Maes","afdeling":"Linde"},{"naam":"rita peeters"},{"naam":""},{"naam":"Piet","afdeling":"Onbekend"}]'::jsonb $$;
 create function pg_temp.aantal() returns bigint language sql as $$
-  select count(*) from public.stay where org_id = pg_temp.id('org') and ended_at is null $$;
+  select count(*) from public.stay s join public.household h on h.id = s.household_id
+   where s.org_id = pg_temp.id('org') and s.ended_at is null and h.import_org is not null $$;
 
 set local role authenticated;
 
@@ -77,11 +82,29 @@ select pg_temp.geweigerd('hoogstens 500', format('select * from public.importeer
 -- 3. De familie uitnodigen
 select pg_temp.als('oa');
 select pg_temp.gelijk('nog geen familie', (select heeft_familie from public.familie_status(pg_temp.id('org')) where household_id = pg_temp.id('rita')), false);
+select pg_temp.geweigerd('nooit naar het adres van een medewerker', format('select * from public.nodig_familie_uit(%L::uuid, ''I-CO@t'')', pg_temp.id('rita')));
+select pg_temp.geweigerd('nooit voor een huishouden van een familie (niet geïmporteerd)', format('select * from public.nodig_familie_uit(%L::uuid, ''x@y.be'')', pg_temp.id('gezin')));
+select pg_temp.gelijk('en de familiestatus toont alleen geïmporteerde bewoners',
+  (select count(*) from public.familie_status(pg_temp.id('org')) where household_id = pg_temp.id('gezin')), 0::bigint);
 select count(*) from public.nodig_familie_uit(pg_temp.id('rita'), 'Els@Voorbeeld.be', 'dochter');
 select pg_temp.gelijk('uitgenodigd', (select uitgenodigd from public.familie_status(pg_temp.id('org')) where household_id = pg_temp.id('rita')), true);
 reset role;
 select pg_temp.gelijk('als familiebeheerder, adres in kleine letters',
   (select role::text || ' ' || email from public.invitation where household_id = pg_temp.id('rita') and revoked_at is null), 'admin els@voorbeeld.be'::text);
+-- Els aanvaardt (zoals accept_invite doet)
+update public.invitation set accepted_at = now(), accepted_by = pg_temp.id('fa') where household_id = pg_temp.id('rita') and revoked_at is null;
+insert into public.membership (household_id, profile_id, role) values (pg_temp.id('rita'), pg_temp.id('fa'), 'admin');
+set local role authenticated;
+select pg_temp.als('fa');
+update public.household set import_org = null, org_id = org_id where id = pg_temp.id('rita');
+reset role;
+select pg_temp.gelijk('import_org ligt vast voor de app', (select import_org from public.household where id = pg_temp.id('rita')), pg_temp.id('org'));
+delete from public.membership where household_id = pg_temp.id('rita');
+set local role authenticated;
+select pg_temp.als('oa');
+select pg_temp.geweigerd('ook niet als de familie vertrok: er was al iemand lid',
+  format('select * from public.nodig_familie_uit(%L::uuid, ''x@y.be'')', pg_temp.id('rita')));
+reset role;
 insert into public.membership (household_id, profile_id, role) values (pg_temp.id('rita'), pg_temp.id('fa'), 'admin');
 set local role authenticated;
 select pg_temp.als('oa');

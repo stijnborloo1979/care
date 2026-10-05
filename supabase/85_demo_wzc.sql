@@ -15,9 +15,11 @@
 --             overdracht en een vraag van een bewoner. Jij bent er
 --             coördinator en team lead van beide afdelingen, zodat je alles
 --             ziet wat een zorgteam ziet.
---             demo_rol(org, rol): in een demo (en alleen daar) wissel je zelf
---             tussen coördinator en beheerder, om beide schermen te tonen.
---             wis_demo_wzc(org): ruimt de demo volledig op.
+--             demo_rol(org, rol): in je eigen demo (en alleen daar) wissel je
+--             zelf tussen coördinator en beheerder, om beide schermen te tonen.
+--             wis_demo_wzc(org): ruimt je eigen demo op. Hoogstens vijf demo's
+--             per dag. Een familie kan nooit aan een demo-huis koppelen
+--             (koppel_met_wzc, 65, krijgt "and not demo").
 --  RISICO     laag. organisation.demo en household.demo markeren alles. De
 --             bewoners zijn verzonnen; er hoort geen familie of tablet bij.
 --             Een demo telt niet mee als klant.
@@ -33,9 +35,75 @@ $$;
 
 alter table public.organisation add column if not exists demo boolean not null default false;
 alter table public.household add column if not exists demo boolean not null default false;
+alter table public.organisation add column if not exists demo_owner uuid references public.profile (id) on delete set null;
+
+-- Hoe vaak iemand een demo maakte (tegen misbruik: hoogstens vijf per dag).
+create table if not exists public.demo_poging (
+  profile_id uuid not null references public.profile (id) on delete cascade,
+  at         timestamptz not null default now()
+);
+alter table public.demo_poging enable row level security;
+revoke all on public.demo_poging from anon, authenticated;
 
 comment on column public.organisation.demo is 'Een voorbeeldhuis van maak_demo_wzc(); verzonnen gegevens.';
 comment on column public.household.demo is 'Een verzonnen bewoner van een demo-woonzorgcentrum.';
+
+-- Een huishouden in een demo-huis is altijd demo, en krijgt nooit een
+-- familie-uitnodiging van het WZC (import_org leeg).
+create or replace function public.demo_volgt_org()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.org_id is not null and exists (select 1 from public.organisation where id = new.org_id and demo) then
+    new.demo := true;
+    new.import_org := null;
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function public.demo_volgt_org() from public, anon, authenticated;
+
+-- Na demo_vast (alfabetisch: household_demo_vast < household_demo_volgt):
+-- de server zet demo, de app niet.
+drop trigger if exists household_demo_volgt on public.household;
+create trigger household_demo_volgt before insert or update of org_id on public.household
+  for each row execute function public.demo_volgt_org();
+
+-- Een familie koppelt nooit aan een demo-huis (65, plus "and not demo").
+create or replace function public.koppel_met_wzc(hh uuid, code text)
+returns text
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  o public.organisation;
+begin
+  if public.family_role(hh) is distinct from 'admin' then
+    raise exception 'Alleen de familiebeheerder kan een huishouden koppelen' using errcode = '42501';
+  end if;
+
+  delete from public.koppel_poging where at < now() - interval '1 day';
+  if (select count(*) from public.koppel_poging
+       where profile_id = auth.uid() and at > now() - interval '1 hour') >= 10 then
+    raise exception 'Te veel pogingen. Probeer het over een uur opnieuw.' using errcode = '42501';
+  end if;
+
+  select * into o from public.organisation
+   where koppelcode = upper(regexp_replace(coalesce(code, ''), '[^A-Za-z0-9]', '', 'g')) and active and not demo;
+  if o.id is null then
+    insert into public.koppel_poging (profile_id) values (auth.uid());
+    return null;
+  end if;
+  perform public.link_household_to_org(hh, o.id);
+  return o.name;
+end;
+$$;
 
 -- In de app kan niemand iets "demo" maken of een echt huis demo noemen.
 create or replace function public.demo_vast()
@@ -85,21 +153,23 @@ declare
   kamers text[] := array['101', '102', '103', '104', '201', '202', '203', '204'];
   i integer;
   ids uuid[] := '{}';
-  at timestamptz;
 begin
   if ik is null then
     raise exception 'Niet ingelogd' using errcode = '42501';
   end if;
   -- Eén demo per persoon: bestaat ze al, dan die.
-  select om.org_id into o
-    from public.org_membership om join public.organisation og on og.id = om.org_id
-   where om.profile_id = ik and og.demo
-   limit 1;
+  select og.id into o from public.organisation og where og.demo and og.demo_owner = ik limit 1;
   if o is not null then
     return o;
   end if;
 
-  insert into public.organisation (name, demo) values ('Demo · WZC Zonnehof', true) returning id into o;
+  delete from public.demo_poging where at < now() - interval '1 day';
+  if (select count(*) from public.demo_poging where profile_id = ik) >= 5 then
+    raise exception 'Te veel demo''s vandaag. Probeer het morgen opnieuw.' using errcode = '42501';
+  end if;
+  insert into public.demo_poging (profile_id) values (ik);
+
+  insert into public.organisation (name, demo, demo_owner) values ('Demo · WZC Zonnehof', true, ik) returning id into o;
   insert into public.org_membership (org_id, profile_id, role, job_title) values (o, ik, 'coordinator', 'Coördinator (demo)');
   insert into public.department (org_id, name) values (o, 'Linde') returning id into linde;
   insert into public.department (org_id, name) values (o, 'Eik') returning id into eik;
@@ -190,14 +260,14 @@ declare
   d uuid;
 begin
   if auth.uid() is null
-     or not exists (select 1 from public.organisation where id = org and demo)
-     or not exists (select 1 from public.org_membership where org_id = org and profile_id = auth.uid()) then
+     or not exists (select 1 from public.organisation where id = org and demo and demo_owner = auth.uid())
+     or not exists (select 1 from public.org_membership where org_id = org and profile_id = auth.uid() and active) then
     raise exception 'Dit kan alleen in een demo' using errcode = '42501';
   end if;
   if rol not in ('org_admin', 'coordinator') then
     raise exception 'Onbekende rol' using errcode = '22023';
   end if;
-  update public.org_membership set role = rol::public.org_role, active = true
+  update public.org_membership set role = rol::public.org_role
    where org_id = org and profile_id = auth.uid();
   -- Terug coördinator: weer team lead van elke afdeling (beheerder worden
   -- beëindigde die rijen, 70).
@@ -226,12 +296,16 @@ set search_path = public
 as $$
 begin
   if auth.uid() is null
-     or not exists (select 1 from public.organisation where id = org and demo)
-     or not exists (select 1 from public.org_membership where org_id = org and profile_id = auth.uid()) then
+     or not exists (select 1 from public.organisation where id = org and demo and demo_owner = auth.uid()) then
     raise exception 'Dit kan alleen in een demo' using errcode = '42501';
   end if;
+  -- Alleen verzonnen bewoners die nooit ergens anders verbleven en waar
+  -- niemand lid van is. Al de rest blijft bestaan (ook zonder huis).
   delete from public.household h
-   where h.demo and exists (select 1 from public.stay s where s.household_id = h.id and s.org_id = org);
+   where h.demo
+     and exists (select 1 from public.stay s where s.household_id = h.id and s.org_id = org)
+     and not exists (select 1 from public.stay s where s.household_id = h.id and s.org_id <> org)
+     and not exists (select 1 from public.membership m where m.household_id = h.id);
   delete from public.organisation where id = org and demo;
 end;
 $$;

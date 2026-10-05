@@ -19,6 +19,12 @@ import {
 import { Fout, Kaart, Kop, Leeg, knop, knopKlein, knopRustig, label, tekstvak } from './ui'
 import { tt } from '../../lib/uiTaal'
 
+/** Eén CSV-veld: tussen aanhalingstekens, en nooit als formule in Excel. */
+function csvVeld(v: string): string {
+  const veilig = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v
+  return `"${veilig.replace(/"/g, '""')}"`
+}
+
 function bewaar(naam: string, inhoud: string) {
   const url = URL.createObjectURL(new Blob([inhoud], { type: 'text/csv;charset=utf-8' }))
   const a = document.createElement('a')
@@ -202,7 +208,7 @@ function Bewoners({ orgId }: { orgId: string }) {
               onClick={() =>
                 bewaar(
                   'lifeangle-uitnodigingen-familie.csv',
-                  '﻿' + [[tt('Bewoner'), tt('E-mail familie'), tt('Link')].join(';'), ...links.filter((l) => l.link).map((l) => [l.naam, l.adres, l.link].join(';'))].join('\r\n'),
+                  '﻿' + [[tt('Bewoner'), tt('E-mail familie'), tt('Link')], ...links.filter((l) => l.link).map((l) => [l.naam, l.adres, l.link ?? ''])].map((r) => r.map(csvVeld).join(';')).join('\r\n'),
                 )
               }
               className={`${knopKlein} mt-3 inline-flex items-center gap-1.5`}

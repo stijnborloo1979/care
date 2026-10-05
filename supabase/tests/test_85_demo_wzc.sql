@@ -55,11 +55,35 @@ reset role;
 select pg_temp.gelijk('demo-vlag niet zelf te zetten', (select demo from public.organisation where id = pg_temp.id('echt')), false);
 set local role authenticated;
 
+-- Alleen de eigenaar wisselt of wist, ook een collega in de demo niet
+reset role;
+insert into public.org_membership (org_id, profile_id, role) values (pg_temp.id('demo'), pg_temp.id('x'), 'caregiver');
+set local role authenticated;
+select pg_temp.als('x');
+select pg_temp.geweigerd('een collega in de demo promoveert zichzelf niet', format('select public.demo_rol(%L::uuid, ''org_admin'')', pg_temp.id('demo')));
+select pg_temp.geweigerd('en wist de demo niet', format('select public.wis_demo_wzc(%L::uuid)', pg_temp.id('demo')));
+
+-- Een familie koppelt nooit aan een demo
+reset role;
+update public.organisation set koppelcode = 'DEMO1234' where id = pg_temp.id('demo');
+insert into public.household (person_name) values ('Echte familie');
+insert into t_ids select 'gezin', id from public.household where person_name = 'Echte familie';
+insert into public.membership (household_id, profile_id, role) values (pg_temp.id('gezin'), pg_temp.id('x'), 'admin');
+set local role authenticated;
+select pg_temp.als('x');
+select pg_temp.gelijk('koppelcode van een demo werkt niet', public.koppel_met_wzc(pg_temp.id('gezin'), 'DEMO1234'), null::text);
+
+-- Een verzonnen bewoner waar toch iemand lid van werd, blijft bestaan
+reset role;
+insert into public.membership (household_id, profile_id, role)
+select h.id, pg_temp.id('x'), 'admin' from public.household h where h.demo order by h.person_name limit 1;
+set local role authenticated;
+
 -- Opruimen
 select pg_temp.als('ik');
 select public.wis_demo_wzc(pg_temp.id('demo'));
 reset role;
 select pg_temp.gelijk('demo weg', (select count(*) from public.organisation where id = pg_temp.id('demo')), 0::bigint);
-select pg_temp.gelijk('verzonnen bewoners weg', (select count(*) from public.household where demo), 0::bigint);
+select pg_temp.gelijk('verzonnen bewoners weg, behalve die met een lid', (select count(*) from public.household where demo), 1::bigint);
 
 rollback;

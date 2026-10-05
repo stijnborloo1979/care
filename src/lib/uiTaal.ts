@@ -78,9 +78,10 @@ export function kiesUiTaal(t: UiTaal) {
 }
 
 export function tt(nl: string, waarden?: Record<string, string | number>): string {
-  const zin = huidige === 'nl' ? nl : (WOORDEN[huidige][nl] ?? nl)
+  const boek = huidige === 'nl' ? null : WOORDEN[huidige]
+  const zin = boek && Object.hasOwn(boek, nl) ? boek[nl] : nl
   if (!waarden) return zin
-  return zin.replace(/\{(\w+)\}/g, (heel, naam) => (naam in waarden ? String(waarden[naam]) : heel))
+  return zin.replace(/\{(\w+)\}/g, (heel, naam) => (Object.hasOwn(waarden, naam) ? String(waarden[naam]) : heel))
 }
 
 /** Hoeveel sleutels er vertaald zijn (voor de controle in de tests). */

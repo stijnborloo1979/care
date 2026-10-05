@@ -74,6 +74,9 @@ export default {
     'Te veel uitnodigingen. Probeer het over een uur opnieuw.': 'Trop d’invitations. Réessayez dans une heure.',
     'Dit kan alleen in een demo': 'Ceci n’est possible que dans une démo',
     'Onbekende rol': 'Rôle inconnu',
+    'Alleen voor een bewoner die het woonzorgcentrum zelf importeerde': 'Uniquement pour un résident importé par la maison de repos elle-même',
+    'Dit adres hoort bij een medewerker van het woonzorgcentrum': 'Cette adresse appartient à un collaborateur de la maison de repos',
+    "Te veel demo's vandaag. Probeer het morgen opnieuw.": 'Trop de démos aujourd’hui. Réessayez demain.',
   },
   en: {
     '1 bewoner importeren': 'Import 1 resident',
@@ -145,5 +148,8 @@ export default {
     'Te veel uitnodigingen. Probeer het over een uur opnieuw.': 'Too many invitations. Try again in an hour.',
     'Dit kan alleen in een demo': 'This is only possible in a demo',
     'Onbekende rol': 'Unknown role',
+    'Alleen voor een bewoner die het woonzorgcentrum zelf importeerde': 'Only for a resident the care home imported itself',
+    'Dit adres hoort bij een medewerker van het woonzorgcentrum': 'This address belongs to a member of the care home’s staff',
+    "Te veel demo's vandaag. Probeer het morgen opnieuw.": 'Too many demos today. Try again tomorrow.',
   },
 } satisfies Vertaling
