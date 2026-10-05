@@ -4,6 +4,8 @@ import { useHousehold } from '../household/useHousehold'
 import { useOrganisatiesKlaar } from '../zorg/useOrganisatie'
 import { useQueryClient } from '@tanstack/react-query'
 import ZorgToegang from '../zorg/ZorgToegang'
+import LaadFout, { Diagnose } from '../household/LaadFout'
+import { useAuth } from '../auth/AuthProvider'
 import {
   STANDAARD_KAMERS,
   STANDAARD_OCHTEND,
@@ -29,12 +31,13 @@ export default function Onboarding() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { session } = useAuth()
   const queryClient = useQueryClient()
 
   // Geen standaardkeuze: of je de app zelf gebruikt of voor iemand anders,
   // bepaalt wie eigenaar wordt. Dat moet een bewuste keuze zijn.
   const [voorWie, setVoorWie] = useState<'zelf' | 'familielid' | null>(null)
-  const { all: huishoudens, isLoading: huisLaden } = useHousehold()
+  const { all: huishoudens, isLoading: huisLaden, isError: huisFout, error: huisFoutMelding, refetch: huisOpnieuw } = useHousehold()
   const organisaties = useOrganisatiesKlaar()
   const [naam, setNaam] = useState('')
   const [adres, setAdres] = useState('')
@@ -290,6 +293,12 @@ export default function Onboarding() {
   const s = stappen[stap]
   const laatste = stap === stappen.length - 1
 
+  // Wie al een huishouden heeft, hoort hier niet: meteen de app in.
+  if (!huisLaden && huishoudens.length > 0 && !busy) return <Navigate to="/" replace />
+  // Een fout is geen nieuwe gebruiker. Niet de onboarding tonen, wel zeggen wat er is.
+  if (!huisLaden && huisFout && !busy)
+    return <LaadFout error={huisFoutMelding} onOpnieuw={() => huisOpnieuw()} />
+
   // Een medewerker van een woonzorgcentrum zonder eigen familie hoort hier niet.
   if (!huisLaden && !organisaties.isLoading && huishoudens.length === 0 && organisaties.lijst.length > 0 && !busy)
     return <Navigate to="/zorg" replace />
@@ -352,6 +361,14 @@ export default function Onboarding() {
         <p role="alert" className="mt-5 rounded-2xl border border-alert bg-surface-soft p-3 text-alert">
           {error}
         </p>
+      ) : null}
+      {stap === 0 ? (
+        <Diagnose
+          email={session?.user.email}
+          id={session?.user.id}
+          aantal={huisLaden ? undefined : huishoudens.length}
+          melding={huisFout ? String((huisFoutMelding as Error)?.message ?? huisFoutMelding) : 'geen'}
+        />
       ) : null}
     </main>
   )

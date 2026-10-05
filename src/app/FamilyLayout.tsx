@@ -13,11 +13,12 @@ import Licht from "../features/licht/Licht";
 import { useOrganisaties } from "../features/zorg/useOrganisatie";
 import ZorgToegang from "../features/zorg/ZorgToegang";
 import { tt } from "../lib/uiTaal";
+import LaadFout from "../features/household/LaadFout";
 
 
 
 export default function FamilyLayout() {
-  const { household, isLoading } = useHousehold();
+  const { household, isLoading, isError, error, refetch } = useHousehold();
   const organisaties = useOrganisaties();
   const toegang = useAccess(household?.household_id);
   const nav = zichtbareNav(NAV, toegang);
@@ -33,6 +34,7 @@ export default function FamilyLayout() {
 
   if (isLoading) return <p className="p-6 text-ink-soft">{tt("Even geduld…")}</p>;
 
+  if (isError && !household) return <LaadFout error={error} onOpnieuw={() => refetch()} />;
   if (!household) return <Navigate to="/start" replace />;
 
   return (

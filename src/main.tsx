@@ -94,6 +94,7 @@ import { useOrganisatiesKlaar } from "./features/zorg/useOrganisatie";
 import { useHousehold } from "./features/household/useHousehold";
 import { configuratieOk } from "./lib/supabase";
 import ErrorBoundary from "./app/ErrorBoundary";
+import LaadFout from "./features/household/LaadFout";
 import SetupNeeded from "./app/SetupNeeded";
 import { pasLokaalToe } from "./features/settings/useDisplayPrefs";
 import "./index.css";
@@ -109,9 +110,11 @@ function Beveiligd({ children }: { children: React.ReactNode }) {
 
 /** De rol bepaalt het scherm: 'person' komt nooit in de familie-interface. */
 function Start() {
-  const { household, all, isLoading } = useHousehold();
+  const { household, all, isLoading, isError, error, refetch } = useHousehold();
   const organisaties = useOrganisatiesKlaar();
   if (isLoading || organisaties.isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  // Een fout is geen nieuwe gebruiker: niet naar de onboarding sturen.
+  if (isError && all.length === 0) return <LaadFout error={error} onOpnieuw={() => refetch()} />;
   // Wie geen familie heeft maar in een woonzorgcentrum werkt, gaat naar dat scherm.
   if (all.length === 0 && organisaties.lijst.length > 0) return <Navigate to="/zorg" replace />;
   // Wie nergens bij hoort, is nieuw: meteen naar de onboarding.
