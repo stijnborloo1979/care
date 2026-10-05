@@ -68,17 +68,18 @@ export function useHouseholds() {
       const { data: { session: currentSession } } = await supabase.auth.getSession()
       console.log('[DEBUG] Session after refresh:', currentSession?.user.id)
 
-      // Debug: check of auth.uid() werkt
-      try {
-        const { data: authData, error: authError } = await supabase.rpc('debug_auth_uid')
-        console.log('[DEBUG] auth.uid() = ', authData, authError ? `ERROR: ${authError.message}` : 'OK')
-      } catch (e) {
-        console.log('[DEBUG] auth.uid() call failed:', e)
+      if (!currentSession?.user.id) {
+        console.error('[DEBUG] No user ID in session after refresh')
+        throw new Error('Not authenticated - no user ID in session')
       }
 
-      console.log('[DEBUG] Calling my_households() RPC with session:', session?.user.id)
-      const { data, error } = await supabase.rpc('my_households')
-      console.log('[DEBUG] my_households() returned:', data, error ? `ERROR: ${error.message}` : 'OK')
+      // CRITICAL FIX: Pass the user ID explicitly to the RPC instead of relying on auth.uid() context
+      // auth.uid() can return NULL in some RPC contexts, causing empty results even though data exists
+      console.log('[DEBUG] Calling my_households() RPC with explicit user_id:', currentSession.user.id)
+      const { data, error } = await supabase.rpc('my_households', {
+        user_id: currentSession.user.id
+      })
+      console.log('[DEBUG] my_households() returned:', data?.length, 'households', error ? `ERROR: ${error.message}` : 'OK')
 
       if (error) throw error
       // home_id komt uit migratie 45. Zolang die nog niet gedraaid is, is
