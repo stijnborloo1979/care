@@ -62,7 +62,24 @@ export function useHouseholds() {
     staleTime: 0,
     refetchOnMount: 'always',
     queryFn: async (): Promise<Household[]> => {
+      // Zorg dat de sessie beschikbaar is en goed geladen voordat we de RPC aanroepen
+      console.log('[DEBUG] Refreshing auth session...')
+      await supabase.auth.refreshSession()
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      console.log('[DEBUG] Session after refresh:', currentSession?.user.id)
+
+      // Debug: check of auth.uid() werkt
+      try {
+        const { data: authData, error: authError } = await supabase.rpc('debug_auth_uid')
+        console.log('[DEBUG] auth.uid() = ', authData, authError ? `ERROR: ${authError.message}` : 'OK')
+      } catch (e) {
+        console.log('[DEBUG] auth.uid() call failed:', e)
+      }
+
+      console.log('[DEBUG] Calling my_households() RPC with session:', session?.user.id)
       const { data, error } = await supabase.rpc('my_households')
+      console.log('[DEBUG] my_households() returned:', data, error ? `ERROR: ${error.message}` : 'OK')
+
       if (error) throw error
       // home_id komt uit migratie 45. Zolang die nog niet gedraaid is, is
       // het eigen huishouden het huis — dan werkt de app zoals voorheen in

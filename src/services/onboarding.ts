@@ -23,6 +23,12 @@ export async function createHousehold(
   ikBenDePersoon = false,
 ): Promise<string> {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Brussels'
+
+  // Zorg dat de sessie beschikbaar is en goed geladen
+  await supabase.auth.refreshSession()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) throw new Error('Niet ingelogd')
+
   const { data, error } = await supabase.rpc('create_household', {
     person_name: personName,
     tz,
