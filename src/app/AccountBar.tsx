@@ -6,6 +6,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
 import ZorgToegang from '../features/zorg/ZorgToegang'
 import { tt } from '../lib/uiTaal'
+import { toonNaam } from '../features/messages/messages'
 
 const ROL: Record<string, string> = {
   admin: tt('familiebeheerder'),
@@ -25,7 +26,7 @@ export default function AccountBar() {
 
   if (!session || !household) return null
 
-  const naam = session.user.email?.split('@')[0] ?? tt('jij')
+  const naam = session.user.email ? toonNaam(session.user.email) : tt('jij')
 
   return (
     <div className="relative">

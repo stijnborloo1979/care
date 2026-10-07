@@ -2,7 +2,7 @@ import { useMag } from '../../core/access/useAccess'
 import { useState } from 'react'
 import Dashboard from '../dashboard/Dashboard'
 import FotoKiezer from '../../components/FotoKiezer'
-import { sendPhotoMessage } from '../messages/messages'
+import { sendPhotoMessage, toonNaam } from '../messages/messages'
 import ManageHomeMemory from '../home-memory/ManageHomeMemory'
 import ManageMemories from '../memories/ManageMemories'
 import ManagePeople from '../people/ManagePeople'
@@ -32,7 +32,8 @@ function useContext() {
     volledig: household?.person_name ?? '',
     tz: household?.timezone ?? 'Europe/Brussels',
     role: household?.role ?? 'member',
-    viewer: (session?.user.email ?? tt('daar')).split('@')[0],
+    // "stijn.borloo@…" wordt "Stijn": de voornaam, niet het mailadres.
+    viewer: session?.user.email ? toonNaam(session.user.email).split(' ')[0] : tt('daar'),
   }
 }
 
