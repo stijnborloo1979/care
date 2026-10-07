@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
 import type { HuisMoment, VastMoment } from './afdelingsdagPuur'
+import { tt } from '../lib/uiTaal'
 
 export * from './afdelingsdagPuur'
 
@@ -41,11 +42,11 @@ export async function nieuwVastMoment(p: Omit<VastMoment, 'id' | 'actief'>): Pro
 export async function zetVastMomentActief(id: string, actief: boolean): Promise<void> {
   const { data, error } = await supabase.from('afdeling_dag').update({ actief }).eq('id', id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Dit kan je niet aanpassen.')
+  if (!data || data.length === 0) throw new Error(tt('Dit kan je niet aanpassen.'))
 }
 
 export async function wisVastMoment(id: string): Promise<void> {
   const { data, error } = await supabase.from('afdeling_dag').delete().eq('id', id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Dit kan je niet wissen.')
+  if (!data || data.length === 0) throw new Error(tt('Dit kan je niet wissen.'))
 }

@@ -155,7 +155,7 @@ export default function Today({ householdId, personName, timezone }: Props) {
             {t('vandaag.vandaag')}
           </h2>
           <p className="mt-2 rounded-card bg-surface p-5 text-lg text-ink-soft shadow-card">
-            Er staat vandaag niets gepland.
+            {t('vandaag.nietsVandaag')}
           </p>
         </section>
       ),
@@ -265,7 +265,7 @@ function NowCard({
         <p className="mt-2 text-3xl font-extrabold leading-tight tracking-tight">
           {t('watnu.rusten')}
         </p>
-        <p className="mt-2 text-lg text-ink-soft">Er is nu niets dat moet. Straks is er weer iets.</p>
+        <p className="mt-2 text-lg text-ink-soft">{t('watnu.nietsDatMoet')}</p>
       </div>
     )
   }
@@ -286,7 +286,7 @@ function NowCard({
           className="mt-6 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white shadow-lift"
         >
           <Icon naam="gedaan" size={20} />
-          Dit is gedaan
+          {t('vandaag.ditIsGedaan')}
         </button>
       )}
     </div>
@@ -345,7 +345,7 @@ function TimelineRow({
           onClick={() => onToggle(event.id, !gedaan)}
           className="ml-auto min-h-[2.4rem] shrink-0 rounded-pill border-[1.5px] border-line-strong px-4 text-sm font-semibold"
         >
-          {gedaan ? 'Ongedaan' : 'Afvinken'}
+          {gedaan ? t('vandaag.ongedaan') : t('vandaag.afvinken')}
         </button>
       )}
     </li>
@@ -393,10 +393,10 @@ function EigenaarLinks() {
   return (
     <div className="eigenaar mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-base font-semibold text-accent-ink">
       <Link to="/familie" className="underline underline-offset-4">
-        Beheren
+        {t('vandaag.beheren')}
       </Link>
       <Link to="/delen" className="underline underline-offset-4">
-        Wie ziet wat
+        {t('vandaag.wieZietWat')}
       </Link>
     </div>
   )

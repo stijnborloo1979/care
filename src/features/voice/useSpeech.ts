@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useKioskBezig } from '../kiosk/kioskStore'
 import { useRadio } from '../radio/radioStore'
-import { locale } from '../../lib/i18n'
+import { locale, t } from '../../lib/i18n'
 
 type Herkenner = {
   lang: string
@@ -48,7 +48,7 @@ export function useSpeech(onVraag: (tekst: string) => void) {
   const start = useCallback(() => {
     const Klasse = herkennerKlasse()
     if (!Klasse) {
-      setFout('Spraak werkt niet in deze browser. Tik een vraag aan.')
+      setFout(t('spraak.nietInBrowser'))
       return
     }
     setFout(null)
@@ -58,12 +58,12 @@ export function useSpeech(onVraag: (tekst: string) => void) {
       rec.interimResults = false
       rec.maxAlternatives = 1
       rec.onresult = (e) => refVraag.current(e.results[0][0].transcript)
-      rec.onerror = () => setFout('Ik heb je niet goed gehoord. Probeer opnieuw.')
+      rec.onerror = () => setFout(t('spraak.nietGehoord'))
       rec.onend = () => setLuistert(false)
       rec.start()
       setLuistert(true)
     } catch {
-      setFout('Spraak is hier niet beschikbaar. Tik een vraag aan.')
+      setFout(t('spraak.nietBeschikbaar'))
       setLuistert(false)
     }
   }, [])

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { vindDatum, vindTijd } from './datumTijd'
+import { datumVoorStem, vindDatum, vindTijd } from './datumTijd'
 import { corrigeer, isJa, isNee, lokaleInterpretatie, splitsProducten, vulVeld } from './lokaleRegels'
 import { valideer, type Gevalideerd } from './valideer'
 import { ActionEngine, type ActieContext, type Diensten } from './actionEngine'
@@ -447,5 +447,15 @@ describe('action engine', () => {
   it('weigert als er nog iets ontbreekt', async () => {
     const u = await engine().voerUit(v('create_calendar_event', { title: 'Dokter' }), 'y', CTX)
     expect(u.gelukt).toBe(false)
+  })
+})
+
+describe('datum voor de stem', () => {
+  const nu = new Date('2026-10-07T10:00:00Z')
+  it('zegt vandaag, morgen en overmorgen in de taal van het huishouden', () => {
+    expect(datumVoorStem('2026-10-08', nu, 'Europe/Brussels', 'nl-BE')).toBe('morgen')
+    expect(datumVoorStem('2026-10-08', nu, 'Europe/Brussels', 'fr-BE')).toBe('demain')
+    expect(datumVoorStem('2026-10-09', nu, 'Europe/Brussels', 'fr-BE')).toBe('après-demain')
+    expect(datumVoorStem('2026-10-07', nu, 'Europe/Brussels', 'en-GB')).toBe('today')
   })
 })

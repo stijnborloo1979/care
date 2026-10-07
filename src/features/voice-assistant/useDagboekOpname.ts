@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { locale } from '../../lib/i18n'
+import { locale, t } from '../../lib/i18n'
 import { useKioskBezig } from '../kiosk/kioskStore'
 import { herkennerKlasse, kiesMimeType, transcribeer, type Herkenner } from './spraak'
 
@@ -60,7 +60,7 @@ export function useDagboekOpname() {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch {
-      setFout('Ik mag de microfoon niet gebruiken.')
+      setFout(t('spraak.micVerboden'))
       return null
     }
     streamRef.current = stream

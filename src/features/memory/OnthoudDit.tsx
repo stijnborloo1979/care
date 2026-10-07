@@ -94,7 +94,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label htmlFor="onthoud-tekst" className="text-sm font-semibold text-ink-soft">
-              Wat wil je onthouden?
+              {vertaal('onthoud.watOnthouden')}
             </label>
             {/* Inspreken is hier de hoofdweg: sneller dan typen, en je
                 handen zijn vaak net vol met wat je wil wegleggen. */}
@@ -125,7 +125,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
               }}
               className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
             >
-              Annuleren
+              {vertaal('algemeen.annuleren')}
             </button>
           </div>
         </form>
@@ -135,7 +135,7 @@ export default function OnthoudDit({ householdId, timezone }: { householdId: str
           className="mt-3 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill border-[1.5px] border-dashed border-line-strong text-lg font-semibold text-ink-soft"
         >
           <Pin size={20} strokeWidth={1.75} aria-hidden="true" />
-          Iets onthouden
+          {vertaal('onthoud.ietsOnthouden')}
         </button>
       )}
     </section>

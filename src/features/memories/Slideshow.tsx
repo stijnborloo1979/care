@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import StoragePhoto from '../../components/StoragePhoto'
 import type { MemoryPhoto } from '../../services/memories'
-import { locale } from '../../lib/i18n'
+import { locale, t } from '../../lib/i18n'
 
 /**
  * Rustige modus: één herinnering per scherm, twee knoppen, geen tijdslimiet.
@@ -48,7 +48,7 @@ export default function Slideshow({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Herinneringen bekijken"
+      aria-label={t('fotos.bekijken')}
       className="fixed inset-0 z-50 overflow-y-auto bg-bg"
       style={{
         paddingTop: 'env(safe-area-inset-top, 0px)',
@@ -60,7 +60,7 @@ export default function Slideshow({
           onClick={onClose}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
-          Sluiten
+          {t('algemeen.sluiten')}
         </button>
 
         <div className="mt-5">
@@ -77,13 +77,13 @@ export default function Slideshow({
             disabled={i === 0}
             className="min-h-[3.4rem] flex-1 rounded-pill border-[1.5px] border-line-strong text-lg font-semibold disabled:opacity-40"
           >
-            ‹ Vorige
+            {t('fotos.vorige')}
           </button>
           <button
             onClick={() => (i < photos.length - 1 ? setI(i + 1) : onClose())}
             className="min-h-[3.4rem] flex-1 rounded-pill bg-accent-ink text-lg font-semibold text-white"
           >
-            {i < photos.length - 1 ? 'Volgende ›' : 'Klaar'}
+            {i < photos.length - 1 ? t('fotos.volgende') : t('algemeen.klaar')}
           </button>
         </div>
 

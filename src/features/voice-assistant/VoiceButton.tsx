@@ -12,7 +12,7 @@ export default function VoiceButton() {
     <button
       type="button"
       onClick={openen}
-      aria-label="LifeAngle Voice: praat met mij"
+      aria-label={t('voice.praatMetMij')}
       className="relative -mt-7 flex min-w-0 flex-1 flex-col items-center justify-end gap-0.5 text-sm font-semibold text-accent-ink"
     >
       <span className="grid h-[4.25rem] w-[4.25rem] place-items-center rounded-full border-4 border-bg bg-accent-ink text-white shadow-lift">

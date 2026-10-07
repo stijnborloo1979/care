@@ -234,11 +234,18 @@ export function tijdVoorStem(hhmm: string): string {
 }
 
 /** "morgen", "overmorgen", "vandaag", of "vrijdag 3 oktober". */
+const RELATIEVE_DAGEN: Record<string, [string, string, string]> = {
+  nl: ['vandaag', 'morgen', 'overmorgen'],
+  fr: ['aujourd’hui', 'demain', 'après-demain'],
+  en: ['today', 'tomorrow', 'the day after tomorrow'],
+}
+
 export function datumVoorStem(datum: string, nu: Date, tz: string, locale = 'nl-BE'): string {
   const vandaag = localDateKey(nu, tz)
-  if (datum === vandaag) return 'vandaag'
-  if (datum === plusDagen(vandaag, 1)) return 'morgen'
-  if (datum === plusDagen(vandaag, 2)) return 'overmorgen'
+  const [nul, een, twee] = RELATIEVE_DAGEN[locale.slice(0, 2)] ?? RELATIEVE_DAGEN.nl
+  if (datum === vandaag) return nul
+  if (datum === plusDagen(vandaag, 1)) return een
+  if (datum === plusDagen(vandaag, 2)) return twee
   const [j, m, d] = datum.split('-').map(Number)
   return new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',

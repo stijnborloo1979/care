@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 import { compressImage, extensionForImage } from '../lib/image'
 import { localDateKey } from '../lib/time'
 import { locale, t } from '../lib/i18n'
+import { tt } from '../lib/uiTaal'
 
 /** "Wie was er hier?" (74): een bezoek dat de persoon niet kan vergeten. */
 export interface Bezoek {
@@ -80,7 +81,7 @@ export async function uploadBezoekFoto(hh: string, id: string, file: File): Prom
 export async function wisBezoek(b: Pick<Bezoek, 'id' | 'photo_path'>): Promise<void> {
   const { data, error } = await supabase.from('visit_log').delete().eq('id', b.id).select('id')
   if (error) throw error
-  if (!data || data.length === 0) throw new Error('Dit bezoek kan je niet meer wissen.')
+  if (!data || data.length === 0) throw new Error(tt('Dit bezoek kan je niet meer wissen.'))
   if (b.photo_path) await supabase.storage.from(BUCKET).remove([b.photo_path])
 }
 

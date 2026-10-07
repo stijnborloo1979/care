@@ -7,6 +7,7 @@ import { localDateKey } from '../../lib/time'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
 import { spreek } from '../voice/useSpeech'
 import { vraagVanVandaag } from './vragen'
+import { t } from '../../lib/i18n'
 
 const NIET_VANDAAG = 'thuis.vertel.niet'
 
@@ -73,7 +74,7 @@ export default function VertelEens({
       setTypen(false)
       setBedankt(true)
       await queryClient.invalidateQueries({ queryKey: ['stories', householdId] })
-      if (huidigePrefs().voice) spreek('Dank je. Dat verhaal is bewaard.')
+      if (huidigePrefs().voice) spreek(t('vertel.bewaardGesproken'))
       onKlaar?.()
     },
   })
@@ -83,10 +84,9 @@ export default function VertelEens({
   if (bedankt && !extraVraag) {
     return (
       <section className="rounded-card bg-surface p-5 shadow-card">
-        <p className="text-lg font-bold">Dank je wel.</p>
+        <p className="text-lg font-bold">{t('vertel.bedankt')}</p>
         <p className="mt-1 text-ink-soft">
-          Je verhaal is bewaard.{delen ? ' Je familie kan het beluisteren.' : ''} Morgen is er een
-          nieuwe vraag.
+          {t('vertel.bewaard')}{delen ? ` ${t('vertel.familieLuistert')}` : ''} {t('vertel.morgen')}
         </p>
       </section>
     )
@@ -101,7 +101,7 @@ export default function VertelEens({
     >
       <h2 id="vertel" className="flex items-center gap-2 text-base font-bold text-ink-faint">
         <MessageCircleHeart size={20} strokeWidth={1.75} aria-hidden="true" />
-        Vertel eens
+        {t('vertel.titel')}
       </h2>
       <p className="mt-2 text-2xl font-bold leading-snug tracking-tight">{vraag}</p>
 
@@ -114,7 +114,7 @@ export default function VertelEens({
               className="flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-alert text-lg font-semibold text-white"
             >
               <Square size={20} strokeWidth={2} />
-              Stop — {opname.seconds} sec
+              {t('vertel.stop', { n: opname.seconds })}
             </button>
           ) : opname.recording ? (
             <div className="space-y-2">
@@ -123,7 +123,7 @@ export default function VertelEens({
                 onClick={opname.reset}
                 className="text-sm font-semibold text-ink-soft underline underline-offset-4"
               >
-                Opnieuw opnemen
+                {t('vertel.opnieuwOpnemen')}
               </button>
             </div>
           ) : (
@@ -132,7 +132,7 @@ export default function VertelEens({
               className="flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink text-lg font-semibold text-white"
             >
               <Mic size={20} strokeWidth={1.75} />
-              Vertel het
+              {t('vertel.vertelHet')}
             </button>
           )}
           {opname.error ? <p className="mt-2 text-sm text-alert">{opname.error}</p> : null}
@@ -143,7 +143,7 @@ export default function VertelEens({
           onChange={(e) => setTekst(e.target.value)}
           rows={4}
           autoFocus
-          placeholder="Schrijf zoveel of zo weinig als je wil."
+          placeholder={t('vertel.schrijf')}
           className="mt-4 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3 text-lg"
         />
       )}
@@ -157,14 +157,14 @@ export default function VertelEens({
               onChange={(e) => setDelen(e.target.checked)}
               className="h-5 w-5"
             />
-            Mijn familie mag dit beluisteren
+            {t('vertel.familieMag')}
           </label>
           <button
             onClick={() => bewaar.mutate()}
             disabled={bewaar.isPending}
             className="flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-60"
           >
-            {bewaar.isPending ? 'Bewaren…' : 'Bewaar mijn verhaal'}
+            {bewaar.isPending ? t('vertel.bewaren') : t('vertel.bewaar')}
           </button>
         </div>
       ) : null}
@@ -177,11 +177,11 @@ export default function VertelEens({
           }}
           className="underline underline-offset-4"
         >
-          {typen ? 'Liever inspreken' : 'Liever typen'}
+          {typen ? t('vertel.liefInspreken') : t('vertel.liefTypen')}
         </button>
         {!extraVraag ? (
           <button onClick={() => setOverslaan(overslaan + 1)} className="underline underline-offset-4">
-            Andere vraag
+            {t('vertel.andereVraag')}
           </button>
         ) : null}
         <button
@@ -199,13 +199,13 @@ export default function VertelEens({
           }}
           className="underline underline-offset-4"
         >
-          Niet vandaag
+          {t('vertel.nietVandaag')}
         </button>
       </div>
 
       {bewaar.error ? (
         <p role="alert" className="mt-3 text-sm text-alert">
-          Bewaren lukte niet. Probeer het straks opnieuw.
+          {t('vertel.bewarenMislukt')}
         </p>
       ) : null}
     </section>

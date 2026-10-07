@@ -42,7 +42,9 @@ end $$;
 select pg_temp.gelijk('zonder abonnement: bron bestaand', (select bron from public.entitlements_voor(pg_temp.id('hh'))), 'bestaand');
 select pg_temp.gelijk('zonder abonnement: alle functies',
   (select cardinality(entitlements) from public.entitlements_voor(pg_temp.id('hh'))), (select count(*)::int from public.entitlement));
-select pg_temp.gelijk('de plannen zijn als voorbeeld gemarkeerd', (select bool_and(voorbeeld) from public.plan), true);
+-- Vanaf 86 zijn Home en Care geen voorbeeld meer; de rest blijft het.
+select pg_temp.gelijk('de verborgen plannen blijven als voorbeeld gemarkeerd',
+  (select bool_and(voorbeeld) from public.plan where id in ('home_free', 'home_ai', 'care_ai')), true);
 
 -- Trial: 30 dagen het plan, daarna home_free
 insert into public.subscription (household_id, plan_id, status, trial_ends_at)

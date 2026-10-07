@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { tt } from '../lib/uiTaal'
 
 /**
  * De analyses achter het familiescherm en het verslag voor de dokter.
@@ -142,7 +143,7 @@ export function watStabielBleef(medicatiePerTijdstip: Helft[], dagritme: Dagritm
     // Dan liever niets beweren dan "stabiel" op drie metingen.
     if (m.momentenEerste < 5 || m.momentenTweede < 5) continue
     if (Math.abs(m.laatste - m.eerste) <= 5) {
-      stabiel.push(`Medicatie van ${m.tijdstip} bleef rond ${Math.round(m.laatste)} %.`)
+      stabiel.push(tt('Medicatie van {tijdstip} bleef rond {procent} %.', { tijdstip: m.tijdstip, procent: Math.round(m.laatste) }))
     }
   }
 
@@ -150,7 +151,7 @@ export function watStabielBleef(medicatiePerTijdstip: Helft[], dagritme: Dagritm
     const eerste = dagritme[0]
     const laatste = dagritme[dagritme.length - 1]
     if (Math.abs(laatste.spreiding - eerste.spreiding) <= 45) {
-      stabiel.push('De spreiding van het dagbegin bleef ongeveer gelijk.')
+      stabiel.push(tt('De spreiding van het dagbegin bleef ongeveer gelijk.'))
     }
   }
 

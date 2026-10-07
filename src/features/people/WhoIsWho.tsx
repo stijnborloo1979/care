@@ -97,7 +97,7 @@ export function PersonDetail() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
       <Link to="/wie" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ Terug
+        {t('algemeen.terug')}
       </Link>
 
       <div className="mt-6 text-center">

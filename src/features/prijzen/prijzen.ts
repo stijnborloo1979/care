@@ -14,6 +14,8 @@ export interface Plan {
   proefdagen: number
   onderdelen: string[]
   voorstel: boolean
+  /** Vanaf migratie 86; ontbreekt bij een oudere database. */
+  prijs_op_aanvraag?: boolean
 }
 
 /** null = migratie 77 nog niet gedraaid. */
@@ -36,6 +38,9 @@ export function euro(cent: number): string {
     maximumFractionDigits: 2,
   }).format(cent / 100)
 }
+
+/** Adres voor een prijsaanvraag (VITE_CONTACT_EMAIL), of null. */
+export const contactAdres: string | null = (import.meta.env.VITE_CONTACT_EMAIL as string | undefined)?.trim() || null
 
 /** Hoeveel je bespaart met een jaarabonnement, in maanden (afgerond). */
 export function maandenGratis(p: Pick<Plan, 'prijs_maand_cent' | 'prijs_jaar_cent'>): number {

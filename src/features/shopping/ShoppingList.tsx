@@ -59,14 +59,14 @@ export default function ShoppingList({ familie = false }: { familie?: boolean })
           className="mt-4 flex min-h-touch w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
         >
           <Mic size={22} aria-hidden="true" />
-          Zeg wat je nodig hebt
+          {t('boodschappen.zeg')}
         </button>
       ) : null}
 
-      {isLoading ? <p className="mt-6 text-lg text-ink-soft">{familie ? tt('Even geduld…') : 'Even geduld…'}</p> : null}
+      {isLoading ? <p className="mt-6 text-lg text-ink-soft">{familie ? tt('Even geduld…') : t('algemeen.evenGeduld')}</p> : null}
       {isError ? (
         <p role="alert" className="mt-6 text-lg text-alert">
-          {familie ? tt('De lijst kon niet geladen worden.') : 'De lijst kon niet geladen worden.'}
+          {familie ? tt('De lijst kon niet geladen worden.') : t('boodschappen.nietGeladen')}
         </p>
       ) : null}
 
@@ -102,8 +102,8 @@ export default function ShoppingList({ familie = false }: { familie?: boolean })
         <input
           value={nieuw}
           onChange={(e) => setNieuw(e.target.value)}
-          placeholder={familie ? tt('Bijvoorbeeld: melk, brood') : 'Bijvoorbeeld: melk, brood'}
-          aria-label={familie ? tt('Product toevoegen') : 'Product toevoegen'}
+          placeholder={familie ? tt('Bijvoorbeeld: melk, brood') : t('boodschappen.voorbeeld')}
+          aria-label={familie ? tt('Product toevoegen') : t('boodschappen.productToevoegen')}
           className="min-h-touch min-w-0 flex-1 rounded-pill border-[1.5px] border-line-strong bg-surface px-5 text-lg"
         />
         <button
@@ -111,12 +111,12 @@ export default function ShoppingList({ familie = false }: { familie?: boolean })
           disabled={voegToe.isPending}
           className="min-h-touch rounded-pill bg-accent-ink px-5 text-lg font-bold text-white disabled:opacity-60"
         >
-          {familie ? tt('Toevoegen') : 'Toevoegen'}
+          {familie ? tt('Toevoegen') : t('boodschappen.toevoegen')}
         </button>
       </form>
       {voegToe.isError ? (
         <p role="alert" className="mt-2 text-alert">
-          {familie ? tt('Dat is niet gelukt. Probeer het opnieuw.') : 'Dat is niet gelukt. Probeer het opnieuw.'}
+          {familie ? tt('Dat is niet gelukt. Probeer het opnieuw.') : t('boodschappen.mislukt')}
         </p>
       ) : null}
     </main>

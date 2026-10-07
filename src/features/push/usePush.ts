@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { tt } from '../../lib/uiTaal'
 
 export type PushStatus = 'laden' | 'aan' | 'uit' | 'geweigerd' | 'onbeschikbaar'
 
@@ -100,7 +101,7 @@ export function usePush(householdId: string) {
 
       setStatus('aan')
     } catch {
-      setFout('Meldingen aanzetten lukte niet. Probeer het later opnieuw.')
+      setFout(tt('Meldingen aanzetten lukte niet. Probeer het later opnieuw.'))
       setStatus('uit')
     }
   }, [householdId])
@@ -118,7 +119,7 @@ export function usePush(householdId: string) {
       }
       setStatus('uit')
     } catch {
-      setFout('Meldingen uitzetten lukte niet.')
+      setFout(tt('Meldingen uitzetten lukte niet.'))
     }
   }, [])
 

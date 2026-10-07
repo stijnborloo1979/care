@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { t } from '../../lib/i18n'
 
 export interface Speelbaar {
   id: string
@@ -72,13 +73,13 @@ export const useRadio = create<RadioState>((set, get) => ({
         get().speel(volgende)
       } else {
         geprobeerd = new Set()
-        set({ speelt: false, laden: false, fout: 'De radio speelt nu niet. Probeer het straks opnieuw.' })
+        set({ speelt: false, laden: false, fout: t('radio.speeltNiet') })
       }
     }
 
     a.play().catch(() => {
       // Een browser weigert geluid tot iemand het scherm heeft aangeraakt.
-      set({ speelt: false, laden: false, fout: 'Tik nog eens op de radio om te starten.' })
+      set({ speelt: false, laden: false, fout: t('radio.tikNogEens') })
     })
   },
 

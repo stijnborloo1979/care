@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { tt } from '../lib/uiTaal'
 
 /**
  * Eén knop om een foto te kiezen, overal hetzelfde: bij een ding, een
@@ -10,8 +11,8 @@ import { useState } from 'react'
  * het toestel zelf.
  */
 export default function FotoKiezer({
-  label = 'Foto kiezen',
-  bezigLabel = 'Bezig…',
+  label = tt('Foto kiezen'),
+  bezigLabel = tt('Bezig…'),
   onKies,
   className = '',
 }: {
@@ -35,7 +36,7 @@ export default function FotoKiezer({
     try {
       await onKies(bestand)
     } catch (err) {
-      setFout(err instanceof Error ? err.message : 'De foto kon niet bewaard worden.')
+      setFout(err instanceof Error ? err.message : tt('De foto kon niet bewaard worden.'))
     } finally {
       setBezig(false)
     }

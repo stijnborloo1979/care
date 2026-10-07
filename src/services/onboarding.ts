@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { tt } from '../lib/uiTaal'
 
 export const STANDAARD_KAMERS = [
   { name: 'Woonkamer', emoji: '🛋️' },
@@ -61,7 +62,7 @@ export async function addPersonCards(
 
 export async function createRooms(householdId: string, namen: string[]) {
   const rijen = namen.map((naam, i) => {
-    const std = STANDAARD_KAMERS.find((k) => k.name === naam)
+    const std = STANDAARD_KAMERS.find((k) => k.name === naam || tt(k.name) === naam)
     return { household_id: householdId, name: naam, emoji: std?.emoji ?? '🚪', sort: i }
   })
   if (rijen.length === 0) return []

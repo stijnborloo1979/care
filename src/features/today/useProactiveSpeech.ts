@@ -5,6 +5,7 @@ import { huidigePrefs } from '../settings/useDisplayPrefs'
 import { spreek } from '../voice/useSpeech'
 import { useRadio } from '../radio/radioStore'
 import { useLicht } from '../licht/lichtStore'
+import { t } from '../../lib/i18n'
 
 const GEZEGD = 'thuis.gezegd'
 const VOORAF_MIN = 10
@@ -85,12 +86,12 @@ export function useProactiveSpeech(events: AgendaEvent[], tz: string) {
         if (e.kind === 'reminder') {
           // Een herinnering ("medicatie om 18:00") hoort op het uur zelf,
           // niet tien minuten vooraf.
-          if (min <= 0 && min > -15) zin = `Herinnering: ${e.title}.`
+          if (min <= 0 && min > -15) zin = t('proactief.herinnering', { titel: e.title })
         } else if (min > 0 && min <= VOORAF_MIN) {
-          zin = `Over ${min} ${min === 1 ? 'minuut' : 'minuten'}: ${e.title}.`
+          zin = min === 1 ? t('proactief.overMinuut', { titel: e.title }) : t('proactief.overMinuten', { n: min, titel: e.title })
         } else if (min <= 0 && min > -15) {
           // De app ging pas open na het begin: dan zeggen we het nu nog.
-          zin = `Het is tijd voor: ${e.title}.`
+          zin = t('proactief.tijdVoor', { titel: e.title })
         }
 
         if (zin) {

@@ -8,31 +8,29 @@ willen blijven wonen, en voor hun familie. (Voorheen: Thuis.)
 
 React + TypeScript + Tailwind, met Supabase als backend.
 
-## Online zetten via Netlify
+## Online zetten via Cloudflare Pages
 
-1. Zet deze map in een GitHub-repo (Add file → Upload files, de hele map ineens).
-2. Netlify → Add new site → Import an existing project → GitHub → kies de repo.
-3. Build command en publish directory laat je leeg: `netlify.toml` vult ze in.
-4. Site configuration → Environment variables → voeg toe:
+De code staat op GitHub; Cloudflare Pages bouwt bij elke push naar `main`.
+Headers en routes staan in `public/_headers` en `public/_redirects`; de
+Node-versie (22) in `.nvmrc`.
+
+1. Cloudflare → Workers & Pages → Create → Pages → Connect to Git → kies de repo.
+2. Build command: `npm run build` · Build output directory: `dist`.
+3. Settings → Variables and Secrets, bij Production:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-5. Deploy. Bij elke push naar `main` bouwt Netlify opnieuw.
+   - `VITE_CONTACT_EMAIL` (optioneel) — het adres achter "Vraag een prijs
+     aan" op de prijspagina, voor woonzorgcentra. Zonder dit adres staat die
+     knop er niet.
+4. Deploy. Een gewijzigde variabele werkt pas na een nieuwe build
+   (Deployments → Retry deployment).
+5. Zet het adres van de site (nu `care-r9d.pages.dev`, later het eigen
+   domein) in Supabase bij Authentication → URL Configuration, als Site URL
+   en met `/**` bij Redirect URLs.
 
 Beide waarden staan in Supabase onder Project Settings → API. De anon key
 mag publiek zijn: RLS beschermt de data, niet die sleutel. De `service_role`
 key hoort nooit in deze repo en nooit in een `VITE_`-variabele.
-
-## Online zetten via Cloudflare Pages
-
-Werkt ook, naast of in plaats van Netlify. Cloudflare leest `netlify.toml`
-niet; daarvoor staan `public/_headers` en `public/_redirects` klaar.
-
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Environment variables (Settings → Variables and Secrets, bij Production):
-  `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, en `NODE_VERSION` = `22`
-- Zet het `pages.dev`-adres in Supabase bij Authentication → URL
-  Configuration, als Site URL en met `/**` bij Redirect URLs.
 
 ## Database
 
@@ -46,7 +44,7 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 4. `04_messages.sql` — berichten en spraakberichten.
 5. `05_auth_invites.sql` — uitnodigingen. Zet daarna in Supabase onder
    Authentication → Providers e-mail aan met magic link, en voeg je
-   Netlify-adres én `http://localhost:5173` toe bij Redirect URLs.
+   adres van de site én `http://localhost:5173` toe bij Redirect URLs.
 6. `06_nightly_job.sql` — zet routines om in de agenda van morgen, vult de
    medicatiemomenten aan en maakt meldingen. Zet pg_cron aan via
    Database → Extensions; de migratie plant zichzelf dan in op 02:30.
@@ -80,11 +78,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     dag op Vandaag staan en is de volgende ochtend weg. Niet beluisterde
     berichten blijven twee dagen, vastgezette altijd.
 20. `20_push.sql` — pushmeldingen: de toestellen van familie, en wie wat
-    krijgt. Het versturen doet de edge function `push-notify`. Onderaan
-    het bestand staan de twee cron-regels, met pg_net.
+    krijgt. Het versturen doet de edge function `push-notify`. Inplannen:
+    `supabase/handmatig/cron_inplannen.sql` (zie onder).
 21. `21_tasks.sql` — taken voor de familie: opnemen, toewijzen, afvinken
     en terugkerende taken. Niet zichtbaar voor de persoon of voor
-    zorgverleners. Plan `task_reminders()` in om 07:00 via pg_cron.
+    zorgverleners. `task_reminders()` om 07:00 plant
+    `supabase/handmatig/cron_inplannen.sql` in.
 22. `22_support_by_family.sql` — de familiebeheerder past het niveau van
     ondersteuning meteen toe, zonder het toestel van de persoon. Elke
     wijziging komt in het zorglogboek.
@@ -102,7 +101,20 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 27. `27_layout.sql` — de indeling van het dagscherm van de persoon, zodat
     familie zelf bepaalt welke blokken erop staan.
 
-(28 tot 45 staan in `supabase/`, in volgorde.)
+(28 tot 45 staan in `supabase/`, in volgorde. Er is geen 28: dat nummer
+werd overgeslagen. Van 46 zijn er twee: draai eerst
+`46_my_households_herstel.sql`, dan `46_voice.sql`. Hernoem ze niet; een
+project dat ze al draaide, zou anders denken dat er iets nieuws is.)
+
+**Geplande taken.** Draai na alle migraties één keer
+`supabase/handmatig/cron_inplannen.sql` in de SQL-editor (vul bovenaan het
+projectadres en de service role key in; bewaar het bestand daarna niet met
+de sleutel erin). Het plant `push-notify`, `cleanup-storage`,
+`task_reminders()` en eventueel `embed` in, en zet zekerheidshalve ook de
+nachtjob en de opruimtaken opnieuw: die plannen zichzelf alleen in als
+pg_cron al aan stond toen je hun migratie draaide. Onderaan staat een
+controlequery. De volledige checklist voor de livegang staat in
+`docs/LIVEGANG.md`.
 
 46. `46_voice.sql` — LifeAngle Voice: boodschappenlijst, herinneringen als
     soort agenda-item, het gesproken dagboek, en de RPC's
@@ -279,6 +291,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     verzonnen bewoners. In je eigen demo wissel je tussen coördinator en
     beheerder en wis je alles weer. Een familie kan nooit aan een demo
     koppelen. Draai daarna `76_systeemcontrole.sql` opnieuw.
+86. `86_prijzen_livegang.sql` — het aanbod bij de livegang: Home € 14,95
+    per maand of € 149 per jaar, 14 dagen gratis, alles inbegrepen (ook de
+    spraakassistent); Care (woonzorgcentrum) op aanvraag. De andere plannen
+    blijven bestaan maar staan niet meer op de prijspagina. Er wordt nog
+    niets afgedwongen of aangerekend: daarvoor is een betaalprovider nodig.
+    Draai daarna `76_systeemcontrole.sql` opnieuw.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
@@ -520,6 +538,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_83_rapport.sql` — alleen beheerder en coördinator; persoonlijke cijfers pas vanaf vijf bewoners in de periode en 28 dagen; nooit "families in de app".
 - `test_84_import.sql` — importeren alleen door beheerder of coördinator; proef bewaart niets; dubbel en "woont hier al" overgeslagen; familie uitnodigen alleen voor eigen import, nooit voor een familie-huishouden of naar een medewerker.
 - `test_85_demo_wzc.sql` — demo met acht bewoners; rol wisselen en wissen alleen door de eigenaar; geen koppeling van een echte familie; wissen laat een huishouden met een lid staan.
+- `test_86_prijzen_livegang.sql` — twee plannen op de prijspagina; Home 14,95 / 149 met 14 proefdagen en de spraakassistent; Care op aanvraag zonder bedrag; geen voorstel meer; home_free blijft als terugval.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 
@@ -662,10 +681,13 @@ De woordenboeken staan in `src/lib/i18n.ts`, zonder bibliotheek: een
 object per taal en één functie `t()`. Een ontbrekende vertaling valt terug
 op het Nederlands.
 
-Alle schermen van de persoon zijn vertaald: Vandaag, Wat nu, Wie is wie,
-Hulp, In huis, Foto's, Weetjes, Radio, Praten, Onthoud dit, het
-oproepscherm, het nachtscherm en de bottom navigation. De familiekant
-staat nog in het Nederlands en verhuist scherm per scherm naar `t()`.
+Alle schermen van de persoon zijn vertaald, ook de spraakassistent (vragen,
+bevestigingen, foutmeldingen), "Vertel eens" (de vragen staan in
+`src/features/stories/vragen.ts` in drie talen, in dezelfde volgorde) en
+het wekwoord ("Hallo", "Bonjour", "Hello"). De familie- en zorgschermen
+gebruiken `tt()` met een eigen taalkeuze (zie hieronder). De test
+`src/lib/i18n.test.ts` zakt als een sleutel in één taal ontbreekt of als
+een `t('…')` in de code niet in het woordenboek staat.
 
 De spraakassistent werkt in de drie talen. De woorden waaraan ze een vraag
 herkent staan per taal in `src/features/voice/patronen.ts`, los van de
@@ -674,8 +696,10 @@ regels niet herkennen, gaat naar de edge function `ask`, die in de eigen
 gegevens zoekt en antwoordt in de taal van het huishouden — ook als de
 gegevens in een andere taal staan.
 
-Nog taalgebonden en dus nog niet vertaald: `quickAdd()` (leest Nederlandse
-datums), de vragen van "Vertel eens", en de hele familiekant.
+`quickAdd()` leest Nederlandse, Franse en Engelse datums en uren door
+elkaar ("donderdag 14u", "jeudi 14h", "thursday 2pm"). Wat familie uit een
+sjabloon of bij de eerste keer instellen bewaart (kamers, routine, Home
+Memory), komt in de taal van haar scherm in het huishouden.
 
 ## Het levensboek
 

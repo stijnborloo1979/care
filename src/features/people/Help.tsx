@@ -86,10 +86,10 @@ export default function Help() {
               <span className="text-3xl" aria-hidden="true">
                 🚑
               </span>
-              Bij dringende hulp: bel 112
+              {t('hulp.bel112')}
             </p>
             <p className="mt-2 text-lg">
-              {prefs.noodplan.trim() || 'Dat kan niet met dit scherm. Gebruik een telefoon.'}
+              {prefs.noodplan.trim() || t('hulp.kanNietScherm')}
             </p>
           </div>
         )}
@@ -102,7 +102,7 @@ export default function Help() {
       <p className="mt-5 text-center text-sm text-ink-faint">
         {bellenKan
           ? t('hulp.noodUitleg')
-          : 'Dit scherm kan niet bellen. Bij brand, gevaar of dringende medische hulp is 112 nodig, met een telefoon.'}
+          : t('hulp.schermBeltNiet')}
       </p>
     </main>
   )

@@ -10,6 +10,8 @@
  * gezin, en dan wat iemand meedraagt. Zonder React of database, zodat ze
  * te testen is.
  */
+import { inHetNederlands } from './vragen'
+
 export const HOOFDSTUKKEN = [
   'Toen ik klein was',
   'School en werk',
@@ -31,32 +33,33 @@ export type Hoofdstuk = (typeof HOOFDSTUKKEN)[number]
 const REGELS: { hoofdstuk: Hoofdstuk; woorden: RegExp }[] = [
   {
     hoofdstuk: 'School en werk',
-    woorden: /school|juf|meester|werk|collega|trots was/,
+    woorden: /school|juf|meester|werk|collega|trots was|école|travail|collègue|teacher|job|work|colleague/,
   },
   {
     hoofdstuk: 'Toen ik klein was',
-    woorden: /als kind|klein was|opgegroeid|jong was|straat waar je woonde/,
+    woorden: /als kind|klein was|opgegroeid|jong was|straat waar je woonde|enfance|enfant|grandi|childhood|as a child|grew up/,
   },
   {
     hoofdstuk: 'Liefde en gezin',
-    woorden: /partner|trouw|je kinderen|eerste kind|kleinkind|moeder|vader|gezin|geboren/,
+    woorden: /partner|trouw|je kinderen|eerste kind|kleinkind|moeder|vader|gezin|geboren|mariage|naissance|mère|père|famille|wedding|born|mother|father|grandchild/,
   },
   {
     hoofdstuk: 'Feesten en gewoontes',
-    woorden: /feest|kerst|nieuwjaar|gerecht|recept|ritueel|cadeau|zondag/,
+    woorden: /feest|kerst|nieuwjaar|gerecht|recept|ritueel|cadeau|zondag|fête|noël|nouvel an|recette|christmas|new year|party|recipe|birthday|anniversaire/,
   },
   {
     hoofdstuk: 'Reizen en plekken',
-    woorden: /reis|vakantie|uitstap|plek|huis waar je|buurt|winkel|auto|fiets/,
+    woorden: /reis|vakantie|uitstap|plek|huis waar je|buurt|winkel|auto|fiets|voyage|vacances|excursion|quartier|voiture|vélo|trip|holiday|travel|bike/,
   },
   {
     hoofdstuk: 'Muziek, spel en vrije tijd',
-    woorden: /lied|muziek|dansen|spel|hobby|vrije tijd|sport|film|programma|boek|huisdier|tuin/,
+    woorden: /lied|muziek|dansen|spel|hobby|vrije tijd|sport|film|programma|boek|huisdier|tuin|chanson|musique|danse|loisir|livre|jardin|music|dance|game|book|garden|\bpets?\b/,
   },
 ]
 
 export function hoofdstukVan(vraag: string): Hoofdstuk {
-  const v = vraag.toLowerCase()
+  // Een vertaalde vraag hoort in hetzelfde hoofdstuk als het origineel.
+  const v = inHetNederlands(vraag).toLowerCase()
   for (const regel of REGELS) {
     if (regel.woorden.test(v)) return regel.hoofdstuk
   }

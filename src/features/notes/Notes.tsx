@@ -45,7 +45,7 @@ export default function Notes() {
         return (
           <section key={c.waarde} className="mt-7">
             <h2 className="text-lg font-bold">
-              {c.emoji} {c.label}
+              {c.emoji} {t(`notities.cat.${c.waarde}`)}
             </h2>
             <ul className="mt-3 space-y-3">
               {notities.map((n) => (
@@ -57,7 +57,7 @@ export default function Notes() {
                     className="mt-3 inline-flex min-h-[2.6rem] items-center gap-2 rounded-pill border-[1.5px] border-line-strong px-4 font-semibold"
                   >
                     <Icon naam="voorlezen" size={18} />
-                    Voorlezen
+                    {t('algemeen.voorlezen')}
                   </button>
                 </li>
               ))}

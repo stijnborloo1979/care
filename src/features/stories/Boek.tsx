@@ -117,7 +117,7 @@ export default function Boek() {
                 {hoofdstukken.map((h, i) => (
                   <li key={h.titel} className="flex gap-3">
                     <span className="text-ink-faint">{i + 1}.</span>
-                    <span>{h.titel}</span>
+                    <span>{tt(h.titel)}</span>
                     <span className="text-ink-faint">
                       {h.verhalen.length === 1
                         ? tt('{n} verhaal', { n: h.verhalen.length })
@@ -130,7 +130,7 @@ export default function Boek() {
 
             {hoofdstukken.map((h) => (
               <section key={h.titel} className="na-pagina pt-10">
-                <h2 className="text-3xl font-extrabold tracking-tight">{h.titel}</h2>
+                <h2 className="text-3xl font-extrabold tracking-tight">{tt(h.titel)}</h2>
 
                 <div className="mt-6 space-y-8">
                   {h.verhalen.map((v) => (

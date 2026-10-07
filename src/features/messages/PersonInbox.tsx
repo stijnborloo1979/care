@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getPersonInbox, hideMessage, markRead, signedUrl, toonNaam, type InboxMessage } from './messages'
 import StoragePhoto from '../../components/StoragePhoto'
-import { locale } from '../../lib/i18n'
+import { locale, t } from '../../lib/i18n'
 
 /**
  * Eén bericht als één grote knop. Indrukken, afspelen, klaar.
@@ -52,13 +52,13 @@ export function MessageButton({ message }: { message: InboxMessage }) {
       audio.onended = () => setPlaying(false)
       audio.onerror = () => {
         setPlaying(false)
-        setError('Het bericht kan nu niet afgespeeld worden.')
+        setError(t('bericht.nietAfspelen'))
       }
       await audio.play()
       setPlaying(true)
       await bevestig()
     } catch {
-      setError('Het bericht kan nu niet afgespeeld worden.')
+      setError(t('bericht.nietAfspelen'))
     } finally {
       setBusy(false)
     }
@@ -73,7 +73,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
     } catch {
       // Lukt het niet, dan blijft de foto staan. Dat is beter dan hem laten
       // verdwijnen terwijl hij er nog is: dan denkt zij dat het gelukt is.
-      setError('Dat lukte nu niet. Probeer het straks nog eens.')
+      setError(t('bericht.lukteNiet'))
       setBezigOpzij(false)
     }
   }
@@ -95,7 +95,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
   if (message.photo_path && !message.audio_path) {
     return (
       <div className="rounded-card border-[1.5px] border-accent bg-accent-soft p-4 shadow-card">
-        <p className="text-xl font-bold">Foto van {naam}</p>
+        <p className="text-xl font-bold">{t('bericht.fotoVan', { naam })}</p>
         {/* Heel de foto, niet bijgesneden. Bij een foto die iemand stuurt
             is het beeld de boodschap; een kop die wegvalt omdat het kader
             liggend is, maakt het bericht zinloos. */}
@@ -103,7 +103,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
           <StoragePhoto
             bucket="messages"
             path={message.photo_path}
-            alt={`Foto van ${naam}`}
+            alt={t('bericht.fotoVan', { naam })}
             passend
           />
         </div>
@@ -118,7 +118,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
           disabled={bezigOpzij}
           className="mt-3 min-h-touch w-full rounded-pill bg-accent-ink px-5 text-lg font-bold text-white disabled:opacity-60"
         >
-          {bezigOpzij ? 'Bezig…' : 'Gezien'}
+          {bezigOpzij ? t('algemeen.bezig') : t('bericht.gezien')}
         </button>
 
         {error ? (
@@ -139,7 +139,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
       onClick={speel}
       disabled={busy}
       aria-pressed={playing}
-      aria-label={`Bericht van ${naam} ${playing ? 'pauzeren' : 'afspelen'}`}
+      aria-label={t(playing ? 'bericht.pauzeren' : 'bericht.afspelen', { naam })}
       className="flex min-h-big w-full items-center gap-4 rounded-card p-5 text-left"
     >
       <span
@@ -150,14 +150,14 @@ export function MessageButton({ message }: { message: InboxMessage }) {
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-xl font-bold">Bericht van {naam}</span>
+        <span className="block text-xl font-bold">{t('bericht.van', { naam })}</span>
         <span className="block text-ink-soft">
           {message.audio_path
             ? playing
-              ? 'Aan het afspelen…'
+              ? t('bericht.speelt')
               : message.seen
-                ? 'Druk om nog eens te luisteren'
-                : `Druk om te luisteren${message.audio_seconds ? ` · ${message.audio_seconds} sec` : ''}`
+                ? t('bericht.nogEens')
+                : `${t('bericht.luister')}${message.audio_seconds ? ` · ${t('bericht.seconden', { n: message.audio_seconds })}` : ''}`
             : message.body}
         </span>
         {error ? (
@@ -169,7 +169,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
 
       {!message.seen ? (
         <span className="shrink-0 rounded-pill bg-accent-ink px-3 py-1 text-sm font-semibold text-white">
-          nieuw
+          {t('bericht.nieuw')}
         </span>
       ) : null}
     </button>
@@ -183,7 +183,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
           disabled={bezigOpzij}
           className="min-h-touch rounded-pill border-[1.5px] border-line-strong bg-surface px-5 font-semibold disabled:opacity-60"
         >
-          {bezigOpzij ? 'Bezig…' : 'Opzij'}
+          {bezigOpzij ? t('algemeen.bezig') : t('bericht.opzij')}
         </button>
       </div>
     ) : null}
@@ -202,12 +202,12 @@ export default function PersonInbox({ householdId }: { householdId: string }) {
     refetchInterval: 60_000,
   })
 
-  if (isLoading) return <p className="text-ink-soft">Berichten laden…</p>
-  if (isError) return <p className="text-ink-soft">Berichten zijn nu niet te zien.</p>
+  if (isLoading) return <p className="text-ink-soft">{t('bericht.laden')}</p>
+  if (isError) return <p className="text-ink-soft">{t('bericht.nietTeZien')}</p>
   if (!data || data.length === 0) return null
 
   return (
-    <section className="space-y-3" aria-label="Berichten voor jou">
+    <section className="space-y-3" aria-label={t('bericht.voorJou')}>
       {data.map((m) => (
         <MessageButton key={m.id} message={m} />
       ))}

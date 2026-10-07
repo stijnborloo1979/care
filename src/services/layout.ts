@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { normaliseer, STANDAARD, type Indeling } from '../features/layout/modules'
+import { tt } from '../lib/uiTaal'
 
 /**
  * De indeling van het dagscherm, bewaard op het huishouden.
@@ -92,9 +93,7 @@ export async function setIndeling(householdId: string, indeling: Indeling): Prom
     // van een databasefout die niemand kan plaatsen.
     if (error.code === '42883' || isOntbrekendeKolom(error)) {
       kolomOntbreekt = true
-      throw new Error(
-        'De indeling kan nog niet bewaard worden: draai supabase/27_layout.sql in de SQL-editor.',
-      )
+      throw new Error(tt('De indeling kan nog niet bewaard worden: draai supabase/27_layout.sql in de SQL-editor.'))
     }
     throw error
   }

@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { isTaal, locale, t, taal, zetTaal } from './i18n'
+import { readdirSync, readFileSync, statSync } from 'fs'
+import { join } from 'path'
+import { isTaal, locale, t, taal, woordenboekVan, zetTaal } from './i18n'
 
 /**
  * t() draait op élk scherm van de persoon. Ging zij stuk, dan was de hele
@@ -81,5 +83,43 @@ describe('de bevestiging na "vraag of iemand belt"', () => {
   it('zegt wel iets geruststellends', () => {
     zetTaal('nl')
     expect(t('hulp.gevraagd', { naam: 'Jens' }).length).toBeGreaterThan(10)
+  })
+})
+
+describe('volledigheid', () => {
+  const plaatshouders = (z: string) => [...new Set([...z.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort().join(',')
+
+  it('elke sleutel bestaat in het Nederlands, het Frans en het Engels', () => {
+    const nl = Object.keys(woordenboekVan('nl'))
+    for (const tl of ['fr', 'en'] as const) {
+      const ander = woordenboekVan(tl)
+      expect(nl.filter((k) => !(k in ander)), `ontbreekt in ${tl}`).toEqual([])
+      expect(Object.keys(ander).filter((k) => !nl.includes(k)), `alleen in ${tl}`).toEqual([])
+    }
+  })
+
+  it('dezelfde plaatshouders in elke taal', () => {
+    const nl = woordenboekVan('nl')
+    const fout: string[] = []
+    for (const tl of ['fr', 'en'] as const)
+      for (const [k, v] of Object.entries(woordenboekVan(tl))) if (plaatshouders(v) !== plaatshouders(nl[k] ?? '')) fout.push(`${tl}: ${k}`)
+    expect(fout).toEqual([])
+  })
+
+  it("elke t('…') in de code bestaat in het woordenboek", () => {
+    const nl = woordenboekVan('nl')
+    const bestanden = (map: string): string[] =>
+      readdirSync(map).flatMap((n) => {
+        const p = join(map, n)
+        if (statSync(p).isDirectory()) return bestanden(p)
+        return /\.(ts|tsx)$/.test(n) && !/\.test\./.test(n) ? [p] : []
+      })
+    const onbekend: string[] = []
+    for (const f of bestanden(join(__dirname, '..'))) {
+      for (const m of readFileSync(f, 'utf8').matchAll(/(?<![\w.])(?:t|vertaal)\(\s*'([\w.]+)'/g)) {
+        if (!(m[1] in nl)) onbekend.push(`${f.split('/src/')[1]}: ${m[1]}`)
+      }
+    }
+    expect(onbekend).toEqual([])
   })
 })

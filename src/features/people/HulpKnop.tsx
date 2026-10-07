@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { vraagHulp } from '../../services/calls'
+import { t } from '../../lib/i18n'
 
 /**
  * "Ik heb hulp nodig" — familie meteen laten weten.
@@ -35,18 +36,18 @@ export default function HulpKnop({ householdId }: { householdId: string }) {
         <span className="text-3xl" aria-hidden="true">
           🔔
         </span>
-        {vraag.isPending ? 'Bezig…' : 'Laat mijn familie weten dat ik hulp nodig heb'}
+        {vraag.isPending ? t('algemeen.bezig') : t('hulp.laatWeten')}
       </button>
 
       {gevraagd ? (
         <p aria-live="polite" className="mt-2 text-lg font-semibold text-ok">
-          Je familie heeft een bericht gekregen.
+          {t('hulp.verstuurd')}
         </p>
       ) : null}
 
       {vraag.isError ? (
         <p role="alert" className="mt-2 text-lg font-semibold text-alert">
-          Dat lukte nu niet. Probeer het nog eens.
+          {t('hulp.mislukt')}
         </p>
       ) : null}
     </div>

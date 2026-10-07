@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Mic, Square } from 'lucide-react'
-import { locale } from '../lib/i18n'
+import { locale, t } from '../lib/i18n'
 
 type Herkenner = {
   lang: string
@@ -30,7 +30,7 @@ function herkennerKlasse(): (new () => Herkenner) | null {
  */
 export default function DictateButton({
   onTekst,
-  label = 'Inspreken',
+  label = t('algemeen.inspreken'),
 }: {
   onTekst: (tekst: string) => void
   label?: string
@@ -71,7 +71,7 @@ export default function DictateButton({
     <button
       type="button"
       onClick={luistert ? stop : start}
-      aria-label={luistert ? 'Stoppen met inspreken' : label}
+      aria-label={luistert ? t('dicteer.stoppen') : label}
       title={label}
       className={`inline-flex min-h-[2.4rem] shrink-0 items-center gap-1.5 rounded-pill border-[1.5px] px-3 text-sm font-semibold ${
         luistert
@@ -80,7 +80,7 @@ export default function DictateButton({
       }`}
     >
       {luistert ? <Square size={16} strokeWidth={2} /> : <Mic size={16} strokeWidth={1.75} />}
-      {luistert ? 'Stop' : label}
+      {luistert ? t('dicteer.stop') : label}
     </button>
   )
 }

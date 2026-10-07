@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import { getCallStatus } from '../../services/calls'
+import { t } from '../../lib/i18n'
 
 export type CallState =
   | 'idle'
@@ -203,7 +204,7 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
           audio: { echoCancellation: true, noiseSuppression: true },
         })
       } catch {
-        setFout('Camera of microfoon is geblokkeerd. Zet ze aan in de browser.')
+        setFout(t('oproep.geblokkeerd'))
         setState('failed')
         return
       }
@@ -251,9 +252,7 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
         if (pc.connectionState === 'connected') setState('active')
         if (pc.connectionState === 'failed') {
           setState('failed')
-          setFout(
-            'De verbinding kwam niet tot stand. Op mobiel internet (4G of 5G) is daarvoor een TURN-server nodig.',
-          )
+          setFout(t('oproep.geenVerbinding'))
         }
       }
 
@@ -262,9 +261,7 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
       const wachttijd = window.setTimeout(() => {
         if (pc.connectionState !== 'connected') {
           setState('failed')
-          setFout(
-            'Het gesprek kwam niet tot stand. Zitten jullie op verschillende netwerken of op 4G/5G, dan is een TURN-server nodig.',
-          )
+          setFout(t('oproep.nietTotStand'))
         }
       }, 25_000)
       timersRef.current.push(wachttijd)
@@ -314,7 +311,7 @@ export function useWebRTC(callId: string | null, rol: 'beller' | 'ontvanger') {
             setState('ended')
           }
         } catch {
-          setFout('Er ging iets mis met de verbinding.')
+          setFout(t('oproep.foutVerbinding'))
           setState('failed')
         }
       })

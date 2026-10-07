@@ -11,6 +11,7 @@ import {
 } from '../../services/radio'
 import { useZenders } from './useZenders'
 import { useRadio } from './radioStore'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Zenders kiezen. Hoogstens vier: meer keuze is voor de persoon niet
@@ -35,7 +36,7 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
     try {
       setResultaten(await zoekZenders(zoek.trim(), land))
     } catch (err) {
-      setFout(err instanceof Error ? err.message : 'Zoeken lukte niet.')
+      setFout(err instanceof Error ? err.message : tt('Zoeken lukte niet.'))
     } finally {
       setBezig(false)
     }
@@ -44,7 +45,7 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
   const voegToe = useMutation({
     mutationFn: (r: Zoekresultaat) => addZender(householdId, r, zenders?.length ?? 0),
     onSuccess: ververs,
-    onError: (e) => setFout(e instanceof Error ? e.message : 'Toevoegen lukte niet.'),
+    onError: (e) => setFout(e instanceof Error ? e.message : tt('Toevoegen lukte niet.')),
   })
 
   const wis = useMutation({ mutationFn: deleteZender, onSuccess: ververs })
@@ -65,10 +66,10 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
     <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="flex items-center gap-2 text-lg font-bold">
         <RadioIcon size={20} strokeWidth={1.75} aria-hidden="true" />
-        Radio
+        {tt('Radio')}
       </h2>
       <p className="mt-1 text-sm text-ink-soft">
-        Hoogstens {MAX_ZENDERS} zenders. De bovenste speelt bij één tik op het Vandaag-scherm.
+        {tt('Hoogstens {n} zenders. De bovenste speelt bij één tik op het Vandaag-scherm.', { n: MAX_ZENDERS })}
       </p>
 
       <ul className="mt-4 space-y-2">
@@ -86,7 +87,7 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
             <button
               onClick={() => verplaats.mutate({ i, richting: -1 })}
               disabled={i === 0}
-              aria-label="Hoger"
+              aria-label={tt('Hoger')}
               className="grid h-9 w-9 place-items-center rounded-full disabled:opacity-30"
             >
               <ArrowUp size={18} strokeWidth={1.75} />
@@ -94,7 +95,7 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
             <button
               onClick={() => verplaats.mutate({ i, richting: 1 })}
               disabled={i === (zenders?.length ?? 0) - 1}
-              aria-label="Lager"
+              aria-label={tt('Lager')}
               className="grid h-9 w-9 place-items-center rounded-full disabled:opacity-30"
             >
               <ArrowDown size={18} strokeWidth={1.75} />
@@ -115,19 +116,19 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
           <input
             value={zoek}
             onChange={(e) => setZoek(e.target.value)}
-            placeholder="Radio 2, Nostalgie, Klara…"
+            placeholder={tt('Radio 2, Nostalgie, Klara…')}
             className="min-h-touch min-w-[min(12rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
           />
           <select
             value={land}
             onChange={(e) => setLand(e.target.value)}
-            aria-label="Land"
+            aria-label={tt('Land')}
             className="min-h-touch rounded-2xl border-[1.5px] border-line-strong bg-surface px-3"
           >
-            <option value="BE">België</option>
-            <option value="NL">Nederland</option>
-            <option value="FR">Frankrijk</option>
-            <option value="">Overal</option>
+            <option value="BE">{tt('België')}</option>
+            <option value="NL">{tt('Nederland')}</option>
+            <option value="FR">{tt('Frankrijk')}</option>
+            <option value="">{tt('Overal')}</option>
           </select>
           <button
             type="submit"
@@ -135,12 +136,12 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
             className="flex min-h-touch items-center gap-2 rounded-pill bg-accent-ink px-5 font-semibold text-white disabled:opacity-50"
           >
             <Search size={18} strokeWidth={1.75} />
-            {bezig ? 'Zoeken…' : 'Zoek'}
+            {bezig ? tt('Zoeken…') : tt('Zoek')}
           </button>
         </form>
       ) : (
         <p className="mt-4 text-sm text-ink-faint">
-          Vier zenders is genoeg. Verwijder er een om een andere te kiezen.
+          {tt('Vier zenders is genoeg. Verwijder er een om een andere te kiezen.')}
         </p>
       )}
 
@@ -148,7 +149,7 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
         <ul className="mt-4 space-y-2">
           {resultaten.length === 0 ? (
             <li className="text-sm text-ink-soft">
-              Niets gevonden dat in de app kan spelen. Probeer een andere naam of kies "Overal".
+              {tt('Niets gevonden dat in de app kan spelen. Probeer een andere naam of kies "Overal".')}
             </li>
           ) : null}
           {resultaten.map((r) => (
@@ -167,13 +168,13 @@ export default function ManageRadio({ householdId }: { householdId: string }) {
                 }
                 className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold"
               >
-                {speelt ? 'Stop' : 'Luister'}
+                {speelt ? tt('Stop') : tt('Luister')}
               </button>
               <button
                 onClick={() => voegToe.mutate(r)}
                 className="shrink-0 rounded-pill bg-accent-ink px-3 py-1 text-sm font-semibold text-white"
               >
-                Kies
+                {tt('Kies')}
               </button>
             </li>
           ))}

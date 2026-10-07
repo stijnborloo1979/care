@@ -93,6 +93,7 @@ const Account = lazy(() => import("./features/auth/Account"));
 import { useOrganisatiesKlaar } from "./features/zorg/useOrganisatie";
 import { useHousehold } from "./features/household/useHousehold";
 import { configuratieOk } from "./lib/supabase";
+import { tt } from "./lib/uiTaal";
 import ErrorBoundary from "./app/ErrorBoundary";
 import LaadFout from "./features/household/LaadFout";
 import SetupNeeded from "./app/SetupNeeded";
@@ -103,7 +104,7 @@ import "./index.css";
 /** Wie niet ingelogd is, ziet het inlogscherm. Meer poortwachter is dit niet. */
 function Beveiligd({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
-  if (loading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  if (loading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>;
   if (!session) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
@@ -112,7 +113,7 @@ function Beveiligd({ children }: { children: React.ReactNode }) {
 function Start() {
   const { household, all, isLoading, isError, error, refetch } = useHousehold();
   const organisaties = useOrganisatiesKlaar();
-  if (isLoading || organisaties.isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>;
+  if (isLoading || organisaties.isLoading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>;
   // Een fout is geen nieuwe gebruiker: niet naar de onboarding sturen.
   if (isError && all.length === 0) return <LaadFout error={error} onOpnieuw={() => refetch()} />;
   // Wie geen familie heeft maar in een woonzorgcentrum werkt, gaat naar dat scherm.
@@ -166,7 +167,7 @@ if (!configuratieOk) {
             <BrowserRouter>
               <OfflineBanner />
               <Suspense
-                fallback={<p className="p-6 text-ink-soft">Even geduld…</p>}
+                fallback={<p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>}
               >
                 <Routes>
                   <Route path="/login/*" element={<Welcome />} />

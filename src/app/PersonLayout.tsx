@@ -97,13 +97,13 @@ export default function PersonLayout() {
           dat één tik na elke herstart; daarna verdwijnt deze regel. */}
       {!spraakVrij && huidigePrefs().voice ? (
         <p className="bg-accent-soft px-4 py-2 text-center text-sm font-semibold text-accent-ink">
-          Tik één keer op het scherm, dan kan ik je met mijn stem herinneren.
+          {t('persoon.tikVoorStem')}
         </p>
       ) : null}
 
       {setting?.enabled ? (
         <p className="bg-surface-soft px-4 py-1.5 text-center text-sm font-semibold text-ink-soft">
-          📍 Je locatie wordt gedeeld met je familie
+          {t('persoon.locatieGedeeld')}
         </p>
       ) : null}
 
@@ -122,7 +122,7 @@ export default function PersonLayout() {
       <VoiceOverlay />
 
       <nav
-        aria-label="Hoofdnavigatie"
+        aria-label={t('persoon.hoofdnavigatie')}
         className="hoofdnav fixed inset-x-0 bottom-0 z-40 flex justify-around gap-1 border-t border-line bg-surface/90 px-2 pt-1 backdrop-blur-xl"
         style={{ paddingBottom: 'calc(0.4rem + env(safe-area-inset-bottom, 0px))' }}
       >

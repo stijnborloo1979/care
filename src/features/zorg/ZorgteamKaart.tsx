@@ -6,6 +6,7 @@ import { spreek } from '../voice/useSpeech'
 import { hhmm } from '../../lib/time'
 import { berichtenVan, draden, isBewoner, lopendVerblijf, stuurAanZorgteam } from './bewonerBerichten'
 import { foutTekst } from './ui'
+import { t } from '../../lib/i18n'
 
 /**
  * Op de tablet van de bewoner, alleen als hij in een woonzorgcentrum
@@ -55,13 +56,13 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
   return (
     <section aria-labelledby="zorgteam" className="space-y-3">
       <h2 id="zorgteam" className="text-base font-bold text-ink-faint">
-        Het zorgteam
+        {t('zorgteam.titel')}
       </h2>
 
       {verstuurd && !open ? (
         <p role="status" className="flex items-center gap-2 rounded-card bg-accent-soft p-4 text-lg font-semibold text-accent-ink">
           <Check size={22} strokeWidth={2} aria-hidden="true" />
-          Verstuurd. Het zorgteam ziet je bericht.
+          {t('zorgteam.verstuurd')}
         </p>
       ) : null}
 
@@ -75,9 +76,9 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label htmlFor="zorgteam-tekst" className="text-lg font-semibold">
-              Wat wil je vragen?
+              {t('zorgteam.watVragen')}
             </label>
-            <DictateButton onTekst={(t) => setTekst(t)} label="Inspreken" />
+            <DictateButton onTekst={(x) => setTekst(x)} label={t('algemeen.inspreken')} />
           </div>
           <textarea
             id="zorgteam-tekst"
@@ -86,7 +87,7 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
             rows={3}
             autoFocus
             maxLength={1000}
-            placeholder="Mag ik een extra deken?"
+            placeholder={t('zorgteam.voorbeeld')}
             className="mt-2 w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 py-3 text-lg"
           />
           {stuur.error ? (
@@ -100,7 +101,7 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
               disabled={!tekst.trim() || stuur.isPending}
               className="flex min-h-touch flex-1 items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white disabled:opacity-50"
             >
-              {stuur.isPending ? 'Bezig…' : 'Versturen'}
+              {stuur.isPending ? t('algemeen.bezig') : t('algemeen.versturen')}
             </button>
             <button
               type="button"
@@ -110,7 +111,7 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
               }}
               className="min-h-touch rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
             >
-              Annuleren
+              {t('algemeen.annuleren')}
             </button>
           </div>
         </form>
@@ -123,7 +124,7 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
           className="flex min-h-big w-full items-center justify-center gap-3 rounded-card border-[1.5px] border-line bg-surface px-4 text-xl font-bold shadow-card"
         >
           <HeartHandshake size={28} strokeWidth={1.75} aria-hidden="true" />
-          Iets vragen aan het zorgteam
+          {t('zorgteam.vragen')}
         </button>
       )}
 
@@ -136,24 +137,24 @@ export default function ZorgteamKaart({ householdId, timezone }: { householdId: 
                 {vraag.gezien_at ? (
                   <>
                     <CheckCheck size={16} strokeWidth={2} className="text-accent-ink" aria-hidden="true" />
-                    Gezien door het zorgteam
+                    {t('zorgteam.gezien')}
                   </>
                 ) : (
                   <>
                     <Check size={16} strokeWidth={2} aria-hidden="true" />
-                    Verstuurd om {hhmm(new Date(vraag.created_at), timezone)}
+                    {t('zorgteam.verstuurdOm', { tijd: hhmm(new Date(vraag.created_at), timezone) })}
                   </>
                 )}
               </p>
               {antwoorden.map((a) => (
                 <div key={a.id} className="mt-3 flex items-start gap-3 rounded-2xl bg-accent-soft p-3">
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-accent-ink">Het zorgteam</span>
+                    <span className="block text-sm font-semibold text-accent-ink">{t('zorgteam.titel')}</span>
                     <span className="block text-lg">{a.body}</span>
                   </span>
                   <button
                     onClick={() => spreek(a.body)}
-                    aria-label="Antwoord voorlezen"
+                    aria-label={t('zorgteam.antwoordVoorlezen')}
                     className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface text-accent-ink"
                   >
                     <Volume2 size={20} strokeWidth={1.75} aria-hidden="true" />
