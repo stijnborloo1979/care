@@ -45,7 +45,8 @@ describe('weekplanning', () => {
       { id: 'v3', org_id: 'o', department_id: null, titel: 'Uit', soort: 'andere', emoji: null, begint: '09:00:00', eindigt: null, dagen: [1], actief: false },
     ]
     const acts: WeekActiviteit[] = [
-      { id: 'a1', department_id: 'd1', titel: 'Zingen', starts_at: new Date(2026, 9, 5, 10, 30).toISOString(), plaats: null, status: 'gepland' },
+      // 10:30 Belgische tijd (CEST = UTC+2), los van de tijdzone van de testmachine.
+      { id: 'a1', department_id: 'd1', titel: 'Zingen', starts_at: '2026-10-05T08:30:00Z', plaats: null, status: 'gepland' },
     ]
     const r = weekRooster(new Date(2026, 9, 5), vast, acts, 'd1')
     expect(r[0].items.map((i) => i.titel)).toEqual(['Zingen', 'Middagmaal'])
