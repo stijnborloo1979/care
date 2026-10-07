@@ -8,31 +8,26 @@ willen blijven wonen, en voor hun familie. (Voorheen: Thuis.)
 
 React + TypeScript + Tailwind, met Supabase als backend.
 
-## Online zetten via Netlify
+## Online zetten via Cloudflare Pages
 
-1. Zet deze map in een GitHub-repo (Add file → Upload files, de hele map ineens).
-2. Netlify → Add new site → Import an existing project → GitHub → kies de repo.
-3. Build command en publish directory laat je leeg: `netlify.toml` vult ze in.
-4. Site configuration → Environment variables → voeg toe:
+De code staat op GitHub; Cloudflare Pages bouwt bij elke push naar `main`.
+Headers en routes staan in `public/_headers` en `public/_redirects`; de
+Node-versie (22) in `.nvmrc`.
+
+1. Cloudflare → Workers & Pages → Create → Pages → Connect to Git → kies de repo.
+2. Build command: `npm run build` · Build output directory: `dist`.
+3. Settings → Variables and Secrets, bij Production:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-5. Deploy. Bij elke push naar `main` bouwt Netlify opnieuw.
+4. Deploy. Een gewijzigde variabele werkt pas na een nieuwe build
+   (Deployments → Retry deployment).
+5. Zet het adres van de site (nu `care-r9d.pages.dev`, later het eigen
+   domein) in Supabase bij Authentication → URL Configuration, als Site URL
+   en met `/**` bij Redirect URLs.
 
 Beide waarden staan in Supabase onder Project Settings → API. De anon key
 mag publiek zijn: RLS beschermt de data, niet die sleutel. De `service_role`
 key hoort nooit in deze repo en nooit in een `VITE_`-variabele.
-
-## Online zetten via Cloudflare Pages
-
-Werkt ook, naast of in plaats van Netlify. Cloudflare leest `netlify.toml`
-niet; daarvoor staan `public/_headers` en `public/_redirects` klaar.
-
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Environment variables (Settings → Variables and Secrets, bij Production):
-  `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, en `NODE_VERSION` = `22`
-- Zet het `pages.dev`-adres in Supabase bij Authentication → URL
-  Configuration, als Site URL en met `/**` bij Redirect URLs.
 
 ## Database
 
@@ -46,7 +41,7 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 4. `04_messages.sql` — berichten en spraakberichten.
 5. `05_auth_invites.sql` — uitnodigingen. Zet daarna in Supabase onder
    Authentication → Providers e-mail aan met magic link, en voeg je
-   Netlify-adres én `http://localhost:5173` toe bij Redirect URLs.
+   adres van de site én `http://localhost:5173` toe bij Redirect URLs.
 6. `06_nightly_job.sql` — zet routines om in de agenda van morgen, vult de
    medicatiemomenten aan en maakt meldingen. Zet pg_cron aan via
    Database → Extensions; de migratie plant zichzelf dan in op 02:30.

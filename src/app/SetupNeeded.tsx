@@ -27,8 +27,8 @@ export default function SetupNeeded() {
         {[
           tt('Open je project op supabase.com en ga naar Project Settings → API.'),
           tt('Kopieer de Project URL en de anon public key.'),
-          tt('Zet ze in Netlify onder Site configuration → Environment variables.'),
-          tt('Klik op Deploys → Trigger deploy. De waarden worden pas bij het bouwen ingebakken.'),
+          tt('Zet ze in Cloudflare Pages onder Settings → Variables and Secrets, bij Production.'),
+          tt('Ga naar Deployments en kies bij de laatste deploy Retry deployment. De waarden worden pas bij het bouwen ingebakken.'),
         ].map((s, i) => (
           <li key={i} className="flex items-start gap-3 rounded-card border border-line bg-surface p-4">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-[1.5px] border-accent bg-accent-soft font-bold text-accent-ink">
