@@ -78,11 +78,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     dag op Vandaag staan en is de volgende ochtend weg. Niet beluisterde
     berichten blijven twee dagen, vastgezette altijd.
 20. `20_push.sql` — pushmeldingen: de toestellen van familie, en wie wat
-    krijgt. Het versturen doet de edge function `push-notify`. Onderaan
-    het bestand staan de twee cron-regels, met pg_net.
+    krijgt. Het versturen doet de edge function `push-notify`. Inplannen:
+    `supabase/handmatig/cron_inplannen.sql` (zie onder).
 21. `21_tasks.sql` — taken voor de familie: opnemen, toewijzen, afvinken
     en terugkerende taken. Niet zichtbaar voor de persoon of voor
-    zorgverleners. Plan `task_reminders()` in om 07:00 via pg_cron.
+    zorgverleners. `task_reminders()` om 07:00 plant
+    `supabase/handmatig/cron_inplannen.sql` in.
 22. `22_support_by_family.sql` — de familiebeheerder past het niveau van
     ondersteuning meteen toe, zonder het toestel van de persoon. Elke
     wijziging komt in het zorglogboek.
@@ -100,7 +101,20 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
 27. `27_layout.sql` — de indeling van het dagscherm van de persoon, zodat
     familie zelf bepaalt welke blokken erop staan.
 
-(28 tot 45 staan in `supabase/`, in volgorde.)
+(28 tot 45 staan in `supabase/`, in volgorde. Er is geen 28: dat nummer
+werd overgeslagen. Van 46 zijn er twee: draai eerst
+`46_my_households_herstel.sql`, dan `46_voice.sql`. Hernoem ze niet; een
+project dat ze al draaide, zou anders denken dat er iets nieuws is.)
+
+**Geplande taken.** Draai na alle migraties één keer
+`supabase/handmatig/cron_inplannen.sql` in de SQL-editor (vul bovenaan het
+projectadres en de service role key in; bewaar het bestand daarna niet met
+de sleutel erin). Het plant `push-notify`, `cleanup-storage`,
+`task_reminders()` en eventueel `embed` in, en zet zekerheidshalve ook de
+nachtjob en de opruimtaken opnieuw: die plannen zichzelf alleen in als
+pg_cron al aan stond toen je hun migratie draaide. Onderaan staat een
+controlequery. De volledige checklist voor de livegang staat in
+`docs/LIVEGANG.md`.
 
 46. `46_voice.sql` — LifeAngle Voice: boodschappenlijst, herinneringen als
     soort agenda-item, het gesproken dagboek, en de RPC's
