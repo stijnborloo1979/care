@@ -2,7 +2,8 @@ import { useMag } from '../../core/access/useAccess'
 import { useState } from 'react'
 import Dashboard from '../dashboard/Dashboard'
 import FotoKiezer from '../../components/FotoKiezer'
-import { sendPhotoMessage, toonNaam } from '../messages/messages'
+import { sendPhotoMessage } from '../messages/messages'
+import { useMijnNaam } from '../../services/mijnNaam'
 import ManageHomeMemory from '../home-memory/ManageHomeMemory'
 import ManageMemories from '../memories/ManageMemories'
 import ManagePeople from '../people/ManagePeople'
@@ -13,14 +14,13 @@ import StartCall from '../calls/StartCall'
 import ManageNotes from '../notes/ManageNotes'
 import Verhalen from '../stories/Verhalen'
 import InviteMember from './InviteMember'
-import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from '../household/useHousehold'
 import { tt } from '../../lib/uiTaal'
 
 /** Elke familiepagina heeft hetzelfde nodig: het huishouden en de rol. */
 function useContext() {
   const { household } = useHousehold()
-  const { session } = useAuth()
+  const mijnNaam = useMijnNaam()
   return {
     hh: household?.household_id ?? '',
     // Het huis staat los van het huishouden: twee mensen die samenwonen
@@ -32,8 +32,8 @@ function useContext() {
     volledig: household?.person_name ?? '',
     tz: household?.timezone ?? 'Europe/Brussels',
     role: household?.role ?? 'member',
-    // "stijn.borloo@…" wordt "Stijn": de voornaam, niet het mailadres.
-    viewer: session?.user.email ? toonNaam(session.user.email).split(' ')[0] : tt('daar'),
+    // Wat bij "Jouw naam" staat, anders "stijn.borloo@…" → "Stijn".
+    viewer: mijnNaam.split(' ')[0] || tt('daar'),
   }
 }
 
