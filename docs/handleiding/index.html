@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LifeAngle Care — handleiding</title>
+<style>
+  :root { --bg:#F3F2EE; --card:#FFFFFF; --ink:#1F2421; --soft:#5B635E; --accent:#0B4C50; --accent-soft:#DDEEEC; --warn:#8A5A12; --warn-soft:#FBF1DE; --line:#DAD6CC; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#16191A; --card:#1F2325; --ink:#ECEDEA; --soft:#A7AEA9; --accent:#7CC4BD; --accent-soft:#1E3A39; --warn:#E9B562; --warn-soft:#3A2E1A; --line:#33393A; }
+  }
+  :root[data-theme="dark"] { --bg:#16191A; --card:#1F2325; --ink:#ECEDEA; --soft:#A7AEA9; --accent:#7CC4BD; --accent-soft:#1E3A39; --warn:#E9B562; --warn-soft:#3A2E1A; --line:#33393A; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Inter", "Segoe UI", system-ui, sans-serif; background:var(--bg); color:var(--ink); line-height:1.6; font-size:17px; }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 2.1rem; line-height:1.2; margin: 0 0 8px; letter-spacing:-0.01em; }
+  h2 { font-size: 1.5rem; margin: 56px 0 12px; padding-top: 24px; border-top: 2px solid var(--line); }
+  h3 { font-size: 1.15rem; margin: 28px 0 8px; color: var(--accent); }
+  p, li { margin: 8px 0; }
+  a { color: var(--accent); }
+  .lead { color: var(--soft); font-size: 1.1rem; }
+  nav.toc { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px 22px; margin: 24px 0; }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { text-decoration: none; font-weight: 600; }
+  .box { border-radius: 16px; padding: 16px 20px; margin: 18px 0; }
+  .tip { background: var(--accent-soft); }
+  .let-op { background: var(--warn-soft); border-left: 5px solid var(--warn); }
+  .box > strong:first-child { display:block; margin-bottom:4px; }
+  .stap { background: var(--card); border:1px solid var(--line); border-radius: 18px; padding: 20px 22px; margin: 18px 0; }
+  .stap .nr { display:inline-grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--accent); color:var(--card); font-weight:700; margin-right:8px; vertical-align:middle; }
+  .stap h4 { display:inline; font-size:1.15rem; margin:0; vertical-align:middle; }
+  .knop { display:inline-block; background:var(--accent); color:var(--card); border-radius:999px; padding:1px 12px; font-weight:600; font-size:0.95em; white-space: nowrap; }
+  .veld { display:inline-block; border:1.5px solid var(--line); background:var(--card); border-radius:10px; padding:0 9px; font-weight:600; }
+  code { background:var(--accent-soft); padding:1px 6px; border-radius:6px; font-size:0.92em; overflow-wrap:anywhere; }
+  figure { margin: 16px 0 6px; }
+  figure img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius: 12px; }
+  figcaption { font-size: 0.92rem; color: var(--soft); margin-top: 6px; }
+  .tabel { overflow-x: auto; }
+  table { width:100%; border-collapse: collapse; background:var(--card); border-radius:12px; overflow:hidden; margin: 14px 0; font-size: 0.97rem; }
+  th, td { text-align:left; padding: 10px 12px; border-bottom:1px solid var(--line); vertical-align: top; }
+  th { background: var(--accent-soft); }
+  .checklist { padding-left: 4px; }
+  .checklist li { list-style: none; }
+  .checklist li::before { content: "☐  "; color: var(--accent); font-weight: 700; }
+  footer { margin-top: 60px; color: var(--soft); font-size: 0.9rem; }
+  @media print { body { background:#fff; color:#000; } nav.toc { display:none; } .stap, figure { break-inside: avoid; } h2 { break-after: avoid; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>LifeAngle Care — handleiding</h1>
+<p class="lead">Hoe je een woonzorgcentrum inricht, medewerkers uitnodigt, een bewoner overzet van thuis naar het woonzorgcentrum, en een verblijf afsluit. Stap voor stap, met de echte schermen.</p>
+
+<div class="box tip">
+  <strong>Over deze handleiding</strong>
+  Elke stap en elke screenshot komt uit een echte doorloop van de app: een beheerder (Ann), een zorgmedewerker (Sarah) en een dochter (Els) die haar moeder Maria overzet. De namen zijn verzonnen. Het adres in de links is dat van een testomgeving; bij jou staat daar het adres van de site.
+</div>
+
+<nav class="toc">
+  <strong>Inhoud</strong>
+  <ol>
+    <li><a href="#overzicht">Wie is wie?</a></li>
+    <li><a href="#voor-je-begint">Voor je begint</a></li>
+    <li><a href="#deel1">Het woonzorgcentrum registreren</a></li>
+    <li><a href="#deel2">Medewerkers uitnodigen</a></li>
+    <li><a href="#deel3">Bewoners importeren uit Excel</a></li>
+    <li><a href="#deel4">Een bewoner overzetten: de familie koppelt</a></li>
+    <li><a href="#deel5">Kamer geven en medewerker toewijzen</a></li>
+    <li><a href="#deel6">Een verblijf beëindigen</a></li>
+    <li><a href="#deel7">Overdracht tussen diensten</a></li>
+    <li><a href="#problemen">Als iets niet lukt</a></li>
+    <li><a href="#checklist">Checklist per bewoner</a></li>
+  </ol>
+</nav>
+
+<h2 id="overzicht">1. Wie is wie?</h2>
+<p>LifeAngle heeft twee kanten. De <strong>familie</strong> werkt in de gewone app (Dashboard, Kalender, Familie, Wie ziet wat …). Het <strong>woonzorgcentrum</strong> werkt in LifeAngle Care, met een eigen menu: Vandaag, Bewoners, Overdracht, Team, Activiteiten, Weekplanning, Kamers, Nieuws, Importeren, Rapporten en Beheer. Beide kanten komen samen op één plek: de koppeling tussen het huishouden van de bewoner en het woonzorgcentrum.</p>
+
+<div class="box tip">
+  <strong>De belangrijkste regel</strong>
+  Een woonzorgcentrum kan nooit zelf een bewoner aan een bestaand huishouden koppelen. De familie doet dat, met een koppelcode. Zo beslist de familie wat het zorgteam ziet. Alle verhalen, foto's, familie en voorkeuren van de bewoner blijven bewaard.
+</div>
+
+<h3>Rollen in het woonzorgcentrum</h3>
+<div class="tabel"><table>
+  <tr><th>Rol</th><th>Wat die persoon kan</th></tr>
+  <tr><td><strong>Beheerder</strong></td><td>Alles inrichten: afdelingen, kamers, medewerkers uitnodigen, de koppelcode, bewoners toewijzen, een verblijf beëindigen, importeren.</td></tr>
+  <tr><td><strong>Coördinator</strong></td><td>Bewoners toewijzen en kamers beheren. Geen medewerkers uitnodigen.</td></tr>
+  <tr><td><strong>Zorgmedewerker</strong></td><td>Ziet de bewoners die aan hem of haar zijn toegewezen: agenda, zorgnotities, contactpersonen. Schrijft overdrachten en zorgnotities.</td></tr>
+  <tr><td><strong>Team lead</strong> (per afdeling)</td><td>Een medewerker die op een afdeling team lead is, ziet alle bewoners van die afdeling, en kan in een noodgeval 4 uur meekijken bij een andere bewoner.</td></tr>
+</table></div>
+
+<h3>Wat het zorgteam wel en niet ziet</h3>
+<div class="tabel"><table>
+  <tr><th>Ziet het zorgteam wel</th><th>Ziet het zorgteam niet</th></tr>
+  <tr><td>Naam, afdeling en kamer, agenda, contactpersonen, de zorgnotities die het zelf schrijft</td><td>Dagboek, documenten, locatie, en wat de familie onderling regelt. De directie en de beheerder zien geen persoonlijke gegevens.</td></tr>
+</table></div>
+
+<h2 id="voor-je-begint">2. Voor je begint</h2>
+<ul class="checklist">
+  <li>Elk persoon heeft een eigen e-mailadres. Inloggen gebeurt met een code van zes cijfers die per mail komt; een wachtwoord kan ook.</li>
+  <li>De namen van de afdelingen en de kamernummers.</li>
+  <li>Voor een snelle start: een Excel-lijst met de bewoners (naam, afdeling, kamer, en het e-mailadres van één familielid).</li>
+</ul>
+
+<h2 id="deel1">3. Het woonzorgcentrum registreren</h2>
+<p>Dit doet de beheerder één keer. Wie registreert, wordt meteen beheerder.</p>
+
+<div class="stap">
+  <span class="nr">1</span><h4>Open de registratiepagina</h4>
+  <p>Log in en ga naar <code>/zorg/nieuw</code>.</p>
+  <p>Wil je eerst rondkijken? Klik dan op <span class="knop">Demo-woonzorgcentrum openen</span>. Dat maakt een proefomgeving met afdelingen, kamers en acht verzonnen bewoners, die je later met één klik wist.</p>
+  <figure><img src="screenshots/01-registreren.png" alt="Het scherm Een woonzorgcentrum registreren" loading="lazy"><figcaption>Het registratiescherm, met onderaan de demo.</figcaption></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">2</span><h4>Naam invullen en registreren</h4>
+  <p>Vul de <span class="veld">Naam van het woonzorgcentrum</span> in en klik op <span class="knop">Registreren</span>. Je komt meteen op <strong>Beheer</strong>.</p>
+  <figure><img src="screenshots/02-naam.png" alt="Naam ingevuld" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">3</span><h4>Eerst een afdeling maken, in Beheer</h4>
+  <p>Scroll in <strong>Beheer</strong> naar de kaart <strong>Afdelingen</strong>. Vul bij <span class="veld">Nieuwe afdeling</span> een naam in en klik op <span class="knop">Toevoegen</span>. Doe dit voor elke afdeling.</p>
+  <div class="box let-op"><strong>Volgorde</strong>Kamers horen bij een afdeling. Zonder afdeling kan je geen kamers toevoegen.</div>
+  <figure><img src="screenshots/03a-afdeling.png" alt="Kaart Afdelingen met de nieuwe afdeling" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">4</span><h4>Kamers toevoegen</h4>
+  <p>Ga in het menu naar <strong>Kamers</strong>. Kies onderaan bij <strong>Kamers toevoegen</strong> de afdeling, typ de nummers (een reeks zoals <code>101-110</code> of een lijst zoals <code>12, 14, 16</code>), kies het aantal bedden per kamer en klik op <span class="knop">10 kamers toevoegen</span>.</p>
+  <figure><img src="screenshots/03-kamers.png" alt="Kamers en bezetting met tien vrije kamers" loading="lazy"><figcaption>Tien kamers op afdeling Linde, allemaal vrij.</figcaption></figure>
+</div>
+
+<h2 id="deel2">4. Medewerkers uitnodigen</h2>
+
+<div class="stap">
+  <span class="nr">1</span><h4>Beheer openen</h4>
+  <p>Klik in het menu op <strong>Beheer</strong>. Bovenaan staat het <strong>Overzicht</strong> met het aantal bewoners, medewerkers, afdelingen en open uitnodigingen, en wat aandacht vraagt.</p>
+  <figure><img src="screenshots/04-beheer.png" alt="Het beheerscherm" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">2</span><h4>E-mailadres en rol</h4>
+  <p>Ga naar de kaart <strong>Medewerkers</strong> → <strong>Medewerker uitnodigen</strong>. Vul het <span class="veld">E-mailadres</span> in, kies de <span class="veld">Rol</span> (Zorgmedewerker, Coördinator of Beheerder) en klik op <span class="knop">Uitnodiging maken</span>.</p>
+  <figure><img src="screenshots/05-uitnodigen.png" alt="Formulier Medewerker uitnodigen" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">3</span><h4>De link doorsturen</h4>
+  <p>Is de mail vertrokken, dan staat er <em>"De uitnodiging is gemaild."</em> Anders zie je de link met <span class="knop">Link kopiëren</span>: stuur hem zelf door. De link werkt <strong>14 dagen</strong>, alleen voor wie inlogt met dat e-mailadres.</p>
+  <figure><img src="screenshots/06-link.png" alt="De uitnodigingslink" loading="lazy"></figure>
+  <p>De uitnodiging staat meteen bij <strong>Openstaande uitnodigingen</strong>. Daar kan je ze opnieuw sturen (14 dagen langer geldig) of intrekken.</p>
+  <figure><img src="screenshots/06b-openstaand.png" alt="Openstaande uitnodigingen" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">4</span><h4>De medewerker opent de link en logt in</h4>
+  <p>Wie de link opent en nog niet ingelogd is, ziet <strong>Je bent uitgenodigd</strong>. Vul het e-mailadres in waarop de uitnodiging kwam, klik op <span class="knop">Stuur mij een code</span> en vul de code van zes cijfers uit de mail in.</p>
+  <figure><img src="screenshots/07-inloggen.png" alt="Je bent uitgenodigd, eerst even inloggen" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">5</span><h4>Uitnodiging aanvaarden</h4>
+  <p>Na het inloggen: <span class="knop">Uitnodiging aanvaarden</span>. De medewerker komt in LifeAngle Care.</p>
+  <figure><img src="screenshots/08-aanvaarden.png" alt="WZC De Linde nodigt je uit" loading="lazy"></figure>
+  <div class="box let-op"><strong>Ingelogd met een ander adres?</strong>Dan staat er <em>"Deze uitnodiging is voor …"</em> met de knop <span class="knop">Uitloggen en inloggen met …</span>.</div>
+</div>
+
+<div class="stap">
+  <span class="nr">6</span><h4>De medewerker op een afdeling zetten</h4>
+  <p>In <strong>Beheer</strong> → <strong>Medewerkers</strong> staat bij elke medewerker <span class="veld">+ Afdeling</span>. Kies de afdeling. Zonder afdeling kan een medewerker geen overdracht schrijven en staat er in het Overzicht <em>"… staat op geen enkele afdeling"</em>.</p>
+</div>
+
+<h2 id="deel3">5. Bewoners importeren uit Excel</h2>
+<p>Voor een woonzorgcentrum dat start met veel bewoners. Wie maar één bewoner heeft die al LifeAngle thuis gebruikt, slaat dit over en gaat naar <a href="#deel4">deel 6</a>.</p>
+
+<div class="stap">
+  <span class="nr">1</span><h4>Importeren openen</h4>
+  <p>Menu → <strong>Importeren</strong> → <span class="knop">Bewoners</span>.</p>
+  <figure><img src="screenshots/09-importeren.png" alt="Importeren" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">2</span><h4>De lijst plakken</h4>
+  <p>Vier kolommen, in deze volgorde: <strong>naam, afdeling, kamer, e-mail van één familielid</strong> (mag leeg). Kopieer de cellen in Excel en plak ze in het vak, of kies een CSV-bestand. Er is ook een <span class="knop">Voorbeeldbestand</span>. Klik op <span class="knop">Nakijken</span>.</p>
+  <figure><img src="screenshots/10-plakken.png" alt="Lijst geplakt" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">3</span><h4>De controle lezen</h4>
+  <p>Per rij staat <em>klaar om te importeren</em> of <em>fout</em>, met de reden. In het voorbeeld bestaat afdeling "Eik" niet en is het e-mailadres onvolledig: die rij wordt overgeslagen. Verbeter de lijst en plak opnieuw, of importeer eerst de goede rijen.</p>
+  <figure><img src="screenshots/11-nakijken.png" alt="Nakijken met een foutieve rij" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">4</span><h4>Importeren en de familie uitnodigen</h4>
+  <p>Klik op <span class="knop">2 bewoners importeren</span>. Bij <strong>Uitnodigingen voor de familie</strong> staat per gezin een link. Wie die opent met het opgegeven e-mailadres, wordt familiebeheerder. De link werkt 14 dagen. Met <span class="knop">Alle links (CSV)</span> download je ze allemaal.</p>
+  <figure><img src="screenshots/13-familielinks.png" alt="Klaar en de familielinks" loading="lazy"></figure>
+</div>
+
+<h2 id="deel4">6. Een bewoner overzetten: de familie koppelt</h2>
+<p>Zo gaat iemand die thuis LifeAngle gebruikt, naar het woonzorgcentrum. Het huishouden blijft bestaan; er komt alleen een koppeling bij.</p>
+
+<div class="stap">
+  <span class="nr">1</span><h4>Het woonzorgcentrum geeft de koppelcode</h4>
+  <p>In <strong>Beheer</strong> staat de kaart <strong>Koppelcode voor familie</strong>. De code heeft acht tekens, <strong>letters en cijfers</strong> (bijvoorbeeld <code>5JPD 4VBE</code>). Klik op <span class="knop">Kopiëren</span> en geef de code aan de familie. Het is één code voor het hele woonzorgcentrum.</p>
+  <p><span class="veld">Nieuwe code</span> maakt een nieuwe; de oude werkt dan niet meer. Doe dat alleen als de code bij de verkeerde mensen terechtkwam.</p>
+  <figure><img src="screenshots/14-koppelcode.png" alt="Koppelcode voor familie" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">2</span><h4>De familie opent "Wie ziet wat"</h4>
+  <p>De familiebeheerder logt in de familie-app in en kiest in het menu <strong>Wie ziet wat</strong>.</p>
+  <figure><img src="screenshots/15-delen.png" alt="Wie ziet wat in de familie-app" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">3</span><h4>De code invullen en koppelen</h4>
+  <p>Scroll naar <strong>Woonzorgcentrum</strong>, vul de <span class="veld">Koppelcode</span> in en klik op <span class="knop">Koppelen</span>.</p>
+  <figure><img src="screenshots/16-invullen.png" alt="Koppelcode invullen" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">4</span><h4>Gekoppeld</h4>
+  <p>Het woonzorgcentrum staat erbij, met de uitleg over wat het team ziet. Zolang het woonzorgcentrum nog geen kamer gaf, staat er <em>"Afdeling en kamer zijn nog niet ingevuld."</em></p>
+  <figure><img src="screenshots/17-gekoppeld.png" alt="Gekoppeld met WZC De Linde" loading="lazy"></figure>
+  <p>Met <span class="knop">Koppeling stoppen</span> beëindigt de familie de koppeling zelf. De medewerkers verliezen dan meteen hun toegang.</p>
+</div>
+
+<h2 id="deel5">7. Kamer geven en medewerker toewijzen</h2>
+
+<div class="stap">
+  <span class="nr">1</span><h4>De bewoner verschijnt in Beheer</h4>
+  <p>Na het koppelen staat de bewoner in <strong>Beheer</strong> bij <strong>Bewoners en wie voor hen zorgt</strong>.</p>
+  <div class="box tip"><strong>Nog niet te zien?</strong>De app ververst gegevens die minder dan een minuut oud zijn niet meteen. Had je Beheer net open, wacht dan een minuut, of klik even in een ander venster en terug.</div>
+</div>
+
+<div class="stap">
+  <span class="nr">2</span><h4>Afdeling en kamer</h4>
+  <p>Klik bij de bewoner op <span class="veld">aanpassen</span>, kies de <span class="veld">Afdeling</span>, typ de <span class="veld">Kamer</span> en klik op <span class="knop">Bewaren</span>.</p>
+  <figure><img src="screenshots/19-kamer.png" alt="Afdeling en kamer kiezen" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">3</span><h4>Een medewerker toewijzen</h4>
+  <p>Kies bij <span class="veld">+ Toewijzen</span> de medewerker. Die ziet vanaf dan de agenda, de zorgnotities en de contactpersonen van deze bewoner. Stoppen doe je met het kruisje naast de naam.</p>
+  <figure><img src="screenshots/20-toewijzen.png" alt="Maria op kamer 104, toegewezen aan Sarah" loading="lazy"></figure>
+</div>
+
+<div class="stap">
+  <span class="nr">4</span><h4>Controleren</h4>
+  <p>De medewerker ziet de bewoner bij <strong>Bewoners</strong> → <strong>Mijn bewoners</strong>. De familie ziet bij <strong>Wie ziet wat</strong> de afdeling, de kamer en wie de bewoner volgt. <strong>Kamers</strong> toont de kamer als bezet.</p>
+  <figure><img src="screenshots/22-mijn-bewoners.png" alt="Mijn bewoners bij de zorgmedewerker" loading="lazy"><figcaption>Wat Sarah ziet.</figcaption></figure>
+  <figure><img src="screenshots/17b-gekoppeld-met-kamer.png" alt="De familie ziet afdeling, kamer en wie volgt" loading="lazy"><figcaption>Wat Els ziet.</figcaption></figure>
+</div>
+
+<h2 id="deel6">8. Een verblijf beëindigen</h2>
+<p>Bij een verhuis of overlijden. Bewust in twee stappen, zodat het niet per ongeluk gebeurt.</p>
+
+<div class="stap">
+  <span class="nr">1</span><h4>Verblijf beëindigen, reden kiezen</h4>
+  <p>Klik in <strong>Beheer</strong> bij de bewoner op <span class="veld">Verblijf beëindigen</span>. Kies de reden: <strong>Verhuisd</strong>, <strong>Overleden</strong> of <strong>Andere reden</strong>, en klik op <span class="knop">Verblijf beëindigen</span>. Met <span class="veld">Annuleren</span> gebeurt er niets.</p>
+  <figure><img src="screenshots/23-reden.png" alt="Het verblijf beëindigen met een reden" loading="lazy"></figure>
+</div>
+
+<div class="box let-op">
+  <strong>Wat er gebeurt</strong>
+  Het zorgteam verliest meteen de toegang en alle toewijzingen stoppen. De bewoner verdwijnt uit de lijst. De familie krijgt een melding en houdt al haar gegevens: dagboek, foto's, documenten, alles. Komt de bewoner terug, dan koppelt de familie opnieuw met de koppelcode.
+</div>
+
+<h2 id="deel7">9. Overdracht tussen diensten</h2>
+<p><strong>Overdracht</strong> in het menu is <em>niet</em> het overzetten van een bewoner. Het is het bericht van de ene dienst aan de volgende, per afdeling.</p>
+<div class="stap">
+  <span class="nr">1</span><h4>Een overdracht schrijven</h4>
+  <p>Kies de dienst (<strong>Vroege dienst</strong>, <strong>Late dienst</strong> of <strong>Nachtdienst</strong>), schrijf wat de volgende dienst moet weten en klik op <span class="knop">Overdracht bewaren</span>. Onder <strong>De laatste dagen</strong> staan de vorige.</p>
+  <figure><img src="screenshots/24-overdracht.png" alt="Overdracht" loading="lazy"></figure>
+  <p>Een overdracht wordt na een tijd automatisch gewist. Wat blijvend belangrijk is, schrijf je in een <strong>zorgnotitie</strong> op de pagina van de bewoner. Een zorgnotitie kan je niet aanpassen of wissen, wel corrigeren. Vink <em>Ook voor de familie</em> aan als de familie ze mag lezen.</p>
+</div>
+
+<h2 id="problemen">10. Als iets niet lukt</h2>
+<div class="tabel"><table>
+  <tr><th>Wat je ziet</th><th>Wat je doet</th></tr>
+  <tr><td>De bewoner staat niet in Beheer na het koppelen</td><td>Wacht een minuut of klik in een ander venster en terug. Staat de koppeling bij de familie wel onder Woonzorgcentrum? Dan is ze gelukt.</td></tr>
+  <tr><td>"Deze code klopt niet"</td><td>Er werd een nieuwe code gemaakt, of een teken is verkeerd overgetypt. Kopieer de huidige code opnieuw uit Beheer.</td></tr>
+  <tr><td>"Deze uitnodiging is verlopen", "al gebruikt" of "ingetrokken"</td><td>Maak in Beheer een nieuwe uitnodiging, of stuur ze opnieuw bij Openstaande uitnodigingen.</td></tr>
+  <tr><td>"Deze uitnodiging is voor …"</td><td>Uitloggen en inloggen met het adres waarop de uitnodiging kwam.</td></tr>
+  <tr><td>Geen code in de mail ontvangen</td><td>Kijk bij ongewenste mail. Komt er nooit iets, dan is de mailverzending van het project nog niet ingesteld (zie <code>docs/LIVEGANG.md</code>, stap 4).</td></tr>
+  <tr><td>"Je staat nog op geen afdeling"</td><td>De beheerder zet je op een afdeling: Beheer → Medewerkers → + Afdeling.</td></tr>
+  <tr><td>"Je bent niet toegewezen aan deze bewoner"</td><td>Vraag de coördinator of de beheerder om een toewijzing.</td></tr>
+  <tr><td>Een importrij met "fout"</td><td>De afdeling bestaat niet (maak ze eerst aan) of het e-mailadres is onvolledig.</td></tr>
+</table></div>
+
+<h2 id="checklist">11. Checklist per bewoner</h2>
+<ul class="checklist">
+  <li>De familie heeft een account en is familiebeheerder.</li>
+  <li>De familie heeft gekoppeld: bij Wie ziet wat → Woonzorgcentrum staat het woonzorgcentrum.</li>
+  <li>Afdeling en kamer zijn ingevuld.</li>
+  <li>Minstens één medewerker is toegewezen.</li>
+  <li>Bij vertrek: verblijf beëindigd, met de juiste reden.</li>
+</ul>
+
+<footer>
+  Gemaakt op basis van de app op de branch <code>afwerking-livegang</code> (oktober 2026). Schermteksten kunnen na een update veranderen; de volgorde van de stappen blijft gelijk.
+</footer>
+
+</main>
+</body>
+</html>
