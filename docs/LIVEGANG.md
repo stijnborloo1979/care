@@ -15,7 +15,8 @@ Vink af in de pull request of in een kopie van dit bestand.
 - [ ] Draai alle migraties in `supabase/` die nog niet gedraaid zijn, in
       volgorde van nummer. Sla `10_rls_tests.sql` over (dat is een test).
       Er is geen 28. Van 46 zijn er twee: eerst `46_my_households_herstel.sql`,
-      dan `46_voice.sql`. De laatste is `86_prijzen_livegang.sql`.
+      dan `46_voice.sql`. De laatste is `87_uitnodiging_familie_herstel.sql`:
+      **draai die zeker**, anders kan een familiebeheerder niemand uitnodigen.
 - [ ] Draai `76_systeemcontrole.sql` als laatste opnieuw. Daarna toont de app
       zelf welke updates nog ontbreken: Instellingen (familiebeheerder) en
       Beheer (WZC-beheerder) → **Systeemcontrole**. Daar mag niets meer
@@ -108,7 +109,10 @@ Deploy via Dashboard → Deploy a new function → plak `index.ts`. Deploy
       daarna wissen.
 - [ ] Een medewerker uitnodigen, laten aanvaarden.
 - [ ] Een gezin koppelen met de koppelcode (Delen → Woonzorgcentrum).
-- [ ] Toewijzen, kamer geven, verblijf beëindigen. Zie de handleiding.
+- [ ] Toewijzen, kamer geven, verblijf beëindigen.
+
+Handleidingen met screenshots: `docs/handleiding-home/index.html` (gezinnen)
+en `docs/handleiding/index.html` (woonzorgcentra).
 
 ## 8. Pilot
 
