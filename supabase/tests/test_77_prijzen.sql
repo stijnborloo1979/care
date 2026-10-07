@@ -11,13 +11,14 @@ end $$;
 
 -- Anoniem ziet de prijzen, niet de tabel
 set local role anon;
-select pg_temp.gelijk('anoniem ziet vijf plannen', (select count(*) from public.publieke_prijzen()), 5::bigint);
-select pg_temp.gelijk('Home kost 9,99 per maand', (select prijs_maand_cent from public.publieke_prijzen() where id = 'home'), 999);
+-- De bedragen zelf staan in 86 (en test_86); hier alleen wat 77 garandeert.
+select pg_temp.gelijk('anoniem ziet de zichtbare plannen', (select count(*) > 0 from public.publieke_prijzen()), true);
+select pg_temp.gelijk('Home heeft een prijs per maand', (select prijs_maand_cent is not null from public.publieke_prijzen() where id = 'home'), true);
 select pg_temp.gelijk('Care per bewoner, excl. btw',
   (select eenheid || '/' || btw_inbegrepen::text from public.publieke_prijzen() where id = 'care'), 'bewoner/false'::text);
 select pg_temp.gelijk('onderdelen als leesbare namen',
   (select 'Medicatie' = any (onderdelen) from public.publieke_prijzen() where id = 'home'), true);
-select pg_temp.gelijk('nog een voorstel', (select bool_and(voorstel) from public.publieke_prijzen()), true);
+select pg_temp.gelijk('voorstel is ingevuld', (select bool_and(voorstel is not null) from public.publieke_prijzen()), true);
 do $$
 begin
   begin

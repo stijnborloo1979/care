@@ -19,6 +19,9 @@ Node-versie (22) in `.nvmrc`.
 3. Settings → Variables and Secrets, bij Production:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_CONTACT_EMAIL` (optioneel) — het adres achter "Vraag een prijs
+     aan" op de prijspagina, voor woonzorgcentra. Zonder dit adres staat die
+     knop er niet.
 4. Deploy. Een gewijzigde variabele werkt pas na een nieuwe build
    (Deployments → Retry deployment).
 5. Zet het adres van de site (nu `care-r9d.pages.dev`, later het eigen
@@ -274,6 +277,12 @@ De SQL staat in `supabase/`. Draai ze in de SQL-editor van je project:
     verzonnen bewoners. In je eigen demo wissel je tussen coördinator en
     beheerder en wis je alles weer. Een familie kan nooit aan een demo
     koppelen. Draai daarna `76_systeemcontrole.sql` opnieuw.
+86. `86_prijzen_livegang.sql` — het aanbod bij de livegang: Home € 14,95
+    per maand of € 149 per jaar, 14 dagen gratis, alles inbegrepen (ook de
+    spraakassistent); Care (woonzorgcentrum) op aanvraag. De andere plannen
+    blijven bestaan maar staan niet meer op de prijspagina. Er wordt nog
+    niets afgedwongen of aangerekend: daarvoor is een betaalprovider nodig.
+    Draai daarna `76_systeemcontrole.sql` opnieuw.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
@@ -515,6 +524,7 @@ Vitest-tests en de build. Je hoeft zelf niets te installeren.
 - `test_83_rapport.sql` — alleen beheerder en coördinator; persoonlijke cijfers pas vanaf vijf bewoners in de periode en 28 dagen; nooit "families in de app".
 - `test_84_import.sql` — importeren alleen door beheerder of coördinator; proef bewaart niets; dubbel en "woont hier al" overgeslagen; familie uitnodigen alleen voor eigen import, nooit voor een familie-huishouden of naar een medewerker.
 - `test_85_demo_wzc.sql` — demo met acht bewoners; rol wisselen en wissen alleen door de eigenaar; geen koppeling van een echte familie; wissen laat een huishouden met een lid staan.
+- `test_86_prijzen_livegang.sql` — twee plannen op de prijspagina; Home 14,95 / 149 met 14 proefdagen en de spraakassistent; Care op aanvraag zonder bedrag; geen voorstel meer; home_free blijft als terugval.
 
 De edge functions hebben eigen tests: `npx vitest run --config vitest.functions.config.ts`.
 

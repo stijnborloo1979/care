@@ -22,7 +22,7 @@ export default function JouwAbonnement({ soort, id, bewoners }: { soort: 'househ
       </h2>
       {abo.data ? (
         <p className="mt-2">
-          <strong>{plan?.naam ?? abo.data.plan_id}</strong> · {STATUS[abo.data.status] ?? abo.data.status}
+          <strong>{plan ? tt(plan.naam) : abo.data.plan_id}</strong> · {STATUS[abo.data.status] ?? abo.data.status}
           {abo.data.trial_ends_at ? `, ${tt('tot {datum}', { datum: new Date(abo.data.trial_ends_at).toLocaleDateString(uiLocale()) })}` : ''}
         </p>
       ) : (

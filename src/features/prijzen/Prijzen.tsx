@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Check, ChevronDown } from 'lucide-react'
-import { euro, maandenGratis, publiekePrijzen, type Plan } from './prijzen'
+import { contactAdres, euro, maandenGratis, publiekePrijzen, type Plan } from './prijzen'
 import { tt } from '../../lib/uiTaal'
 
 /**
  * De prijspagina. Ook zonder in te loggen. Zolang de prijzen een voorstel
- * zijn, staat dat er bovenaan; er wordt nog niets aangerekend.
+ * zijn (voorbeeld = true), staat dat er bovenaan. Een plan met
+ * prijs_op_aanvraag (Care, vanaf 86) toont geen bedrag maar een aanvraag.
  */
 export default function Prijzen() {
   const q = useQuery({ queryKey: ['publieke-prijzen'], queryFn: publiekePrijzen, staleTime: 10 * 60_000, retry: false })
@@ -24,7 +25,7 @@ export default function Prijzen() {
       </Link>
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{tt('Wat kost LifeAngle?')}</h1>
       <p className="mt-2 max-w-2xl text-lg text-ink-soft">
-        {tt('Eén prijs per huishouden, met zoveel familieleden als je wil. Voor een woonzorgcentrum: per bewoner die er echt verblijft.')}
+        {tt('Eén prijs per huishouden, met zoveel familieleden als je wil. Voor een woonzorgcentrum maken we een voorstel op maat.')}
       </p>
 
       {voorstel ? (
@@ -47,7 +48,7 @@ export default function Prijzen() {
             </button>
           ))}
         </div>
-        {voor === 'home' ? (
+        {voor === 'home' && lijst.some((p) => p.prijs_jaar_cent != null) ? (
           <label className="inline-flex min-h-touch cursor-pointer items-center gap-2 font-semibold">
             <input type="checkbox" checked={jaar} onChange={(e) => setJaar(e.target.checked)} className="h-5 w-5" />
             {tt('Per jaar betalen')}
@@ -60,9 +61,9 @@ export default function Prijzen() {
         <p className="mt-8 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">{tt('De prijzen zijn nog niet ingesteld.')}</p>
       ) : null}
 
-      <div className={`mt-6 grid gap-5 ${lijst.length >= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
+      <div className={`mt-6 grid gap-5 ${lijst.length >= 3 ? 'lg:grid-cols-3' : lijst.length === 2 ? 'lg:grid-cols-2' : 'max-w-xl'}`}>
         {lijst.map((p, i) => (
-          <PlanKaart key={p.id} plan={p} jaar={jaar && voor === 'home'} uitgelicht={voor === 'home' ? i === 1 : i === 0} />
+          <PlanKaart key={p.id} plan={p} jaar={jaar && voor === 'home'} uitgelicht={lijst.length > 1 && (voor === 'home' ? i === 1 : i === 0)} />
         ))}
       </div>
 
@@ -78,11 +79,26 @@ export default function Prijzen() {
         <section className="rounded-card bg-surface p-6 shadow-card">
           <h2 className="text-lg font-bold">{tt('Woonzorgcentrum?')}</h2>
           <p className="mt-2 text-ink-soft">
-            {tt('Je betaalt alleen voor bewoners die die maand echt verblijven, niet voor bedden of medewerkers. Begin met een pilot op één afdeling.')}
+            {tt('We maken een voorstel op maat, op basis van het aantal bewoners. Begin met een pilot op één afdeling.')}
           </p>
-          <Link to="/zorg/nieuw" className="mt-4 inline-flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-semibold text-white">
-            {tt('Een woonzorgcentrum registreren')}
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {contactAdres ? (
+              <a
+                href={`mailto:${contactAdres}?subject=${encodeURIComponent(tt('Prijsaanvraag LifeAngle Care'))}`}
+                className="inline-flex min-h-touch items-center rounded-pill bg-accent-ink px-5 font-semibold text-white"
+              >
+                {tt('Vraag een prijs aan')}
+              </a>
+            ) : null}
+            <Link
+              to="/zorg/nieuw"
+              className={`inline-flex min-h-touch items-center rounded-pill px-5 font-semibold ${
+                contactAdres ? 'border-[1.5px] border-line-strong bg-surface' : 'bg-accent-ink text-white'
+              }`}
+            >
+              {tt('Een woonzorgcentrum registreren')}
+            </Link>
+          </div>
         </section>
       </div>
     </main>
@@ -91,7 +107,8 @@ export default function Prijzen() {
 
 function PlanKaart({ plan: p, jaar, uitgelicht }: { plan: Plan; jaar: boolean; uitgelicht: boolean }) {
   const [open, setOpen] = useState(false)
-  const gratis = (p.prijs_maand_cent ?? 0) === 0
+  const opAanvraag = !!p.prijs_op_aanvraag
+  const gratis = !opAanvraag && (p.prijs_maand_cent ?? 0) === 0
   const bedrag = jaar && p.prijs_jaar_cent != null ? p.prijs_jaar_cent : p.prijs_maand_cent ?? 0
   const per = p.eenheid === 'bewoner' ? tt('per bewoner per maand') : jaar ? tt('per jaar') : tt('per maand')
   const winst = jaar ? maandenGratis(p) : 0
@@ -102,20 +119,29 @@ function PlanKaart({ plan: p, jaar, uitgelicht }: { plan: Plan; jaar: boolean; u
       aria-labelledby={`plan-${p.id}`}
     >
       <h2 id={`plan-${p.id}`} className="text-xl font-bold">
-        {p.naam}
+        {tt(p.naam)}
       </h2>
       <p className="mt-3">
-        <span className="text-4xl font-extrabold tracking-tight">{gratis ? tt('Gratis') : euro(bedrag)}</span>
-        {!gratis ? <span className="ml-2 text-ink-soft">{per}</span> : null}
+        <span className="text-4xl font-extrabold tracking-tight">
+          {opAanvraag ? tt('Prijs op aanvraag') : gratis ? tt('Gratis') : euro(bedrag)}
+        </span>
+        {!gratis && !opAanvraag ? <span className="ml-2 text-ink-soft">{per}</span> : null}
       </p>
       <p className="mt-1 text-sm text-ink-faint">
-        {!gratis ? (p.btw_inbegrepen ? tt('btw inbegrepen') : tt('excl. btw')) : ' '}
+        {!gratis && !opAanvraag ? (p.btw_inbegrepen ? tt('btw inbegrepen') : tt('excl. btw')) : ' '}
         {p.minimum_maand_cent ? ` · ${tt('minimum {bedrag} per maand', { bedrag: euro(p.minimum_maand_cent) })}` : ''}
         {winst > 0 ? ` · ${winst === 1 ? tt('{n} maand gratis', { n: winst }) : tt('{n} maanden gratis', { n: winst })}` : ''}
       </p>
-      {p.omschrijving ? <p className="mt-3 text-ink-soft">{p.omschrijving}</p> : null}
+      {p.omschrijving ? <p className="mt-3 text-ink-soft">{tt(p.omschrijving)}</p> : null}
       {p.proefdagen > 0 ? (
         <p className="mt-3 font-semibold text-accent-ink">{tt('{n} dagen gratis proberen', { n: p.proefdagen })}</p>
+      ) : null}
+      {p.proefdagen > 0 && !gratis && !opAanvraag && p.prijs_maand_cent ? (
+        <p className="mt-1 text-sm text-ink-soft">
+          {jaar && p.prijs_jaar_cent != null
+            ? tt('Daarna {bedrag} per jaar. Opzeggen kan altijd.', { bedrag: euro(p.prijs_jaar_cent) })
+            : tt('Daarna {bedrag} per maand. Opzeggen kan altijd.', { bedrag: euro(p.prijs_maand_cent) })}
+        </p>
       ) : null}
       <button
         onClick={() => setOpen(!open)}
@@ -130,7 +156,7 @@ function PlanKaart({ plan: p, jaar, uitgelicht }: { plan: Plan; jaar: boolean; u
           {p.onderdelen.map((o) => (
             <li key={o} className="flex items-start gap-2 text-sm">
               <Check size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-accent-ink" aria-hidden="true" />
-              {o}
+              {tt(o)}
             </li>
           ))}
         </ul>

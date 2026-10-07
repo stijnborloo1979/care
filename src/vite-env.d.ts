@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_TURN_URL?: string
   readonly VITE_TURN_USERNAME?: string
   readonly VITE_TURN_CREDENTIAL?: string
+  /** Adres voor prijsaanvragen van woonzorgcentra (prijspagina). */
+  readonly VITE_CONTACT_EMAIL?: string
 }
 
 interface ImportMeta {
