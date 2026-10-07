@@ -46,7 +46,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
     <section className="rounded-card bg-surface p-6 shadow-card">
       <h2 className="text-lg font-bold">{tt('Snel een afspraak toevoegen')}</h2>
       <p className="mt-1 text-sm text-ink-soft">
-        {tt('Typ of spreek het in gewone taal in:')} <em>donderdag 14u dokter Janssens</em>.
+        {tt('Typ of spreek het in gewone taal in:')} <em>{tt('donderdag 14u dokter Janssens')}</em>.
       </p>
 
       <form
@@ -55,7 +55,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
           setFout(null)
           setGelukt(null)
           if (!herkend) {
-            setFout(tt('Ik haal er geen dag of uur uit. Probeer "{voorbeeld}".', { voorbeeld: 'morgen 14u dokter' }))
+            setFout(tt('Ik haal er geen dag of uur uit. Probeer "{voorbeeld}".', { voorbeeld: tt('morgen 14u dokter') }))
             return
           }
           bewaren.mutate()
@@ -69,7 +69,7 @@ export default function QuickAdd({ householdId }: { householdId: string }) {
             setFout(null)
             setGelukt(null)
           }}
-          placeholder="morgen 10u kapper"
+          placeholder={tt('morgen 10u kapper')}
           className="min-h-touch min-w-[min(12rem,100%)] flex-1 rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
         />
         <DictateButton onTekst={(t) => setTekst(t.replace(/\.$/, ''))} />

@@ -77,7 +77,7 @@ export default function BelKnop({
           <span>{p.name}</span>
           <span className="text-lg font-semibold tabular-nums text-ink-soft">{p.phone}</span>
           <span className="text-base font-normal text-ink-faint">
-            Bellen kan niet met dit scherm.
+            {t('bellen.kanNiet')}
           </span>
         </div>
       )

@@ -247,12 +247,13 @@ function ItemForm({
   function neemSjabloon(naam: string) {
     const t = SJABLONEN.find((x) => x.naam === naam)
     if (!t) return
-    setName(t.naam)
+    // In de taal van het scherm: wat familie hier bewaart, staat zo op de tablet.
+    setName(tt(t.naam))
     setEmoji(t.emoji)
     // Wat er al ingevuld is blijft staan: een sjabloon vult aan, het
     // overschrijft geen werk dat iemand net heeft gedaan.
-    setWhere((v) => v || t.waar)
-    setSteps((v) => v || t.stappen.join('\n'))
+    setWhere((v) => v || tt(t.waar))
+    setSteps((v) => v || t.stappen.map((s) => tt(s)).join('\n'))
   }
 
   const opslaan = useMutation({
@@ -296,7 +297,7 @@ function ItemForm({
                 onClick={() => neemSjabloon(t.naam)}
                 className="min-h-[2.4rem] rounded-pill border border-line bg-surface-soft px-3 text-sm font-semibold text-ink-soft"
               >
-                {t.emoji} {t.naam}
+                {t.emoji} {tt(t.naam)}
               </button>
             ))}
           </div>

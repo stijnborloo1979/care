@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { tt } from '../lib/uiTaal'
 
 // Alles wat de app over een huishouden bewaart. RLS bepaalt wat jij
 // daarvan terugkrijgt: je exporteert nooit meer dan je in de app ziet.
@@ -54,8 +55,9 @@ export async function exporteer(): Promise<Blob> {
   }
 
   const inhoud = {
-    uitleg:
+    uitleg: tt(
       'Alle gegevens die LifeAngle bewaart en die jij mag zien. Bestanden (foto’s, opnames, documenten) staan hier als pad in de opslag; de bestanden zelf download je in de app.',
+    ),
     geexporteerd_op: new Date().toISOString(),
     gebruiker: { id: uid, email: gebruiker.user?.email },
     profiel,
@@ -73,7 +75,7 @@ export async function verwijderAccount(ookHuishoudens: boolean) {
   if (error) {
     const context = (error as { context?: { json?: () => Promise<{ error?: string }> } }).context
     const body = context?.json ? await context.json().catch(() => null) : null
-    throw new Error(body?.error ?? 'Verwijderen lukte niet. Probeer het opnieuw.')
+    throw new Error(body?.error ?? tt('Verwijderen lukte niet. Probeer het opnieuw.'))
   }
   return data
 }

@@ -43,10 +43,10 @@ export default function Onboarding() {
   const [adres, setAdres] = useState('')
   const [mensen, setMensen] = useState<Persoon[]>([LEEG, LEEG, LEEG])
   const [routine, setRoutine] = useState(
-    STANDAARD_OCHTEND.map((s) => `${s.at} ${s.title}`).join('\n'),
+    STANDAARD_OCHTEND.map((s) => `${s.at} ${tt(s.title)}`).join('\n'),
   )
   const [kamers, setKamers] = useState<string[]>(STANDAARD_KAMERS.map((k) => k.name))
-  const [dingNaam, setDingNaam] = useState('Koffiezetapparaat')
+  const [dingNaam, setDingNaam] = useState(tt('Koffiezetapparaat'))
   const [dingKamer, setDingKamer] = useState('Keuken')
   const [dingWaar, setDingWaar] = useState('')
   const [dingStappen, setDingStappen] = useState('')
@@ -69,12 +69,13 @@ export default function Onboarding() {
         .map((m) => ({ at: m[1].replace('.', ':').padStart(5, '0'), title: m[2] }))
 
       if (stappen.length > 0) {
-        await createRoutine(hh, 'Dagelijks', stappen)
+        await createRoutine(hh, tt('Dagelijks'), stappen)
       }
 
-      const gemaakt = await createRooms(hh, kamers)
+      // De kamers bewaren in de taal van het scherm: zo staan ze ook zo op de tablet.
+      const gemaakt = await createRooms(hh, kamers.map((k) => tt(k)))
 
-      const kamer = gemaakt.find((k) => k.name === dingKamer) ?? gemaakt[0]
+      const kamer = gemaakt.find((k) => k.name === tt(dingKamer)) ?? gemaakt[0]
       if (kamer && dingNaam.trim() && dingWaar.trim()) {
         await addFirstItem({
           householdId: hh,
@@ -142,7 +143,7 @@ export default function Onboarding() {
               autoFocus
               value={naam}
               onChange={(e) => setNaam(e.target.value)}
-              placeholder="Maria Janssens"
+              placeholder={tt('Maria Janssens')}
               className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4 text-lg"
             />
           </label>
@@ -243,7 +244,7 @@ export default function Onboarding() {
                     : 'border-line-strong bg-surface text-ink-faint'
                 }`}
               >
-                {k.emoji} {k.name}
+                {k.emoji} {tt(k.name)}
               </button>
             )
           })}
@@ -268,7 +269,7 @@ export default function Onboarding() {
               className="min-h-touch min-w-[min(9rem,100%)] rounded-2xl border-[1.5px] border-line-strong bg-surface px-4"
             >
               {kamers.map((k) => (
-                <option key={k}>{k}</option>
+                <option key={k} value={k}>{tt(k)}</option>
               ))}
             </select>
           </div>

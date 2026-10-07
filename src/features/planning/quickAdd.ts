@@ -15,6 +15,9 @@ export interface QuickAddResultaat {
   uitleg: string
 }
 
+// Nederlands, Frans en Engels door elkaar: wie typt, kiest zijn taal niet
+// eerst, en geen enkel woord betekent in de ene taal iets anders dan in de
+// andere.
 const DAGEN: Record<string, number> = {
   zondag: 0,
   maandag: 1,
@@ -23,6 +26,20 @@ const DAGEN: Record<string, number> = {
   donderdag: 4,
   vrijdag: 5,
   zaterdag: 6,
+  dimanche: 0,
+  lundi: 1,
+  mardi: 2,
+  mercredi: 3,
+  jeudi: 4,
+  vendredi: 5,
+  samedi: 6,
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
 }
 
 const MAANDEN = [
@@ -39,6 +56,34 @@ const MAANDEN = [
   'november',
   'december',
 ]
+
+const MAANDEN_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+const MAANDEN_EN = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+
+/** Maandnaam in eender welke taal → 0..11, of -1. */
+function maandVan(woord: string): number {
+  for (const lijst of [MAANDEN, MAANDEN_FR, MAANDEN_EN]) {
+    const i = lijst.indexOf(woord)
+    if (i >= 0) return i
+  }
+  return -1
+}
+
+const ALLE_MAANDEN = [...new Set([...MAANDEN, ...MAANDEN_FR, ...MAANDEN_EN])].join('|')
+
+/** Hoeveel dagen vanaf vandaag; de langste vorm eerst. */
+const RELATIEF: Record<string, number> = {
+  vandaag: 0,
+  overmorgen: 2,
+  morgen: 1,
+  "aujourd'hui": 0,
+  'aujourd’hui': 0,
+  'après-demain': 2,
+  demain: 1,
+  today: 0,
+  'day after tomorrow': 2,
+  tomorrow: 1,
+}
 
 function schoon(tekst: string) {
   return tekst.replace(/\s+/g, ' ').trim()
@@ -70,18 +115,23 @@ export function quickAdd(invoer: string, nu = new Date()): QuickAddResultaat | n
   }
 
   if (!datum) {
-    const woordDatum = hap(new RegExp(`\\b(\\d{1,2})\\s+(${MAANDEN.join('|')})\\b`))
+    // 14 maart, 14 mars, 14 march (en "march 14")
+    const woordDatum = hap(new RegExp(`\\b(\\d{1,2})\\s+(${ALLE_MAANDEN})\\b`))
+    const omgekeerd = woordDatum ? null : hap(new RegExp(`\\b(${ALLE_MAANDEN})\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`))
     if (woordDatum) {
-      datum = new Date(nu.getFullYear(), MAANDEN.indexOf(woordDatum[2]), Number(woordDatum[1]))
+      datum = new Date(nu.getFullYear(), maandVan(woordDatum[2]), Number(woordDatum[1]))
       dagUitleg = `${woordDatum[1]} ${woordDatum[2]}`
+    } else if (omgekeerd) {
+      datum = new Date(nu.getFullYear(), maandVan(omgekeerd[1]), Number(omgekeerd[2]))
+      dagUitleg = `${omgekeerd[2]} ${omgekeerd[1]}`
     }
   }
 
   // 2. vandaag, morgen, overmorgen
   if (!datum) {
-    const relatief = hap(/\b(vandaag|morgen|overmorgen)\b/)
+    const relatief = hap(new RegExp(`(?<![\\p{L}-])(${Object.keys(RELATIEF).join('|')})(?![\\p{L}-])`, 'u'))
     if (relatief) {
-      const dagen = { vandaag: 0, morgen: 1, overmorgen: 2 }[relatief[1] as 'vandaag']
+      const dagen = RELATIEF[relatief[1]]
       datum = new Date(nu)
       datum.setDate(datum.getDate() + dagen)
       dagUitleg = relatief[1]
@@ -90,7 +140,8 @@ export function quickAdd(invoer: string, nu = new Date()): QuickAddResultaat | n
 
   // 3. een weekdag: altijd de eerstvolgende, nooit een dag in het verleden
   if (!datum) {
-    const weekdag = hap(new RegExp(`\\b(?:volgende\\s+)?(${Object.keys(DAGEN).join('|')})\\b`))
+    const weekdag =
+      hap(new RegExp(`\\b(?:volgende\\s+|next\\s+)?(${Object.keys(DAGEN).join('|')})(?:\\s+prochain)?\\b`))
     if (weekdag) {
       const doel = DAGEN[weekdag[1]]
       datum = new Date(nu)
@@ -101,24 +152,36 @@ export function quickAdd(invoer: string, nu = new Date()): QuickAddResultaat | n
     }
   }
 
-  // 4. het uur: 14u, 14u30, 14:00, om 9 uur
+  // 4. het uur: 14u, 14u30, 14:00, om 9 uur — 14h, 14h30, à 9 heures —
+  //    2pm, 2:30 pm, at 9
   let uur: number | null = null
   let minuut = 0
+  const ampm = hap(/\b(\d{1,2})(?:[:.](\d{2}))?\s?(am|pm)\b/)
   const tijd =
+    ampm ??
     hap(/\b(\d{1,2})[:.](\d{2})\b/) ??
-    hap(/\b(\d{1,2})\s?u\s?(\d{2})\b/) ??
-    hap(/\b(\d{1,2})\s?u\b/) ??
-    hap(/\bom\s+(\d{1,2})(?:\s*uur)?\b/)
+    hap(/\b(\d{1,2})\s?[uh]\s?(\d{2})\b/) ??
+    hap(/\b(\d{1,2})\s?[uh]\b/) ??
+    hap(/(?:\bom|(?<!\p{L})à|\bat)\s+(\d{1,2})(?:\s*(?:uur|heures?|o'clock))?\b/u)
 
   if (tijd) {
     uur = Number(tijd[1])
     minuut = tijd[2] ? Number(tijd[2]) : 0
-    // "om 3" op de middag bedoelt bijna nooit 3 uur 's nachts.
-    if (uur < 8 && !/\b(\d{1,2})[:.]/.test(tijd[0])) uur += 12
+    if (ampm) {
+      if (uur < 1 || uur > 12) return null
+      if (ampm[3] === 'pm' && uur < 12) uur += 12
+      if (ampm[3] === 'am' && uur === 12) uur = 0
+    } else if (uur < 8 && !/\b(\d{1,2})[:.]/.test(tijd[0])) {
+      // "om 3" op de middag bedoelt bijna nooit 3 uur 's nachts.
+      uur += 12
+    }
     if (uur > 23 || minuut > 59) return null
   }
 
-  const titel = schoon(rest.replace(/\b(om|op|de|een)\b/gi, ' '))
+  // Losse verbindingswoorden weg, in de drie talen ("à" heeft geen \b).
+  const titel = schoon(
+    rest.replace(/\b(om|op|de|een|le|la|les|un|une|chez|at|on|the|a)\b/gi, ' ').replace(/(?<!\p{L})à(?!\p{L})/gu, ' '),
+  )
   if (!titel) return null
   if (!datum && uur === null) return null
 

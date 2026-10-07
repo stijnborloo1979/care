@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { tt, uiLocale } from '../lib/uiTaal'
 
 /**
  * Wie bekeek wat (migratie 55) en noodtoegang (migratie 54).
@@ -149,18 +150,18 @@ const ROLNAAM: Record<string, string> = {
 
 export function wie(i: Pick<Inzage, 'actor_id' | 'rol'>, namen: Record<string, string>): string {
   if (i.actor_id && namen[i.actor_id]) return namen[i.actor_id]
-  return (i.rol && ROLNAAM[i.rol]) || 'Iemand'
+  return (i.rol && ROLNAAM[i.rol]) || tt('Iemand')
 }
 
 export function watZin(i: Pick<Inzage, 'soort' | 'row_id'>, onderwerpen: Record<string, string>): string {
   const naam = i.row_id ? onderwerpen[i.row_id] : undefined
   switch (i.soort) {
     case 'document':
-      return naam ? `opende het document „${naam}”` : 'opende een document'
+      return naam ? tt('opende het document „{naam}”', { naam }) : tt('opende een document')
     case 'life_story':
-      return naam ? `beluisterde „${naam}”` : 'beluisterde een opname'
+      return naam ? tt('beluisterde „{naam}”', { naam }) : tt('beluisterde een opname')
     case 'location_point':
-      return 'bekeek de locatie'
+      return tt('bekeek de locatie')
   }
 }
 
@@ -174,10 +175,10 @@ export function perDag<T extends { at: string }>(rijen: T[], nu = new Date()): [
     const verschil = Math.round((vandaag - dag(d)) / 86_400_000)
     const label =
       verschil === 0
-        ? 'Vandaag'
+        ? tt('Vandaag')
         : verschil === 1
-          ? 'Gisteren'
-          : d.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })
+          ? tt('Gisteren')
+          : d.toLocaleDateString(uiLocale(), { weekday: 'long', day: 'numeric', month: 'long' })
     if (!groepen.has(label)) groepen.set(label, [])
     groepen.get(label)!.push(r)
   }

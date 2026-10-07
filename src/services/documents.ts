@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { signedUrl } from '../lib/storage'
 import { ontbrekendeFunctie } from '../lib/ontbrekendeFunctie'
+import { tt } from '../lib/uiTaal'
 
 export type DocCategory = 'identiteit' | 'verzekering' | 'medisch' | 'afspraken' | 'belangrijk'
 
@@ -97,6 +98,6 @@ export async function openDocument(doc: Pick<DocumentRow, 'id' | 'storage_path'>
   } else {
     path = (data as string | null) ?? path
   }
-  if (!path) throw new Error('Dit document heeft geen bestand')
+  if (!path) throw new Error(tt('Dit document heeft geen bestand'))
   return signedUrl(BUCKET, path, 300)
 }

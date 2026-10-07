@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { tt } from '../lib/uiTaal'
 
 /**
  * Eén huis, twee mensen.
@@ -71,9 +72,9 @@ export function kiesHuisgenoten(hh: string, alle: HuisKandidaat[]): HuisKandidaa
  */
 export function samenvattingInWoorden(s: Samenvoeging): string {
   if (s.losgemaakt) {
-    return 'Losgemaakt. De kamers en apparaten blijven bij het huis staan.'
+    return tt('Losgemaakt. De kamers en apparaten blijven bij het huis staan.')
   }
-  if (s.al_gedeeld) return 'Deze twee delen het huis al.'
+  if (s.al_gedeeld) return tt('Deze twee delen het huis al.')
 
   const delen: string[] = []
   const verplaatst = s.kamers_verplaatst ?? 0
@@ -81,11 +82,11 @@ export function samenvattingInWoorden(s: Samenvoeging): string {
   const dingen = s.dingen_verplaatst ?? 0
   const weg = s.dubbel_weggelaten ?? 0
 
-  if (verplaatst > 0) delen.push(`${verplaatst} ${verplaatst === 1 ? 'kamer' : 'kamers'} verhuisd`)
-  if (samen > 0) delen.push(`${samen} ${samen === 1 ? 'kamer' : 'kamers'} samengevoegd`)
-  if (dingen > 0) delen.push(`${dingen} ${dingen === 1 ? 'ding' : 'dingen'} mee`)
-  if (weg > 0) delen.push(`${weg} leeg dubbel weggelaten`)
+  if (verplaatst > 0) delen.push(verplaatst === 1 ? tt('1 kamer verhuisd') : tt('{n} kamers verhuisd', { n: verplaatst }))
+  if (samen > 0) delen.push(samen === 1 ? tt('1 kamer samengevoegd') : tt('{n} kamers samengevoegd', { n: samen }))
+  if (dingen > 0) delen.push(dingen === 1 ? tt('1 ding mee') : tt('{n} dingen mee', { n: dingen }))
+  if (weg > 0) delen.push(tt('{n} leeg dubbel weggelaten', { n: weg }))
 
-  if (delen.length === 0) return 'Het huis is nu gedeeld. Er stond nog niets in om te verhuizen.'
-  return `Het huis is nu gedeeld: ${delen.join(', ')}.`
+  if (delen.length === 0) return tt('Het huis is nu gedeeld. Er stond nog niets in om te verhuizen.')
+  return tt('Het huis is nu gedeeld: {delen}.', { delen: delen.join(', ') })
 }

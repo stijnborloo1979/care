@@ -667,10 +667,13 @@ De woordenboeken staan in `src/lib/i18n.ts`, zonder bibliotheek: een
 object per taal en één functie `t()`. Een ontbrekende vertaling valt terug
 op het Nederlands.
 
-Alle schermen van de persoon zijn vertaald: Vandaag, Wat nu, Wie is wie,
-Hulp, In huis, Foto's, Weetjes, Radio, Praten, Onthoud dit, het
-oproepscherm, het nachtscherm en de bottom navigation. De familiekant
-staat nog in het Nederlands en verhuist scherm per scherm naar `t()`.
+Alle schermen van de persoon zijn vertaald, ook de spraakassistent (vragen,
+bevestigingen, foutmeldingen), "Vertel eens" (de vragen staan in
+`src/features/stories/vragen.ts` in drie talen, in dezelfde volgorde) en
+het wekwoord ("Hallo", "Bonjour", "Hello"). De familie- en zorgschermen
+gebruiken `tt()` met een eigen taalkeuze (zie hieronder). De test
+`src/lib/i18n.test.ts` zakt als een sleutel in één taal ontbreekt of als
+een `t('…')` in de code niet in het woordenboek staat.
 
 De spraakassistent werkt in de drie talen. De woorden waaraan ze een vraag
 herkent staan per taal in `src/features/voice/patronen.ts`, los van de
@@ -679,8 +682,10 @@ regels niet herkennen, gaat naar de edge function `ask`, die in de eigen
 gegevens zoekt en antwoordt in de taal van het huishouden — ook als de
 gegevens in een andere taal staan.
 
-Nog taalgebonden en dus nog niet vertaald: `quickAdd()` (leest Nederlandse
-datums), de vragen van "Vertel eens", en de hele familiekant.
+`quickAdd()` leest Nederlandse, Franse en Engelse datums en uren door
+elkaar ("donderdag 14u", "jeudi 14h", "thursday 2pm"). Wat familie uit een
+sjabloon of bij de eerste keer instellen bewaart (kamers, routine, Home
+Memory), komt in de taal van haar scherm in het huishouden.
 
 ## Het levensboek
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Mic, Pencil, Square, X, AlertCircle, Loader2 } from 'lucide-react'
-import { t } from '../../lib/i18n'
+import { locale, t } from '../../lib/i18n'
 import { useVoiceAssistant, type Fase } from './useVoiceAssistant'
 import { opsomming } from './zinnen'
 import type { Params } from './intents'
@@ -53,7 +53,7 @@ export default function VoiceOverlay() {
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
-      aria-label="LifeAngle Voice"
+      aria-label={t('voice.naam')}
       className="fixed inset-0 z-[60] flex flex-col bg-bg outline-none"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
@@ -200,7 +200,7 @@ export default function VoiceOverlay() {
         {v.fase !== 'opname' && v.fase !== 'bewaart' && !v.geenSpraak ? (
           <button
             onClick={v.microfoon}
-            aria-label={v.fase === 'luistert' ? 'Klaar met praten' : 'Praat'}
+            aria-label={v.fase === 'luistert' ? t('voice.klaarMetPraten') : t('voice.knop')}
             className={`mt-8 grid h-28 w-28 shrink-0 place-items-center rounded-full text-white shadow-lift transition-transform ${
               v.fase === 'luistert' ? 'voice-luistert bg-accent-ink' : 'bg-accent-ink/90'
             }`}
@@ -257,11 +257,11 @@ function Status({ fase, status }: { fase: Fase; status?: string }) {
   } else if (status === 'gelukt') {
     icoon = <Check size={44} aria-hidden="true" />
     kleur = 'bg-ok text-white'
-    label = 'Gedaan'
+    label = t('voice.gedaan')
   } else if (status === 'mislukt') {
     icoon = <AlertCircle size={44} aria-hidden="true" />
     kleur = 'bg-surface text-alert border-[1.5px] border-alert'
-    label = 'Niet gelukt'
+    label = t('voice.nietGelukt')
   }
 
   return (
@@ -278,20 +278,20 @@ function Samenvatting({ s }: { s: { intent: string; parameters: Params } }) {
   const p = s.parameters
   const rijen: [string, string][] = []
   const wat = p.title ?? p.text
-  if (wat) rijen.push(['Wat', wat])
+  if (wat) rijen.push([t('voice.rij.wat'), wat])
   if (p.date) {
     const [j, m, d] = p.date.split('-').map(Number)
     rijen.push([
-      'Dag',
-      new Intl.DateTimeFormat('nl-BE', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' }).format(
+      t('voice.rij.dag'),
+      new Intl.DateTimeFormat(locale(), { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' }).format(
         new Date(Date.UTC(j, m - 1, d)),
       ),
     ])
   }
-  if (p.time) rijen.push(['Uur', p.time])
-  if (p.items?.length) rijen.push(['Producten', opsomming(p.items)])
-  if (p.contact) rijen.push(['Wie', p.contact])
-  if (p.message) rijen.push(['Bericht', p.message])
+  if (p.time) rijen.push([t('voice.rij.uur'), p.time])
+  if (p.items?.length) rijen.push([t('voice.rij.producten'), opsomming(p.items)])
+  if (p.contact) rijen.push([t('voice.rij.wie'), p.contact])
+  if (p.message) rijen.push([t('voice.rij.bericht'), p.message])
   if (rijen.length === 0) return null
 
   return (

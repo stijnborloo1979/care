@@ -129,14 +129,14 @@ export default function Talk() {
           {antwoord.bevestig && antwoord.bevestig.length > 0 ? (
             bevestigd ? (
               <p className="mt-4 rounded-2xl bg-accent-soft p-3 text-lg font-semibold text-accent-ink">
-                Genoteerd. Je familie ziet het ook.
+                {t('praten.genoteerdFamilie')}
               </p>
             ) : (
               <button
                 onClick={() => neemNu(antwoord.bevestig!)}
                 className="mt-4 flex min-h-touch w-full items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
               >
-                Ik heb ze nu genomen
+                {t('praten.nuGenomen')}
               </button>
             )
           ) : null}
@@ -146,7 +146,7 @@ export default function Talk() {
               href={`tel:${antwoord.bellen.nummer.replace(/\s/g, '')}`}
               className="mt-4 flex min-h-touch items-center justify-center rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white"
             >
-              📞 Bel {antwoord.bellen.naam}
+              📞 {t('praten.bel', { naam: antwoord.bellen.naam })}
             </a>
           ) : null}
 
@@ -182,7 +182,7 @@ export default function Talk() {
       </section>
 
       <p className="mt-6 text-sm text-ink-faint">
-        Ik antwoord alleen met wat je familie heeft ingevuld. Weet ik het niet, dan zeg ik dat.
+        {t('praten.alleenFamilie')}
       </p>
     </main>
   )

@@ -1,13 +1,14 @@
 import { Navigate } from 'react-router-dom'
 import { useHousehold } from './features/household/useHousehold'
 import Today from './features/today/Today'
+import { t } from './lib/i18n'
 
 export default function PersonShell() {
   const { household, isLoading, isError } = useHousehold()
 
-  if (isLoading) return <p className="p-6 text-ink-soft">Even geduld…</p>
+  if (isLoading) return <p className="p-6 text-ink-soft">{t('algemeen.evenGeduld')}</p>
 
-  if (isError) return <p className="p-6 text-ink-soft">De gegevens zijn nu niet te laden.</p>
+  if (isError) return <p className="p-6 text-ink-soft">{t('algemeen.nietTeLaden')}</p>
   if (!household) return <Navigate to="/start" replace />
 
   return (

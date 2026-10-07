@@ -3,6 +3,7 @@ import StoragePhoto from '../../components/StoragePhoto'
 import Icon from '../../components/Icon'
 import { hhmm } from '../../lib/time'
 import { getMedsToday, type MedMoment } from '../../services/medsToday'
+import { t } from '../../lib/i18n'
 
 /**
  * Medicatie op het scherm van de persoon.
@@ -53,7 +54,7 @@ export default function MedicatieKaart({
   return (
     <section aria-labelledby="medicatie" className="rounded-card bg-surface p-5 shadow-card">
       <h2 id="medicatie" className="text-base font-bold text-ink-faint">
-        Medicatie
+        {t('medicatie.titel')}
       </h2>
 
       {nu ? (
@@ -66,7 +67,7 @@ export default function MedicatieKaart({
       ) : (
         <p className="mt-2 flex items-center gap-2 text-xl font-bold">
           <Icon naam="gedaan" size={24} />
-          Alles genomen voor vandaag.
+          {t('medicatie.allesGenomen')}
         </p>
       )}
 
@@ -78,7 +79,7 @@ export default function MedicatieKaart({
             <li key={m.id} className="flex items-center gap-2 text-ink-soft">
               <Icon naam="gedaan" size={18} />
               <span>
-                {m.naam} — genomen om {hhmm(new Date(m.taken_at as string), timezone)}
+                {t('medicatie.genomenOm', { naam: m.naam, tijd: hhmm(new Date(m.taken_at as string), timezone) })}
               </span>
             </li>
           ))}
@@ -87,7 +88,7 @@ export default function MedicatieKaart({
 
       {open.length > 1 ? (
         <p className="mt-3 text-ink-faint">
-          Daarna nog {open.length - 1} {open.length - 1 === 1 ? 'moment' : 'momenten'} vandaag.
+          {open.length - 1 === 1 ? t('medicatie.nogEen') : t('medicatie.nogMeer', { n: open.length - 1 })}
         </p>
       ) : null}
     </section>
@@ -124,7 +125,7 @@ function Moment({
           <p className="text-2xl font-extrabold leading-tight tracking-tight">{m.naam}</p>
           {m.dosis ? <p className="mt-1 text-lg">{m.dosis}</p> : null}
           <p className="mt-1 text-lg text-ink-soft">
-            om {hhmm(new Date(m.due_at), timezone)}
+            {t('medicatie.om', { tijd: hhmm(new Date(m.due_at), timezone) })}
           </p>
         </div>
       </div>
@@ -137,7 +138,7 @@ function Moment({
         className="mt-4 flex min-h-[3.4rem] w-full items-center justify-center gap-2 rounded-pill bg-accent-ink px-5 text-lg font-semibold text-white shadow-lift disabled:opacity-60"
       >
         <Icon naam="gedaan" size={20} />
-        {bezig ? 'Bezig…' : 'Genomen'}
+        {bezig ? t('algemeen.bezig') : t('medicatie.genomen')}
       </button>
     </div>
   )

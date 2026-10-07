@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
+import { tt } from '../../lib/uiTaal'
 
 /**
  * Als de huishoudens niet te laden zijn, is dat een fout — geen nieuwe
@@ -33,22 +34,22 @@ export default function LaadFout({
 
   return (
     <main className="mx-auto max-w-[34rem] px-5 py-10">
-      <h1 className="text-2xl font-bold">Je gegevens zijn nu niet te laden</h1>
-      <p className="mt-2 text-ink-soft">Je huishouden is niet weg. Probeer het opnieuw.</p>
+      <h1 className="text-2xl font-bold">{tt('Je gegevens zijn nu niet te laden')}</h1>
+      <p className="mt-2 text-ink-soft">{tt('Je huishouden is niet weg. Probeer het opnieuw.')}</p>
       <div className="mt-6 flex gap-3">
         {onOpnieuw ? (
           <button
             onClick={onOpnieuw}
             className="min-h-[3rem] rounded-full bg-accent px-6 font-bold text-white"
           >
-            Opnieuw
+            {tt('Opnieuw')}
           </button>
         ) : null}
         <button
           onClick={() => signOut()}
           className="min-h-[3rem] rounded-full border-[1.5px] border-line-strong px-6 font-bold"
         >
-          Uitloggen
+          {tt('Uitloggen')}
         </button>
       </div>
       <Diagnose melding={melding} email={session?.user.email} id={session?.user.id} uid={uid} />

@@ -32,7 +32,10 @@ export function useWekwoord(opts: { actief: boolean; naam: string; onWek: () => 
     let herstart: number | null = null
     let fouten = 0
 
-    const zinnen = [`hallo ${doel}`, `hey ${doel}`, `hoi ${doel}`, `dag ${doel}`, `ok ${doel}`, `oke ${doel}`]
+    // De herkenner luistert in de taal van het huishouden; de begroetingen
+    // van de drie talen tellen altijd.
+    const groeten = ['hallo', 'hey', 'hoi', 'dag', 'ok', 'oke', 'bonjour', 'salut', 'coucou', 'hello', 'hi', 'okay']
+    const zinnen = groeten.map((g) => `${g} ${doel}`)
 
     function start() {
       if (gestopt || document.visibilityState !== 'visible') return

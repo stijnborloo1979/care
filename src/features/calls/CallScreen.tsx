@@ -64,7 +64,7 @@ export default function CallScreen({
       className="fixed inset-0 z-[60] flex flex-col bg-black"
       role="dialog"
       aria-modal="true"
-      aria-label={`Videogesprek met ${metWie}`}
+      aria-label={t('oproep.metWie', { naam: metWie })}
       style={{
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -98,12 +98,11 @@ export default function CallScreen({
                 niets kapot, er is gewoon niet opgenomen. */}
             {state === 'declined' ? (
               <p className="max-w-sm text-lg text-white/80">
-                Er werd op &ldquo;Nu niet&rdquo; gedrukt. Probeer het straks opnieuw, of stuur een
-                ingesproken bericht.
+                {t('oproep.nuNiet')}
               </p>
             ) : state === 'missed' ? (
               <p className="max-w-sm text-lg text-white/80">
-                Misschien is er niemand bij het scherm. Een ingesproken bericht blijft wel staan.
+                {t('oproep.niemand')}
               </p>
             ) : fout ? (
               <p className="max-w-sm text-lg text-white/80">{fout}</p>
@@ -118,13 +117,13 @@ export default function CallScreen({
             onClick={zetGeluidAan}
             className="absolute inset-x-6 top-6 flex min-h-[4rem] items-center justify-center rounded-card bg-white text-xl font-bold text-black shadow-lift"
           >
-            🔊 Tik hier voor geluid
+            {t('oproep.tikGeluid')}
           </button>
         ) : null}
 
         {state === 'active' && !externHeeftGeluid ? (
           <p className="absolute inset-x-6 top-6 rounded-card bg-black/70 p-4 text-center text-lg text-white">
-            Er komt geen geluid van de andere kant. Staat daar de microfoon uit of geblokkeerd?
+            {t('oproep.geenGeluid')}
           </p>
         ) : null}
 
@@ -143,7 +142,7 @@ export default function CallScreen({
         <button
           onClick={() => zetMicrofoon(!microfoonAan)}
           aria-pressed={!microfoonAan}
-          aria-label={microfoonAan ? 'Microfoon uitzetten' : 'Microfoon aanzetten'}
+          aria-label={microfoonAan ? t('oproep.micUit') : t('oproep.micAan')}
           className="grid h-14 w-14 place-items-center rounded-full bg-white/15 text-2xl text-white"
         >
           {microfoonAan ? '🎤' : '🔇'}
@@ -152,7 +151,7 @@ export default function CallScreen({
         <button
           onClick={stoppen}
           className="grid h-20 w-20 place-items-center rounded-full bg-[#B03A2E] text-3xl text-white"
-          aria-label="Ophangen"
+          aria-label={t('oproep.ophangen')}
         >
           📵
         </button>
@@ -160,7 +159,7 @@ export default function CallScreen({
         <button
           onClick={() => zetCamera(!cameraAan)}
           aria-pressed={!cameraAan}
-          aria-label={cameraAan ? 'Camera uitzetten' : 'Camera aanzetten'}
+          aria-label={cameraAan ? t('oproep.camUit') : t('oproep.camAan')}
           className="grid h-14 w-14 place-items-center rounded-full bg-white/15 text-2xl text-white"
         >
           {cameraAan ? '📹' : '🚫'}

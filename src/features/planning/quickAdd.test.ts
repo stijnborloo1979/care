@@ -67,4 +67,36 @@ describe('quickAdd', () => {
   it('weigert een lege titel', () => {
     expect(quickAdd('morgen 14u', NU)).toBeNull()
   })
+
+  describe('in het Frans en het Engels', () => {
+    it('jeudi 14h médecin', () => {
+      expect(op(quickAdd('jeudi 14h médecin', NU))).toEqual({ titel: 'Médecin', datum: '12/3', tijd: '14:00' })
+    })
+    it('demain à 9 heures coiffeur', () => {
+      expect(op(quickAdd('demain à 9 heures coiffeur', NU))).toEqual({ titel: 'Coiffeur', datum: '11/3', tijd: '09:00' })
+    })
+    it('après-demain is niet morgen', () => {
+      expect(op(quickAdd('après-demain 10h30 kiné', NU)).datum).toBe('12/3')
+    })
+    it('14 avril 15h dentiste', () => {
+      expect(op(quickAdd('14 avril 15h dentiste', NU))).toEqual({ titel: 'Dentiste', datum: '14/4', tijd: '15:00' })
+    })
+    it('tomorrow 2pm doctor', () => {
+      expect(op(quickAdd('tomorrow 2pm doctor', NU))).toEqual({ titel: 'Doctor', datum: '11/3', tijd: '14:00' })
+    })
+    it('friday 9:30 am hairdresser', () => {
+      expect(op(quickAdd('friday 9:30 am hairdresser', NU))).toEqual({ titel: 'Hairdresser', datum: '13/3', tijd: '09:30' })
+    })
+    it('march 20 at 11 dentist', () => {
+      expect(op(quickAdd('march 20 at 11 dentist', NU))).toEqual({ titel: 'Dentist', datum: '20/3', tijd: '11:00' })
+    })
+    it('12 am is middernacht, 12 pm is middag', () => {
+      expect(op(quickAdd('tomorrow 12 pm lunch', NU)).tijd).toBe('12:00')
+      expect(op(quickAdd('tomorrow 12 am alarm', NU)).tijd).toBe('00:00')
+    })
+    it('het Nederlands blijft werken: morgen is niet overmorgen', () => {
+      expect(op(quickAdd('overmorgen 14u dokter', NU)).datum).toBe('12/3')
+      expect(op(quickAdd('morgen 14u dokter', NU)).datum).toBe('11/3')
+    })
+  })
 })

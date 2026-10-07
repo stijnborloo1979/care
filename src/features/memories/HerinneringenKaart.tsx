@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import StoragePhoto from '../../components/StoragePhoto'
 import { usePhotos } from './usePhotos'
+import { t } from '../../lib/i18n'
 
 /**
  * De ingang naar de fototijdlijn, als tegel op het dagscherm.
@@ -23,7 +24,7 @@ export default function HerinneringenKaart({ householdId }: { householdId: strin
 
   return (
     <section aria-labelledby="herinneringen" className="overflow-hidden rounded-card bg-surface shadow-card">
-      <Link to="/fotos" aria-label={`Foto's bekijken, te beginnen bij ${nieuwste.title}`}>
+      <Link to="/fotos" aria-label={t('fotos.bekijkVanaf', { titel: nieuwste.title })}>
         <StoragePhoto
           path={nieuwste.photo_path}
           bucket="memories"
@@ -35,7 +36,7 @@ export default function HerinneringenKaart({ householdId }: { householdId: strin
 
       <div className="p-5">
         <h2 id="herinneringen" className="text-base font-bold text-ink-faint">
-          Herinneringen
+          {t('fotos.herinneringen')}
         </h2>
         <p className="mt-1 text-2xl font-bold tracking-tight">{nieuwste.title}</p>
         {nieuwste.year ? <p className="mt-1 text-lg text-ink-soft">{nieuwste.year}</p> : null}
@@ -45,7 +46,7 @@ export default function HerinneringenKaart({ householdId }: { householdId: strin
           className="mt-4 inline-flex min-h-touch items-center rounded-pill border-[1.5px] border-line-strong px-5 font-semibold"
         >
           {/* Het aantal erbij: dat maakt van een knop een belofte. */}
-          Alle {fotos.length} foto's bekijken
+          {t('fotos.alle', { n: fotos.length })}
         </Link>
       </div>
     </section>

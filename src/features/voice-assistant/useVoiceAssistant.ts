@@ -252,7 +252,7 @@ export function useVoiceAssistant() {
       if (e instanceof SpraakFout && e.soort !== 'fout') {
         geenSpraakRef.current = true
         setGeenSpraak(true)
-        const zin = e.soort === 'geweigerd' ? 'Ik mag de microfoon niet gebruiken. Typ wat je wil.' : t('voice.geenSpraak')
+        const zin = e.soort === 'geweigerd' ? t('spraak.micVerbodenTyp') : t('voice.geenSpraak')
         setBeurt({ stand: standRef.current, zeg: zin, status: 'mislukt', luisterNa: false })
         setFase('wacht')
         return

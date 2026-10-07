@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useKioskBezig } from '../kiosk/kioskStore'
+import { t } from '../../lib/i18n'
 
 export type RecorderState = 'idle' | 'requesting' | 'recording' | 'ready' | 'error'
 
@@ -73,7 +74,7 @@ export function useVoiceRecorder() {
 
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       setState('error')
-      setError('Opnemen werkt niet in deze browser. Typ je bericht of gebruik een andere browser.')
+      setError(t('opname.nietInBrowser'))
       return
     }
 
@@ -120,11 +121,11 @@ export function useVoiceRecorder() {
       setState('error')
       const naam = e instanceof DOMException ? e.name : ''
       if (naam === 'NotAllowedError') {
-        setError('De microfoon is geblokkeerd. Zet hem aan in de instellingen van je browser.')
+        setError(t('opname.micGeblokkeerd'))
       } else if (naam === 'NotFoundError') {
-        setError('Geen microfoon gevonden op dit toestel.')
+        setError(t('opname.geenMic'))
       } else {
-        setError('Opnemen lukte niet. Probeer het opnieuw.')
+        setError(t('opname.mislukt'))
       }
     }
   }, [stop, stopTracks])

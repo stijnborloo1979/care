@@ -18,7 +18,7 @@ export default function ItemDetail() {
     const tekst = [
       item.name,
       item.where_text ?? '',
-      ...item.item_step.map((s, i) => `Stap ${i + 1}: ${s.body}`),
+      ...item.item_step.map((s, i) => t('inhuis.stap', { n: i + 1, tekst: s.body })),
     ].join('. ')
     window.speechSynthesis.cancel()
     const u = new SpeechSynthesisUtterance(tekst)
@@ -36,7 +36,7 @@ export default function ItemDetail() {
         to={`/memory/${item.room_id}`}
         className="font-semibold text-accent-ink underline underline-offset-4"
       >
-        ‹ Terug
+        {t('algemeen.terug')}
       </Link>
 
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">
@@ -86,7 +86,7 @@ export default function ItemDetail() {
         className="mt-6 flex min-h-touch w-full items-center justify-center gap-2 rounded-pill border-[1.5px] border-line-strong px-5 text-lg font-semibold"
       >
         <Icon naam="voorlezen" size={20} />
-        Lees dit voor
+        {t('inhuis.leesVoor')}
       </button>
     </main>
   )

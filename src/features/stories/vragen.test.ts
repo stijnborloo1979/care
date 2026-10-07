@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { vraagVanVandaag } from './vragen'
+import { VRAGEN, VRAGEN_PER_TAAL, inHetNederlands, vraagVanVandaag } from './vragen'
+import { hoofdstukVan } from './hoofdstukken'
+import { zetTaal } from '../../lib/i18n'
 import { kiesHerinnering } from '../memories/vandaagVroeger'
 
 const LIJST = ['A', 'B', 'C', 'D']
@@ -68,5 +70,39 @@ describe('kiesHerinnering', () => {
 
   it('geeft niets zonder foto’s', () => {
     expect(kiesHerinnering([], '2026-09-24')).toBeNull()
+  })
+})
+
+describe('vragen in drie talen', () => {
+  it('evenveel vragen in elke taal, in dezelfde volgorde', () => {
+    expect(VRAGEN_PER_TAAL.fr).toHaveLength(VRAGEN.length)
+    expect(VRAGEN_PER_TAAL.en).toHaveLength(VRAGEN.length)
+    expect(inHetNederlands(VRAGEN_PER_TAAL.fr[7])).toBe(VRAGEN[7])
+    expect(inHetNederlands(VRAGEN_PER_TAAL.en[7])).toBe(VRAGEN[7])
+  })
+
+  it('stelt de vraag in de taal van het huishouden, dezelfde als in het Nederlands', () => {
+    zetTaal('nl')
+    const nl = vraagVanVandaag('2026-10-07', new Set())!
+    zetTaal('fr')
+    const fr = vraagVanVandaag('2026-10-07', new Set())!
+    zetTaal('nl')
+    expect(VRAGEN_PER_TAAL.fr).toContain(fr)
+    expect(inHetNederlands(fr)).toBe(nl)
+  })
+
+  it('een vraag die in het Nederlands beantwoord is, komt in het Frans niet terug', () => {
+    zetTaal('fr')
+    const alles = new Set(VRAGEN.slice(1))
+    const over = vraagVanVandaag('2026-10-07', alles)
+    zetTaal('nl')
+    expect(over).toBe(VRAGEN_PER_TAAL.fr[0])
+  })
+
+  it('een vertaalde vraag komt in hetzelfde hoofdstuk', () => {
+    for (let i = 0; i < VRAGEN.length; i++) {
+      expect(hoofdstukVan(VRAGEN_PER_TAAL.fr[i])).toBe(hoofdstukVan(VRAGEN[i]))
+      expect(hoofdstukVan(VRAGEN_PER_TAAL.en[i])).toBe(hoofdstukVan(VRAGEN[i]))
+    }
   })
 })

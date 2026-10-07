@@ -6,7 +6,7 @@ export default function MemoryHome() {
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6 sm:max-w-[46rem]">
       <Link to="/" className="font-semibold text-accent-ink underline underline-offset-4">
-        ‹ Vandaag
+        {t('algemeen.naarVandaag')}
       </Link>
 
       <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{t('huis.titel')}</h1>

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { tt } from '../lib/uiTaal'
 
 export interface Zender {
   id: string
@@ -110,5 +111,5 @@ export async function zoekZenders(naam: string, land = 'BE'): Promise<Zoekresult
       // Volgende server proberen.
     }
   }
-  throw new Error('De zenderlijst is nu niet bereikbaar. Probeer het straks opnieuw.')
+  throw new Error(tt('De zenderlijst is nu niet bereikbaar. Probeer het straks opnieuw.'))
 }
