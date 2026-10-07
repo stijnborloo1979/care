@@ -95,7 +95,8 @@ as $$
     (83, 'functie', 'org_rapport', 'Rapporten'),
     (84, 'functie', 'importeer_bewoners', 'Bewoners importeren'),
     (85, 'functie', 'maak_demo_wzc', 'Demo-woonzorgcentrum'),
-    (86, 'kolom', 'plan.prijs_op_aanvraag', 'Aanbod bij de livegang')
+    (86, 'kolom', 'plan.prijs_op_aanvraag', 'Aanbod bij de livegang'),
+    (87, 'functie', 'uitnodiging_token', 'Familie uitnodigen (herstel)')
   )
   select k.nr, k.label,
     case k.soort
