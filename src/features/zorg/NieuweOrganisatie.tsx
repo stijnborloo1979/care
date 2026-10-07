@@ -27,7 +27,10 @@ export default function NieuweOrganisatie() {
 
   if (isLoading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>
   // Wie al ergens werkt en hier per ongeluk landt, gaat gewoon naar zijn scherm.
-  if (org && !maak.isPending) return <Navigate to="/zorg" replace />
+  // Maar niet net na het registreren: dan gaat onSuccess naar Beheer, en
+  // deze regel zou die navigatie inhalen en de nieuwe beheerder op een leeg
+  // Vandaag zetten in plaats van bij de koppelcode.
+  if (org && !maak.isPending && !maak.isSuccess) return <Navigate to="/zorg" replace />
 
   return (
     <main className="mx-auto max-w-[32rem] px-5 py-10">

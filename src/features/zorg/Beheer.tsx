@@ -391,6 +391,9 @@ function Medewerkers({ orgId }: { orgId: string }) {
       setLink(r.link)
       setGemaild(r.gemaild)
       setEmail('')
+      // De nieuwe uitnodiging meteen in "Openstaande uitnodigingen" en in
+      // de teller van het Overzicht, zodat ze ingetrokken kan worden.
+      queryClient.invalidateQueries({ queryKey: ['zorg', 'open-uitnodigingen', orgId] })
     },
   })
 
