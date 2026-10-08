@@ -297,6 +297,10 @@ controlequery. De volledige checklist voor de livegang staat in
     blijven bestaan maar staan niet meer op de prijspagina. Er wordt nog
     niets afgedwongen of aangerekend: daarvoor is een betaalprovider nodig.
     Draai daarna `76_systeemcontrole.sql` opnieuw.
+87. `87_uitnodiging_familie_herstel.sql` — "Iemand uitnodigen" bij Familie
+    werkt weer: `create_invite` (05) zocht `gen_random_bytes` in `public`,
+    terwijl pgcrypto op Supabase in `extensions` staat. Draai daarna
+    `76_systeemcontrole.sql` opnieuw.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { toonNaam } from '../messages/messages'
+import { mijnProfielNaam } from '../../services/mijnNaam'
 import { tt } from '../../lib/uiTaal'
 
 /**
@@ -27,15 +28,9 @@ export default function JouwNaam() {
   const { data } = useQuery({
     queryKey: ['mijn-profiel', id],
     enabled: !!id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profile')
-        .select('full_name')
-        .eq('id', id)
-        .maybeSingle()
-      if (error) throw error
-      return (data as { full_name: string | null } | null)?.full_name ?? ''
-    },
+    // Dezelfde sleutel en dezelfde functie als useMijnNaam: na Opslaan
+    // verandert ook de begroeting op het dashboard.
+    queryFn: () => mijnProfielNaam(id),
   })
 
   const [naam, setNaam] = useState('')

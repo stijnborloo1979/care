@@ -6,6 +6,7 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
 import ZorgToegang from '../features/zorg/ZorgToegang'
 import { tt } from '../lib/uiTaal'
+import { useMijnNaam } from '../services/mijnNaam'
 
 const ROL: Record<string, string> = {
   admin: tt('familiebeheerder'),
@@ -22,10 +23,11 @@ export default function AccountBar() {
   const { session, signOut } = useAuth()
   const { household, all, kies } = useHousehold()
   const [open, setOpen] = useState(false)
+  const mijnNaam = useMijnNaam()
 
   if (!session || !household) return null
 
-  const naam = session.user.email?.split('@')[0] ?? tt('jij')
+  const naam = mijnNaam || tt('jij')
 
   return (
     <div className="relative">

@@ -31,7 +31,7 @@ export default function Onboarding() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
-  const { session } = useAuth()
+  const { session, signOut } = useAuth()
   const queryClient = useQueryClient()
 
   // Geen standaardkeuze: of je de app zelf gebruikt of voor iemand anders,
@@ -357,6 +357,16 @@ export default function Onboarding() {
           {tt('Deze stap overslaan')}
         </button>
       ) : null}
+
+      {/* Wie met het verkeerde adres inlogde, of hier niet hoort, moet weg
+          kunnen zonder eerst een huishouden aan te maken. */}
+      <p className="mt-10 text-center text-sm text-ink-faint">
+        {tt('Je bent nu ingelogd als')}{' '}
+        <span className="break-all font-semibold">{session?.user.email}</span>.{' '}
+        <button onClick={() => signOut()} className="font-semibold underline underline-offset-4">
+          {tt('Uitloggen')}
+        </button>
+      </p>
 
       {error ? (
         <p role="alert" className="mt-5 rounded-2xl border border-alert bg-surface-soft p-3 text-alert">

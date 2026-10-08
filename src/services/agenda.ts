@@ -13,6 +13,22 @@ export interface AgendaEvent {
   note: string | null
   person_id: string | null
   done_at: string | null
+  created_at?: string
+}
+
+/**
+ * Telt dit moment als gemist? Niet afgevinkt, en meer dan een uur
+ * voorbij. Maar een moment dat pas aangemaakt werd toen het al voorbij
+ * was, telt niet: niemand kon het op tijd afvinken. Dat gebeurt bij elk
+ * nieuw gezin dat 's avonds de app instelt; anders zag de familie meteen
+ * "De dag wijkt af".
+ */
+export function isGemist(e: AgendaEvent, nu: Date): boolean {
+  if (e.done_at) return false
+  const start = new Date(e.starts_at).getTime()
+  if (start >= nu.getTime() - 3600_000) return false
+  if (e.created_at && new Date(e.created_at).getTime() > start) return false
+  return true
 }
 
 /**
@@ -27,7 +43,7 @@ export async function getToday(householdId: string, tz: string): Promise<AgendaE
 
   const { data, error } = await supabase
     .from('agenda_event')
-    .select('id, household_id, starts_at, title, emoji, kind, note, person_id, done_at')
+    .select('id, household_id, starts_at, title, emoji, kind, note, person_id, done_at, created_at')
     .eq('household_id', householdId)
     .gte('starts_at', van)
     .lte('starts_at', tot)

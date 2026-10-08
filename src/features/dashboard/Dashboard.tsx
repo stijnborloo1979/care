@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { dismissAlert, getSummary, type Summary } from '../../services/dashboard'
+import { isGemist } from '../../services/agenda'
 import { hhmm } from '../../lib/time'
 import { useNow } from '../today/useAgenda'
 import Icon from '../../components/Icon'
@@ -59,9 +60,7 @@ function toestandVan(s: Summary, now: Date): Toestand {
     }
   }
 
-  const gemist = s.events.filter(
-    (e) => !e.done_at && new Date(e.starts_at).getTime() < now.getTime() - 3600_000,
-  )
+  const gemist = s.events.filter((e) => isGemist(e, now))
   if (gemist.length >= 3) {
     return {
       kleur: 'var(--warn)',
