@@ -17,6 +17,10 @@ Vink af in de pull request of in een kopie van dit bestand.
       Er is geen 28. Van 46 zijn er twee: eerst `46_my_households_herstel.sql`,
       dan `46_voice.sql`. De laatste is `87_uitnodiging_familie_herstel.sql`:
       **draai die zeker**, anders kan een familiebeheerder niemand uitnodigen.
+- [ ] Krijgt de app overal 403, of geeft "Klaar" bij de onboarding 409? Dan
+      staan de API-rechten niet open (nieuwere projecten doen dat niet meer
+      vanzelf). Draai `supabase/handmatig/rechten_herstellen.sql`; de
+      controle onderaan moet `true, true, 0, 1` tonen.
 - [ ] Draai `76_systeemcontrole.sql` als laatste opnieuw. Daarna toont de app
       zelf welke updates nog ontbreken: Instellingen (familiebeheerder) en
       Beheer (WZC-beheerder) → **Systeemcontrole**. Daar mag niets meer
