@@ -13,6 +13,7 @@
 
 import { supabase } from '../../lib/supabase'
 import { locale } from '../../lib/i18n'
+import { uitspraak } from '../../lib/uitspraak'
 import { useRadio } from '../radio/radioStore'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
 
@@ -169,7 +170,7 @@ export function zeg(tekst: string): Promise<void> {
   }
   return new Promise((resolve) => {
     window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(tekst)
+    const u = new SpeechSynthesisUtterance(uitspraak(tekst, locale()))
     u.lang = locale()
     // Rustig tempo, zoals de rest van de app.
     u.rate = 0.92
