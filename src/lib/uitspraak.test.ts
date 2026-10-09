@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { uitspraak } from './uitspraak'
 
 describe('uitspraak', () => {
-  it('leest "min." aan het eind van een zin als minus, niet als minister', () => {
+  it('houdt het woord min, maar leest het niet als afkorting van minister', () => {
     expect(uitspraak('Het volume staat op de knop met plus en min.', 'nl-BE')).toBe(
-      'Het volume staat op de knop met plus en minus.',
+      'Het volume staat op de knop met plus en min,',
     )
   })
 
-  it('laat het punt staan als het er was', () => {
-    expect(uitspraak('Plus en min. Klaar.', 'nl')).toBe('Plus en minus. Klaar.')
+  it('laat "min" zonder punt ongemoeid', () => {
+    expect(uitspraak('Plus en min', 'nl')).toBe('Plus en min')
   })
 
   it('leest een hoeveelheid minuten als minuten', () => {
