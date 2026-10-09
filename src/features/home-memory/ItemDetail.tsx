@@ -3,6 +3,7 @@ import Icon from '../../components/Icon'
 import StoragePhoto from '../../components/StoragePhoto'
 import { useItem } from './useHomeMemory'
 import { locale, t } from '../../lib/i18n'
+import { uitspraak } from '../../lib/uitspraak'
 
 /**
  * Waar het ding ligt, en hoe het werkt. Eén stap per kaart, grote tekst,
@@ -21,7 +22,7 @@ export default function ItemDetail() {
       ...item.item_step.map((s, i) => t('inhuis.stap', { n: i + 1, tekst: s.body })),
     ].join('. ')
     window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(tekst)
+    const u = new SpeechSynthesisUtterance(uitspraak(tekst, locale()))
     u.lang = locale()
     u.rate = 0.92
     window.speechSynthesis.speak(u)
