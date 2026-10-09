@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useKioskBezig } from '../kiosk/kioskStore'
 import { useRadio } from '../radio/radioStore'
 import { locale, t } from '../../lib/i18n'
+import { kanVoorlezen, stopVoorlezen, voorlezen } from '../../lib/voorlezen'
 
 type Herkenner = {
   lang: string
@@ -23,17 +24,11 @@ function herkennerKlasse(): (new () => Herkenner) | null {
 }
 
 export function spreek(tekst: string) {
-  if (!('speechSynthesis' in window)) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(tekst)
-  u.lang = locale()
-  u.rate = 0.92
+  if (!kanVoorlezen()) return
   // De radio even zachter, anders gaat de herinnering verloren in de muziek.
   const radio = useRadio.getState()
   radio.demp(true)
-  u.onend = () => radio.demp(false)
-  u.onerror = () => radio.demp(false)
-  window.speechSynthesis.speak(u)
+  voorlezen(tekst, { onEinde: () => radio.demp(false) })
 }
 
 export function useSpeech(onVraag: (tekst: string) => void) {
@@ -69,9 +64,7 @@ export function useSpeech(onVraag: (tekst: string) => void) {
   }, [])
 
   useEffect(() => {
-    return () => {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-    }
+    return () => stopVoorlezen()
   }, [])
 
   return { start, luistert, fout, beschikbaar }

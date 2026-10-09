@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getPersonInbox, hideMessage, markRead, signedUrl, toonNaam, type InboxMessage } from './messages'
 import StoragePhoto from '../../components/StoragePhoto'
-import { locale, t } from '../../lib/i18n'
+import { t } from '../../lib/i18n'
+import { voorlezen } from '../../lib/voorlezen'
 
 /**
  * Eén bericht als één grote knop. Indrukken, afspelen, klaar.
@@ -34,12 +35,7 @@ export function MessageButton({ message }: { message: InboxMessage }) {
 
     if (!message.audio_path) {
       // Een tekstbericht: laten voorlezen door het toestel zelf.
-      if (message.body && 'speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(message.body)
-        u.lang = locale()
-        u.rate = 0.92
-        window.speechSynthesis.speak(u)
-      }
+      if (message.body) voorlezen(message.body)
       await bevestig()
       return
     }

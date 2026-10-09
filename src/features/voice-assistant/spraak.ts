@@ -13,6 +13,7 @@
 
 import { supabase } from '../../lib/supabase'
 import { locale } from '../../lib/i18n'
+import { stopVoorlezen, voorlezen } from '../../lib/voorlezen'
 import { useRadio } from '../radio/radioStore'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
 
@@ -168,11 +169,6 @@ export function zeg(tekst: string): Promise<void> {
     return Promise.resolve()
   }
   return new Promise((resolve) => {
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(tekst)
-    u.lang = locale()
-    // Rustig tempo, zoals de rest van de app.
-    u.rate = 0.92
     const radio = useRadio.getState()
     radio.demp(true)
     let klaar = false
@@ -182,14 +178,13 @@ export function zeg(tekst: string): Promise<void> {
       radio.demp(false)
       resolve()
     }
-    u.onend = einde
-    u.onerror = einde
     // Sommige browsers vergeten onend; dan niet eeuwig wachten.
     window.setTimeout(einde, 2000 + tekst.length * 90)
-    window.speechSynthesis.speak(u)
+    // Rustig tempo, zoals de rest van de app.
+    voorlezen(tekst, { rate: 0.92, onEinde: einde })
   })
 }
 
 export function zwijg() {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel()
+  stopVoorlezen()
 }
