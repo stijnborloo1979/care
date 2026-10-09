@@ -110,9 +110,16 @@ export function RoomItems() {
                 to={`/memory/ding/${i.id}`}
                 className="flex items-center gap-4 rounded-card border border-line bg-surface p-4 shadow-card"
               >
-                <span className="w-10 text-center text-3xl" aria-hidden="true">
-                  {i.emoji ?? '📦'}
-                </span>
+                {/* Een foto vervangt het icoon; het icoon is alleen de terugval. */}
+                {i.photo_path ? (
+                  <div className="w-14 flex-none">
+                    <StoragePhoto path={i.photo_path} emoji={i.emoji} alt={i.name} />
+                  </div>
+                ) : (
+                  <span className="w-10 text-center text-3xl" aria-hidden="true">
+                    {i.emoji ?? '📦'}
+                  </span>
+                )}
                 <span className="min-w-0 flex-1">
                   <span className="block text-lg font-bold">{i.name}</span>
                   <span className="block text-ink-soft">{i.where_text}</span>

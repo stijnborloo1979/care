@@ -9,6 +9,7 @@ import {
   uploadRoomPhoto,
   uploadStepPhoto,
   type Item,
+  type ItemWithSteps,
   type Room,
 } from '../../services/homeMemory'
 import { useItem, useItems, useRooms } from './useHomeMemory'
@@ -171,9 +172,16 @@ function ItemRow({
   return (
     <li className="rounded-2xl border border-line bg-surface-soft p-3">
       <div className="flex items-center gap-3">
-        <span className="w-8 text-center text-2xl" aria-hidden="true">
-          {item.emoji ?? '📦'}
-        </span>
+        {/* Een foto vervangt het icoon; het icoon is alleen de terugval. */}
+        {item.photo_path ? (
+          <div className="w-14 flex-none">
+            <StoragePhoto path={item.photo_path} emoji={item.emoji} alt={item.name} />
+          </div>
+        ) : (
+          <span className="w-8 text-center text-2xl" aria-hidden="true">
+            {item.emoji ?? '📦'}
+          </span>
+        )}
         <span className="min-w-0 flex-1">
           <span className="block font-semibold">{item.name}</span>
           <span className="block truncate text-sm text-ink-soft">{item.where_text}</span>
@@ -224,18 +232,31 @@ function ItemRow({
   )
 }
 
-function ItemForm({
-  householdId,
-  roomId,
-  itemId,
-  onDone,
-}: {
+type ItemFormProps = {
   householdId: string
   roomId: string
   itemId?: string
   onDone: () => void
-}) {
-  const { data: bestaand } = useItem(itemId ?? '')
+}
+
+/**
+ * Wacht tot het item geladen is voordat het formulier zijn beginwaarden
+ * vastlegt. Anders staan naam, icoon en stappen op de lege standaard (📦),
+ * en een latere opslag schrijft die standaard over het bestaande icoon.
+ */
+function ItemForm(props: ItemFormProps) {
+  const { data: bestaand, isLoading } = useItem(props.itemId ?? '')
+  if (props.itemId && isLoading) return <p className="text-sm text-ink-soft">{tt('Laden…')}</p>
+  return <ItemFormInhoud key={props.itemId ?? 'nieuw'} {...props} bestaand={bestaand ?? null} />
+}
+
+function ItemFormInhoud({
+  householdId,
+  roomId,
+  itemId,
+  onDone,
+  bestaand,
+}: ItemFormProps & { bestaand: ItemWithSteps | null }) {
   const queryClient = useQueryClient()
 
   const [name, setName] = useState(bestaand?.name ?? '')
