@@ -59,6 +59,11 @@ queryClient.setMutationDefaults(['markDone'], {
   },
   onSettled: (_d, _e, v) => {
     queryClient.invalidateQueries({ queryKey: ['agenda', v.householdId] })
+    // Een medicatie-item vinkt ook de medicatiekaart en het overzicht af
+    // (migratie 88). Zonder deze regels blijft de kaart tot de volgende
+    // verversing open staan.
+    queryClient.invalidateQueries({ queryKey: ['meds-today', v.householdId] })
+    queryClient.invalidateQueries({ queryKey: ['summary', v.householdId] })
   },
 })
 
