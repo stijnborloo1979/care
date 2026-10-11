@@ -6,6 +6,7 @@ import CodeLogin from './CodeLogin'
 import TaalKiezer from '../../components/TaalKiezer'
 import { tt } from '../../lib/uiTaal'
 import TabletPair from './TabletPair'
+import Logo from '../../components/Logo'
 
 /**
  * Drie deuren, omdat er drie soorten mensen binnenkomen: wie zorgt, wie
@@ -55,9 +56,7 @@ function Deuren() {
   return (
     <>
       <div className="flex items-start justify-between gap-4">
-        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-accent-ink text-2xl text-white shadow-lift">
-          🏡
-        </div>
+        <Logo className="h-16 w-16 object-contain" />
         <TaalKiezer compact />
       </div>
       <h1 className="mt-6 text-[2.2rem] font-extrabold leading-tight tracking-tight">

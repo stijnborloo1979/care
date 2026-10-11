@@ -10,6 +10,7 @@ import { useOrganisatie } from '../features/zorg/useOrganisatie'
 import { ROLNAAM } from '../features/zorg/zorgApi'
 import { useOngezien } from '../features/zorg/OpenVragen'
 import { tt } from '../lib/uiTaal'
+import Logo from '../components/Logo'
 
 /**
  * Het scherm voor wie in een woonzorgcentrum werkt. Los van het
@@ -140,7 +141,10 @@ export default function ZorgLayout() {
   return (
     <div className="flex min-h-screen">
       <aside className="hidden print:!hidden w-64 shrink-0 border-r border-line bg-surface px-3 py-5 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
-        <p className="px-2 pb-3 text-lg font-extrabold tracking-tight">LifeAngle Care</p>
+        <div className="flex items-center gap-2 px-2 pb-3">
+          <Logo className="h-8 w-8 object-contain" />
+          <p className="text-lg font-extrabold tracking-tight">LifeAngle Care</p>
+        </div>
         <div className="pb-4">{kopBalk}</div>
         <nav aria-label={tt('Hoofdnavigatie')} className="space-y-4">
           {groepen.map((g) => (
