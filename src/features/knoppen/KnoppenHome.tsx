@@ -73,13 +73,17 @@ export function KnopAchtergrond({ pad }: { pad: string }) {
 
 // Een functie en geen constante: tt() moet bij elke weergave de taal van
 // het huishouden kennen, en die kan wijzigen zonder dat de module herlaadt.
-function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: IconNaam }[] {
+// Medicijnen en zoeken hebben nog geen kleur of foto per knop: die komt pas
+// met een migratie die de server-lijst uitbreidt.
+function tegels(): { id: KnopId | 'medicatie' | 'zoeken'; to: string; label: string; sub: string; icoon: IconNaam }[] {
   return [
     // Geen "/": dat is het scherm met grote knoppen zelf. Het overzicht staat op /overzicht.
     { id: 'vandaag', to: '/overzicht', label: tt('Vandaag'), sub: tt('Wat er gepland staat'), icoon: 'vandaag' },
     { id: 'wie', to: '/wie', label: tt('Wie komt er?'), sub: tt('Familie en bezoek'), icoon: 'wie' },
     { id: 'memory', to: '/memory', label: tt('Waar ligt het?'), sub: tt('Dingen in huis'), icoon: 'memory' },
     { id: 'fotos', to: '/fotos', label: tt("Foto's"), sub: tt('Herinneringen'), icoon: 'fotos' },
+    { id: 'medicatie', to: '/medicijnen', label: tt('Medicijnen'), sub: tt('Wat ik vandaag neem'), icoon: 'medicatie' },
+    { id: 'zoeken', to: '/zoeken', label: tt('Zoeken'), sub: tt('Vind wat je zoekt'), icoon: 'zoek' },
     { id: 'radio', to: '/radio', label: tt('Radio'), sub: tt('Favoriete zender'), icoon: 'afspelen' },
     { id: 'help', to: '/help', label: tt('Help'), sub: tt('Hulp of familie'), icoon: 'help' },
   ]
@@ -96,8 +100,8 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
   // krijgt de tegel de gewone vormgeving.
   const k = schoneKnopKleuren(kleuren)
   const f = schoneKnopFotos(fotos)
-  const kleurVan = (id: KnopId) => k[id]
-  const fotoVan = (id: KnopId) => f[id]
+  const kleurVan = (id: string) => (k as Record<string, string | undefined>)[id]
+  const fotoVan = (id: string) => (f as Record<string, string | undefined>)[id]
   const nuKleur = kleurVan('nu')
   const fotoNu = fotoVan('nu')
 

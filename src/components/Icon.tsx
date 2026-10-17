@@ -20,6 +20,7 @@ import {
   Users,
   Video,
   Volume2,
+  Search,
   ShoppingCart,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -32,6 +33,7 @@ import type { LucideIcon } from 'lucide-react'
  */
 const ICONEN = {
   vandaag: House,
+  zoek: Search,
   wie: Users,
   memory: Brain,
   help: LifeBuoy,

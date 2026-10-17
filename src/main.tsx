@@ -63,6 +63,8 @@ const WeekSamen = lazy(() => import("./features/week/WeekSamen"));
 const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
 const Prijzen = lazy(() => import("./features/prijzen/Prijzen"));
+import MedicijnenNu from "./features/medicijnen/MedicijnenNu";
+import Zoeken from "./features/zoeken/Zoeken";
 const ManageMedication = lazy(() => import("./features/medication/ManageMedication"));
 const ManageNotesPage = lazy(() =>
   import("./features/family/FamilyPages").then((m) => ({
@@ -231,6 +233,8 @@ if (!configuratieOk) {
                     <Route path="/" element={<Start />} />
                     <Route path="/persoon" element={<PersonShell />} />
                     <Route path="/overzicht" element={<Overzicht />} />
+                    <Route path="/medicijnen" element={<MedicijnenNu />} />
+                    <Route path="/zoeken" element={<Zoeken />} />
                     <Route path="/wie" element={<WhoIsWho />} />
                     <Route path="/wie/:personId" element={<PersonDetail />} />
                     <Route path="/nu" element={<WhatNow />} />
