@@ -15,6 +15,7 @@ export default {
     "Nog {aantal} te nemen": "Encore {aantal} à prendre",
     "Alles genomen": "Tout pris",
     "Om {tijd}": "À {tijd}",
+    "Vraag het gewoon": "Demandez simplement",
   },
   en: {
     "Medicijnen": "Medicines",
@@ -29,5 +30,6 @@ export default {
     "Nog {aantal} te nemen": "{aantal} still to take",
     "Alles genomen": "All taken",
     "Om {tijd}": "At {tijd}",
+    "Vraag het gewoon": "Just ask",
   },
 } satisfies Vertaling

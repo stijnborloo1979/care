@@ -199,16 +199,19 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
             </Link>
           )
         })}
+        <button
+          type="button"
+          onClick={openVoice}
+          className="relative flex min-h-big flex-col justify-center overflow-hidden rounded-card bg-accent p-6 text-accent-ink shadow-lift"
+        >
+          <span className="relative flex flex-col gap-3">
+            <Icon naam="praten" size={48} />
+            <span className="text-3xl font-bold">{tt('Praat met mij')}</span>
+            <span className="text-lg opacity-90">{tt('Vraag het gewoon')}</span>
+          </span>
+        </button>
       </nav>
 
-      <button
-        type="button"
-        onClick={openVoice}
-        className="flex min-h-big w-full items-center justify-center gap-4 rounded-pill border-4 border-accent bg-surface text-2xl font-bold text-accent-ink"
-      >
-        <Icon naam="praten" size={36} />
-        {tt('Praat met mij')}
-      </button>
     </main>
   )
 }
