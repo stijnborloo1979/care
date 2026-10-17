@@ -45,6 +45,7 @@ export default function PersonShell() {
         personName={household.person_name.split(' ')[0]}
         timezone={household.timezone}
         kleuren={prefs.knoppenKleuren}
+        fotos={prefs.knoppenFotos}
       />
     )
   }
