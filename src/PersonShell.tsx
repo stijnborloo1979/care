@@ -56,6 +56,7 @@ export default function PersonShell() {
   if (prefs.indeling === 'knoppen') {
     return (
       <KnoppenHome
+        householdId={household.household_id}
         personName={household.person_name.split(' ')[0]}
         timezone={household.timezone}
         kleuren={prefs.knoppenKleuren}
