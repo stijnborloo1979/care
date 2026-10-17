@@ -23,7 +23,7 @@ describe('kleur per knop', () => {
   })
 
   it('kent de knoppen van het scherm, ook medicijnen en zoeken', () => {
-    expect(KNOP_IDS).toEqual(['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help', 'medicatie', 'zoeken'])
+    expect(KNOP_IDS).toEqual(['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help', 'medicatie', 'zoeken', 'praten'])
     expect(isKnopId('nu')).toBe(true)
     expect(isKnopId('onbekend')).toBe(false)
   })

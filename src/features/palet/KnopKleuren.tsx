@@ -37,6 +37,7 @@ const KNOP_NAMEN: Record<KnopId, () => string> = {
   help: () => tt('Help'),
   medicatie: () => tt('Medicijnen'),
   zoeken: () => tt('Zoeken'),
+  praten: () => tt('Praat met mij'),
 }
 
 function kleurNaam(hex: string): string {
