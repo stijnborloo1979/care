@@ -17,6 +17,8 @@ export interface LifeStory {
   titel?: string | null
   /** Waar de opname staat; ontbreekt vóór migratie 56 (dan 'messages'). */
   audio_bucket?: 'messages' | 'diary'
+  /** Bij welke foto dit verhaal hoort; ontbreekt vóór migratie 97. */
+  foto_id?: string | null
 }
 
 /** Vroeger: alle opnames in 'messages', map <hh>/verhalen/. */
@@ -84,6 +86,8 @@ export async function addStory(p: {
   delen: boolean
   soort?: 'verhaal' | 'dagboek'
   titel?: string
+  /** Het verhaal hoort bij deze foto (migratie 97). */
+  fotoId?: string
 }) {
   const { data: user } = await supabase.auth.getUser()
   // Het id terug, zodat de bewoner een fragment meteen privé kan zetten.
@@ -99,6 +103,8 @@ export async function addStory(p: {
     // Alleen meesturen als het een dagboek is: zo blijft "Vertel eens"
     // werken op een database zonder migratie 46.
     ...(p.soort === 'dagboek' ? { soort: 'dagboek', titel: p.titel ?? null } : {}),
+    // Alleen meesturen bij een foto: zo blijft het werken zonder migratie 97.
+    ...(p.fotoId ? { foto_id: p.fotoId } : {}),
   }
 
   const heeftOpname = !!(p.blob && p.mimeType)

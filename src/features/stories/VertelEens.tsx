@@ -23,10 +23,13 @@ export default function VertelEens({
   householdId,
   timezone,
   extraVraag,
+  fotoId,
   onKlaar,
 }: {
   householdId: string
   timezone: string
+  /** Het verhaal gaat over deze foto (migratie 97). */
+  fotoId?: string
   /** Een vraag die van buitenaf komt, zoals over een foto van vandaag. */
   extraVraag?: string | null
   onKlaar?: () => void
@@ -67,6 +70,7 @@ export default function VertelEens({
         seconden: opname.recording?.seconds,
         mimeType: opname.recording?.mimeType,
         delen,
+        fotoId,
       }),
     onSuccess: async () => {
       opname.reset()
