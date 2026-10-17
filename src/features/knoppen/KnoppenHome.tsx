@@ -4,9 +4,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Icon, { type IconNaam } from '../../components/Icon'
 import { useVoice } from '../voice-assistant/voiceStore'
-import { dateLine, greeting } from '../../lib/time'
+import { dateLine, greeting, hhmm } from '../../lib/time'
 import { tt } from '../../lib/uiTaal'
 import { signedUrlCached } from '../../lib/storage'
+import { t } from '../../lib/i18n'
+import { useNow } from '../today/useAgenda'
+import { useVandaag } from '../today/useVandaag'
+import { whatNow } from '../today/whatNow'
 import {
   FOTO_LAAG_DEKKING,
   schoneKnopFotos,
@@ -20,6 +24,7 @@ import {
 const BUCKET = 'home-memory'
 
 interface Props {
+  householdId: string
   personName: string
   timezone: string
   /** Kleur per knop, door familie of het WZC gekozen. Ontbreekt een knop, dan de gewone vormgeving. */
@@ -80,8 +85,12 @@ function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: 
   ]
 }
 
-export default function KnoppenHome({ personName, timezone, kleuren, fotos }: Props) {
+export default function KnoppenHome({ householdId, personName, timezone, kleuren, fotos }: Props) {
   const now = new Date()
+  const klok = useNow()
+  // Het volgende op de agenda, rechts in de startknop. Zelfde bron als Vandaag.
+  const { data: agenda } = useVandaag(householdId, timezone, klok)
+  const volgende = agenda ? whatNow(agenda, klok).next : undefined
   const openVoice = useVoice((s) => s.openen)
   // Een kleur of foto die niet (meer) in de vaste lijst staat, valt weg: dan
   // krijgt de tegel de gewone vormgeving.
@@ -101,21 +110,46 @@ export default function KnoppenHome({ personName, timezone, kleuren, fotos }: Pr
         </h1>
       </header>
 
-      {/* Eén primaire actie, bovenaan, zoals op het originele scherm. */}
+      {/* Eén primaire actie, bovenaan, zoals op het originele scherm. Rechts
+          staat het volgende op de agenda, zodat je niet hoeft te zoeken. */}
       <Link
         to="/nu"
-        aria-label={tt('Wat moet ik nu doen?')}
         style={kleurStijl(nuKleur)}
-        className={`relative flex min-h-big items-center gap-6 overflow-hidden rounded-card px-8 py-6 text-white shadow-lift ${nuKleur ? '' : 'bg-accent'}`}
+        className={`relative flex min-h-big flex-col overflow-hidden rounded-card text-white shadow-lift sm:flex-row ${nuKleur ? '' : 'bg-accent'}`}
       >
         {fotoNu ? <KnopAchtergrond pad={fotoNu} /> : null}
-        <span className="relative flex items-center gap-6">
+        <span className="relative flex flex-1 items-center gap-6 px-8 py-6">
           <Icon naam="vandaag" size={56} />
           <span>
             <span className="block text-xl font-semibold opacity-90">{tt('Wat moet ik nu doen?')}</span>
             <span className="block text-3xl font-extrabold">{tt('Bekijk wat nu belangrijk is')}</span>
           </span>
         </span>
+
+        {volgende !== undefined ? (
+          <span className="relative flex flex-col justify-center gap-2 border-t border-white/35 bg-black/20 px-8 py-6 sm:w-[24rem] sm:border-l sm:border-t-0">
+            {volgende ? (
+              <>
+                <span className="text-lg font-semibold opacity-90">
+                  {t('vandaag.daarna')} · {t('vandaag.om', { tijd: hhmm(new Date(volgende.starts_at), timezone) })}
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="text-3xl" aria-hidden="true">
+                    {volgende.emoji ?? '📌'}
+                  </span>
+                  <span className="text-3xl font-extrabold leading-tight">{volgende.title}</span>
+                </span>
+                {volgende.note ? <span className="text-lg opacity-90">{volgende.note}</span> : null}
+              </>
+            ) : (
+              <>
+                <span className="text-lg font-semibold opacity-90">{t('vandaag.daarna')}</span>
+                <span className="text-3xl font-extrabold leading-tight">{tt('Vandaag niets meer')}</span>
+                <span className="text-lg opacity-90">{tt('Rust maar even')}</span>
+              </>
+            )}
+          </span>
+        ) : null}
       </Link>
 
       <nav aria-label={tt('Hoofdmenu')} className="grid grid-cols-2 gap-4 lg:grid-cols-3">
