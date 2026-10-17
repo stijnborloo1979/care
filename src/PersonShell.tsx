@@ -40,36 +40,26 @@ export function Overzicht() {
   )
 }
 
+/**
+ * Het startscherm is altijd de tegelpagina. "Grote knoppen" en "Origineel"
+ * bepalen alleen wat de tegel Vandaag opent (zie Overzicht hierboven).
+ */
 export default function PersonShell() {
   const { household, isLoading, isError } = useHousehold()
-  // Vóór de vroegtijdige returns: de indeling hoort bij het huishouden, en
-  // de hook moet in elke weergave dezelfde volgorde aanroepen.
+  // Vóór de vroegtijdige returns: de hook blijft in elke weergave dezelfde volgorde.
   const { prefs } = useDisplayPrefs(household?.household_id ?? '')
 
   if (isLoading) return <p className="p-6 text-ink-soft">{t('algemeen.evenGeduld')}</p>
-
   if (isError) return <p className="p-6 text-ink-soft">{t('algemeen.nietTeLaden')}</p>
   if (!household) return <Navigate to="/start" replace />
 
-  // De originele indeling is de standaard; het scherm met grote knoppen is
-  // er naast, en wordt alleen getoond als familie of het WZC dat koos.
-  if (prefs.indeling === 'knoppen') {
-    return (
-      <KnoppenHome
-        householdId={household.household_id}
-        personName={household.person_name.split(' ')[0]}
-        timezone={household.timezone}
-        kleuren={prefs.knoppenKleuren}
-        fotos={prefs.knoppenFotos}
-      />
-    )
-  }
-
   return (
-    <Today
+    <KnoppenHome
       householdId={household.household_id}
       personName={household.person_name.split(' ')[0]}
       timezone={household.timezone}
+      kleuren={prefs.knoppenKleuren}
+      fotos={prefs.knoppenFotos}
     />
   )
 }
