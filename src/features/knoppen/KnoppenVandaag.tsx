@@ -37,11 +37,14 @@ export default function KnoppenVandaag({ householdId, personName, timezone }: Pr
   const events = data ?? []
   const { current, next } = whatNow(events, now)
 
-  // De rest van de dag, zonder wat al bovenaan staat en zonder wat gedaan is.
-  const later = events
-    .filter((e) => e.id !== current?.id && e.id !== next?.id && statusOf(e, now) !== 'done')
+  // De rest van de dag, zonder wat al bovenaan staat. Gedane afspraken
+  // blijven in de lijst, zodat ze terug te zetten zijn.
+  const rest = events
+    .filter((e) => e.id !== current?.id && e.id !== next?.id)
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
-  const zichtbaar = alles ? later : later.slice(0, 2)
+  const open = rest.filter((e) => statusOf(e, now) !== 'done')
+  // Standaard alleen de eerstvolgende open afspraken; gedane en de rest op verzoek.
+  const zichtbaar = alles ? rest : open.slice(0, 2)
 
   return (
     <div className="space-y-7">
@@ -94,22 +97,42 @@ export default function KnoppenVandaag({ householdId, personName, timezone }: Pr
       {/* Medicatie: met de foto van de verpakking, zoals op het gewone scherm. */}
       <MedicatieKaart householdId={householdId} timezone={timezone} />
 
-      {/* Later vandaag: alleen de eerstvolgende, de rest op verzoek. */}
-      {later.length > 0 ? (
+      {/* Later vandaag: alleen de eerstvolgende, de rest op verzoek. Elke
+          afspraak is af te vinken, net als op het gewone scherm. */}
+      {rest.length > 0 ? (
         <section aria-labelledby="later-titel" className="space-y-3">
           <h2 id="later-titel" className="text-2xl font-bold text-ink-soft">
             {tt('Later vandaag')}
           </h2>
           <ul className="overflow-hidden rounded-[1.75rem] bg-surface shadow-card">
-            {zichtbaar.map((e) => (
-              <li key={e.id} className="flex min-h-[5.5rem] items-center gap-5 border-b border-line px-6 py-5 last:border-b-0">
-                <span className="w-28 text-3xl font-extrabold">{hhmm(new Date(e.starts_at), timezone)}</span>
-                <span className="flex-1 text-3xl">{e.title}</span>
-                <span className="text-xl text-ink-soft">{STATUS_LABEL[statusOf(e, now)]}</span>
-              </li>
-            ))}
+            {zichtbaar.map((e) => {
+              const gedaan = statusOf(e, now) === 'done'
+              return (
+                <li
+                  key={e.id}
+                  className="flex min-h-[6rem] flex-wrap items-center gap-4 border-b border-line px-6 py-5 last:border-b-0"
+                >
+                  <span className="w-28 text-3xl font-extrabold">{hhmm(new Date(e.starts_at), timezone)}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className={`block text-3xl ${gedaan ? 'text-ink-soft line-through' : ''}`}>{e.title}</span>
+                    <span className="block text-xl text-ink-soft">{STATUS_LABEL[statusOf(e, now)]}</span>
+                  </span>
+                  {isHuis(e) ? null : (
+                    <button
+                      type="button"
+                      onClick={() => markDone.mutate({ id: e.id, done: !gedaan })}
+                      className={`min-h-[4.5rem] min-w-[11rem] rounded-pill px-6 text-2xl font-bold ${
+                        gedaan ? 'border-2 border-line bg-surface text-ink' : 'bg-accent-ink text-white'
+                      }`}
+                    >
+                      {gedaan ? t('vandaag.ongedaan') : t('vandaag.afvinken')}
+                    </button>
+                  )}
+                </li>
+              )
+            })}
           </ul>
-          {later.length > 2 ? (
+          {rest.length > zichtbaar.length || (alles && rest.length > 2) ? (
             <button
               type="button"
               onClick={() => setAlles((v) => !v)}
