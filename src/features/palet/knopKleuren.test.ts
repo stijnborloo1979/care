@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  FOTO_LAAG_DEKKING,
   KNOP_IDS,
   KNOP_KLEUREN,
   contrast,
   isKnopId,
   isKnopKleur,
+  schoneKnopFotos,
   schoneKnopKleuren,
 } from './paletten'
 
@@ -47,5 +49,31 @@ describe('kleur per knop', () => {
     expect(schoneKnopKleuren(null)).toEqual({})
     expect(schoneKnopKleuren('tekst')).toEqual({})
     expect(schoneKnopKleuren([])).toEqual({})
+  })
+
+  it('de donkere laag over een foto houdt witte tekst leesbaar, ook bij een witte foto', () => {
+    // Een volledig witte foto onder de laag: wat er dan overblijft, is grijs.
+    const grijs = Math.round(255 * (1 - FOTO_LAAG_DEKKING))
+    const hex = grijs.toString(16).padStart(2, '0')
+    expect(contrast(`#${hex}${hex}${hex}`, '#ffffff')).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
+describe('foto per knop', () => {
+  it('laat alleen bekende knoppen met een nette padnaam door', () => {
+    const schoon = schoneKnopFotos({
+      nu: 'hh1/knoppen/nu/a.jpg',
+      onbekend: 'hh1/knoppen/onbekend/a.jpg',
+      wie: '/abs/pad.jpg',
+      memory: 'hh1/../andere/a.jpg',
+      help: 42,
+      radio: '',
+    })
+    expect(schoon).toEqual({ nu: 'hh1/knoppen/nu/a.jpg' })
+  })
+
+  it('geeft een lege lijst bij ongeldige invoer', () => {
+    expect(schoneKnopFotos(null)).toEqual({})
+    expect(schoneKnopFotos('tekst')).toEqual({})
   })
 })

@@ -152,3 +152,36 @@ export function schoneKnopKleuren(ruw: unknown): KnopKleuren {
   }
   return uit
 }
+
+/* -------------------------------------------------------------------
+   Foto per knop. De foto krijgt een donkere laag eroverheen, zodat de
+   witte tekst altijd leesbaar blijft, wat de foto ook is.
+   ------------------------------------------------------------------- */
+
+/**
+ * Dekking van de laag over een foto. Bij 60% zwart wordt zelfs een volledig
+ * witte foto #666666: dat geeft 5,7:1 met witte tekst (zie knopKleuren.test.ts).
+ */
+export const FOTO_LAAG_DEKKING = 0.6
+
+/** Het pad van een knopfoto in de bucket. De server controleert het echte huishouden. */
+export type KnopFotos = Partial<Record<KnopId, string>>
+
+/** Alleen bekende knoppen met een nette padnaam; de rest valt weg. */
+export function schoneKnopFotos(ruw: unknown): KnopFotos {
+  const uit: KnopFotos = {}
+  if (!ruw || typeof ruw !== 'object') return uit
+  for (const [sleutel, waarde] of Object.entries(ruw as Record<string, unknown>)) {
+    if (
+      isKnopId(sleutel) &&
+      typeof waarde === 'string' &&
+      waarde.length > 0 &&
+      waarde.length <= 300 &&
+      !waarde.includes('..') &&
+      !waarde.startsWith('/')
+    ) {
+      uit[sleutel] = waarde
+    }
+  }
+  return uit
+}

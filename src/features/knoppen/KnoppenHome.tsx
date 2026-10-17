@@ -1,16 +1,31 @@
 import type { CSSProperties } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Icon, { type IconNaam } from '../../components/Icon'
 import { useVoice } from '../voice-assistant/voiceStore'
 import { dateLine, greeting } from '../../lib/time'
 import { tt } from '../../lib/uiTaal'
-import { schoneKnopKleuren, type KnopId, type KnopKleuren } from '../palet/paletten'
+import { signedUrlCached } from '../../lib/storage'
+import {
+  FOTO_LAAG_DEKKING,
+  schoneKnopFotos,
+  schoneKnopKleuren,
+  type KnopFotos,
+  type KnopId,
+  type KnopKleuren,
+} from '../palet/paletten'
+
+/** De bucket waar de knopfoto's staan: dezelfde als de kamerfoto's. */
+const BUCKET = 'home-memory'
 
 interface Props {
   personName: string
   timezone: string
   /** Kleur per knop, door familie of het WZC gekozen. Ontbreekt een knop, dan de gewone vormgeving. */
   kleuren?: KnopKleuren
+  /** Foto per knop, als pad in de bucket. Ontbreekt een knop, dan telt de kleur. */
+  fotos?: KnopFotos
 }
 
 /** Vorm en kleur van een gekleurde tegel: de achtergrond is de gekozen kleur, de tekst wit. */
@@ -19,17 +34,38 @@ function kleurStijl(kleur: string | undefined): CSSProperties | undefined {
 }
 
 /**
- * Het dagscherm met grote knoppen: een andere indeling, dezelfde functies.
- *
- * Eén primaire knop bovenaan, daaronder zes grote tegels, en onderaan
- * "Praat met mij". Elke tegel brengt naar een bestaand scherm; er is
- * niets nieuws achter, en niets verdwijnt. De originele indeling blijft
- * precies zoals ze was, en is met de instelling "Origineel" weer terug te
- * zetten.
- *
- * Alleen de vorm verandert. De kleuren komen uit het gekozen palet
- * (data-palet op de html-tag), niet van dit scherm zelf.
+ * De foto achter een knop, met een donkere laag eroverheen. Die laag zorgt
+ * dat de witte tekst leesbaar blijft, wat de foto ook is (zie paletten.ts).
+ * Lukt het laden niet, dan blijft de gekozen kleur staan.
  */
+export function KnopAchtergrond({ pad }: { pad: string }) {
+  const [kapot, setKapot] = useState(false)
+  const { data } = useQuery({
+    queryKey: ['knop-foto', pad],
+    queryFn: () => signedUrlCached(BUCKET, pad),
+    staleTime: 3 * 3600 * 1000,
+    retry: 1,
+  })
+
+  if (!data || kapot) return null
+  return (
+    <>
+      <img
+        src={data}
+        alt=""
+        loading="lazy"
+        onError={() => setKapot(true)}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{ backgroundColor: `rgba(0, 0, 0, ${FOTO_LAAG_DEKKING})` }}
+      />
+    </>
+  )
+}
+
 // Een functie en geen constante: tt() moet bij elke weergave de taal van
 // het huishouden kennen, en die kan wijzigen zonder dat de module herlaadt.
 function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: IconNaam }[] {
@@ -44,14 +80,17 @@ function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: 
   ]
 }
 
-export default function KnoppenHome({ personName, timezone, kleuren }: Props) {
+export default function KnoppenHome({ personName, timezone, kleuren, fotos }: Props) {
   const now = new Date()
   const openVoice = useVoice((s) => s.openen)
-  // Een kleur die niet (meer) in de vaste lijst staat, valt weg: dan krijgt
-  // de tegel de gewone vormgeving in plaats van een onleesbare kleur.
+  // Een kleur of foto die niet (meer) in de vaste lijst staat, valt weg: dan
+  // krijgt de tegel de gewone vormgeving.
   const k = schoneKnopKleuren(kleuren)
+  const f = schoneKnopFotos(fotos)
   const kleurVan = (id: KnopId) => k[id]
+  const fotoVan = (id: KnopId) => f[id]
   const nuKleur = kleurVan('nu')
+  const fotoNu = fotoVan('nu')
 
   return (
     <div className="space-y-6">
@@ -67,30 +106,36 @@ export default function KnoppenHome({ personName, timezone, kleuren }: Props) {
         to="/nu"
         aria-label={tt('Wat moet ik nu doen?')}
         style={kleurStijl(nuKleur)}
-        className={`flex min-h-big items-center gap-6 rounded-card px-8 py-6 text-white shadow-lift ${nuKleur ? '' : 'bg-accent'}`}
+        className={`relative flex min-h-big items-center gap-6 overflow-hidden rounded-card px-8 py-6 text-white shadow-lift ${nuKleur ? '' : 'bg-accent'}`}
       >
-        <Icon naam="vandaag" size={56} />
-        <span>
-          <span className="block text-xl font-semibold opacity-90">{tt('Wat moet ik nu doen?')}</span>
-          <span className="block text-3xl font-extrabold">{tt('Bekijk wat nu belangrijk is')}</span>
+        {fotoNu ? <KnopAchtergrond pad={fotoNu} /> : null}
+        <span className="relative flex items-center gap-6">
+          <Icon naam="vandaag" size={56} />
+          <span>
+            <span className="block text-xl font-semibold opacity-90">{tt('Wat moet ik nu doen?')}</span>
+            <span className="block text-3xl font-extrabold">{tt('Bekijk wat nu belangrijk is')}</span>
+          </span>
         </span>
       </Link>
 
       <nav aria-label={tt('Hoofdmenu')} className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {tegels().map((t) => {
-          const id = t.id
-          const kleur = kleurVan(id)
+          const kleur = kleurVan(t.id)
+          const foto = fotoVan(t.id)
           return (
-          <Link
-            key={t.to}
-            to={t.to}
-            style={kleurStijl(kleur)}
-            className={`flex min-h-big flex-col justify-center gap-3 rounded-card p-6 shadow-card ${kleur ? '' : 'bg-surface'}`}
-          >
-            <Icon naam={t.icoon} size={48} />
-            <span className="text-3xl font-bold">{t.label}</span>
-            <span className={`text-lg ${kleur ? 'opacity-90' : 'text-ink-soft'}`}>{t.sub}</span>
-          </Link>
+            <Link
+              key={t.to}
+              to={t.to}
+              style={kleurStijl(kleur)}
+              className={`relative flex min-h-big flex-col justify-center overflow-hidden rounded-card p-6 shadow-card ${kleur ? '' : 'bg-surface'}`}
+            >
+              {foto ? <KnopAchtergrond pad={foto} /> : null}
+              <span className="relative flex flex-col gap-3">
+                <Icon naam={t.icoon} size={48} />
+                <span className="text-3xl font-bold">{t.label}</span>
+                <span className={`text-lg ${kleur || foto ? 'opacity-90' : 'text-ink-soft'}`}>{t.sub}</span>
+              </span>
+            </Link>
           )
         })}
       </nav>

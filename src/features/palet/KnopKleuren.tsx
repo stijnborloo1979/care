@@ -1,19 +1,32 @@
+import { useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { tt } from '../../lib/uiTaal'
-import { KNOP_KLEUREN, KNOP_IDS, schoneKnopKleuren, type KnopId, type KnopKleuren } from './paletten'
+import { compressImage, extensionForImage } from '../../lib/image'
+import { KnopAchtergrond } from '../knoppen/KnoppenHome'
+import {
+  KNOP_KLEUREN,
+  KNOP_IDS,
+  schoneKnopFotos,
+  schoneKnopKleuren,
+  type KnopFotos,
+  type KnopId,
+  type KnopKleuren,
+} from './paletten'
 
 /**
- * Per knop van het scherm met grote knoppen een kleur kiezen.
+ * Per knop van het scherm met grote knoppen een kleur of een foto kiezen.
  *
- * Eén rij per knop, met de twaalf vaste kleuren ernaast. Een kleur die bij
- * de knop hoort, staat in het huishouden; "Standaard" haalt hem weg. De
- * database (migratie 89) weigert alles wat niet in de lijst staat.
- *
- * Alleen familie of het WZC ziet dit. De persoon zelf krijgt het scherm
- * nooit te zien.
+ * Een kleur komt uit de vaste lijst in paletten.ts. Een foto krijgt een
+ * donkere laag, zodat de tekst leesbaar blijft. Beide gaan via set_weergave,
+ * dat de database weigert voor de persoon zelf.
  */
 
+/*
+ * De namen staan als losse tt()-aanroepen, zodat de vertaaltest ze ziet en
+ * ze in elke taal een naam hebben. Een dynamische tt(variabele) zou stil
+ * de Nederlandse naam tonen.
+ */
 const KNOP_NAMEN: Record<KnopId, () => string> = {
   nu: () => tt('Wat moet ik nu doen?'),
   vandaag: () => tt('Vandaag'),
@@ -24,11 +37,6 @@ const KNOP_NAMEN: Record<KnopId, () => string> = {
   help: () => tt('Help'),
 }
 
-/*
- * De namen staan als losse tt()-aanroepen, zodat de vertaaltest ze ziet en
- * ze in elke taal een naam hebben. Een dynamische tt(variabele) zou stil
- * de Nederlandse naam tonen.
- */
 function kleurNaam(hex: string): string {
   switch (hex) {
     case '#0f5d63': return tt('Petrol')
@@ -47,8 +55,12 @@ function kleurNaam(hex: string): string {
   }
 }
 
+/** De bucket waar de knopfoto's staan: dezelfde als de kamerfoto's. */
+const BUCKET = 'home-memory'
+
 interface Weergave {
   knoppenKleuren?: KnopKleuren
+  knoppenFotos?: KnopFotos
 }
 
 export function KnopKleuren({ hh }: { hh: string }) {
@@ -64,29 +76,70 @@ export function KnopKleuren({ hh }: { hh: string }) {
     },
   })
 
-  const huidig: KnopKleuren = schoneKnopKleuren(data?.knoppenKleuren)
+  const kleuren: KnopKleuren = schoneKnopKleuren(data?.knoppenKleuren)
+  const fotos: KnopFotos = schoneKnopFotos(data?.knoppenFotos)
 
-  const zet = useMutation({
-    mutationFn: async (kleuren: KnopKleuren) => {
+  function ververs() {
+    qc.invalidateQueries({ queryKey: ['weergave', hh] })
+    qc.invalidateQueries({ queryKey: ['prefs', hh] })
+  }
+
+  const zetKleur = useMutation({
+    mutationFn: async (nieuw: KnopKleuren) => {
       // De functie vervangt het hele object: we sturen de volledige lijst.
       const { error } = await supabase.rpc('set_weergave', {
         hh,
-        prefs: { knoppenKleuren: schoneKnopKleuren(kleuren) },
+        prefs: { knoppenKleuren: schoneKnopKleuren(nieuw) },
       })
       if (error) throw error
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['weergave', hh] })
-      qc.invalidateQueries({ queryKey: ['prefs', hh] })
+    onSuccess: ververs,
+  })
+
+  /**
+   * Een foto opslaan of weghalen. De database controleert het pad; pas als
+   * die het aanneemt, gaat de vorige foto uit de bucket.
+   */
+  const zetFoto = useMutation({
+    mutationFn: async ({ id, file, weg }: { id: KnopId; file?: File; weg?: boolean }) => {
+      const vorige = fotos[id] ?? null
+      let nieuwPad: string | null = null
+
+      if (file && !weg) {
+        const blob = await compressImage(file, 1200)
+        nieuwPad = `${hh}/knoppen/${id}/${crypto.randomUUID()}.${extensionForImage(blob.type)}`
+        const { error } = await supabase.storage.from(BUCKET).upload(nieuwPad, blob, { contentType: blob.type })
+        if (error) throw error
+      }
+
+      const map: KnopFotos = { ...fotos }
+      if (nieuwPad) map[id] = nieuwPad
+      else delete map[id]
+
+      const { error } = await supabase.rpc('set_weergave', {
+        hh,
+        prefs: { knoppenFotos: schoneKnopFotos(map) },
+      })
+      if (error) {
+        // Geen rij die naar het bestand verwijst: dan het nieuwe bestand weer weg.
+        if (nieuwPad) await supabase.storage.from(BUCKET).remove([nieuwPad])
+        throw error
+      }
+
+      if (vorige && vorige !== nieuwPad) await supabase.storage.from(BUCKET).remove([vorige])
     },
+    onSuccess: ververs,
   })
 
   function kies(id: KnopId, hex: string | null) {
-    const nieuw: KnopKleuren = { ...huidig }
+    const nieuw: KnopKleuren = { ...kleuren }
     if (hex === null) delete nieuw[id]
     else nieuw[id] = hex
-    zet.mutate(nieuw)
+    zetKleur.mutate(nieuw)
   }
+
+  const bezig = zetKleur.isPending || zetFoto.isPending
+  const fout = zetKleur.error || zetFoto.error
 
   if (isLoading) return null
 
@@ -95,56 +148,130 @@ export function KnopKleuren({ hh }: { hh: string }) {
       <p className="text-sm text-ink-soft">
         {tt('Kies per knop een kleur. De indeling verandert niet.')}
       </p>
+      <p className="text-sm text-ink-soft">
+        {tt('Met een foto krijgt de knop een donkere laag, zodat de tekst leesbaar blijft.')}
+      </p>
 
       <ul className="space-y-4">
-        {KNOP_IDS.map((id) => {
-          const gekozen = huidig[id]
-          return (
-            <li key={id} className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-base font-semibold text-ink">{KNOP_NAMEN[id]()}</span>
-                {gekozen ? (
-                  <button
-                    type="button"
-                    onClick={() => kies(id, null)}
-                    disabled={zet.isPending}
-                    className="min-h-[2.5rem] rounded-pill px-4 text-sm font-semibold text-accent-ink underline disabled:opacity-60"
-                  >
-                    {tt('Standaard')}
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="flex flex-wrap gap-2" role="group" aria-label={KNOP_NAMEN[id]()}>
-                {KNOP_KLEUREN.map((k) => {
-                  const actief = gekozen === k.hex
-                  return (
-                    <button
-                      key={k.hex}
-                      type="button"
-                      onClick={() => kies(id, k.hex)}
-                      disabled={zet.isPending}
-                      aria-pressed={actief}
-                      aria-label={kleurNaam(k.hex)}
-                      title={kleurNaam(k.hex)}
-                      className={`h-11 w-11 rounded-full border-2 disabled:opacity-60 ${
-                        actief ? 'border-ink ring-2 ring-ink ring-offset-2 ring-offset-surface' : 'border-line'
-                      }`}
-                      style={{ backgroundColor: k.hex }}
-                    />
-                  )
-                })}
-              </div>
-            </li>
-          )
-        })}
+        {KNOP_IDS.map((id) => (
+          <KnopRij
+            key={id}
+            naam={KNOP_NAMEN[id]()}
+            gekozen={kleuren[id]}
+            foto={fotos[id]}
+            bezig={bezig}
+            onKies={(hex) => kies(id, hex)}
+            onFoto={(file) => zetFoto.mutate({ id, file })}
+            onWeg={() => zetFoto.mutate({ id, weg: true })}
+          />
+        ))}
       </ul>
 
-      {zet.error ? (
+      {fout ? (
         <p role="alert" className="text-sm font-semibold text-alert">
           {tt('Dat lukte nu niet. Probeer het later nog eens.')}
         </p>
       ) : null}
     </div>
+  )
+}
+
+function KnopRij({
+  naam,
+  gekozen,
+  foto,
+  bezig,
+  onKies,
+  onFoto,
+  onWeg,
+}: {
+  naam: string
+  gekozen: string | undefined
+  foto: string | undefined
+  bezig: boolean
+  onKies: (hex: string | null) => void
+  onFoto: (file: File) => void
+  onWeg: () => void
+}) {
+  const invoer = useRef<HTMLInputElement>(null)
+
+  return (
+    <li className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-base font-semibold text-ink">{naam}</span>
+        <div className="flex items-center gap-2">
+          {gekozen ? (
+            <button
+              type="button"
+              onClick={() => onKies(null)}
+              disabled={bezig}
+              className="min-h-[2.5rem] rounded-pill px-3 text-sm font-semibold text-accent-ink underline disabled:opacity-60"
+            >
+              {tt('Standaard')}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2" role="group" aria-label={naam}>
+        {KNOP_KLEUREN.map((k) => {
+          const actief = gekozen === k.hex
+          return (
+            <button
+              key={k.hex}
+              type="button"
+              onClick={() => onKies(k.hex)}
+              disabled={bezig}
+              aria-pressed={actief}
+              aria-label={kleurNaam(k.hex)}
+              title={kleurNaam(k.hex)}
+              className={`h-11 w-11 rounded-full border-2 disabled:opacity-60 ${
+                actief ? 'border-ink ring-2 ring-ink ring-offset-2 ring-offset-surface' : 'border-line'
+              }`}
+              style={{ backgroundColor: k.hex }}
+            />
+          )
+        })}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        {foto ? (
+          <div className="relative h-16 w-28 overflow-hidden rounded-xl border border-line">
+            <KnopAchtergrond pad={foto} />
+          </div>
+        ) : null}
+        <input
+          ref={invoer}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            e.target.value = ''
+            if (file) onFoto(file)
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => invoer.current?.click()}
+          disabled={bezig}
+          className="min-h-[2.75rem] rounded-pill border-2 border-line bg-surface px-4 text-sm font-semibold text-ink disabled:opacity-60"
+        >
+          {foto ? tt('Foto wijzigen') : tt('Foto kiezen')}
+        </button>
+        {foto ? (
+          <button
+            type="button"
+            onClick={onWeg}
+            disabled={bezig}
+            className="min-h-[2.75rem] rounded-pill px-4 text-sm font-semibold text-accent-ink underline disabled:opacity-60"
+          >
+            {tt('Foto weg')}
+          </button>
+        ) : null}
+      </div>
+    </li>
   )
 }
