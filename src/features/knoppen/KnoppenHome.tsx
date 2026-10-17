@@ -162,7 +162,9 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
             <Link
               key={t.to}
               to={t.to}
-              style={kleurStijl(kleur)}
+              // Met een foto is de tekst altijd wit, ook zonder gekozen kleur;
+              // anders is ze donker op een donkere foto.
+              style={kleurStijl(kleur) ?? (foto ? { color: '#ffffff' } : undefined)}
               className={`relative flex min-h-big flex-col justify-center overflow-hidden rounded-card p-6 shadow-card ${kleur ? '' : 'bg-surface'}`}
             >
               {foto ? <KnopAchtergrond pad={foto} /> : null}
