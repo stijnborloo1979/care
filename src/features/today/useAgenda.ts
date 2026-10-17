@@ -18,6 +18,10 @@ export function useAgenda(householdId: string, tz: string) {
     queryKey: ['agenda', householdId],
     queryFn: () => getToday(householdId, tz),
     staleTime: 60_000,
+    // Vangnet: realtime mist wel eens een wijziging op een tablet die lang
+    // openstaat (een bezoek dat wordt afgezegd bleef zo staan). Elke minuut
+    // opnieuw ophalen, zodat de agenda hoe dan ook binnen een minuut klopt.
+    refetchInterval: 60_000,
   })
 }
 
