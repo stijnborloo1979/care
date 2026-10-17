@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon, { type IconNaam } from '../../components/Icon'
 import { dateLine, greeting, hhmm } from '../../lib/time'
@@ -21,8 +20,8 @@ interface Props {
  * Vandaag in de grote-knoppen-weergave.
  *
  * Eén ding tegelijk: wat nu moet staat groot bovenaan, met één grote knop.
- * Daaronder wat erna komt, de medicatie met foto, en alleen de eerstvolgende
- * afspraken. Met "Alles van vandaag" komt de rest erbij.
+ * Daaronder wat erna komt, de medicatie met foto, en alle afspraken van de
+ * dag, elk aan of uit te vinken.
  *
  * Dezelfde gegevens en dezelfde "wat nu"-logica als het gewone overzicht
  * (useVandaag en whatNow); alleen de vorm verschilt. De normale weergave
@@ -32,16 +31,15 @@ export default function KnoppenVandaag({ householdId, personName, timezone }: Pr
   const now = useNow()
   const { data, isLoading, isError } = useVandaag(householdId, timezone, now)
   const markDone = useMarkDone(householdId)
-  const [alles, setAlles] = useState(false)
 
   const events = data ?? []
   const { current, next } = whatNow(events, now)
 
-  // De rest van de dag, zonder wat al bovenaan staat en zonder wat gedaan is.
-  const later = events
-    .filter((e) => e.id !== current?.id && e.id !== next?.id && statusOf(e, now) !== 'done')
+  // De rest van de dag, zonder wat al bovenaan staat. Ook de gedane
+  // afspraken blijven staan, zodat je ze direct weer kunt terugzetten.
+  const rest = events
+    .filter((e) => e.id !== current?.id && e.id !== next?.id)
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
-  const zichtbaar = alles ? later : later.slice(0, 2)
 
   return (
     <div className="space-y-7">
@@ -94,31 +92,41 @@ export default function KnoppenVandaag({ householdId, personName, timezone }: Pr
       {/* Medicatie: met de foto van de verpakking, zoals op het gewone scherm. */}
       <MedicatieKaart householdId={householdId} timezone={timezone} />
 
-      {/* Later vandaag: alleen de eerstvolgende, de rest op verzoek. */}
-      {later.length > 0 ? (
+      {/* Later vandaag: alle afspraken van de dag, elk aan of uit te vinken,
+          net als op het gewone scherm. */}
+      {rest.length > 0 ? (
         <section aria-labelledby="later-titel" className="space-y-3">
           <h2 id="later-titel" className="text-2xl font-bold text-ink-soft">
             {tt('Later vandaag')}
           </h2>
           <ul className="overflow-hidden rounded-[1.75rem] bg-surface shadow-card">
-            {zichtbaar.map((e) => (
-              <li key={e.id} className="flex min-h-[5.5rem] items-center gap-5 border-b border-line px-6 py-5 last:border-b-0">
-                <span className="w-28 text-3xl font-extrabold">{hhmm(new Date(e.starts_at), timezone)}</span>
-                <span className="flex-1 text-3xl">{e.title}</span>
-                <span className="text-xl text-ink-soft">{STATUS_LABEL[statusOf(e, now)]}</span>
-              </li>
-            ))}
+            {rest.map((e) => {
+              const gedaan = statusOf(e, now) === 'done'
+              return (
+                <li
+                  key={e.id}
+                  className="flex min-h-[6rem] flex-wrap items-center gap-4 border-b border-line px-6 py-5 last:border-b-0"
+                >
+                  <span className="w-28 text-3xl font-extrabold">{hhmm(new Date(e.starts_at), timezone)}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className={`block text-3xl ${gedaan ? 'text-ink-soft line-through' : ''}`}>{e.title}</span>
+                    <span className="block text-xl text-ink-soft">{STATUS_LABEL[statusOf(e, now)]}</span>
+                  </span>
+                  {isHuis(e) ? null : (
+                    <button
+                      type="button"
+                      onClick={() => markDone.mutate({ id: e.id, done: !gedaan })}
+                      className={`min-h-[4.5rem] min-w-[11rem] rounded-pill px-6 text-2xl font-bold ${
+                        gedaan ? 'border-2 border-line bg-surface text-ink' : 'bg-accent-ink text-white'
+                      }`}
+                    >
+                      {gedaan ? t('vandaag.ongedaan') : t('vandaag.afvinken')}
+                    </button>
+                  )}
+                </li>
+              )
+            })}
           </ul>
-          {later.length > 2 ? (
-            <button
-              type="button"
-              onClick={() => setAlles((v) => !v)}
-              aria-expanded={alles}
-              className="min-h-[3.5rem] px-2 text-2xl font-bold text-accent-ink underline underline-offset-4"
-            >
-              {alles ? tt('Minder tonen') : tt('Alles van vandaag')}
-            </button>
-          ) : null}
         </section>
       ) : null}
 
