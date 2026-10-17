@@ -34,7 +34,8 @@ function kleurStijl(kleur: string | undefined): CSSProperties | undefined {
 // het huishouden kennen, en die kan wijzigen zonder dat de module herlaadt.
 function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: IconNaam }[] {
   return [
-    { id: 'vandaag', to: '/', label: tt('Vandaag'), sub: tt('Wat er gepland staat'), icoon: 'vandaag' },
+    // Geen "/": dat is het scherm met grote knoppen zelf. Het overzicht staat op /overzicht.
+    { id: 'vandaag', to: '/overzicht', label: tt('Vandaag'), sub: tt('Wat er gepland staat'), icoon: 'vandaag' },
     { id: 'wie', to: '/wie', label: tt('Wie komt er?'), sub: tt('Familie en bezoek'), icoon: 'wie' },
     { id: 'memory', to: '/memory', label: tt('Waar ligt het?'), sub: tt('Dingen in huis'), icoon: 'memory' },
     { id: 'fotos', to: '/fotos', label: tt("Foto's"), sub: tt('Herinneringen'), icoon: 'fotos' },
