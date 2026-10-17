@@ -60,6 +60,7 @@ export default function PersonShell() {
       timezone={household.timezone}
       kleuren={prefs.knoppenKleuren}
       fotos={prefs.knoppenFotos}
+      tegels={prefs.tegels}
     />
   )
 }

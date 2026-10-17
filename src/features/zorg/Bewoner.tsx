@@ -6,6 +6,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import { HuisPalet } from '../palet/PaletKiezer'
 import { KnopKleuren } from '../palet/KnopKleuren'
+import { TegelKeuze } from '../knoppen/TegelKeuze'
 import BerichtenVanBewoner from './BerichtenVanBewoner'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 import DitBenIkKaart from './DitBenIkKaart'
@@ -80,6 +81,7 @@ export default function Bewoner() {
             <h3 className="mt-6 font-semibold">{tt('Kleur per knop')}</h3>
             <div className="mt-2">
               <KnopKleuren hh={hh} />
+              <TegelKeuze hh={hh} />
             </div>
           </section>
         ) : null}

@@ -10,6 +10,7 @@ import {
   type KnopKleuren,
   type PaletId,
 } from '../palet/paletten'
+import { schoneTegels, type KiesbareTegel } from '../knoppen/tegels'
 
 /** Waar de app mag bellen. Zie kanBellen. */
 export type Bellen = 'nee' | 'telefoon' | 'ja'
@@ -62,6 +63,8 @@ export interface DisplayPrefs {
    * 'knoppenFotos' en wordt alleen via set_weergave gezet (migratie 90).
    */
   knoppenFotos: KnopFotos
+  /** Welke keuzetegels op het startscherm staan; null = alle. Via set_weergave (migratie 95). */
+  tegels: KiesbareTegel[] | null
   simple: boolean
   voice: boolean
   /** Het scherm licht op bij een melding. */
@@ -116,6 +119,7 @@ export const STANDAARD: DisplayPrefs = {
   paletActief: 'standaard',
   knoppenKleuren: {},
   knoppenFotos: {},
+  tegels: null,
   simple: false,
   voice: true,
   licht: true,
@@ -171,6 +175,7 @@ export function volledig(ruw: unknown): DisplayPrefs {
   if (!isPalet(p.paletActief)) p.paletActief = STANDAARD.paletActief
   p.knoppenKleuren = schoneKnopKleuren(p.knoppenKleuren)
   p.knoppenFotos = schoneKnopFotos(p.knoppenFotos)
+  p.tegels = schoneTegels(p.tegels)
   // kanBellen was een ja/nee. Rijen van voor die wijziging staan nog in de
   // database, en een boolean die als stand doorglipt zou 'nee' noch 'ja'
   // zijn: dan viel de keuze terug op de standaard en kreeg een tablet
@@ -285,7 +290,7 @@ export function useDisplayPrefs(householdId: string) {
       })
       const eff =
         !weergaveFout && werkelijk && typeof werkelijk === 'object'
-          ? (werkelijk as { palet?: unknown; knoppenKleuren?: unknown; knoppenFotos?: unknown })
+          ? (werkelijk as { palet?: unknown; knoppenKleuren?: unknown; knoppenFotos?: unknown; tegels?: unknown })
           : null
       return volledig({
         ...(ruw && typeof ruw === 'object' ? ruw : {}),
@@ -294,6 +299,7 @@ export function useDisplayPrefs(householdId: string) {
         // zodat de persoon ze ook ziet als het huishouden ze niet zelf heeft gezet.
         knoppenKleuren: eff?.knoppenKleuren ?? (ruw as { knoppenKleuren?: unknown } | null)?.knoppenKleuren,
         knoppenFotos: eff?.knoppenFotos ?? (ruw as { knoppenFotos?: unknown } | null)?.knoppenFotos,
+        tegels: eff?.tegels ?? (ruw as { tegels?: unknown } | null)?.tegels,
       })
     },
   })
@@ -334,6 +340,7 @@ export function useDisplayPrefs(householdId: string) {
       palet?: PaletId | null
       knoppenKleuren?: KnopKleuren
       knoppenFotos?: KnopFotos
+      tegels?: KiesbareTegel[] | null
     }) => {
       const { error } = await supabase.rpc('set_weergave', { hh: householdId, prefs: deel })
       if (error) throw error
