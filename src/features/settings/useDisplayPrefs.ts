@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { isTaal, taalVanToestel, zetTaal, type Taal } from '../../lib/i18n'
-import { isPalet, type PaletId } from '../palet/paletten'
+import { isPalet, schoneKnopKleuren, type KnopKleuren, type PaletId } from '../palet/paletten'
 
 /** Waar de app mag bellen. Zie kanBellen. */
 export type Bellen = 'nee' | 'telefoon' | 'ja'
@@ -43,6 +43,12 @@ export interface DisplayPrefs {
    * effective_weergave en staat niet in de database.
    */
   paletActief: PaletId
+  /**
+   * Per knop een kleur, uit de vaste lijst in paletten.ts. Ontbreekt een
+   * knop, dan krijgt ze de gewone vormgeving. Staat in de database als
+   * 'knoppenKleuren' en wordt alleen via set_weergave gezet (migratie 89).
+   */
+  knoppenKleuren: KnopKleuren
   simple: boolean
   voice: boolean
   /** Het scherm licht op bij een melding. */
@@ -95,6 +101,7 @@ export const STANDAARD: DisplayPrefs = {
   indeling: 'origineel',
   palet: null,
   paletActief: 'standaard',
+  knoppenKleuren: {},
   simple: false,
   voice: true,
   licht: true,
@@ -148,6 +155,7 @@ export function volledig(ruw: unknown): DisplayPrefs {
   if (!INDELINGEN.includes(p.indeling)) p.indeling = STANDAARD.indeling
   if (p.palet !== null && !isPalet(p.palet)) p.palet = null
   if (!isPalet(p.paletActief)) p.paletActief = STANDAARD.paletActief
+  p.knoppenKleuren = schoneKnopKleuren(p.knoppenKleuren)
   // kanBellen was een ja/nee. Rijen van voor die wijziging staan nog in de
   // database, en een boolean die als stand doorglipt zou 'nee' noch 'ja'
   // zijn: dan viel de keuze terug op de standaard en kreeg een tablet
@@ -260,8 +268,17 @@ export function useDisplayPrefs(householdId: string) {
       const { data: werkelijk, error: weergaveFout } = await supabase.rpc('effective_weergave', {
         hh: householdId,
       })
-      const eff = !weergaveFout && werkelijk && typeof werkelijk === 'object' ? (werkelijk as { palet?: unknown }) : null
-      return volledig({ ...(ruw && typeof ruw === 'object' ? ruw : {}), paletActief: eff?.palet })
+      const eff =
+        !weergaveFout && werkelijk && typeof werkelijk === 'object'
+          ? (werkelijk as { palet?: unknown; knoppenKleuren?: unknown })
+          : null
+      return volledig({
+        ...(ruw && typeof ruw === 'object' ? ruw : {}),
+        paletActief: eff?.palet,
+        // Knopkleuren komen uit dezelfde functie als het palet, zodat de
+        // persoon ze ook ziet als het huishouden ze niet zelf heeft gezet.
+        knoppenKleuren: eff?.knoppenKleuren ?? (ruw as { knoppenKleuren?: unknown } | null)?.knoppenKleuren,
+      })
     },
   })
 
@@ -296,7 +313,7 @@ export function useDisplayPrefs(householdId: string) {
    * scherm hier is alleen de weg om het te vragen.
    */
   const zetWeergave = useMutation({
-    mutationFn: async (deel: { indeling?: Indeling; palet?: PaletId | null }) => {
+    mutationFn: async (deel: { indeling?: Indeling; palet?: PaletId | null; knoppenKleuren?: KnopKleuren }) => {
       const { error } = await supabase.rpc('set_weergave', { hh: householdId, prefs: deel })
       if (error) throw error
       await queryClient.invalidateQueries({ queryKey: ['prefs', householdId] })

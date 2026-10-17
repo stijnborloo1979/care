@@ -1,12 +1,21 @@
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import Icon, { type IconNaam } from '../../components/Icon'
 import { useVoice } from '../voice-assistant/voiceStore'
 import { dateLine, greeting } from '../../lib/time'
 import { tt } from '../../lib/uiTaal'
+import { schoneKnopKleuren, type KnopId, type KnopKleuren } from '../palet/paletten'
 
 interface Props {
   personName: string
   timezone: string
+  /** Kleur per knop, door familie of het WZC gekozen. Ontbreekt een knop, dan de gewone vormgeving. */
+  kleuren?: KnopKleuren
+}
+
+/** Vorm en kleur van een gekleurde tegel: de achtergrond is de gekozen kleur, de tekst wit. */
+function kleurStijl(kleur: string | undefined): CSSProperties | undefined {
+  return kleur ? { backgroundColor: kleur, color: '#ffffff' } : undefined
 }
 
 /**
@@ -23,20 +32,25 @@ interface Props {
  */
 // Een functie en geen constante: tt() moet bij elke weergave de taal van
 // het huishouden kennen, en die kan wijzigen zonder dat de module herlaadt.
-function tegels(): { to: string; label: string; sub: string; icoon: IconNaam }[] {
+function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: IconNaam }[] {
   return [
-    { to: '/', label: tt('Vandaag'), sub: tt('Wat er gepland staat'), icoon: 'vandaag' },
-    { to: '/wie', label: tt('Wie komt er?'), sub: tt('Familie en bezoek'), icoon: 'wie' },
-    { to: '/memory', label: tt('Waar ligt het?'), sub: tt('Dingen in huis'), icoon: 'memory' },
-    { to: '/fotos', label: tt("Foto's"), sub: tt('Herinneringen'), icoon: 'fotos' },
-    { to: '/radio', label: tt('Radio'), sub: tt('Favoriete zender'), icoon: 'afspelen' },
-    { to: '/help', label: tt('Help'), sub: tt('Hulp of familie'), icoon: 'help' },
+    { id: 'vandaag', to: '/', label: tt('Vandaag'), sub: tt('Wat er gepland staat'), icoon: 'vandaag' },
+    { id: 'wie', to: '/wie', label: tt('Wie komt er?'), sub: tt('Familie en bezoek'), icoon: 'wie' },
+    { id: 'memory', to: '/memory', label: tt('Waar ligt het?'), sub: tt('Dingen in huis'), icoon: 'memory' },
+    { id: 'fotos', to: '/fotos', label: tt("Foto's"), sub: tt('Herinneringen'), icoon: 'fotos' },
+    { id: 'radio', to: '/radio', label: tt('Radio'), sub: tt('Favoriete zender'), icoon: 'afspelen' },
+    { id: 'help', to: '/help', label: tt('Help'), sub: tt('Hulp of familie'), icoon: 'help' },
   ]
 }
 
-export default function KnoppenHome({ personName, timezone }: Props) {
+export default function KnoppenHome({ personName, timezone, kleuren }: Props) {
   const now = new Date()
   const openVoice = useVoice((s) => s.openen)
+  // Een kleur die niet (meer) in de vaste lijst staat, valt weg: dan krijgt
+  // de tegel de gewone vormgeving in plaats van een onleesbare kleur.
+  const k = schoneKnopKleuren(kleuren)
+  const kleurVan = (id: KnopId) => k[id]
+  const nuKleur = kleurVan('nu')
 
   return (
     <div className="space-y-6">
@@ -51,7 +65,8 @@ export default function KnoppenHome({ personName, timezone }: Props) {
       <Link
         to="/nu"
         aria-label={tt('Wat moet ik nu doen?')}
-        className="flex min-h-big items-center gap-6 rounded-card bg-accent px-8 py-6 text-white shadow-lift"
+        style={kleurStijl(nuKleur)}
+        className={`flex min-h-big items-center gap-6 rounded-card px-8 py-6 text-white shadow-lift ${nuKleur ? '' : 'bg-accent'}`}
       >
         <Icon naam="vandaag" size={56} />
         <span>
@@ -61,17 +76,22 @@ export default function KnoppenHome({ personName, timezone }: Props) {
       </Link>
 
       <nav aria-label={tt('Hoofdmenu')} className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        {tegels().map((t) => (
+        {tegels().map((t) => {
+          const id = t.id
+          const kleur = kleurVan(id)
+          return (
           <Link
             key={t.to}
             to={t.to}
-            className="flex min-h-big flex-col justify-center gap-3 rounded-card bg-surface p-6 shadow-card"
+            style={kleurStijl(kleur)}
+            className={`flex min-h-big flex-col justify-center gap-3 rounded-card p-6 shadow-card ${kleur ? '' : 'bg-surface'}`}
           >
             <Icon naam={t.icoon} size={48} />
             <span className="text-3xl font-bold">{t.label}</span>
-            <span className="text-lg text-ink-soft">{t.sub}</span>
+            <span className={`text-lg ${kleur ? 'opacity-90' : 'text-ink-soft'}`}>{t.sub}</span>
           </Link>
-        ))}
+          )
+        })}
       </nav>
 
       <button

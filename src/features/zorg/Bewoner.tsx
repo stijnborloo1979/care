@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Eye, Phone, TriangleAlert, Users } from 'lucide-react
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import { HuisPalet } from '../palet/PaletKiezer'
+import { KnopKleuren } from '../palet/KnopKleuren'
 import BerichtenVanBewoner from './BerichtenVanBewoner'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 import DitBenIkKaart from './DitBenIkKaart'
@@ -76,6 +77,10 @@ export default function Bewoner() {
               {tt('Kies per bewoner een palet, of laat het het palet van het woonzorgcentrum erven. De indeling verandert niet.')}
             </p>
             <HuisPalet hh={hh} metWzc />
+            <h3 className="mt-6 font-semibold">{tt('Kleur per knop')}</h3>
+            <div className="mt-2">
+              <KnopKleuren hh={hh} />
+            </div>
           </section>
         ) : null}
         <Dossier hh={hh} orgId={orgId} naam={bewoner?.naam.split(' ')[0] ?? tt('de bewoner')} />
