@@ -16,6 +16,7 @@ import PushNakijken from '../push/PushNakijken'
 import { TALEN } from '../../lib/i18n'
 import { tt } from '../../lib/uiTaal'
 import { HuisPalet } from '../palet/PaletKiezer'
+import { KnopKleuren } from '../palet/KnopKleuren'
 
 // De echte waarden staan in index.css; dit is alleen het bolletje in het
 // scherm. Donker en hoog contrast krijgen daar hun eigen variant.
@@ -164,6 +165,11 @@ export default function Settings() {
             {tt('Alleen de kleuren veranderen, nooit de indeling.')}
           </p>
           <HuisPalet hh={hh} />
+        </div>
+
+        <div className="mt-6 space-y-2">
+          <h3 className="font-semibold">{tt('Kleur per knop')}</h3>
+          <KnopKleuren hh={hh} />
         </div>
       </section>
 

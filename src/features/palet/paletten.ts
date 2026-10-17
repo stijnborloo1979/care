@@ -94,3 +94,61 @@ export function contrast(a: string, b: string): number {
   const [hoog, laag] = la > lb ? [la, lb] : [lb, la]
   return (hoog + 0.05) / (laag + 0.05)
 }
+
+/* -------------------------------------------------------------------
+   Kleur per knop op het scherm met grote knoppen.
+
+   Familie of het WZC kiest per knop een kleur uit deze lijst. Vaste
+   lijst, net als de paletten: elke kleur haalt minstens 4,5:1 met witte
+   tekst (zie paletten.test.ts), en de server (migratie 89) weigert alles
+   wat hier niet in staat.
+   ------------------------------------------------------------------- */
+
+export type KnopId = 'nu' | 'vandaag' | 'wie' | 'memory' | 'fotos' | 'radio' | 'help'
+
+export const KNOP_IDS: KnopId[] = ['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help']
+
+export interface KleurKeuze {
+  hex: string
+  naam: string
+}
+
+/**
+ * Twaalf kleuren die bij elkaar passen, van groen-blauw via blauw en paars
+ * naar warm bruin en inkt. Zo kan een reeks knoppen een rustige schakering
+ * krijgen in plaats van willekeurige kleuren.
+ */
+export const KNOP_KLEUREN: KleurKeuze[] = [
+  { hex: '#0f5d63', naam: 'Petrol' },
+  { hex: '#1d6b63', naam: 'Linde' },
+  { hex: '#2f6b3a', naam: 'Bos' },
+  { hex: '#1f4e79', naam: 'Blauw' },
+  { hex: '#17568f', naam: 'Zee' },
+  { hex: '#2b3f8f', naam: 'Indigo' },
+  { hex: '#66409a', naam: 'Paars' },
+  { hex: '#7a2f5e', naam: 'Pruim' },
+  { hex: '#9a4a2a', naam: 'Roest' },
+  { hex: '#7a5a12', naam: 'Oker' },
+  { hex: '#5c1f08', naam: 'Bruin' },
+  { hex: '#1f1d1a', naam: 'Inkt' },
+]
+
+export type KnopKleuren = Partial<Record<KnopId, string>>
+
+export function isKnopId(v: unknown): v is KnopId {
+  return typeof v === 'string' && (KNOP_IDS as string[]).includes(v)
+}
+
+export function isKnopKleur(v: unknown): v is string {
+  return typeof v === 'string' && KNOP_KLEUREN.some((k) => k.hex === v)
+}
+
+/** Alleen bekende knoppen met een bekende kleur; de rest valt weg. */
+export function schoneKnopKleuren(ruw: unknown): KnopKleuren {
+  const uit: KnopKleuren = {}
+  if (!ruw || typeof ruw !== 'object') return uit
+  for (const [sleutel, waarde] of Object.entries(ruw as Record<string, unknown>)) {
+    if (isKnopId(sleutel) && isKnopKleur(waarde)) uit[sleutel] = waarde
+  }
+  return uit
+}

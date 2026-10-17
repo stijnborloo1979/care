@@ -23,6 +23,7 @@ export default function PersonShell() {
       <KnoppenHome
         personName={household.person_name.split(' ')[0]}
         timezone={household.timezone}
+        kleuren={prefs.knoppenKleuren}
       />
     )
   }

@@ -305,6 +305,11 @@ controlequery. De volledige checklist voor de livegang staat in
     per huishouden en per WZC. Alleen familie of de beheerder/coördinator van
     de organisatie kan dit wijzigen; de persoon zelf niet. Terugdraaien:
     `supabase/rollback/88_weergave.sql`.
+89. `89_knop_kleuren.sql` — kleur per knop op het scherm met grote knoppen.
+    Alleen kleuren uit de vaste lijst in `paletten.ts` (elk ≥4,5:1 met witte
+    tekst); de server controleert dezelfde lijst. Vervangt set_weergave,
+    effective_weergave en set_display_prefs. Terugdraaien:
+    `supabase/rollback/89_knop_kleuren.sql`.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
