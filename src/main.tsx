@@ -8,7 +8,7 @@ import OfflineBanner from "./app/OfflineBanner";
 import { AuthProvider, useAuth } from "./features/auth/AuthProvider";
 import AcceptInvite from "./features/auth/AcceptInvite";
 import Welcome from "./features/auth/Welcome";
-import PersonShell from "./PersonShell";
+import PersonShell, { Overzicht } from "./PersonShell";
 import PersonLayout from "./app/PersonLayout";
 import WhoIsWho, { PersonDetail } from "./features/people/WhoIsWho";
 import Help from "./features/people/Help";
@@ -230,6 +230,7 @@ if (!configuratieOk) {
                   >
                     <Route path="/" element={<Start />} />
                     <Route path="/persoon" element={<PersonShell />} />
+                    <Route path="/overzicht" element={<Overzicht />} />
                     <Route path="/wie" element={<WhoIsWho />} />
                     <Route path="/wie/:personId" element={<PersonDetail />} />
                     <Route path="/nu" element={<WhatNow />} />
