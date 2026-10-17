@@ -102,7 +102,7 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
   const fotoNu = fotoVan('nu')
 
   return (
-    <div className="space-y-6">
+    <main className="mx-auto max-w-[64rem] space-y-6 px-5 pb-28 pt-6">
       <header>
         <p className="text-lg font-semibold text-ink-soft">{dateLine(now, timezone)}</p>
         <h1 className="mt-1 text-4xl font-extrabold tracking-tight">
@@ -127,7 +127,7 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
         </span>
 
         {volgende !== undefined ? (
-          <span className="relative flex flex-col justify-center gap-2 border-t border-white/35 bg-black/20 px-8 py-6 sm:w-[24rem] sm:border-l sm:border-t-0">
+          <span className="relative flex min-w-0 shrink-0 flex-col justify-center gap-2 border-t border-white/35 bg-black/20 px-8 py-6 sm:w-[22rem] sm:border-l sm:border-t-0">
             {volgende ? (
               <>
                 <span className="text-lg font-semibold opacity-90">
@@ -137,7 +137,7 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
                   <span className="text-3xl" aria-hidden="true">
                     {volgende.emoji ?? '📌'}
                   </span>
-                  <span className="text-3xl font-extrabold leading-tight">{volgende.title}</span>
+                  <span className="min-w-0 break-words text-3xl font-extrabold leading-tight">{volgende.title}</span>
                 </span>
                 {volgende.note ? <span className="text-lg opacity-90">{volgende.note}</span> : null}
               </>
@@ -182,6 +182,6 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
         <Icon naam="praten" size={36} />
         {tt('Praat met mij')}
       </button>
-    </div>
+    </main>
   )
 }
