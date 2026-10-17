@@ -125,6 +125,8 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
   const fotoVan = (id: KnopId) => f[id]
   const nuKleur = kleurVan('nu')
   const fotoNu = fotoVan('nu')
+  const praatKleur = kleurVan('praten')
+  const praatFoto = fotoVan('praten')
 
   return (
     <main className="mx-auto max-w-[64rem] space-y-6 px-5 pb-28 pt-6">
@@ -202,12 +204,14 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
         <button
           type="button"
           onClick={openVoice}
-          className="relative flex min-h-big flex-col justify-center overflow-hidden rounded-card bg-accent p-6 text-accent-ink shadow-lift"
+          style={kleurStijl(praatKleur) ?? (praatFoto ? { color: '#ffffff' } : undefined)}
+          className={`relative flex min-h-big flex-col justify-center overflow-hidden rounded-card p-6 shadow-lift ${praatKleur ? '' : 'bg-accent text-accent-ink'}`}
         >
+          {praatFoto ? <KnopAchtergrond pad={praatFoto} /> : null}
           <span className="relative flex flex-col gap-3">
             <Icon naam="praten" size={48} />
             <span className="text-3xl font-bold">{tt('Praat met mij')}</span>
-            <span className="text-lg opacity-90">{tt('Vraag het gewoon')}</span>
+            <span className={`text-lg ${praatKleur || praatFoto ? 'opacity-90' : 'opacity-90'}`}>{tt('Vraag het gewoon')}</span>
           </span>
         </button>
       </nav>
