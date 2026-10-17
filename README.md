@@ -316,6 +316,8 @@ controlequery. De volledige checklist voor de livegang staat in
     hoort. Tekst op een foto krijgt een donkere laag van 60%, zodat het
     contrast altijd minstens 4,5:1 blijft. Terugdraaien:
     `supabase/rollback/90_knop_fotos.sql`.
+91. `91_bezoek_afzeggen.sql` — "Toch niet" bij een eigen bezoek haalt het bezoek weg; agenda-verwijderingen komen door op alle schermen.
+    Terugdraaien: `supabase/rollback/91_bezoek_afzeggen.sql`.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
