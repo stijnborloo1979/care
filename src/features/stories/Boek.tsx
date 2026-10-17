@@ -9,6 +9,7 @@ import StoragePhoto from '../../components/StoragePhoto'
 import VerhaalQR from './VerhaalQR'
 import { locale } from '../../lib/i18n'
 import { tt } from '../../lib/uiTaal'
+import HerinneringToevoegen from './HerinneringToevoegen'
 
 /**
  * Het levensboek.
@@ -44,6 +45,9 @@ export default function Boek() {
 
   // Het levensboek is voor verhalen; dagboekfragmenten horen er niet in.
   const verhalen = useMemo(() => (data ?? []).filter((v) => (v.soort ?? 'verhaal') === 'verhaal'), [data])
+  // Ook zonder verhalen staat er een boek als er herinneringen met foto zijn.
+  const fotoMetFoto = (fotos ?? []).filter((f) => !!f.photo_path).length
+  const leeg = verhalen.length === 0 && fotoMetFoto === 0
   const hoofdstukken = useMemo(() => inHoofdstukken(verhalen), [verhalen])
   const metGeluid = verhalen.filter((v) => v.audio_path)
 
@@ -96,13 +100,15 @@ export default function Boek() {
       <main className="mx-auto max-w-[52rem] px-8 py-12">
         {isLoading ? <p className="text-ink-soft">{tt('Bezig met laden…')}</p> : null}
 
-        {!isLoading && verhalen.length === 0 ? (
+        {!isLoading && leeg ? (
           <p className="text-ink-soft">
             {tt('Er zijn nog geen verhalen. Ze verschijnen hier zodra er een vraag beantwoord is.')}
           </p>
         ) : null}
 
-        {verhalen.length > 0 ? (
+        <HerinneringToevoegen hh={hh} />
+
+        {!leeg ? (
           <>
             <header className="titelblad flex min-h-[70vh] flex-col justify-center text-center">
               <p className="text-lg uppercase tracking-[0.3em] text-ink-faint">{tt('Het leven van')}</p>
