@@ -17,7 +17,9 @@ export default function WhoIsWho() {
 
   const familie = (people ?? []).filter((p) => p.kind === 'family')
   const rest = (people ?? []).filter((p) => p.kind === 'contact' || p.kind === 'care')
-  const bezoek = (events ?? []).filter((e) => e.person_id)
+  // Een bezoek dat familie plant, heeft geen gekoppelde persoon: plan_bezoek
+  // zet alleen de soort 'visit' en de naam van de familielid. Die telt ook mee.
+  const bezoek = (events ?? []).filter((e) => e.person_id || e.kind === 'visit')
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
@@ -30,9 +32,16 @@ export default function WhoIsWho() {
           <ul className="mt-2 space-y-1">
             {bezoek.map((e) => {
               const p = (people ?? []).find((x) => x.id === e.person_id)
+              if (!p) {
+                return (
+                  <li key={e.id} className="text-lg">
+                    <strong>{e.title}</strong> — {hhmm(new Date(e.starts_at), tz)}
+                  </li>
+                )
+              }
               return (
                 <li key={e.id} className="text-lg">
-                  <strong>{p?.name ?? e.title}</strong> — {e.title.toLowerCase()} om{' '}
+                  <strong>{p.name}</strong> — {e.title.toLowerCase()} om{' '}
                   {hhmm(new Date(e.starts_at), tz)}
                 </li>
               )
