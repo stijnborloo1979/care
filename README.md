@@ -322,6 +322,8 @@ controlequery. De volledige checklist voor de livegang staat in
     Terugdraaien: `supabase/rollback/92_medicatie_kwartier.sql`.
 93. `93_knop_ids_medicatie_zoeken.sql` — kleur en foto ook voor de tegels medicijnen en zoeken. Breidt de knop-lijst van set_weergave uit.
     Terugdraaien: `supabase/rollback/93_knop_ids_medicatie_zoeken.sql`.
+94. `94_knop_id_praten.sql` — kleur en foto ook voor de tegel Praat met mij. Breidt de knop-lijst van set_weergave uit.
+    Terugdraaien: `supabase/rollback/94_knop_id_praten.sql`.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
