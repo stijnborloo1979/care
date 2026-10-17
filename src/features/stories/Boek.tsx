@@ -10,6 +10,7 @@ import VerhaalQR from './VerhaalQR'
 import { locale } from '../../lib/i18n'
 import { tt } from '../../lib/uiTaal'
 import HerinneringToevoegen from './HerinneringToevoegen'
+import NieuweFotos from './NieuweFotos'
 
 /**
  * Het levensboek.
@@ -106,7 +107,12 @@ export default function Boek() {
           </p>
         ) : null}
 
-        <HerinneringToevoegen hh={hh} />
+        {/* De persoon vertelt over foto's van familie; familie voegt ze toe. */}
+        {household?.role === 'person' ? (
+          <NieuweFotos hh={hh} timezone={household.timezone} />
+        ) : (
+          <HerinneringToevoegen hh={hh} />
+        )}
 
         {!leeg ? (
           <>
