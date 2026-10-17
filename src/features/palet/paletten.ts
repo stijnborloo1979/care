@@ -104,9 +104,9 @@ export function contrast(a: string, b: string): number {
    wat hier niet in staat.
    ------------------------------------------------------------------- */
 
-export type KnopId = 'nu' | 'vandaag' | 'wie' | 'memory' | 'fotos' | 'radio' | 'help'
+export type KnopId = 'nu' | 'vandaag' | 'wie' | 'memory' | 'fotos' | 'radio' | 'help' | 'medicatie' | 'zoeken'
 
-export const KNOP_IDS: KnopId[] = ['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help']
+export const KNOP_IDS: KnopId[] = ['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help', 'medicatie', 'zoeken']
 
 export interface KleurKeuze {
   hex: string
