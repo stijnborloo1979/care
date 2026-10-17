@@ -35,11 +35,9 @@ export default function KnoppenVandaag({ householdId, personName, timezone }: Pr
   const events = data ?? []
   const { current, next } = whatNow(events, now)
 
-  // De rest van de dag, zonder wat al bovenaan staat. Ook de gedane
-  // afspraken blijven staan, zodat je ze direct weer kunt terugzetten.
-  const rest = events
-    .filter((e) => e.id !== current?.id && e.id !== next?.id)
-    .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+  // Alle afspraken van vandaag, ook die bovenaan staan: elk moet in de lijst
+  // af te vinken zijn. Gedane afspraken blijven staan, zodat je ze terugzet.
+  const alle = [...events].sort((a, b) => a.starts_at.localeCompare(b.starts_at))
 
   return (
     <div className="space-y-7">
@@ -92,15 +90,15 @@ export default function KnoppenVandaag({ householdId, personName, timezone }: Pr
       {/* Medicatie: met de foto van de verpakking, zoals op het gewone scherm. */}
       <MedicatieKaart householdId={householdId} timezone={timezone} />
 
-      {/* Later vandaag: alle afspraken van de dag, elk aan of uit te vinken,
-          net als op het gewone scherm. */}
-      {rest.length > 0 ? (
+      {/* Alle afspraken van de dag, elk aan of uit te vinken, net als op het
+          gewone scherm. */}
+      {alle.length > 0 ? (
         <section aria-labelledby="later-titel" className="space-y-3">
           <h2 id="later-titel" className="text-2xl font-bold text-ink-soft">
-            {tt('Later vandaag')}
+            {tt('Vandaag')}
           </h2>
           <ul className="overflow-hidden rounded-[1.75rem] bg-surface shadow-card">
-            {rest.map((e) => {
+            {alle.map((e) => {
               const gedaan = statusOf(e, now) === 'done'
               return (
                 <li
