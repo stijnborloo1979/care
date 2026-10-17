@@ -12,6 +12,9 @@ export default {
     "Typ wat je zoekt, bijvoorbeeld: bril": "Tapez ce que vous cherchez, par exemple : lunettes",
     "Zoek": "Chercher",
     "Niets gevonden. Probeer een ander woord.": "Rien trouvé. Essayez un autre mot.",
+    "Nog {aantal} te nemen": "Encore {aantal} à prendre",
+    "Alles genomen": "Tout pris",
+    "Om {tijd}": "À {tijd}",
   },
   en: {
     "Medicijnen": "Medicines",
@@ -23,5 +26,8 @@ export default {
     "Typ wat je zoekt, bijvoorbeeld: bril": "Type what you are looking for, for example: glasses",
     "Zoek": "Search",
     "Niets gevonden. Probeer een ander woord.": "Nothing found. Try another word.",
+    "Nog {aantal} te nemen": "{aantal} still to take",
+    "Alles genomen": "All taken",
+    "Om {tijd}": "At {tijd}",
   },
 } satisfies Vertaling
