@@ -324,6 +324,8 @@ controlequery. De volledige checklist voor de livegang staat in
     Terugdraaien: `supabase/rollback/93_knop_ids_medicatie_zoeken.sql`.
 94. `94_knop_id_praten.sql` — kleur en foto ook voor de tegel Praat met mij. Breidt de knop-lijst van set_weergave uit.
     Terugdraaien: `supabase/rollback/94_knop_id_praten.sql`.
+95. `95_tegels_kiezen.sql` — familie of het WZC kiest welke keuzetegels op het startscherm staan. Vandaag, Help, Iets onthouden en Herinneringen blijven altijd. Zorgteam komt er bij een WZC-verblijf. Vervangt set_weergave, effective_weergave en set_display_prefs.
+    Terugdraaien: `supabase/rollback/95_tegels_kiezen.sql`.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een

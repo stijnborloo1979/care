@@ -64,6 +64,7 @@ const Radio = lazy(() => import("./features/radio/Radio"));
 const Privacy = lazy(() => import("./features/privacy/Privacy"));
 const Prijzen = lazy(() => import("./features/prijzen/Prijzen"));
 import MedicijnenNu from "./features/medicijnen/MedicijnenNu";
+import { OnthoudenPagina, ZorgteamPagina } from "./features/knoppen/Paginas";
 import Zoeken from "./features/zoeken/Zoeken";
 const ManageMedication = lazy(() => import("./features/medication/ManageMedication"));
 const ManageNotesPage = lazy(() =>
@@ -234,6 +235,8 @@ if (!configuratieOk) {
                     <Route path="/persoon" element={<PersonShell />} />
                     <Route path="/overzicht" element={<Overzicht />} />
                     <Route path="/medicijnen" element={<MedicijnenNu />} />
+                    <Route path="/onthouden" element={<OnthoudenPagina />} />
+                    <Route path="/zorgteam" element={<ZorgteamPagina />} />
                     <Route path="/zoeken" element={<Zoeken />} />
                     <Route path="/wie" element={<WhoIsWho />} />
                     <Route path="/wie/:personId" element={<PersonDetail />} />

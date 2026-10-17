@@ -17,6 +17,7 @@ import { TALEN } from '../../lib/i18n'
 import { tt } from '../../lib/uiTaal'
 import { HuisPalet } from '../palet/PaletKiezer'
 import { KnopKleuren } from '../palet/KnopKleuren'
+import { TegelKeuze } from '../knoppen/TegelKeuze'
 
 // De echte waarden staan in index.css; dit is alleen het bolletje in het
 // scherm. Donker en hoog contrast krijgen daar hun eigen variant.
@@ -170,6 +171,7 @@ export default function Settings() {
         <div className="mt-6 space-y-2">
           <h3 className="font-semibold">{tt('Kleur per knop')}</h3>
           <KnopKleuren hh={hh} />
+          <TegelKeuze hh={hh} />
         </div>
       </section>
 
