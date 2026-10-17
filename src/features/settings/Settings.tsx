@@ -15,6 +15,7 @@ import { usePush } from '../push/usePush'
 import PushNakijken from '../push/PushNakijken'
 import { TALEN } from '../../lib/i18n'
 import { tt } from '../../lib/uiTaal'
+import { HuisPalet } from '../palet/PaletKiezer'
 
 // De echte waarden staan in index.css; dit is alleen het bolletje in het
 // scherm. Donker en hoog contrast krijgen daar hun eigen variant.
@@ -62,7 +63,7 @@ const SCHAAL: { waarde: DisplayPrefs['scale']; label: string }[] = [
 export default function Settings() {
   const { household } = useHousehold()
   const hh = household?.household_id ?? ''
-  const { prefs, zet } = useDisplayPrefs(hh)
+  const { prefs, zet, zetWeergave } = useDisplayPrefs(hh)
   const voornaam = household?.person_name.split(' ')[0] ?? tt('de persoon')
 
   return (
@@ -135,6 +136,35 @@ export default function Settings() {
             />
           </label>
         ) : null}
+      </section>
+
+      <section className="rounded-card bg-surface p-6 shadow-card">
+        <h2 className="text-lg font-bold">{tt('Scherm')}</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          {tt('Welke indeling het scherm van {voornaam} heeft, en in welke kleuren. Dat kiezen alleen familie of het woonzorgcentrum. De originele indeling blijft altijd beschikbaar.', { voornaam })}
+        </p>
+
+        <Rij
+          titel={tt('Indeling')}
+          onder={tt('Origineel: de tegels zoals familie ze samenstelt. Grote knoppen: zes grote tegels en één grote knop bovenaan.')}
+        >
+          <Keuze
+            opties={[
+              { waarde: 'origineel', label: tt('Origineel') },
+              { waarde: 'knoppen', label: tt('Grote knoppen') },
+            ]}
+            actief={prefs.indeling}
+            onKies={(v) => zetWeergave.mutate({ indeling: v as DisplayPrefs['indeling'] })}
+          />
+        </Rij>
+
+        <div className="mt-4 space-y-2">
+          <h3 className="font-semibold">{tt('Kleuren')}</h3>
+          <p className="text-sm text-ink-soft">
+            {tt('Alleen de kleuren veranderen, nooit de indeling.')}
+          </p>
+          <HuisPalet hh={hh} />
+        </div>
       </section>
 
       <section className="rounded-card bg-surface p-6 shadow-card">

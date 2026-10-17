@@ -2,11 +2,21 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { isTaal, taalVanToestel, zetTaal, type Taal } from '../../lib/i18n'
+import { isPalet, type PaletId } from '../palet/paletten'
 
 /** Waar de app mag bellen. Zie kanBellen. */
 export type Bellen = 'nee' | 'telefoon' | 'ja'
 
 const BELLEN: Bellen[] = ['nee', 'telefoon', 'ja']
+
+/**
+ * De indeling van het dagscherm. 'origineel' is de indeling met tegels
+ * die familie op /familie/indeling samenstelt; 'knoppen' is het scherm met
+ * grote knoppen. Kiest familie of het WZC, nooit de persoon zelf.
+ */
+export type Indeling = 'origineel' | 'knoppen'
+
+const INDELINGEN: Indeling[] = ['origineel', 'knoppen']
 
 export interface DisplayPrefs {
   /** Taal van de schermen, de datums en de stem. */
@@ -14,8 +24,25 @@ export interface DisplayPrefs {
   scale: '1' | '1.15' | '1.3' | '1.5'
   contrast: 'normal' | 'high'
   theme: 'auto' | 'light' | 'dark'
-  /** Accentkleur. Vaste keuzes; de waarden staan in index.css. */
+  /** Accentkleur. Vaste keuzes; de waarden staan in index.css. Geldt niet als er een palet gekozen is. */
   accent: 'groenblauw' | 'blauw' | 'groen' | 'paars' | 'warm'
+  /**
+   * Welke indeling het dagscherm heeft. Staat in de database als
+   * 'indeling' en wordt alleen gezet via set_weergave (migratie 88).
+   */
+  indeling: Indeling
+  /**
+   * Het palet dat dit huishouden zelf koos. Null betekent: het palet van de
+   * organisatie, of de standaard als er geen organisatie is. Staat in de
+   * database als 'palet'.
+   */
+  palet: PaletId | null
+  /**
+   * Het palet dat op dit toestel werkelijk getoond wordt: eigen keuze,
+   * anders van de organisatie, anders de standaard. Komt van
+   * effective_weergave en staat niet in de database.
+   */
+  paletActief: PaletId
   simple: boolean
   voice: boolean
   /** Het scherm licht op bij een melding. */
@@ -65,6 +92,9 @@ export const STANDAARD: DisplayPrefs = {
   contrast: 'normal',
   theme: 'auto',
   accent: 'groenblauw',
+  indeling: 'origineel',
+  palet: null,
+  paletActief: 'standaard',
   simple: false,
   voice: true,
   licht: true,
@@ -114,6 +144,10 @@ export function volledig(ruw: unknown): DisplayPrefs {
   const deel = ruw && typeof ruw === 'object' ? (ruw as Partial<DisplayPrefs>) : {}
   const p = { ...STANDAARD, ...deel }
   if (!isTaal(p.taal)) p.taal = STANDAARD.taal
+  // Een onbekende indeling valt terug op de originele: die is altijd veilig.
+  if (!INDELINGEN.includes(p.indeling)) p.indeling = STANDAARD.indeling
+  if (p.palet !== null && !isPalet(p.palet)) p.palet = null
+  if (!isPalet(p.paletActief)) p.paletActief = STANDAARD.paletActief
   // kanBellen was een ja/nee. Rijen van voor die wijziging staan nog in de
   // database, en een boolean die als stand doorglipt zou 'nee' noch 'ja'
   // zijn: dan viel de keuze terug op de standaard en kreeg een tablet
@@ -177,8 +211,17 @@ export function pasToe(p: DisplayPrefs) {
   const r = document.documentElement
   r.setAttribute('data-scale', p.simple && p.scale === '1' ? '1.15' : p.scale)
   r.setAttribute('data-contrast', p.contrast)
-  if (p.accent === 'groenblauw') r.removeAttribute('data-accent')
-  else r.setAttribute('data-accent', p.accent)
+  // Een gekozen palet gaat vóór de accentkleur: die laatste is de oude,
+  // vaste keuze die familie nog kan aanpassen. Zonder palet blijft die gelden.
+  if (p.paletActief !== 'standaard') {
+    r.setAttribute('data-palet', p.paletActief)
+    r.removeAttribute('data-accent')
+  } else {
+    r.removeAttribute('data-palet')
+    if (p.accent === 'groenblauw') r.removeAttribute('data-accent')
+    else r.setAttribute('data-accent', p.accent)
+  }
+  r.setAttribute('data-indeling', p.indeling)
   if (p.theme === 'auto') r.removeAttribute('data-theme')
   else r.setAttribute('data-theme', p.theme)
   document.body.setAttribute('data-simple', p.simple ? 'true' : 'false')
@@ -210,7 +253,15 @@ export function useDisplayPrefs(householdId: string) {
         .eq('id', householdId)
         .maybeSingle()
       if (error) throw error
-      return volledig((data as { display_prefs: unknown } | null)?.display_prefs)
+      const ruw = (data as { display_prefs: unknown } | null)?.display_prefs
+      // Het effectieve palet komt van de functie, omdat het ook uit het
+      // WZC-palet kan komen. Ontbreekt migratie 88 nog, dan blijft het
+      // standaardpalet staan in plaats van dat de hele query faalt.
+      const { data: werkelijk, error: weergaveFout } = await supabase.rpc('effective_weergave', {
+        hh: householdId,
+      })
+      const eff = !weergaveFout && werkelijk && typeof werkelijk === 'object' ? (werkelijk as { palet?: unknown }) : null
+      return volledig({ ...(ruw && typeof ruw === 'object' ? ruw : {}), paletActief: eff?.palet })
     },
   })
 
@@ -239,5 +290,18 @@ export function useDisplayPrefs(householdId: string) {
     onSuccess: (nieuw) => queryClient.setQueryData(['prefs', householdId], nieuw),
   })
 
-  return { prefs: query.data ?? lees(), zet }
+  /**
+   * Indeling en palet van het huishouden. Alleen familie of de beheerder
+   * van de organisatie kan dit; de database weigert de persoon zelf. Het
+   * scherm hier is alleen de weg om het te vragen.
+   */
+  const zetWeergave = useMutation({
+    mutationFn: async (deel: { indeling?: Indeling; palet?: PaletId | null }) => {
+      const { error } = await supabase.rpc('set_weergave', { hh: householdId, prefs: deel })
+      if (error) throw error
+      await queryClient.invalidateQueries({ queryKey: ['prefs', householdId] })
+    },
+  })
+
+  return { prefs: query.data ?? lees(), zet, zetWeergave }
 }
