@@ -149,7 +149,7 @@ export function KnopKleuren({ hh }: { hh: string }) {
         {tt('Kies per knop een kleur. De indeling verandert niet.')}
       </p>
       <p className="text-sm text-ink-soft">
-        {tt('Met een foto krijgt de knop een donkere laag, zodat de tekst leesbaar blijft.')}
+        {tt('Met een foto wordt het onderste deel van de knop donkerder, zodat de tekst leesbaar blijft.')}
       </p>
 
       <ul className="space-y-4">

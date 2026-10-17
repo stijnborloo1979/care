@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  FOTO_LAAG_DEKKING,
+  FOTO_LAAG,
   KNOP_IDS,
   KNOP_KLEUREN,
   contrast,
@@ -51,9 +51,10 @@ describe('kleur per knop', () => {
     expect(schoneKnopKleuren([])).toEqual({})
   })
 
-  it('de donkere laag over een foto houdt witte tekst leesbaar, ook bij een witte foto', () => {
-    // Een volledig witte foto onder de laag: wat er dan overblijft, is grijs.
-    const grijs = Math.round(255 * (1 - FOTO_LAAG_DEKKING))
+  it('het verloop over een foto houdt witte tekst leesbaar, ook bij een witte foto', () => {
+    // Vanaf het midden van de tegel staat de tekst. Een volledig witte foto
+    // onder de laag geeft daar het zwakst contrast: wat er overblijft, is grijs.
+    const grijs = Math.round(255 * (1 - FOTO_LAAG.midden))
     const hex = grijs.toString(16).padStart(2, '0')
     expect(contrast(`#${hex}${hex}${hex}`, '#ffffff')).toBeGreaterThanOrEqual(4.5)
   })

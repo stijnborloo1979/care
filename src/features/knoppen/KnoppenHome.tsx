@@ -8,7 +8,7 @@ import { dateLine, greeting } from '../../lib/time'
 import { tt } from '../../lib/uiTaal'
 import { signedUrlCached } from '../../lib/storage'
 import {
-  FOTO_LAAG_DEKKING,
+  FOTO_LAAG_CSS,
   schoneKnopFotos,
   schoneKnopKleuren,
   type KnopFotos,
@@ -34,8 +34,8 @@ function kleurStijl(kleur: string | undefined): CSSProperties | undefined {
 }
 
 /**
- * De foto achter een knop, met een donkere laag eroverheen. Die laag zorgt
- * dat de witte tekst leesbaar blijft, wat de foto ook is (zie paletten.ts).
+ * De foto achter een knop, met een verloop eroverheen: bovenaan open,
+ * onderaan donker waar de tekst staat (zie paletten.ts).
  * Lukt het laden niet, dan blijft de gekozen kleur staan.
  */
 export function KnopAchtergrond({ pad }: { pad: string }) {
@@ -60,7 +60,7 @@ export function KnopAchtergrond({ pad }: { pad: string }) {
       <span
         aria-hidden="true"
         className="absolute inset-0"
-        style={{ backgroundColor: `rgba(0, 0, 0, ${FOTO_LAAG_DEKKING})` }}
+        style={{ backgroundImage: FOTO_LAAG_CSS }}
       />
     </>
   )

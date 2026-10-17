@@ -155,14 +155,28 @@ export function schoneKnopKleuren(ruw: unknown): KnopKleuren {
 
 /* -------------------------------------------------------------------
    Foto per knop. De foto krijgt een donkere laag eroverheen, zodat de
-   witte tekst altijd leesbaar blijft, wat de foto ook is.
+   witte tekst leesbaar blijft, wat de foto ook is.
    ------------------------------------------------------------------- */
 
 /**
- * Dekking van de laag over een foto. Bij 60% zwart wordt zelfs een volledig
- * witte foto #666666: dat geeft 5,7:1 met witte tekst (zie knopKleuren.test.ts).
+ * De laag over een foto is een verloop: bovenaan bijna open, zodat de foto
+ * herkenbaar blijft, en onderaan donker waar de tekst staat. Het icoon
+ * bovenaan is geen tekst en hoeft maar 3:1. Vanaf het midden is de tekst
+ * minstens 4,5:1 met witte tekst, ook bij een volledig witte foto
+ * (zie knopKleuren.test.ts).
  */
-export const FOTO_LAAG_DEKKING = 0.6
+export const FOTO_LAAG = {
+  bovenaan: 0.15,
+  midden: 0.55,
+  onderaan: 0.8,
+  /** Waar in de tegel (0–100%) het midden ligt. */
+  middenOp: 45,
+} as const
+
+export const FOTO_LAAG_CSS =
+  `linear-gradient(to bottom, rgba(0, 0, 0, ${FOTO_LAAG.bovenaan}) 0%, ` +
+  `rgba(0, 0, 0, ${FOTO_LAAG.midden}) ${FOTO_LAAG.middenOp}%, ` +
+  `rgba(0, 0, 0, ${FOTO_LAAG.onderaan}) 100%)`
 
 /** Het pad van een knopfoto in de bucket. De server controleert het echte huishouden. */
 export type KnopFotos = Partial<Record<KnopId, string>>
