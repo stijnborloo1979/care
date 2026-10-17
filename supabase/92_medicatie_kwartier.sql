@@ -58,14 +58,22 @@ $$;
 
 revoke execute on function public.controleer_medicatie_overdag() from public, anon, authenticated;
 
--- Inplannen: elk kwartier. Dit blok staat in de migratie omdat het alleen
--- de cron-tabel raakt, geen sleutels.
+-- Inplannen: elk kwartier. Staat pg_cron niet aan, dan krijg je een melding
+-- en is de migratie toch geslaagd; zet de extensie dan aan en draai dit
+-- blok opnieuw.
 do $$
 begin
   perform cron.unschedule('medicatie-kwartier');
 exception when others then
   null;
-end $$;
+end
+$$;
 
-select cron.schedule('medicatie-kwartier', '*/15 * * * *',
-  'select public.controleer_medicatie_overdag()');
+do $$
+begin
+  perform cron.schedule('medicatie-kwartier', '*/15 * * * *',
+    'select public.controleer_medicatie_overdag()');
+exception when others then
+  raise notice 'pg_cron staat nog niet aan. Zet de extensie aan en draai dit blok opnieuw.';
+end
+$$;
