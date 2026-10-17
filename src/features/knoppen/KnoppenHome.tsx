@@ -10,6 +10,7 @@ import { signedUrlCached } from '../../lib/storage'
 import { t } from '../../lib/i18n'
 import { useNow } from '../today/useAgenda'
 import { useVandaag } from '../today/useVandaag'
+import { getMedsToday } from '../../services/medsToday'
 import { whatNow } from '../today/whatNow'
 import {
   FOTO_LAAG_DEKKING,
@@ -73,7 +74,9 @@ export function KnopAchtergrond({ pad }: { pad: string }) {
 
 // Een functie en geen constante: tt() moet bij elke weergave de taal van
 // het huishouden kennen, en die kan wijzigen zonder dat de module herlaadt.
-function tegels(): { id: KnopId; to: string; label: string; sub: string; icoon: IconNaam }[] {
+interface Tegel { id: KnopId; to: string; label: string; sub: string; icoon: IconNaam }
+
+function tegels(): Tegel[] {
   return [
     // Geen "/": dat is het scherm met grote knoppen zelf. Het overzicht staat op /overzicht.
     { id: 'vandaag', to: '/overzicht', label: tt('Vandaag'), sub: tt('Wat er gepland staat'), icoon: 'vandaag' },
@@ -93,6 +96,26 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
   // Het volgende op de agenda, rechts in de startknop. Zelfde bron als Vandaag.
   const { data: agenda } = useVandaag(householdId, timezone, klok)
   const volgende = agenda ? whatNow(agenda, klok).next : undefined
+  // Medicijnen: hoeveel innames vandaag nog open staan. Zelfde bron en sleutel
+  // als de medicatiekaart, dus één keer ophalen.
+  const { data: meds } = useQuery({
+    queryKey: ['meds-today', householdId],
+    queryFn: () => getMedsToday(householdId, timezone),
+    enabled: !!householdId,
+    staleTime: 60_000,
+  })
+  const openInnames = (meds ?? []).filter((m) => !m.taken_at).length
+  // Eerstvolgende bezoek: uit dezelfde agenda als Vandaag.
+  const volgendBezoek = (agenda ?? []).find((e) => e.kind === 'visit' && new Date(e.starts_at) > klok)
+  // De ondertitel van een tegel, als de gegevens er zijn. Anders de vaste tekst.
+  const levendeSub = (id: KnopId): string | undefined => {
+    if (id === 'vandaag' && volgende) return `${hhmm(new Date(volgende.starts_at), timezone)} · ${volgende.title}`
+    if (id === 'medicatie' && meds) {
+      return openInnames > 0 ? tt('Nog {aantal} te nemen', { aantal: openInnames }) : tt('Alles genomen')
+    }
+    if (id === 'wie' && volgendBezoek) return tt('Om {tijd}', { tijd: hhmm(new Date(volgendBezoek.starts_at), timezone) })
+    return undefined
+  }
   const openVoice = useVoice((s) => s.openen)
   // Een kleur of foto die niet (meer) in de vaste lijst staat, valt weg: dan
   // krijgt de tegel de gewone vormgeving.
@@ -171,7 +194,7 @@ export default function KnoppenHome({ householdId, personName, timezone, kleuren
               <span className="relative flex flex-col gap-3">
                 <Icon naam={t.icoon} size={48} />
                 <span className="text-3xl font-bold">{t.label}</span>
-                <span className={`text-lg ${kleur || foto ? 'opacity-90' : 'text-ink-soft'}`}>{t.sub}</span>
+                <span className={`text-lg ${kleur || foto ? 'opacity-90' : 'text-ink-soft'}`}>{levendeSub(t.id) ?? t.sub}</span>
               </span>
             </Link>
           )
