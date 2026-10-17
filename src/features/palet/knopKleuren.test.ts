@@ -22,8 +22,8 @@ describe('kleur per knop', () => {
     expect(new Set(KNOP_KLEUREN.map((k) => k.hex)).size).toBe(12)
   })
 
-  it('kent de zeven knoppen van het scherm', () => {
-    expect(KNOP_IDS).toEqual(['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help'])
+  it('kent de knoppen van het scherm, ook medicijnen en zoeken', () => {
+    expect(KNOP_IDS).toEqual(['nu', 'vandaag', 'wie', 'memory', 'fotos', 'radio', 'help', 'medicatie', 'zoeken'])
     expect(isKnopId('nu')).toBe(true)
     expect(isKnopId('onbekend')).toBe(false)
   })

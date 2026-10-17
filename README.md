@@ -320,6 +320,8 @@ controlequery. De volledige checklist voor de livegang staat in
     Terugdraaien: `supabase/rollback/91_bezoek_afzeggen.sql`.
 92. `92_medicatie_kwartier.sql` — medicatie-waarschuwing elk kwartier i.p.v. alleen 's nachts; één melding per inname.
     Terugdraaien: `supabase/rollback/92_medicatie_kwartier.sql`.
+93. `93_knop_ids_medicatie_zoeken.sql` — kleur en foto ook voor de tegels medicijnen en zoeken. Breidt de knop-lijst van set_weergave uit.
+    Terugdraaien: `supabase/rollback/93_knop_ids_medicatie_zoeken.sql`.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
