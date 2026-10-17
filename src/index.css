@@ -109,6 +109,25 @@
   --accent-ink: #523080;
   --accent-soft: #eae1f7;
 }
+/* Kleurpaletten van familie of het WZC (zie src/features/palet/paletten.ts).
+   Alleen de kleuren; de indeling blijft gelijk. Elk palet is vooraf
+   gecontroleerd op contrast. Het standaardpalet heeft geen attribuut en
+   gebruikt de vaste accentkleur hierboven. */
+:root[data-palet='linde'] {
+  --accent: #1d6b63;
+  --accent-ink: #17564f;
+  --accent-soft: #e0f1ee;
+}
+:root[data-palet='zacht-blauw'] {
+  --accent: #1f4e79;
+  --accent-ink: #1a4166;
+  --accent-soft: #e4ecf4;
+}
+:root[data-palet='hoog-contrast'] {
+  --accent: #5c1f08;
+  --accent-ink: #4a1906;
+  --accent-soft: #f7e6dc;
+}
 :root[data-accent='warm'] {
   --accent: #a5691f;
   --accent-ink: #8a5a1e;

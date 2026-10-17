@@ -47,3 +47,26 @@ describe('volledig', () => {
     }
   })
 })
+
+describe('indeling en palet', () => {
+  it('begint op de originele indeling en het standaardpalet', () => {
+    expect(STANDAARD.indeling).toBe('origineel')
+    expect(STANDAARD.palet).toBeNull()
+    expect(STANDAARD.paletActief).toBe('standaard')
+  })
+
+  it('valt bij een onbekende indeling terug op de originele', () => {
+    expect(volledig({ indeling: 'rommel' }).indeling).toBe('origineel')
+    expect(volledig({ indeling: 'knoppen' }).indeling).toBe('knoppen')
+  })
+
+  it('laat een onbekend eigen palet vallen, zodat het WZC-palet of de standaard geldt', () => {
+    expect(volledig({ palet: 'rood' }).palet).toBeNull()
+    expect(volledig({ palet: 'linde' }).palet).toBe('linde')
+  })
+
+  it('valt bij een onbekend werkelijk palet terug op de standaard', () => {
+    expect(volledig({ paletActief: 'onzin' }).paletActief).toBe('standaard')
+    expect(volledig({ paletActief: 'zacht-blauw' }).paletActief).toBe('zacht-blauw')
+  })
+})

@@ -9,6 +9,7 @@ import { Afdelingen, Organisatie } from './BeheerOrganisatie'
 import SysteemControle from '../systeem/SysteemControle'
 import JouwAbonnement from '../prijzen/JouwAbonnement'
 import { useOrganisatie } from './useOrganisatie'
+import { WzcPalet } from '../palet/PaletKiezer'
 import { useAuth } from '../auth/AuthProvider'
 import {
   ROLNAAM,
@@ -67,6 +68,15 @@ export default function Beheer() {
       {isBeheerder ? <OpenUitnodigingen orgId={orgId} /> : null}
       {isBeheerder ? <Afdelingen orgId={orgId} /> : null}
       {isBeheerder ? <Organisatie orgId={orgId} /> : null}
+      {beheert ? (
+        <section className="rounded-card bg-surface p-6 shadow-card">
+          <h2 className="text-lg font-bold">{tt('Kleuren van het scherm')}</h2>
+          <p className="mt-1 mb-4 text-sm text-ink-soft">
+            {tt('Het standaardpalet van het woonzorgcentrum. Elke bewoner erft het, tenzij familie of het WZC er per bewoner iets anders voor kiest.')}
+          </p>
+          <WzcPalet orgId={orgId} />
+        </section>
+      ) : null}
       <Bewaartermijn orgId={orgId} isBeheerder={isBeheerder} />
       <OverdrachtTermijn orgId={orgId} isBeheerder={isBeheerder} />
       <TeamberichtTermijn orgId={orgId} isBeheerder={isBeheerder} />

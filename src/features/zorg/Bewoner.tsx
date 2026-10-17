@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Check, Eye, Phone, TriangleAlert, Users } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
+import { HuisPalet } from '../palet/PaletKiezer'
 import BerichtenVanBewoner from './BerichtenVanBewoner'
 import BezoekVastleggen from '../bezoek/BezoekVastleggen'
 import DitBenIkKaart from './DitBenIkKaart'
@@ -30,7 +31,7 @@ import { tt } from '../../lib/uiTaal'
 
 export default function Bewoner() {
   const { hh = '' } = useParams()
-  const { org } = useOrganisatie()
+  const { org, beheert } = useOrganisatie()
   const { session } = useAuth()
   const ik = session?.user.id ?? ''
   const orgId = org?.org_id ?? ''
@@ -68,6 +69,15 @@ export default function Bewoner() {
     return (
       <div className="space-y-6">
         {kop}
+        {beheert ? (
+          <section className="rounded-card bg-surface p-5 shadow-card sm:p-6">
+            <h2 className="text-lg font-bold">{tt('Kleuren van het scherm')}</h2>
+            <p className="mt-1 mb-4 text-sm text-ink-soft">
+              {tt('Kies per bewoner een palet, of laat het het palet van het woonzorgcentrum erven. De indeling verandert niet.')}
+            </p>
+            <HuisPalet hh={hh} metWzc />
+          </section>
+        ) : null}
         <Dossier hh={hh} orgId={orgId} naam={bewoner?.naam.split(' ')[0] ?? tt('de bewoner')} />
       </div>
     )

@@ -301,6 +301,10 @@ controlequery. De volledige checklist voor de livegang staat in
     werkt weer: `create_invite` (05) zocht `gen_random_bytes` in `public`,
     terwijl pgcrypto op Supabase in `extensions` staat. Draai daarna
     `76_systeemcontrole.sql` opnieuw.
+88. `88_weergave.sql` — indeling (origineel of grote knoppen) en kleurpalet,
+    per huishouden en per WZC. Alleen familie of de beheerder/coördinator van
+    de organisatie kan dit wijzigen; de persoon zelf niet. Terugdraaien:
+    `supabase/rollback/88_weergave.sql`.
 
 **Taal van de schermen.** Familie- en zorgschermen zijn er in het Nederlands,
 Frans en Engels (keuze in het accountmenu en op het welkomstscherm; een
