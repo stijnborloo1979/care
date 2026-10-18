@@ -52,11 +52,16 @@ begin
   raise exception 'GEZAKT: % — werd niet geweigerd', wat;
 end $$;
 
+-- Een WZC bestaat pas na aanvraag en goedkeuring (98); hier direct als service role.
+insert into public.organisation (name) values ('WZC De Linde');
+insert into public.org_membership (org_id, profile_id, role)
+  select id, (select v from t_ids where k = 'oa'), 'org_admin' from public.organisation where name = 'WZC De Linde';
+
 set local role authenticated;
 
--- Een WZC registreren
+-- Het WZC is er al
 select pg_temp.als('oa');
-insert into t_ids select 'org', public.create_organisation('WZC De Linde');
+insert into t_ids select 'org', (select id from public.organisation where name = 'WZC De Linde');
 insert into t_tekst select 'code', public.org_koppelcode(pg_temp.id('org'));
 select pg_temp.gelijk('koppelcode: 8 tekens, geen verwarrende', (select pg_temp.tekst('code') ~ '^[A-HJ-NP-Z2-9]{8}$'), true);
 
