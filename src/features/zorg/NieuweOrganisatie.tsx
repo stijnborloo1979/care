@@ -1,45 +1,74 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link, Navigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Building2 } from 'lucide-react'
-import { maakOrganisatie } from './zorgApi'
+import { dienOrgAanvraag, type OrgAanvraagInvoer } from './zorgApi'
 import { useOrganisatie } from './useOrganisatie'
 import { Fout, knop, label, veld } from './ui'
 import { tt } from '../../lib/uiTaal'
 import { DemoKnop } from './Demo'
 
+const leeg: OrgAanvraagInvoer = {
+  naam: '',
+  ondernemingsnummer: '',
+  erkenningsnummer: '',
+  adres: '',
+  contactNaam: '',
+  contactEmail: '',
+  telefoon: '',
+}
+
+const velden: { sleutel: keyof OrgAanvraagInvoer; tekst: string; plaats?: string; verplicht: boolean; type?: string }[] = [
+  { sleutel: 'naam', tekst: 'Naam van het woonzorgcentrum', plaats: 'WZC De Linde', verplicht: true },
+  { sleutel: 'ondernemingsnummer', tekst: 'Ondernemingsnummer', plaats: '0123.456.789', verplicht: true },
+  { sleutel: 'erkenningsnummer', tekst: 'Erkenningsnummer (indien bekend)', verplicht: false },
+  { sleutel: 'adres', tekst: 'Adres', plaats: 'Straat 1, 9000 Gent', verplicht: true },
+  { sleutel: 'contactNaam', tekst: 'Naam van de contactpersoon', verplicht: true },
+  { sleutel: 'contactEmail', tekst: 'E-mailadres van het woonzorgcentrum', plaats: 'info@woonzorgcentrum.be', verplicht: true, type: 'email' },
+  { sleutel: 'telefoon', tekst: 'Telefoonnummer van de contactpersoon', verplicht: true, type: 'tel' },
+]
+
 /**
- * Een woonzorgcentrum registreren. Wie dit doet, wordt er beheerder van.
- * Medewerkers komen er daarna bij op uitnodiging; bewoners via de familie.
+ * Een woonzorgcentrum aanvragen. LifeAngle controleert de gegevens telefonisch
+ * en per e-mail; pas daarna wordt het account van het WZC actief.
  */
 export default function NieuweOrganisatie() {
   const { org, isLoading } = useOrganisatie()
-  const [naam, setNaam] = useState('')
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const maak = useMutation({
-    mutationFn: () => maakOrganisatie(naam),
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['organisaties'], type: 'all' })
-      navigate('/zorg/beheer', { replace: true })
-    },
+  const [v, setV] = useState<OrgAanvraagInvoer>(leeg)
+  const [ingediend, setIngediend] = useState(false)
+  const dien = useMutation({
+    mutationFn: () => dienOrgAanvraag(v),
+    onSuccess: () => setIngediend(true),
   })
 
   if (isLoading) return <p className="p-6 text-ink-soft">{tt('Even geduld…')}</p>
-  // Wie al ergens werkt en hier per ongeluk landt, gaat gewoon naar zijn scherm.
-  // Maar niet net na het registreren: dan gaat onSuccess naar Beheer, en
-  // deze regel zou die navigatie inhalen en de nieuwe beheerder op een leeg
-  // Vandaag zetten in plaats van bij de koppelcode.
-  if (org && !maak.isPending && !maak.isSuccess) return <Navigate to="/zorg" replace />
+  // Wie al aan een WZC gekoppeld is, gaat naar zijn scherm.
+  if (org && !ingediend) return <Navigate to="/zorg" replace />
+
+  if (ingediend) {
+    return (
+      <main className="mx-auto max-w-[32rem] px-5 py-10">
+        <h1 className="text-[1.9rem] font-extrabold leading-tight tracking-tight">{tt('Je aanvraag is ontvangen')}</h1>
+        <p className="mt-3 text-lg text-ink-soft">
+          {tt('LifeAngle controleert de gegevens en neemt contact op met de contactpersoon. Pas daarna wordt het woonzorgcentrum actief en kan de beheerder medewerkers uitnodigen.')}
+        </p>
+        <Link to="/" className="mt-8 block text-center font-semibold text-ink-faint underline underline-offset-4">
+          {tt('Terug')}
+        </Link>
+      </main>
+    )
+  }
+
+  const kanIndienen = velden.every((f) => !f.verplicht || v[f.sleutel].trim() !== '') && !dien.isPending
 
   return (
     <main className="mx-auto max-w-[32rem] px-5 py-10">
       <span className="grid h-14 w-14 place-items-center rounded-2xl bg-accent-soft text-accent-ink">
         <Building2 size={28} strokeWidth={1.75} aria-hidden="true" />
       </span>
-      <h1 className="mt-5 text-[1.9rem] font-extrabold leading-tight tracking-tight">{tt('Een woonzorgcentrum registreren')}</h1>
+      <h1 className="mt-5 text-[1.9rem] font-extrabold leading-tight tracking-tight">{tt('Een woonzorgcentrum aanvragen')}</h1>
       <p className="mt-2 text-lg text-ink-soft">
-        {tt('Je wordt beheerder. Daarna nodig je medewerkers uit en krijg je een code voor de familie van je bewoners.')}
+        {tt('LifeAngle controleert elk woonzorgcentrum voordat het actief wordt. Daarna wordt de contactpersoon beheerder.')}
       </p>
       <p className="mt-2 text-ink-soft">
         {tt('Werk je in een woonzorgcentrum dat al LifeAngle gebruikt? Dan heb je een uitnodiging nodig van je beheerder.')}
@@ -48,18 +77,27 @@ export default function NieuweOrganisatie() {
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          if (naam.trim()) maak.mutate()
+          if (kanIndienen) dien.mutate()
         }}
-        className="mt-6"
+        className="mt-6 space-y-4"
       >
-        <label className="block">
-          <span className={label}>{tt('Naam van het woonzorgcentrum')}</span>
-          <input required value={naam} onChange={(e) => setNaam(e.target.value)} placeholder={tt('WZC De Linde')} className={veld} />
-        </label>
-        <button type="submit" disabled={!naam.trim() || maak.isPending} className={`${knop} mt-4 w-full text-lg`}>
-          {maak.isPending ? tt('Bezig…') : tt('Registreren')}
+        {velden.map((f) => (
+          <label key={f.sleutel} className="block">
+            <span className={label}>{tt(f.tekst)}</span>
+            <input
+              type={f.type ?? 'text'}
+              required={f.verplicht}
+              value={v[f.sleutel]}
+              onChange={(e) => setV({ ...v, [f.sleutel]: e.target.value })}
+              placeholder={f.plaats ? tt(f.plaats) : undefined}
+              className={veld}
+            />
+          </label>
+        ))}
+        <button type="submit" disabled={!kanIndienen} className={`${knop} mt-2 w-full text-lg`}>
+          {dien.isPending ? tt('Bezig…') : tt('Aanvraag indienen')}
         </button>
-        <Fout fout={maak.error} />
+        <Fout fout={dien.error} />
       </form>
 
       <div className="mt-8 rounded-card border-[1.5px] border-dashed border-accent bg-accent-soft p-5">

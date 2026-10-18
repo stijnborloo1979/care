@@ -78,6 +78,7 @@ const CareLog = lazy(() => import("./features/care-log/CareLog"));
 const Documents = lazy(() => import("./features/documents/Documents"));
 // LifeAngle Care: alleen wie in een woonzorgcentrum werkt, laadt dit.
 const ZorgLayout = lazy(() => import("./app/ZorgLayout"));
+const PlatformBeheer = lazy(() => import("./features/platform/PlatformBeheer"));
 const ZorgBewoners = lazy(() => import("./features/zorg/Bewoners"));
 const ZorgBewoner = lazy(() => import("./features/zorg/Bewoner"));
 const ZorgOverdracht = lazy(() => import("./features/zorg/Overdracht"));
@@ -183,6 +184,16 @@ if (!configuratieOk) {
                     element={
                       <Beveiligd>
                         <Account />
+                      </Beveiligd>
+                    }
+                  />
+                  <Route
+                    path="/platform"
+                    element={
+                      <Beveiligd>
+                        <Suspense fallback={null}>
+                          <PlatformBeheer />
+                        </Suspense>
                       </Beveiligd>
                     }
                   />

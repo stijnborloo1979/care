@@ -59,6 +59,36 @@ Deno.serve(async (req) => {
       .select('household_id, role, household:household_id (person_name)')
       .eq('profile_id', uid)
 
+    // Beheerder van een actief WZC (migratie 98): het account mag pas weg als er
+    // nog minstens twee beheerders overblijven. Dit controleren we vóór er iets
+    // verwijderd wordt, anders zou het huishouden wel weg zijn en het account niet.
+    const { data: orgBeheer } = await admin
+      .from('org_membership')
+      .select('org_id, organisation:org_id (name, active)')
+      .eq('profile_id', uid)
+      .eq('role', 'org_admin')
+      .eq('active', true)
+    for (const m of orgBeheer ?? []) {
+      const org = (Array.isArray(m.organisation) ? m.organisation[0] : m.organisation) as { name: string; active: boolean } | null
+      if (!org?.active) continue
+      const { count } = await admin
+        .from('org_membership')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', m.org_id)
+        .eq('role', 'org_admin')
+        .eq('active', true)
+        .neq('profile_id', uid)
+      if ((count ?? 0) < 2) {
+        return json(
+          {
+            error: `Je bent beheerder van ${org.name}. Maak eerst een andere beheerder, zodat er twee beheerders overblijven, en probeer het daarna opnieuw.`,
+            woonzorgcentrum: org.name,
+          },
+          409,
+        )
+      }
+    }
+
     const teVerwijderen: string[] = []
 
     for (const lid of leden ?? []) {
