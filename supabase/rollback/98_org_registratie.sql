@@ -84,24 +84,35 @@ drop function if exists public.is_platform_beheerder();
 -- create_organisation weer open, zoals in 03.
 grant execute on function public.create_organisation(text, text) to authenticated;
 
+-- Veilig om opnieuw te draaien: wat er niet (meer) is, wordt overgeslagen.
 do $$
 begin
-  if not exists (select 1 from public.org_aanvraag) then
-    drop table if exists public.org_aanvraag;
-  else
-    raise notice 'org_aanvraag blijft staan: er zijn al aanvragen.';
+  if to_regclass('public.org_aanvraag') is not null then
+    if not exists (select 1 from public.org_aanvraag) then
+      drop table public.org_aanvraag;
+    else
+      raise notice 'org_aanvraag blijft staan: er zijn al aanvragen.';
+    end if;
   end if;
-  if not exists (select 1 from public.platform_log) then
-    drop table if exists public.platform_log;
-  else
-    raise notice 'platform_log blijft staan: er staat al een logregel in.';
+
+  if to_regclass('public.platform_log') is not null then
+    if not exists (select 1 from public.platform_log) then
+      drop table public.platform_log;
+    else
+      raise notice 'platform_log blijft staan: er staat al een logregel in.';
+    end if;
   end if;
-  if not exists (select 1 from public.organisation where dpa_referentie is not null) then
-    alter table public.organisation drop column if exists dpa_referentie;
-    alter table public.organisation drop column if exists dpa_getekend_op;
-  else
-    raise notice 'dpa_referentie blijft staan: er zijn al activaties.';
+
+  if exists (select 1 from information_schema.columns
+              where table_schema = 'public' and table_name = 'organisation' and column_name = 'dpa_referentie') then
+    if not exists (select 1 from public.organisation where dpa_referentie is not null) then
+      alter table public.organisation drop column dpa_referentie;
+      alter table public.organisation drop column if exists dpa_getekend_op;
+    else
+      raise notice 'dpa_referentie blijft staan: er zijn al activaties.';
+    end if;
   end if;
+
   drop table if exists public.platform_beheerder;
 end
 $$;
