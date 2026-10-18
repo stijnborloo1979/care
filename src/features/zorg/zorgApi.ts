@@ -113,8 +113,27 @@ async function rpcLijst<T>(naam: string, args?: Record<string, unknown>): Promis
 
 export const mijnOrganisaties = () => rpcLijst<Organisatie>('mijn_organisaties')
 
-export async function maakOrganisatie(naam: string): Promise<string> {
-  const { data, error } = await supabase.rpc('create_organisation', { org_name: naam.trim() })
+export interface OrgAanvraagInvoer {
+  naam: string
+  ondernemingsnummer: string
+  erkenningsnummer: string
+  adres: string
+  contactNaam: string
+  contactEmail: string
+  telefoon: string
+}
+
+/** Dient een aanvraag in. Er ontstaat pas een WZC na controle door LifeAngle. */
+export async function dienOrgAanvraag(v: OrgAanvraagInvoer): Promise<string> {
+  const { data, error } = await supabase.rpc('dien_org_aanvraag', {
+    naam: v.naam.trim(),
+    ondernemingsnummer: v.ondernemingsnummer.trim(),
+    erkenningsnummer: v.erkenningsnummer.trim(),
+    adres: v.adres.trim(),
+    contact_naam: v.contactNaam.trim(),
+    contact_email: v.contactEmail.trim(),
+    telefoon: v.telefoon.trim(),
+  })
   if (error) throw error
   return data as string
 }
