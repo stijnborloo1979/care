@@ -48,7 +48,14 @@ select pg_temp.geweigerd('geen andere rol', format('select public.demo_rol(%L::u
 select pg_temp.als('x');
 select pg_temp.geweigerd('een vreemde wisselt niets', format('select public.demo_rol(%L::uuid, ''org_admin'')', pg_temp.id('demo')));
 select pg_temp.geweigerd('en wist niets', format('select public.wis_demo_wzc(%L::uuid)', pg_temp.id('demo')));
-insert into t_ids values ('echt', public.create_organisation('Echt WZC'));
+reset role;
+do $$ declare o uuid; begin
+  insert into public.organisation (name) values ('Echt WZC') returning id into o;
+  insert into t_ids values ('echt', o);
+  insert into public.org_membership (org_id, profile_id, role) values (o, (select v from t_ids where k = 'x'), 'org_admin');
+end $$;
+set local role authenticated;
+select pg_temp.als('x');
 select pg_temp.geweigerd('demo_rol in een echt huis', format('select public.demo_rol(%L::uuid, ''coordinator'')', pg_temp.id('echt')));
 do $$ begin update public.organisation set demo = true where id = (select v from t_ids where k = 'echt'); exception when others then null; end $$;
 reset role;

@@ -60,6 +60,8 @@ select pg_temp.als('c1');
 select pg_temp.gelijk('vooraf: het team heeft toegang', public.toegewezen(pg_temp.id('hh')), true);
 
 select pg_temp.als('co');
+select pg_temp.geweigerd('coördinator beëindigt geen verblijf (98)', format('select public.beeindig_verblijf(%L::uuid, ''verhuisd'')', pg_temp.id('hh')));
+select pg_temp.als('oa');
 select public.beeindig_verblijf(pg_temp.id('hh'), 'verhuisd');
 
 select pg_temp.als('c1');
@@ -71,7 +73,7 @@ select pg_temp.geweigerd('twee keer beëindigen', format('select public.beeindig
 
 reset role;
 select pg_temp.gelijk('reden en wie bij het verblijf',
-  (select end_reason || '/' || (ended_by = pg_temp.id('co'))::text from public.stay where household_id = pg_temp.id('hh')), 'verhuisd/true'::text);
+  (select end_reason || '/' || (ended_by = pg_temp.id('oa'))::text from public.stay where household_id = pg_temp.id('hh')), 'verhuisd/true'::text);
 select pg_temp.gelijk('toewijzing beëindigd',
   (select count(*) from public.care_assignment where valid_until is null and profile_id = pg_temp.id('c1')), 0::bigint);
 select pg_temp.gelijk('familie krijgt een melding zonder de reden',

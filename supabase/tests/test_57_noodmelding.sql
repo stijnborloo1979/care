@@ -79,7 +79,9 @@ select public.mark_alerts(jsonb_build_array(jsonb_build_object(
 select pg_temp.gelijk('na afvinken niet nog eens naar de org admin',
   (select count(*) from public.pending_alerts(100) a where a.notification_id = pg_temp.id('n') and a.profile_id = pg_temp.id('oa')), 0);
 
--- Een ontslagen org admin krijgt niets meer
+-- Een ontslagen org admin krijgt niets meer (er blijft altijd een tweede beheerder over, zie 98)
+insert into public.org_membership (org_id, profile_id, role) values ((select org_id from public.org_membership where profile_id = pg_temp.id('oa')), pg_temp.id('oa2'), 'org_admin');
+update public.org_membership set role = 'org_admin' where profile_id = pg_temp.id('ta') and org_id = (select org_id from public.org_membership where profile_id = pg_temp.id('oa'));
 update public.org_membership set active = false where profile_id = pg_temp.id('oa');
 delete from public.notification_delivery;
 select pg_temp.gelijk('inactieve org admin krijgt geen mail',
