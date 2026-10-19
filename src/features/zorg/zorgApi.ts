@@ -777,3 +777,50 @@ export async function zetTeamberichtTermijn(org: string, dagen: number) {
 export async function zorgteam(hh: string) {
   return rpcLijst<{ naam: string; rol: 'toegewezen' | 'team lead'; sinds: string }>('zorgteam', { hh })
 }
+
+// ---- Taken per afdeling (fase 2) ----------------------------------------
+
+export interface ZorgTaak {
+  id: string
+  title: string
+  note: string | null
+  due_on: string | null
+  done_at: string | null
+  created_at: string
+}
+
+/** Open en recent afgevinkte taken van één afdeling. Zie migratie 101. */
+export async function zorgTaken(org: string, afdeling: string): Promise<ZorgTaak[]> {
+  const { data, error } = await supabase
+    .from('zorg_taak')
+    .select('id, title, note, due_on, done_at, created_at')
+    .eq('org_id', org)
+    .eq('department_id', afdeling)
+    .order('done_at', { ascending: true, nullsFirst: true })
+    .order('due_on', { ascending: true, nullsFirst: false })
+  if (error) throw error
+  return (data ?? []) as ZorgTaak[]
+}
+
+export async function maakZorgTaak(org: string, afdeling: string, titel: string, notitie: string | null): Promise<void> {
+  const { data: u } = await supabase.auth.getUser()
+  const { error } = await supabase.from('zorg_taak').insert({
+    org_id: org,
+    department_id: afdeling,
+    title: titel.trim(),
+    note: notitie?.trim() || null,
+    created_by: u.user?.id,
+  })
+  if (error) throw error
+}
+
+export async function zetZorgTaakAfgevinkt(id: string, afgevinkt: boolean): Promise<void> {
+  const { data: u } = await supabase.auth.getUser()
+  const { data, error } = await supabase
+    .from('zorg_taak')
+    .update({ done_at: afgevinkt ? new Date().toISOString() : null, done_by: afgevinkt ? u.user?.id : null })
+    .eq('id', id)
+    .select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error(tt('Je kunt deze taak niet aanpassen.'))
+}
