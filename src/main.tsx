@@ -82,6 +82,7 @@ const PlatformBeheer = lazy(() => import("./features/platform/PlatformBeheer"));
 const ZorgBewoners = lazy(() => import("./features/zorg/Bewoners"));
 const ZorgBewoner = lazy(() => import("./features/zorg/Bewoner"));
 const ZorgOverdracht = lazy(() => import("./features/zorg/Overdracht"));
+const ZorgTaken = lazy(() => import("./features/zorg/AfdelingTaken"));
 const ZorgActiviteiten = lazy(() => import("./features/zorg/Activiteiten"));
 const ZorgNieuws = lazy(() => import("./features/zorg/Nieuws"));
 const ZorgVandaag = lazy(() => import("./features/zorg/Vandaag"));
@@ -221,6 +222,7 @@ if (!configuratieOk) {
                     <Route path="importeren" element={<ZorgImporteren />} />
                     <Route path="bewoner/:hh" element={<ZorgBewoner />} />
                     <Route path="overdracht" element={<ZorgOverdracht />} />
+                    <Route path="taken" element={<ZorgTaken />} />
                     <Route path="activiteiten" element={<ZorgActiviteiten />} />
                     <Route path="nieuws" element={<ZorgNieuws />} />
                     <Route path="team" element={<ZorgTeam />} />
