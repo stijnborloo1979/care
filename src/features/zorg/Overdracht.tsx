@@ -4,6 +4,8 @@ import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import OpenVragen from './OpenVragen'
 import { DIENSTEN, dienstDatum, huidigeDienst, medewerkers, nieuweOverdracht, overdrachten, type Dienst } from './zorgApi'
+import { conceptAan, conceptVoorAfdeling } from './overdrachtBronnen'
+import { conceptTekst, type Regel } from './overdrachtConcept'
 import { Fout, Kaart, Kop, Laden, Leeg, knop, label, tekstvak, uur } from './ui'
 import { tt, uiLocale } from '../../lib/uiTaal'
 
@@ -25,6 +27,22 @@ export default function Overdracht() {
 
   const [dienst, setDienst] = useState<Dienst>(huidigeDienst())
   const [tekst, setTekst] = useState('')
+  const [bronnen, setBronnen] = useState<Regel[] | null>(null)
+
+  const aan = useQuery({
+    queryKey: ['zorg', 'concept-aan', org?.org_id],
+    enabled: !!org,
+    queryFn: () => conceptAan(org!.org_id),
+  })
+  // Het concept is een voorstel: het komt in het invulveld en wordt pas
+  // met de knop "Overdracht bewaren" opgeslagen.
+  const maakConcept = useMutation({
+    mutationFn: () => conceptVoorAfdeling(org!.org_id, afdeling!.id),
+    onSuccess: (r) => {
+      setBronnen(r)
+      if (r.length) setTekst((t) => (t.trim() ? `${t}\n${conceptTekst(r)}` : conceptTekst(r)))
+    },
+  })
 
   const lijst = useQuery({
     queryKey: ['zorg', 'overdracht', afdeling?.id],
@@ -128,6 +146,32 @@ export default function Overdracht() {
             <span className={label}>{tt('Wat moet de volgende dienst weten?')}</span>
             <textarea rows={5} maxLength={8000} value={tekst} onChange={(e) => setTekst(e.target.value)} className={tekstvak} />
           </label>
+          {aan.data ? (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => maakConcept.mutate()}
+                disabled={maakConcept.isPending || !afdeling}
+                className="min-h-touch rounded-pill border-[1.5px] border-line-strong bg-surface px-4 font-semibold"
+              >
+                {maakConcept.isPending ? tt('Bezig…') : tt('Concept uit de laatste dienst')}
+              </button>
+              <Fout fout={maakConcept.error} />
+              {bronnen && bronnen.length === 0 ? (
+                <p className="mt-2 text-sm text-ink-soft">{tt('Er is niets nieuws sinds de vorige dienst.')}</p>
+              ) : null}
+              {bronnen && bronnen.length > 0 ? (
+                <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+                  {bronnen.map((r) => (
+                    <li key={`${r.bron.soort}-${r.bron.id}`}>
+                      <span className="font-semibold">{tt(r.bron.soort === 'zorgnotitie' ? 'Zorgnotitie' : r.bron.soort === 'nieuw_verblijf' ? 'Nieuw verblijf' : 'Activiteit')}:</span>{' '}
+                      {r.tekst}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
           <button type="submit" disabled={!tekst.trim() || bewaar.isPending} className={`${knop} mt-3 w-full sm:w-auto`}>
             {bewaar.isPending ? tt('Bezig…') : tt('Overdracht bewaren')}
           </button>
