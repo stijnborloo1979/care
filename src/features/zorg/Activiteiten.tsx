@@ -12,11 +12,12 @@ import {
   mijnBewoners,
   nieuweActiviteit,
   schrijfIn,
+  vulDeelnemersUitVerblijf,
   zetAanwezigheid,
   type Activiteit,
   type Deelname,
 } from './zorgApi'
-import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, label, veld } from './ui'
+import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, knopRustig, label, veld } from './ui'
 import VasteDag from './VasteDag'
 import { tt } from '../../lib/uiTaal'
 
@@ -184,9 +185,20 @@ function Deelnemers({ activiteit, magBeheren }: { activiteit: Activiteit; magBeh
   })
 
   const teKiezen = (mijn.data ?? []).filter((b) => !ingeschreven.has(b.household_id))
+  // Alle bewoners die nu op de afdeling verblijven, in één keer. Bestaande deelnemers blijven zoals ze zijn.
+  const uitVerblijf = useMutation({
+    mutationFn: () => vulDeelnemersUitVerblijf(activiteit.id),
+    onSuccess: ververs,
+  })
 
   return (
     <div className="border-t border-line px-4 py-3">
+      {magBeheren && activiteit.department_id && activiteit.status === 'gepland' ? (
+        <button onClick={() => uitVerblijf.mutate()} disabled={uitVerblijf.isPending} className={`${knopRustig} mb-3`}>
+          {uitVerblijf.isPending ? tt('Bezig…') : tt('Alle bewoners van deze afdeling toevoegen')}
+        </button>
+      ) : null}
+      <Fout fout={uitVerblijf.error} />
       {lijst.data && lijst.data.length === 0 ? <Leeg>{tt('Nog niemand ingeschreven.')}</Leeg> : null}
       <ul className="space-y-1.5">
         {(lijst.data ?? []).map((d) => (
