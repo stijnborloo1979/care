@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { conceptTekst, maakConcept, type Invoer } from './overdrachtConcept'
+import { beginHuidigeDienst, conceptTekst, maakConcept, type Invoer } from './overdrachtConcept'
 
 const basis = (over: Partial<Invoer> = {}): Invoer => ({
   sinds: '2026-10-19T06:00:00Z',
@@ -91,5 +91,21 @@ describe('maakConcept', () => {
       }),
     )
     expect(conceptTekst(r).split('\n')).toHaveLength(2)
+  })
+})
+
+describe('beginHuidigeDienst', () => {
+  const om = (dag: number, uur: number, min = 0) => new Date(2026, 9, dag, uur, min)
+  it('vroeg: begint om 07:00 dezelfde dag', () => {
+    expect(beginHuidigeDienst(om(19, 14, 50)).getTime()).toBe(om(19, 7).getTime())
+  })
+  it('laat: begint om 15:00', () => {
+    expect(beginHuidigeDienst(om(19, 21, 40)).getTime()).toBe(om(19, 15).getTime())
+  })
+  it('nacht na middernacht: begint om 22:00 de vorige dag', () => {
+    expect(beginHuidigeDienst(om(19, 6, 50)).getTime()).toBe(om(18, 22).getTime())
+  })
+  it('nacht vóór middernacht: begint om 22:00 dezelfde dag', () => {
+    expect(beginHuidigeDienst(om(19, 23, 10)).getTime()).toBe(om(19, 22).getTime())
   })
 })
