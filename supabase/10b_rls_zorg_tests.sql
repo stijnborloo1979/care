@@ -84,13 +84,16 @@ begin
   set local role authenticated;
   select count(*) into n from public.stay where org_id = org_a;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
-    values ('caregiver met toewijzing ziet alleen het eigen verblijf (niet alle verblijven van A)', 1, n, n = 1);
+    values ('caregiver ziet naam/kamer van alle verblijven van A (bedoeld, migratie 53)', 2, n, n = 2);
   select count(*) into n from public.stay where id = stay2;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
-    values ('caregiver zonder toewijzing ziet verblijf van ander (verwacht 0)', 0, n, n = 0);
+    values ('caregiver zonder toewijzing ziet verblijf van ander (naam/kamer, bedoeld)', 1, n, n = 1);
   select count(*) into n from public.care_assignment where stay_id = stay2;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
-    values ('caregiver ziet toewijzingen van verblijf zonder eigen toewijzing (verwacht 0)', 0, n, n = 0);
+    values ('caregiver ziet toewijzingen van ander verblijf niet (verwacht 0)', 0, n, n = 0);
+  select count(*) into n from public.care_assignment where profile_id = u_care_a;
+  insert into resultaat(omschrijving, verwacht, werkelijk, ok)
+    values ('caregiver ziet eigen toewijzing', 1, n, n = 1);
   select count(*) into n from public.care_note where household_id = hh2;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
     values ('caregiver ziet zorgnotitie van niet-toegewezen bewoner', 0, n, n = 0);
@@ -106,7 +109,7 @@ begin
   set local role authenticated;
   select count(*) into n from public.stay where id = stay1;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
-    values ('caregiver zonder toewijzing ziet verblijf van toegewezen bewoner (verwacht 0)', 0, n, n = 0);
+    values ('caregiver zonder toewijzing ziet naam/kamer van toegewezen bewoner (bedoeld)', 1, n, n = 1);
   select count(*) into n from public.care_note where household_id = hh1;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
     values ('caregiver zonder toewijzing ziet zorgnotitie van toegewezen bewoner (verwacht 0)', 0, n, n = 0);
