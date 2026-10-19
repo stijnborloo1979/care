@@ -27,6 +27,7 @@ declare
   u_care_a uuid := gen_random_uuid();     -- caregiver A, toegewezen aan hh1
   u_care_a_ongewezen uuid := gen_random_uuid();
   u_admin_b uuid := gen_random_uuid();
+  u_coord_a uuid := gen_random_uuid();   -- coördinator A, geen toewijzing
   u_fam_hh1 uuid := gen_random_uuid();    -- familie van hh1
   u_wrong_hh uuid := gen_random_uuid();   -- familie van hh2 (niet hh1)
   n int;
@@ -35,14 +36,15 @@ begin
   -- Gebruikers en profielen
   insert into auth.users (id, email) values
     (u_admin_a, 'admin.a@test.be'), (u_care_a, 'care.a@test.be'),
-    (u_care_a_ongewezen, 'care2.a@test.be'), (u_admin_b, 'admin.b@test.be'),
+    (u_care_a_ongewezen, 'care2.a@test.be'), (u_admin_b, 'admin.b@test.be'), (u_coord_a, 'coord.a@test.be'),
     (u_fam_hh1, 'fam.hh1@test.be'), (u_wrong_hh, 'fam.hh2@test.be');
 
   -- Organisaties, lidmaatschappen, afdelingen
   insert into public.organisation (id, name) values (org_a, 'WZC A'), (org_b, 'WZC B');
   insert into public.org_membership (org_id, profile_id, role) values
     (org_a, u_admin_a, 'org_admin'), (org_a, u_care_a, 'caregiver'),
-    (org_a, u_care_a_ongewezen, 'caregiver'), (org_b, u_admin_b, 'org_admin');
+    (org_a, u_care_a_ongewezen, 'caregiver'), (org_b, u_admin_b, 'org_admin'),
+    (org_a, u_coord_a, 'coordinator');
   insert into public.department (id, org_id, name) values (dep_a1, org_a, 'Afd 1'), (dep_a2, org_a, 'Afd 2');
   insert into public.department_staff (department_id, profile_id)
     values (dep_a1, u_care_a), (dep_a2, u_care_a_ongewezen);
@@ -113,6 +115,13 @@ begin
   select count(*) into n from public.care_note where household_id = hh1;
   insert into resultaat(omschrijving, verwacht, werkelijk, ok)
     values ('caregiver zonder toewijzing ziet zorgnotitie van toegewezen bewoner (verwacht 0)', 0, n, n = 0);
+  reset role;
+
+  perform set_config('request.jwt.claim.sub', u_coord_a::text, true);
+  set local role authenticated;
+  select count(*) into n from public.care_assignment where stay_id = stay2;
+  insert into resultaat(omschrijving, verwacht, werkelijk, ok)
+    values ('coördinator A ziet toewijzingen van organisatie A', 1, n, n = 1);
   reset role;
 
   perform set_config('request.jwt.claim.sub', u_admin_b::text, true);
