@@ -1,8 +1,5 @@
 import { supabase } from '../../lib/supabase'
-import { maakConcept, type Invoer, type Regel } from './overdrachtConcept'
-
-/** Hoeveel uur terug we kijken: ongeveer één dienst. */
-const VENSTER_UUR = 8
+import { beginHuidigeDienst, maakConcept, type Invoer, type Regel } from './overdrachtConcept'
 
 /** Staat de concept-overdracht aan voor deze organisatie? Standaard uit. */
 export async function conceptAan(org: string): Promise<boolean> {
@@ -17,7 +14,7 @@ export async function conceptAan(org: string): Promise<boolean> {
  * komt niet in het concept.
  */
 export async function conceptVoorAfdeling(org: string, afdeling: string, nu = new Date()): Promise<Regel[]> {
-  const sinds = new Date(nu.getTime() - VENSTER_UUR * 3600_000).toISOString()
+  const sinds = beginHuidigeDienst(nu).toISOString()
 
   const [notities, verblijven, activiteiten] = await Promise.all([
     supabase

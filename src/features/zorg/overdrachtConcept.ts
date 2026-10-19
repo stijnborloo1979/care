@@ -86,3 +86,21 @@ export function maakConcept(i: Invoer): Regel[] {
 export function conceptTekst(regels: Regel[]): string {
   return regels.map((r) => r.tekst).join('\n')
 }
+
+/**
+ * Het begin van de dienst die nu overdraagt: het concept beslaat wat sinds
+ * die start is gebeurd. Vroeg 07-15, laat 15-22, nacht 22-07.
+ */
+export function beginHuidigeDienst(nu: Date = new Date()): Date {
+  const d = new Date(nu)
+  const h = d.getHours()
+  if (h >= 7 && h < 15) {
+    d.setHours(7, 0, 0, 0)
+  } else if (h >= 15 && h < 22) {
+    d.setHours(15, 0, 0, 0)
+  } else {
+    d.setHours(22, 0, 0, 0)
+    if (h < 7) d.setDate(d.getDate() - 1)
+  }
+  return d
+}
