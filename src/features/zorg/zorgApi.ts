@@ -824,3 +824,12 @@ export async function zetZorgTaakAfgevinkt(id: string, afgevinkt: boolean): Prom
   if (error) throw error
   if (!data || data.length === 0) throw new Error(tt('Je kunt deze taak niet aanpassen.'))
 }
+
+// ---- Deelnemers uit het verblijf (fase 2) -------------------------------
+
+/** Voegt alle bewoners van de afdeling van de activiteit toe. Zie migratie 102. */
+export async function vulDeelnemersUitVerblijf(activiteit: string): Promise<number> {
+  const { data, error } = await supabase.rpc('activiteit_deelnemers_uit_verblijf', { activiteit })
+  if (error) throw error
+  return (data as number) ?? 0
+}
