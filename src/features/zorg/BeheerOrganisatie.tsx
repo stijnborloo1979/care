@@ -8,11 +8,13 @@ import {
   hernoemAfdeling,
   nieuweAfdeling,
   orgGegevens,
+  zetConceptAan,
   zetOrgGegevens,
   type AfdelingRij,
 } from './zorgApi'
 import { Fout, Kaart, Leeg, knop, knopKlein, knopRustig, label, veld } from './ui'
 import { tt } from '../../lib/uiTaal'
+import { conceptAan } from './overdrachtBronnen'
 
 /** Naam, contactadres en btw-nummer van het woonzorgcentrum. Alleen de beheerder. */
 export function Organisatie({ orgId }: { orgId: string }) {
@@ -69,7 +71,39 @@ export function Organisatie({ orgId }: { orgId: string }) {
         </div>
       </form>
       <Fout fout={bewaar.error} />
+      <ConceptSchakelaar orgId={orgId} />
     </Kaart>
+  )
+}
+
+/** Schakelaar voor 'concept uit de laatste dienst' bij de overdracht. Alleen de beheerder. */
+function ConceptSchakelaar({ orgId }: { orgId: string }) {
+  const queryClient = useQueryClient()
+  const aan = useQuery({ queryKey: ['zorg', 'concept-aan', orgId], queryFn: () => conceptAan(orgId) })
+  const zet = useMutation({
+    mutationFn: (nieuw: boolean) => zetConceptAan(orgId, nieuw),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['zorg', 'concept-aan', orgId] }),
+  })
+  if (aan.data === undefined) return null
+  return (
+    <div className="mt-6 border-t border-line pt-4">
+      <label className="flex min-h-touch cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          className="mt-1 h-5 w-5 accent-accent-ink"
+          checked={aan.data}
+          disabled={zet.isPending}
+          onChange={(e) => zet.mutate(e.target.checked)}
+        />
+        <span>
+          <span className="block font-semibold">{tt('Concept uit de laatste dienst aanbieden')}</span>
+          <span className="block text-sm text-ink-soft">
+            {tt('Medewerkers krijgen bij de overdracht een voorstel op basis van de zorgnotities en activiteiten van de vorige dienst. Ze lezen en bewerken het altijd zelf.')}
+          </span>
+        </span>
+      </label>
+      <Fout fout={zet.error} />
+    </div>
   )
 }
 

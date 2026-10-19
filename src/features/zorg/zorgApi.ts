@@ -447,6 +447,17 @@ export async function zetOrgGegevens(org: string, g: OrgGegevens): Promise<void>
   if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan de gegevens aanpassen.'))
 }
 
+/** Zet het concept uit de laatste dienst aan of uit. Alleen de beheerder (RLS op organisation). */
+export async function zetConceptAan(org: string, aan: boolean): Promise<void> {
+  const { data, error } = await supabase
+    .from('organisation')
+    .update({ concept_overdracht: aan })
+    .eq('id', org)
+    .select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan dit aanpassen.'))
+}
+
 export async function nieuweAfdeling(org: string, naam: string) {
   const { error } = await supabase.from('department').insert({ org_id: org, name: naam.trim() })
   if (error) throw error
