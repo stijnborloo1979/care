@@ -63,7 +63,7 @@ begin
     begin
       execute format('revoke execute on function %s from public, anon, authenticated', f);
       execute format('grant execute on function %s to service_role', f);
-    exception when undefined_function then
+    exception when undefined_function or undefined_object then
       -- 09_ai.sql is optioneel; zonder die migratie bestaan de
       -- embeddingfuncties niet.
       raise notice 'overgeslagen, bestaat niet: %', f;
