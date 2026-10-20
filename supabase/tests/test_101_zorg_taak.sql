@@ -47,7 +47,7 @@ begin
   set local role authenticated;
 
   -- 1. Medewerker A1 ziet de taak van A1: 1
-  perform set_config('request.jwt.claim.sub', u_care_a1::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care_a1::text, 'role', 'authenticated')::text, true);
   select count(*) into n from public.zorg_taak where id = t_a1;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('medewerker A1 ziet taak van A1', 1, n, n = 1);
 
@@ -76,12 +76,12 @@ begin
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('medewerker A1 maakt taak op A2 niet aan', 0, n, n = 0);
 
   -- 6. Beheerder A ziet beide taken: 2
-  perform set_config('request.jwt.claim.sub', u_admin_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_a::text, 'role', 'authenticated')::text, true);
   select count(*) into n from public.zorg_taak where org_id = org_a;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('beheerder A ziet alle taken van A', 2, n, n = 2);
 
   -- 7. Beheerder B ziet niets van A: 0
-  perform set_config('request.jwt.claim.sub', u_admin_b::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_b::text, 'role', 'authenticated')::text, true);
   select count(*) into n from public.zorg_taak where org_id = org_a;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('beheerder B ziet niets van A', 0, n, n = 0);
 
@@ -93,7 +93,7 @@ begin
   exception when others then
     n := 0;
   end;
-  perform set_config('request.jwt.claim.sub', u_admin_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_a::text, 'role', 'authenticated')::text, true);
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('taak op afdeling van andere organisatie wordt geweigerd', 0, n, n = 0);
 end
 $$;

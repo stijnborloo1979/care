@@ -50,7 +50,7 @@ begin
   insert into public.activity_participant (activity_id, household_id, status) values (act_a1, hh2, 'afwezig');
 
   -- 1. Beheerder A vult de activiteit van A1: alleen hh1 en hh2 komen erbij (hh1 nieuw, hh2 bestaat al): 1 nieuw
-  perform set_config('request.jwt.claim.sub', u_admin_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_a::text, 'role', 'authenticated')::text, true);
   n := public.activiteit_deelnemers_uit_verblijf(act_a1);
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('eerste keer: 1 nieuwe deelnemer (hh1)', 1, n, n = 1);
 
@@ -71,7 +71,7 @@ begin
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('bewoner van andere afdeling wordt niet toegevoegd', 0, n, n = 0);
 
   -- 6. Medewerker (caregiver) mag het niet: geweigerd
-  perform set_config('request.jwt.claim.sub', u_care_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care_a::text, 'role', 'authenticated')::text, true);
   ok_fout := false;
   begin
     perform public.activiteit_deelnemers_uit_verblijf(act_a1);
@@ -81,7 +81,7 @@ begin
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('caregiver kan geen deelnemers toevoegen', 1, case when ok_fout then 1 else 0 end, ok_fout);
 
   -- 7. Beheerder B mag de activiteit van A niet vullen: geweigerd
-  perform set_config('request.jwt.claim.sub', u_admin_b::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_b::text, 'role', 'authenticated')::text, true);
   ok_fout := false;
   begin
     perform public.activiteit_deelnemers_uit_verblijf(act_a1);
@@ -91,7 +91,7 @@ begin
   insert into resultaat (omschrijving, verwacht, werkelijk, ok) values ('beheerder B kan activiteit van A niet vullen', 1, case when ok_fout then 1 else 0 end, ok_fout);
 
   -- 8. Activiteit zonder afdeling: geweigerd
-  perform set_config('request.jwt.claim.sub', u_admin_b::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_b::text, 'role', 'authenticated')::text, true);
   ok_fout := false;
   begin
     perform public.activiteit_deelnemers_uit_verblijf(act_b);

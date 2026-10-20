@@ -30,7 +30,7 @@ begin
 
   -- 2. Eigen spraak uitzetten lukt
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_care::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care::text, 'role', 'authenticated')::text, true);
   r := public.spraak_aan_zetten(org_a, false);
   reset role;
   select spraak_aan into v from public.org_membership where org_id = org_a and profile_id = u_care;
@@ -39,7 +39,7 @@ begin
 
   -- 3. Zonder inloggen: geweigerd
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', '', true);
+  perform set_config('request.jwt.claims', '', true);
   begin
     perform public.spraak_aan_zetten(org_a, true);
     v := true;
@@ -52,7 +52,7 @@ begin
 
   -- 4. Geen actief lidmaatschap: niets gewijzigd, false
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_ander::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_ander::text, 'role', 'authenticated')::text, true);
   r := public.spraak_aan_zetten(org_b, false);
   reset role;
   select spraak_aan into v from public.org_membership where org_id = org_b and profile_id = u_ander;
@@ -62,7 +62,7 @@ begin
   -- 5. Raakt het andere lidmaatschap van iemand anders niet
   insert into public.org_membership (org_id, profile_id, role, active) values (org_a, u_ander, 'caregiver', true);
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_care::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care::text, 'role', 'authenticated')::text, true);
   r := public.spraak_aan_zetten(org_a, true);
   reset role;
   select spraak_aan into v from public.org_membership where org_id = org_a and profile_id = u_ander;
