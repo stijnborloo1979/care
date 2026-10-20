@@ -38,9 +38,11 @@ sed "s/current_database_placeholder/$DB/" "$HIER/supabase_shim.sql" | "${PSQL[@]
 # 02_demo_data zoekt een bestaand account; hier maken we het nep-adres aan.
 "${PSQL[@]}" -d "$DB" -c "insert into auth.users (email) values ('vervang@door-jouw-email.be')"
 
-for f in $(ls "$SUPA"/[0-9][0-9]_*.sql | sort); do
-  nr=$(basename "$f" | cut -c1-2)
-  [ "$nr" = "10" ] && continue            # 10 is een testscript
+# Numeriek sorteren: anders komt 100 vóór 11. Alleen 10_rls_tests.sql is het
+# testscript; 100–105 zijn gewone migraties en mogen niet overgeslagen worden.
+for f in $(ls "$SUPA" | grep -E '^[0-9]+_.*\.sql$' | sort -n | sed "s|^|$SUPA/|"); do
+  [ "$(basename "$f")" = "10_rls_tests.sql" ] && continue
+  nr=$(basename "$f" | cut -d_ -f1)
   [ "$((10#$nr))" -gt "$UPTO" ] && break
   if ! out=$("${PSQL[@]}" -d "$DB" -f "$f" 2>&1); then
     echo "MIGRATIE MISLUKT: $(basename "$f")"; echo "$out" | grep -v NOTICE | tail -20; exit 1

@@ -28,7 +28,7 @@ begin
     values (t_a1, org_a, dep_a1, 'Verband verschonen', u_admin_a);
 
   -- 1. Medewerker vinkt af: toegestaan
-  perform set_config('request.jwt.claim.sub', u_care_a1::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care_a1::text, 'role', 'authenticated')::text, true);
   fout := false;
   begin
     update public.zorg_taak set done_at = now(), done_by = u_care_a1 where id = t_a1;
@@ -56,7 +56,7 @@ begin
     values ('medewerker zet taak weer open', 0, case when fout then 1 else 0 end, not fout);
 
   -- 4. Beheerder wijzigt de titel: toegestaan
-  perform set_config('request.jwt.claim.sub', u_admin_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_a::text, 'role', 'authenticated')::text, true);
   update public.zorg_taak set title = 'Verband verschonen (aangepast)' where id = t_a1;
   get diagnostics n = row_count;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)

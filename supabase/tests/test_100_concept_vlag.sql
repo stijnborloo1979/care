@@ -30,28 +30,28 @@ begin
 
   -- 1. Beheerder A zet de vlag aan voor A: 1 rij
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_admin_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_a::text, 'role', 'authenticated')::text, true);
   update public.organisation set concept_overdracht = true where id = org_a;
   get diagnostics n = row_count;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
     values ('beheerder A zet vlag aan voor A', 1, n, n = 1);
 
   -- 2. Caregiver A probeert de vlag uit te zetten: 0 rijen
-  perform set_config('request.jwt.claim.sub', u_care_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care_a::text, 'role', 'authenticated')::text, true);
   update public.organisation set concept_overdracht = false where id = org_a;
   get diagnostics n = row_count;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
     values ('caregiver A kan vlag niet wijzigen', 0, n, n = 0);
 
   -- 3. Beheerder B probeert de vlag van A te wijzigen: 0 rijen
-  perform set_config('request.jwt.claim.sub', u_admin_b::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_b::text, 'role', 'authenticated')::text, true);
   update public.organisation set concept_overdracht = false where id = org_a;
   get diagnostics n = row_count;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
     values ('beheerder B kan vlag van A niet wijzigen', 0, n, n = 0);
 
   -- 4. De vlag van A staat nog steeds aan (controle als de beheerder zelf)
-  perform set_config('request.jwt.claim.sub', u_admin_a::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin_a::text, 'role', 'authenticated')::text, true);
   select concept_overdracht into nieuw from public.organisation where id = org_a;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
     values ('vlag van A staat aan na de pogingen', 1, case when nieuw then 1 else 0 end, nieuw);

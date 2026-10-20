@@ -31,7 +31,7 @@ begin
 
   -- 2. Organisatie uit: niets vastgelegd
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_care::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care::text, 'role', 'authenticated')::text, true);
   r := public.spraak_vraag_registreren(org_a, 'planning');
   reset role;
   select count(*) into n from public.spraak_log where org_id = org_a;
@@ -49,7 +49,7 @@ begin
   -- 4. Medewerker zet eigen spraak uit: niet gelogd
   update public.org_membership set spraak_aan = false where org_id = org_b and profile_id = u_care;
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_care::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_care::text, 'role', 'authenticated')::text, true);
   r := public.spraak_vraag_registreren(org_b, 'planning');
   reset role;
   select count(*) into n from public.spraak_log where org_id = org_b;
@@ -60,7 +60,7 @@ begin
   update public.org_membership set spraak_aan = true where org_id = org_b and profile_id = u_care;
   begin
     set local role authenticated;
-    perform set_config('request.jwt.claim.sub', u_care::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub', u_care::text, 'role', 'authenticated')::text, true);
     perform public.spraak_vraag_registreren(org_b, 'verzonnen');
     reset role;
     n := 1;
@@ -83,7 +83,7 @@ begin
 
   -- 7. Beheerder ziet het auditlog van de eigen organisatie
   set local role authenticated;
-  perform set_config('request.jwt.claim.sub', u_admin::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', u_admin::text, 'role', 'authenticated')::text, true);
   select count(*) into n from public.spraak_log where org_id = org_b;
   reset role;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
