@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase'
 import { ontbrekendeFunctie } from '../../lib/ontbrekendeFunctie'
 import { tt } from '../../lib/uiTaal'
+import type { DeelnameRij } from './deelnemerTelling'
 
 /**
  * Alles wat de schermen voor een woonzorgcentrum aan de database vragen.
@@ -93,6 +94,8 @@ export interface Activiteit {
   plaats: string | null
   status: 'gepland' | 'geannuleerd' | 'afgelopen'
 }
+
+export type { DeelnameRij } from './deelnemerTelling'
 
 export interface Deelname {
   activity_id: string
@@ -305,6 +308,17 @@ export async function deelnames(activiteit: string): Promise<Deelname[]> {
     .eq('activity_id', activiteit)
   if (error) throw error
   return (data ?? []) as Deelname[]
+}
+
+/** Aantal bewoners per activiteit, zonder de namen op te halen. */
+export async function deelnemerRijen(activiteiten: string[]): Promise<DeelnameRij[]> {
+  if (!activiteiten.length) return []
+  const { data, error } = await supabase
+    .from('activity_participant')
+    .select('activity_id, status')
+    .in('activity_id', activiteiten)
+  if (error) throw error
+  return (data ?? []) as DeelnameRij[]
 }
 
 export async function schrijfIn(activiteit: string, hh: string, status: Deelname['status'] = 'ingeschreven') {
