@@ -16,6 +16,7 @@ import { locale } from '../../lib/i18n'
 import { stopVoorlezen, voorlezen } from '../../lib/voorlezen'
 import { useRadio } from '../radio/radioStore'
 import { huidigePrefs } from '../settings/useDisplayPrefs'
+import { encodeWav, knipSamples, SPRAAK_RATE, STUK_SECONDEN } from './knip'
 
 // ---------------------------------------------------------------------
 //  Spraakherkenning van de browser
@@ -147,13 +148,49 @@ function luisterViaOpname(maxSeconden: number): Luisteren {
  */
 export async function transcribeer(blob: Blob): Promise<string | null> {
   if (!blob.size) return ''
+  const samples = await naarSpraakSamples(blob)
+  // Lukt het decoderen niet, dan één keer het oorspronkelijke bestand sturen.
+  if (!samples) return stuurStuk(blob, `opname.${blob.type.includes('mp4') ? 'm4a' : 'webm'}`)
+
+  // Google neemt maximaal één minuut per aanvraag: we knippen in stukken van 50 seconden.
+  const stukken = knipSamples(samples, SPRAAK_RATE * STUK_SECONDEN)
+  const teksten: string[] = []
+  for (const [i, stuk] of stukken.entries()) {
+    const tekst = await stuurStuk(new Blob([encodeWav(stuk, SPRAAK_RATE)], { type: 'audio/wav' }), `stuk-${i}.wav`)
+    if (tekst === null) return null // liever geen tekst dan een half gesprek
+    teksten.push(tekst)
+  }
+  return teksten.join(' ').trim()
+}
+
+async function stuurStuk(blob: Blob, naam: string): Promise<string | null> {
   try {
     const form = new FormData()
-    form.append('audio', blob, `opname.${blob.type.includes('mp4') ? 'm4a' : 'webm'}`)
+    form.append('audio', blob, naam)
     form.append('taal', locale().slice(0, 2))
     const { data, error } = await supabase.functions.invoke('voice-transcribe', { body: form })
     if (error || typeof data?.tekst !== 'string') return null
     return data.tekst.trim()
+  } catch {
+    return null
+  }
+}
+
+/** Decodeert de opname en zet ze om naar mono 16 kHz. Null als de browser dat niet kan. */
+async function naarSpraakSamples(blob: Blob): Promise<Float32Array | null> {
+  try {
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    const ctx = new AC()
+    const decoded = await ctx.decodeAudioData(await blob.arrayBuffer())
+    await ctx.close()
+    const lengte = Math.ceil(decoded.duration * SPRAAK_RATE)
+    const offline = new OfflineAudioContext(1, lengte, SPRAAK_RATE)
+    const bron = offline.createBufferSource()
+    bron.buffer = decoded
+    bron.connect(offline.destination)
+    bron.start()
+    const gerenderd = await offline.startRendering()
+    return gerenderd.getChannelData(0)
   } catch {
     return null
   }

@@ -11,11 +11,16 @@
 //
 // De audio wordt niet bewaard; alleen de tekst gaat terug naar de app.
 //
+// Transcriptie via Google Speech-to-Text op het EU-endpoint (zelfde route
+// als spraak-vraag). Audio blijft binnen Europa en wordt niet bewaard.
+//
 // Secrets:
-//   OPENAI_API_KEY
-//   STT_MODEL      optioneel, standaard gpt-4o-mini-transcribe
+//   GOOGLE_SA_JSON     volledige JSON van het service account
+//   STT_GOOGLE_MODEL   optioneel, standaard 'short'
 //
 // Verify JWT aan laten: alleen ingelogde gebruikers.
+
+import { bytesNaarBase64, transcribeerEU } from '../_shared/stt.ts'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -30,8 +35,8 @@ Deno.serve(async (req) => {
 
   try {
     if (!req.headers.get('Authorization')) return json({ fout: 'niet_ingelogd' }, 401)
-    const sleutel = Deno.env.get('OPENAI_API_KEY')
-    if (!sleutel) return json({ fout: 'geen_provider' }, 503)
+    const sa = JSON.parse(Deno.env.get('GOOGLE_SA_JSON') ?? 'null')
+    if (!sa?.client_email || !sa?.private_key || !sa?.project_id) return json({ fout: 'geen_provider' }, 503)
 
     const form = await req.formData()
     const audio = form.get('audio')
@@ -39,22 +44,14 @@ Deno.serve(async (req) => {
     if (!(audio instanceof File) || audio.size === 0) return json({ fout: 'geen_audio' }, 400)
     if (audio.size > MAX_BYTES) return json({ fout: 'te_groot' }, 413)
 
-    const uit = new FormData()
-    uit.append('file', audio, audio.name || 'opname.webm')
-    uit.append('model', Deno.env.get('STT_MODEL') ?? 'gpt-4o-mini-transcribe')
-    if (['nl', 'fr', 'en'].includes(taal)) uit.append('language', taal)
-
-    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${sleutel}` },
-      body: uit,
-    })
-    if (!res.ok) {
-      console.error('voice-transcribe', res.status)
-      return json({ fout: 'provider' }, 502)
-    }
-    const data = await res.json()
-    return json({ tekst: typeof data.text === 'string' ? data.text.trim() : '' })
+    const bytes = new Uint8Array(await audio.arrayBuffer())
+    const tekst = await transcribeerEU(
+      sa,
+      bytesNaarBase64(bytes),
+      ['nl', 'fr', 'en'].includes(taal) ? taal : 'nl',
+      Deno.env.get('STT_GOOGLE_MODEL') ?? 'short',
+    )
+    return json({ tekst })
   } catch (e) {
     console.error('voice-transcribe', String(e).slice(0, 120))
     return json({ fout: 'intern' }, 500)
