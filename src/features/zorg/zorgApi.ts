@@ -833,3 +833,22 @@ export async function vulDeelnemersUitVerblijf(activiteit: string): Promise<numb
   if (error) throw error
   return (data as number) ?? 0
 }
+
+// ---- Spraakvraag (fase 3, basis) ---------------------------------------
+
+/** Staat de spraakvraag voor deze organisatie én deze medewerker aan? */
+export async function spraakAan(org: string): Promise<boolean> {
+  const { data: u } = await supabase.auth.getUser()
+  const [o, m] = await Promise.all([
+    supabase.from('organisation').select('spraak_lezen').eq('id', org).maybeSingle(),
+    supabase.from('org_membership').select('spraak_aan').eq('org_id', org).eq('profile_id', u.user?.id ?? '').maybeSingle(),
+  ])
+  return !!(o.data as { spraak_lezen?: boolean } | null)?.spraak_lezen && !!(m.data as { spraak_aan?: boolean } | null)?.spraak_aan
+}
+
+/** Legt een vraag vast (alleen soort en tijdstip). False als het uit staat. */
+export async function registreerSpraakVraag(org: string, soort: 'tijd_dienst' | 'open_taken'): Promise<boolean> {
+  const { data, error } = await supabase.rpc('spraak_vraag_registreren', { org, soort })
+  if (error) throw error
+  return data === true
+}
