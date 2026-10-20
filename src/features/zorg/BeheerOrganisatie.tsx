@@ -15,6 +15,7 @@ import {
 import { Fout, Kaart, Leeg, knop, knopKlein, knopRustig, label, veld } from './ui'
 import { tt } from '../../lib/uiTaal'
 import { conceptAan } from './overdrachtBronnen'
+import { spraakStatus, zetSpraakLezen } from './zorgApi'
 
 /** Naam, contactadres en btw-nummer van het woonzorgcentrum. Alleen de beheerder. */
 export function Organisatie({ orgId }: { orgId: string }) {
@@ -72,6 +73,7 @@ export function Organisatie({ orgId }: { orgId: string }) {
       </form>
       <Fout fout={bewaar.error} />
       <ConceptSchakelaar orgId={orgId} />
+      <SpraakSchakelaar orgId={orgId} />
     </Kaart>
   )
 }
@@ -99,6 +101,37 @@ function ConceptSchakelaar({ orgId }: { orgId: string }) {
           <span className="block font-semibold">{tt('Concept uit de laatste dienst aanbieden')}</span>
           <span className="block text-sm text-ink-soft">
             {tt('Medewerkers krijgen bij de overdracht een voorstel op basis van de zorgnotities en activiteiten van de vorige dienst. Ze lezen en bewerken het altijd zelf.')}
+          </span>
+        </span>
+      </label>
+      <Fout fout={zet.error} />
+    </div>
+  )
+}
+
+/** Spraakvragen voor de hele organisatie. Standaard uit; alleen de beheerder. */
+function SpraakSchakelaar({ orgId }: { orgId: string }) {
+  const queryClient = useQueryClient()
+  const status = useQuery({ queryKey: ['zorg', 'spraak-status', orgId], queryFn: () => spraakStatus(orgId) })
+  const zet = useMutation({
+    mutationFn: (nieuw: boolean) => zetSpraakLezen(orgId, nieuw),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['zorg', 'spraak-status', orgId] }),
+  })
+  if (status.data === undefined) return null
+  return (
+    <div className="mt-6 border-t border-line pt-4">
+      <label className="flex min-h-touch cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          className="mt-1 h-5 w-5 accent-accent-ink"
+          checked={status.data.organisatie}
+          disabled={zet.isPending}
+          onChange={(e) => zet.mutate(e.target.checked)}
+        />
+        <span>
+          <span className="block font-semibold">{tt('Vaste vragen voor medewerkers aanbieden')}</span>
+          <span className="block text-sm text-ink-soft">
+            {tt('Medewerkers kunnen dan vragen stellen zoals "Welke dienst is het nu?". Er wordt alleen vastgelegd welk soort vraag is gesteld, geen tekst of stem. Ze kunnen dit zelf ook uitzetten.')}
           </span>
         </span>
       </label>
