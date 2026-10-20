@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import { BarChart3, BedDouble, CalendarDays, CalendarRange, ClipboardList, Megaphone, Users } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
+import SpraakVraag from './SpraakVraag'
 import { useOngezien } from './OpenVragen'
 import { afdelingen as haalAfdelingen, mijnBewoners } from './zorgApi'
 import { vasteDag } from '../../services/afdelingsdag'
@@ -93,6 +94,7 @@ export default function Vandaag() {
           {org.naam} — {new Intl.DateTimeFormat(uiLocale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(nu)}
         </p>
       </header>
+      <SpraakVraag />
 
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tegels.map((x) => (
