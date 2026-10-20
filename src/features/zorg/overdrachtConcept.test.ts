@@ -6,6 +6,7 @@ const basis = (over: Partial<Invoer> = {}): Invoer => ({
   notities: [],
   nieuweVerblijven: [],
   activiteiten: [],
+  taken: [],
   ...over,
 })
 
@@ -91,6 +92,31 @@ describe('maakConcept', () => {
       }),
     )
     expect(conceptTekst(r).split('\n')).toHaveLength(2)
+  })
+})
+
+describe('openstaande taken', () => {
+  it('neemt een openstaande taak mee, ook als ze vóór het venster is aangemaakt', () => {
+    const r = maakConcept(
+      basis({
+        taken: [{ id: 't1', title: 'Verband verschonen', note: null, due_on: null, created_at: '2026-10-10T08:00:00Z', kamer: '101' }],
+      }),
+    )
+    expect(r).toHaveLength(1)
+    expect(r[0].bron).toEqual({ soort: 'taak', id: 't1', tijd: '2026-10-10T08:00:00Z' })
+    expect(r[0].tekst).toContain('Verband verschonen')
+    expect(r[0].tekst).toContain('kamer 101')
+  })
+
+  it('zet de vervaldatum en de notitie in de tekst', () => {
+    const r = maakConcept(
+      basis({
+        taken: [{ id: 't2', title: 'Bloeddruk', note: 'liggend en staand', due_on: '2026-10-21', created_at: '2026-10-20T09:00:00Z', kamer: null }],
+      }),
+    )
+    expect(r[0].tekst).toContain('voor 21 oktober')
+    expect(r[0].tekst).toContain('(liggend en staand)')
+    expect(r[0].tekst).not.toContain('kamer')
   })
 })
 
