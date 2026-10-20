@@ -846,6 +846,37 @@ export async function spraakAan(org: string): Promise<boolean> {
   return !!(o.data as { spraak_lezen?: boolean } | null)?.spraak_lezen && !!(m.data as { spraak_aan?: boolean } | null)?.spraak_aan
 }
 
+/** Organisatie-schakelaar en eigen schakelaar apart, voor de instellingen. */
+export async function spraakStatus(org: string): Promise<{ organisatie: boolean; eigen: boolean }> {
+  const { data: u } = await supabase.auth.getUser()
+  const [o, m] = await Promise.all([
+    supabase.from('organisation').select('spraak_lezen').eq('id', org).maybeSingle(),
+    supabase.from('org_membership').select('spraak_aan').eq('org_id', org).eq('profile_id', u.user?.id ?? '').maybeSingle(),
+  ])
+  return {
+    organisatie: !!(o.data as { spraak_lezen?: boolean } | null)?.spraak_lezen,
+    eigen: !!(m.data as { spraak_aan?: boolean } | null)?.spraak_aan,
+  }
+}
+
+/** Alleen de beheerder: spraakvragen voor de hele organisatie aan of uit. */
+export async function zetSpraakLezen(org: string, aan: boolean): Promise<void> {
+  const { data, error } = await supabase
+    .from('organisation')
+    .update({ spraak_lezen: aan })
+    .eq('id', org)
+    .select('id')
+  if (error) throw error
+  if (!data || data.length === 0) throw new Error(tt('Alleen de beheerder kan dit aanpassen.'))
+}
+
+/** Medewerker zet de eigen spraakvragen aan of uit (migratie 105). */
+export async function zetEigenSpraak(org: string, aan: boolean): Promise<void> {
+  const { data, error } = await supabase.rpc('spraak_aan_zetten', { org, aan })
+  if (error) throw error
+  if (data !== true) throw new Error(tt('Je bent geen actief lid van deze organisatie.'))
+}
+
 /** Legt een vraag vast (alleen soort en tijdstip). False als het uit staat. */
 export async function registreerSpraakVraag(org: string, soort: 'tijd_dienst' | 'open_taken'): Promise<boolean> {
   const { data, error } = await supabase.rpc('spraak_vraag_registreren', { org, soort })
