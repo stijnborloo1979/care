@@ -49,7 +49,7 @@ begin
   -- Eerst weghalen wat er al stond, zodat opnieuw draaien veilig is.
   foreach v_taak in array array['push-notify', 'cleanup-storage', 'taken-herinneren', 'embed',
     'thuis-nightly', 'zorgnotities-opruimen', 'overdracht-opruimen', 'teamberichten-opruimen',
-    'bewonerberichten-opruimen', 'nieuws-opruimen', 'uitstap-opruimen'] loop
+    'bewonerberichten-opruimen', 'nieuws-opruimen', 'uitstap-opruimen', 'spraak-log-opruimen'] loop
     begin
       perform cron.unschedule(v_taak);
     exception when others then
@@ -65,6 +65,7 @@ begin
   perform cron.schedule('bewonerberichten-opruimen', '35 3 * * *', 'select public.bewonerbericht_opruimen()');
   perform cron.schedule('nieuws-opruimen',           '40 3 * * *', 'select public.nieuws_opruimen()');
   perform cron.schedule('uitstap-opruimen',          '45 3 * * *', 'select public.uitstap_opruimen()');
+  perform cron.schedule('spraak-log-opruimen',       '50 3 * * *', 'select public.spraak_log_opschonen()');
 
   -- Meldingen naar de toestellen van familie: elke vijf minuten.
   perform cron.schedule('push-notify', '*/5 * * * *', format(
