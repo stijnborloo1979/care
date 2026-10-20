@@ -16,7 +16,7 @@ export async function conceptAan(org: string): Promise<boolean> {
 export async function conceptVoorAfdeling(org: string, afdeling: string, nu = new Date()): Promise<Regel[]> {
   const sinds = beginHuidigeDienst(nu).toISOString()
 
-  const [notities, verblijven, activiteiten] = await Promise.all([
+  const [notities, verblijven, activiteiten, taken] = await Promise.all([
     supabase
       .from('care_note')
       .select('id, body, category, created_at, vervangt, stay:stay_id (department_id, room)')
@@ -37,8 +37,15 @@ export async function conceptVoorAfdeling(org: string, afdeling: string, nu = ne
       .eq('department_id', afdeling)
       .gte('starts_at', sinds)
       .order('starts_at'),
+    supabase
+      .from('zorg_taak')
+      .select('id, title, note, due_on, created_at, stay:stay_id (room)')
+      .eq('org_id', org)
+      .eq('department_id', afdeling)
+      .is('done_at', null)
+      .order('created_at'),
   ])
-  for (const r of [notities, verblijven, activiteiten]) if (r.error) throw r.error
+  for (const r of [notities, verblijven, activiteiten, taken]) if (r.error) throw r.error
 
   type NoteRij = {
     id: string
@@ -67,6 +74,21 @@ export async function conceptVoorAfdeling(org: string, afdeling: string, nu = ne
       started_at: v.started_at,
     })),
     activiteiten: ((activiteiten.data ?? []) as { id: string; titel: string; starts_at: string; plaats: string | null; status: string }[]),
+    taken: ((taken.data ?? []) as unknown as {
+      id: string
+      title: string
+      note: string | null
+      due_on: string | null
+      created_at: string
+      stay: { room: string | null } | null
+    }[]).map((t) => ({
+      id: t.id,
+      title: t.title,
+      note: t.note,
+      due_on: t.due_on,
+      created_at: t.created_at,
+      kamer: t.stay?.room ?? null,
+    })),
   }
 
   return maakConcept(invoer)

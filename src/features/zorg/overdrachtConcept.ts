@@ -8,7 +8,7 @@
  * Niets hiervan wordt opgeslagen voordat de verantwoordelijke het bevestigt.
  */
 
-export type BronSoort = 'zorgnotitie' | 'nieuw_verblijf' | 'activiteit'
+export type BronSoort = 'zorgnotitie' | 'nieuw_verblijf' | 'activiteit' | 'taak'
 
 export type Bron = { soort: BronSoort; id: string; tijd: string }
 
@@ -28,10 +28,22 @@ export type Invoer = {
   }[]
   nieuweVerblijven: { id: string; kamer: string | null; started_at: string }[]
   activiteiten: { id: string; titel: string; starts_at: string; plaats: string | null; status: string }[]
+  /** Openstaande taken van de afdeling. Die blijven staan tot ze afgevinkt zijn, dus geen tijdvenster. */
+  taken: {
+    id: string
+    title: string
+    note: string | null
+    due_on: string | null
+    created_at: string
+    kamer: string | null
+  }[]
 }
 
 const tijd = (iso: string) =>
   new Intl.DateTimeFormat('nl-BE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Brussels' }).format(new Date(iso))
+
+const datum = (iso: string) =>
+  new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'long', timeZone: 'Europe/Brussels' }).format(new Date(`${iso}T12:00:00Z`))
 
 const CATEGORIE: Record<string, string> = {
   observatie: 'observatie',
@@ -52,6 +64,16 @@ export function maakConcept(i: Invoer): Regel[] {
   const vervangen = new Set(i.notities.map((n) => n.vervangt).filter((x): x is string => !!x))
 
   const regels: Regel[] = []
+
+  for (const t of i.taken) {
+    const kamer = t.kamer ? ` · kamer ${t.kamer}` : ''
+    const voor = t.due_on ? ` · voor ${datum(t.due_on)}` : ''
+    const notitie = t.note ? ` (${t.note})` : ''
+    regels.push({
+      tekst: `Open taak${kamer}${voor}: ${t.title}${notitie}.`,
+      bron: { soort: 'taak', id: t.id, tijd: t.created_at },
+    })
+  }
 
   for (const v of i.nieuweVerblijven) {
     if (!na(v.started_at)) continue
