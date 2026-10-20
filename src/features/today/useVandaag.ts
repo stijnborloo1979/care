@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAgenda } from './useAgenda'
 import { dagVanBewoner, huisNaarAgenda, samenVoegen } from '../../services/afdelingsdag'
 import { localDateKey } from '../../lib/time'
-import { uitstappen, uitstapNaarAgenda } from '../../services/uitstap'
+import { uitstappen, uitstapNaarAgenda, zonderMaaltijdTijdensUitstap } from '../../services/uitstap'
 
 /** De dag van de afdeling (78). Thuis: leeg. */
 export function useDagVanHuis(householdId: string, tz: string) {
@@ -45,7 +45,7 @@ export function useVandaag(householdId: string, tz: string, nu: Date) {
     () =>
       agenda.data
         ? samenVoegen(agenda.data, [
-            ...huisNaarAgenda(huis.data ?? [], householdId, nu),
+            ...huisNaarAgenda(zonderMaaltijdTijdensUitstap(huis.data ?? [], uit.data ?? []), householdId, nu),
             ...uitstapNaarAgenda(uit.data ?? [], householdId, nu, tz),
           ])
         : undefined,

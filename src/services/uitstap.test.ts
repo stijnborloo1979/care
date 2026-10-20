@@ -9,7 +9,7 @@ import { dagverhaal } from '../features/dagverhaal/dagverhaal'
 const TZ = 'Europe/Brussels'
 const u = (p: Partial<Uitstap>): Uitstap => ({
   id: 'u1', household_id: 'hh', met_wie: 'Els', vertrek: '2026-10-03T14:00:00+02:00', terug: '2026-10-03T17:00:00+02:00',
-  notitie: 'Naar de markt', status: 'gepland', vertrokken_at: null, terug_at: null, created_by: null, created_at: '', ...p,
+  notitie: 'Naar de markt', eet_mee: false, status: 'gepland', vertrokken_at: null, terug_at: null, created_by: null, created_at: '', ...p,
 })
 
 afterEach(() => zetTaal('nl'))

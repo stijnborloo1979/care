@@ -4,7 +4,7 @@ import type { Uitstap } from './uitstapPuur'
 
 export * from './uitstapPuur'
 
-const VELDEN = 'id, household_id, met_wie, vertrek, terug, notitie, status, vertrokken_at, terug_at, created_by, created_at'
+const VELDEN = 'id, household_id, met_wie, vertrek, terug, notitie, eet_mee, status, vertrokken_at, terug_at, created_by, created_at'
 
 function ontbreekt(e: { code?: string } | null) {
   return !!e && (ontbrekendeFunctie(e) || ['42P01', 'PGRST205'].includes(e.code ?? ''))
@@ -31,15 +31,22 @@ export async function uitstappen(hh: string | string[]): Promise<Uitstap[]> {
   return (data ?? []) as Uitstap[]
 }
 
-export async function meldUitstap(p: { hh: string; metWie: string; vertrek: Date; terug: Date; notitie?: string; auteur: string }) {
+export async function meldUitstap(p: { hh: string; metWie: string; vertrek: Date; terug: Date; notitie?: string; eetMee?: boolean; auteur: string }) {
   const { error } = await supabase.from('uitstap').insert({
     household_id: p.hh,
     met_wie: p.metWie.trim(),
     vertrek: p.vertrek.toISOString(),
     terug: p.terug.toISOString(),
     notitie: p.notitie?.trim() || null,
+    eet_mee: p.eetMee ?? false,
     created_by: p.auteur,
   })
+  if (error) throw error
+}
+
+/** De familie zet "blijft eten" aan of uit, tot het vertrek. */
+export async function uitstapEetKeuze(id: string, eet: boolean) {
+  const { error } = await supabase.rpc('uitstap_eetkeuze', { uitstap_id: id, eet })
   if (error) throw error
 }
 

@@ -1,5 +1,5 @@
 import type { AgendaEvent } from './agenda'
-import { HUIS_PREFIX } from './afdelingsdagPuur'
+import { HUIS_PREFIX, type HuisMoment } from './afdelingsdagPuur'
 import { hhmm, localDateKey } from '../lib/time'
 import { t } from '../lib/i18n'
 import { tt, uiLocale } from '../lib/uiTaal'
@@ -12,11 +12,26 @@ export interface Uitstap {
   vertrek: string
   terug: string
   notitie: string | null
+  /** Blijft de bewoner tijdens de uitstap eten? Standaard niet (106). */
+  eet_mee: boolean
   status: 'gepland' | 'weg' | 'terug' | 'geannuleerd'
   vertrokken_at: string | null
   terug_at: string | null
   created_by: string | null
   created_at: string
+}
+
+/** Vervalt de maaltijd van het huis op dit moment door een uitstap? */
+export function uitstapVervaltMaaltijd(u: Pick<Uitstap, 'status' | 'vertrek' | 'terug' | 'eet_mee'>, moment: Date): boolean {
+  if (u.eet_mee) return false
+  if (u.status === 'geannuleerd' || u.status === 'terug') return false
+  const m = moment.getTime()
+  return m >= new Date(u.vertrek).getTime() && m < new Date(u.terug).getTime()
+}
+
+/** De maaltijden van het huis, zonder de maaltijden waar de bewoner niet bij is. */
+export function zonderMaaltijdTijdensUitstap(huis: HuisMoment[], lijst: Uitstap[]): HuisMoment[] {
+  return huis.filter((m) => !(m.soort === 'maaltijd' && lijst.some((u) => uitstapVervaltMaaltijd(u, new Date(m.begint)))))
 }
 
 export type Toestand = 'gepland' | 'weg' | 'te-laat' | 'terug' | 'geannuleerd'
