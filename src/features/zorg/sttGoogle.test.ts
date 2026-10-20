@@ -7,7 +7,7 @@ import {
   leesTranscript,
   recognizeUrl,
   taalCode,
-} from '../../../supabase/functions/spraak-vraag/stt'
+} from '../../../supabase/functions/_shared/stt'
 
 describe('Google spraak (EU)', () => {
   it('gebruikt het EU-endpoint, niet het globale', () => {

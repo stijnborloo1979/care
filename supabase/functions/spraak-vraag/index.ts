@@ -15,13 +15,7 @@
 //   SUPABASE_URL, SUPABASE_ANON_KEY  staan standaard klaar
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import {
-  bouwRecognizeBody,
-  geschatteBytes,
-  jwtDelen,
-  leesTranscript,
-  recognizeUrl,
-} from './stt.ts'
+import { bouwRecognizeBody, geschatteBytes, leesTranscript, recognizeUrl, toegangsToken } from '../_shared/stt.ts'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -87,47 +81,6 @@ Deno.serve(async (req) => {
     return json({ fout: 'intern' }, 500)
   }
 })
-
-async function toegangsToken(sa: { client_email: string; private_key: string }): Promise<string> {
-  const { header, payload } = jwtDelen(sa.client_email, Math.floor(Date.now() / 1000))
-  const invoer = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(payload))}`
-  const sleutel = await crypto.subtle.importKey(
-    'pkcs8',
-    pemNaarBytes(sa.private_key),
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const handtekening = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', sleutel, new TextEncoder().encode(invoer))
-  const jwt = `${invoer}.${b64urlBytes(new Uint8Array(handtekening))}`
-
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: jwt }),
-  })
-  if (!res.ok) throw new Error(`token ${res.status}`)
-  const data = await res.json()
-  return data.access_token as string
-}
-
-function pemNaarBytes(pem: string): ArrayBuffer {
-  const schoon = pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '')
-  const bin = atob(schoon)
-  const bytes = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
-  return bytes.buffer
-}
-
-function b64url(tekst: string): string {
-  return b64urlBytes(new TextEncoder().encode(tekst))
-}
-
-function b64urlBytes(bytes: Uint8Array): string {
-  let bin = ''
-  for (const b of bytes) bin += String.fromCharCode(b)
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
