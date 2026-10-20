@@ -9,6 +9,7 @@ import {
   alleBewoners,
   annuleerActiviteit,
   deelnames,
+  deelnemerRijen,
   mijnBewoners,
   nieuweActiviteit,
   schrijfIn,
@@ -19,6 +20,7 @@ import {
 } from './zorgApi'
 import { Fout, Kaart, Kop, Laden, Leeg, dagEnUur, knop, knopKlein, knopRustig, label, veld } from './ui'
 import VasteDag from './VasteDag'
+import { telDeelnemers } from './deelnemerTelling'
 import { tt } from '../../lib/uiTaal'
 
 /** Zingen, wandelen, de kapper: wat er te doen is, en wie meedoet. */
@@ -28,6 +30,13 @@ export default function Activiteiten() {
   const magPlannen = beheert || !!org?.team_lead
   const lijst = useQuery({ queryKey: ['zorg', 'activiteiten', orgId], enabled: !!orgId, queryFn: () => activiteiten(orgId) })
   const [open, setOpen] = useState<string | null>(null)
+  const ids = (lijst.data ?? []).map((a) => a.id)
+  // Eén query voor alle aantallen: de namen komen pas op als iemand een activiteit opent.
+  const tellingen = useQuery({
+    queryKey: ['zorg', 'deelnemer-tellingen', orgId, ids.join(',')],
+    enabled: ids.length > 0,
+    queryFn: async () => telDeelnemers(await deelnemerRijen(ids)),
+  })
 
   if (!org) return null
   return (
@@ -65,6 +74,7 @@ export default function Activiteiten() {
                     {dagEnUur(a.starts_at)}
                     {a.plaats ? ` · ${a.plaats}` : ''}
                     {a.status === 'geannuleerd' ? ` · ${tt('geannuleerd')}` : ''}
+                    {a.status === 'gepland' && tellingen.data ? ` · ${tt('{n} ingeschreven', { n: tellingen.data[a.id] ?? 0 })}` : ''}
                   </span>
                 </span>
                 <ChevronDown
