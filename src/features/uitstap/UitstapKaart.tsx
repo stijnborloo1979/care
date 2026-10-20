@@ -120,10 +120,11 @@ function Melden({ householdId, tz, onKlaar, onStop }: { householdId: string; tz:
   const [vertrek, setVertrek] = useState(naarLokaleTijd(begin, tz))
   const [terug, setTerug] = useState(naarLokaleTijd(new Date(begin.getTime() + 3 * 3600_000), tz))
   const [notitie, setNotitie] = useState('')
+  const [eet, setEet] = useState(false)
   const [fout, setFout] = useState<string | null>(null)
 
   const bewaar = useMutation({
-    mutationFn: () => meldUitstap({ hh: householdId, metWie, vertrek: uitLokaleTijd(vertrek, tz), terug: uitLokaleTijd(terug, tz), notitie, auteur: ik }),
+    mutationFn: () => meldUitstap({ hh: householdId, metWie, vertrek: uitLokaleTijd(vertrek, tz), terug: uitLokaleTijd(terug, tz), notitie, eetMee: eet, auteur: ik }),
     onSuccess: onKlaar,
     onError: (e) => setFout(foutTekst(e)),
   })
@@ -154,6 +155,11 @@ function Melden({ householdId, tz, onKlaar, onStop }: { householdId: string; tz:
         <span className="text-sm font-semibold text-ink-soft">{tt('Waar naartoe (mag leeg)')}</span>
         <input maxLength={300} value={notitie} onChange={(e) => setNotitie(e.target.value)} placeholder={tt('Naar de markt en daarna bij ons eten')} className="mt-1 min-h-touch w-full rounded-2xl border-[1.5px] border-line-strong bg-surface px-4" />
       </label>
+      <label className="flex min-h-touch items-center gap-3 sm:col-span-2">
+        <input type="checkbox" checked={eet} onChange={(e) => setEet(e.target.checked)} className="h-6 w-6" />
+        <span className="font-semibold">{tt('Blijft eten tijdens de uitstap')}</span>
+      </label>
+      <p className="text-sm text-ink-soft sm:col-span-2">{tt('Zonder vinkje vervalt de maaltijd van het huis tijdens de uitstap.')}</p>
       {fout ? <p className="text-sm text-alert sm:col-span-2">{fout}</p> : null}
       <div className="flex flex-wrap gap-2 sm:col-span-2">
         <button type="submit" disabled={bewaar.isPending} className="min-h-touch rounded-pill bg-accent-ink px-5 font-semibold text-white">
