@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../auth/AuthProvider'
 import { useOrganisatie } from './useOrganisatie'
 import OpenVragen from './OpenVragen'
-import { DIENSTEN, dienstDatum, huidigeDienst, medewerkers, nieuweOverdracht, overdrachten, type Dienst } from './zorgApi'
+import { DIENSTEN, dienstDatum, huidigeDienst, medewerkers, nieuweOverdracht, overdrachten, zorgTaken, type Dienst } from './zorgApi'
 import { conceptAan, conceptVoorAfdeling } from './overdrachtBronnen'
 import { conceptTekst, type Regel } from './overdrachtConcept'
 import { Fout, Kaart, Kop, Laden, Leeg, knop, label, tekstvak, uur } from './ui'
@@ -43,6 +43,15 @@ export default function Overdracht() {
       if (r.length) setTekst((t) => (t.trim() ? `${t}\n${conceptTekst(r)}` : conceptTekst(r)))
     },
   })
+
+  // Openstaande taken van deze afdeling: wat de volgende dienst zeker moet weten.
+  const taken = useQuery({
+    queryKey: ['zorg', 'taken', org?.org_id, afdeling?.id],
+    enabled: !!org && !!afdeling,
+    queryFn: () => zorgTaken(org!.org_id, afdeling!.id),
+  })
+  const openTaken = (taken.data ?? []).filter((t) => !t.done_at)
+  const nieuweTaken = openTaken.filter((t) => !tekst.includes(t.title))
 
   const lijst = useQuery({
     queryKey: ['zorg', 'overdracht', afdeling?.id],
@@ -169,6 +178,29 @@ export default function Overdracht() {
                     </li>
                   ))}
                 </ul>
+              ) : null}
+            </div>
+          ) : null}
+          {openTaken.length > 0 ? (
+            <div className="mt-3 rounded-2xl bg-surface-soft px-4 py-3">
+              <p className="text-sm font-semibold">
+                {tt('Nog open op {afdeling} ({n})', { afdeling: afdeling?.naam ?? '', n: openTaken.length })}
+              </p>
+              <ul className="mt-1 list-inside list-disc text-sm text-ink-soft">
+                {openTaken.map((t) => (
+                  <li key={t.id}>{t.title}</li>
+                ))}
+              </ul>
+              {nieuweTaken.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setTekst((t) => [t.trim(), ...nieuweTaken.map((x) => `- ${x.title}`)].filter(Boolean).join('\n'))
+                  }
+                  className="mt-2 min-h-touch rounded-pill border-[1.5px] border-line-strong bg-surface px-4 font-semibold"
+                >
+                  {tt('Neem op in de overdracht')}
+                </button>
               ) : null}
             </div>
           ) : null}
