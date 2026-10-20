@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import TaalKiezer from '../components/TaalKiezer'
 import { DemoBalk, DemoKnop } from '../features/zorg/Demo'
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, FileUp, BedDouble, Building2, CalendarDays, CalendarRange, ChevronDown, ClipboardList, House, KeyRound, LogOut, Megaphone, Menu, MessagesSquare, Settings2, Users, X } from 'lucide-react'
+import { BarChart3, FileUp, BedDouble, Building2, CalendarDays, CalendarRange, ChevronDown, ClipboardList, House, KeyRound, LogOut, Megaphone, Menu, MessagesSquare, Settings2, UtensilsCrossed, Users, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../features/auth/AuthProvider'
 import { useHousehold } from '../features/household/useHousehold'
@@ -42,6 +42,7 @@ export default function ZorgLayout() {
     { to: '/zorg/bewoners', label: tt('Bewoners'), icoon: Users, teller: vragen, groep: 'Dagelijks', onderaan: true },
     { to: '/zorg/overdracht', label: tt('Overdracht'), icoon: ClipboardList, groep: 'Dagelijks', onderaan: true },
     { to: '/zorg/taken', label: tt('Taken'), icoon: ClipboardList, groep: 'Dagelijks', onderaan: false },
+    { to: '/zorg/maaltijden', label: tt('Maaltijden'), icoon: UtensilsCrossed, groep: 'Dagelijks', onderaan: false },
     { to: '/zorg/team', label: tt('Team'), icoon: MessagesSquare, groep: 'Dagelijks', onderaan: true },
     { to: '/zorg/activiteiten', label: tt('Activiteiten'), icoon: CalendarDays, groep: 'Planning' },
     { to: '/zorg/week', label: tt('Weekplanning'), icoon: CalendarRange, groep: 'Planning' },
