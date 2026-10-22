@@ -111,8 +111,8 @@ begin
 
   -- 10. Op uitstap zonder eten mee: de maaltijd telt niet meer als verwacht
   reset role;
-  insert into public.uitstap (household_id, met_wie, vertrek, terug, status)
-    values (hh, 'Els', now() - interval '2 days', now() + interval '1 day', 'gepland');
+  insert into public.uitstap (household_id, met_wie, vertrek, terug, status, eet_mee)
+    values (hh, 'Els', now() - interval '2 days', now() + interval '1 day', 'gepland', false);
   set local role authenticated;
   perform set_config('request.jwt.claims', json_build_object('sub', u_admin::text, 'role', 'authenticated')::text, true);
   select aantal_verwacht into cijfer from public.maaltijd_analyse(org, vandaag - 1, vandaag) where moment_titel = 'Ontbijt';

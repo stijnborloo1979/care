@@ -120,7 +120,7 @@ function Melden({ householdId, tz, onKlaar, onStop }: { householdId: string; tz:
   const [vertrek, setVertrek] = useState(naarLokaleTijd(begin, tz))
   const [terug, setTerug] = useState(naarLokaleTijd(new Date(begin.getTime() + 3 * 3600_000), tz))
   const [notitie, setNotitie] = useState('')
-  const [eet, setEet] = useState(false)
+  const [eet, setEet] = useState(true)
   const [fout, setFout] = useState<string | null>(null)
 
   const bewaar = useMutation({

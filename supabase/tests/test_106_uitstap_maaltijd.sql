@@ -22,7 +22,7 @@ begin
   insert into public.household (person_name) values ('Test 106') returning id into hh;
   insert into public.membership (household_id, profile_id, role) values (hh, u_fam, 'admin');
 
-  -- 1. Nieuwe uitstap: standaard niet eten mee.
+  -- 1. Nieuwe uitstap: standaard blijft de bewoner eten (109).
   set local role authenticated;
   perform set_config('request.jwt.claims', json_build_object('sub', u_fam::text, 'role', 'authenticated')::text, true);
   insert into public.uitstap (household_id, met_wie, vertrek, terug)
@@ -30,13 +30,13 @@ begin
     returning id into uit;
   select eet_mee into eet from public.uitstap where id = uit;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
-    values ('standaard: niet eten mee', 0, case when eet then 1 else 0 end, eet = false);
+    values ('standaard: blijft eten mee', 1, case when eet then 1 else 0 end, eet = true);
 
-  -- 2. Familie zet "blijft eten" aan vóór vertrek.
-  perform public.uitstap_eetkeuze(uit, true);
+  -- 2. Familie zet "niet eten mee" aan vóór vertrek.
+  perform public.uitstap_eetkeuze(uit, false);
   select eet_mee into eet from public.uitstap where id = uit;
   insert into resultaat (omschrijving, verwacht, werkelijk, ok)
-    values ('familie zet blijft eten aan', 1, case when eet then 1 else 0 end, eet = true);
+    values ('familie zet niet eten mee aan', 0, case when eet then 1 else 0 end, eet = false);
 
   -- 3. Een vreemde kan het niet wijzigen.
   perform set_config('request.jwt.claims', json_build_object('sub', u_vreemd::text, 'role', 'authenticated')::text, true);

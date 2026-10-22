@@ -29,6 +29,9 @@ export default {
     "Het menu voor vandaag is nog niet ingevuld.": "Le menu d'aujourd'hui n'est pas encore complété.",
     "Allergenen": "Allergènes",
     "Allergenen: vraag het aan de keuken.": "Allergènes : demandez-le à la cuisine.",
+    "Standaard: {status}, nog niet bevestigd": "Par défaut : {status}, pas encore confirmé",
+    "{n} maaltijden zijn nog niet bevestigd (standaard gegeten).": "{n} repas ne sont pas encore confirmés (par défaut mangé).",
+    "{n} niet bevestigd": "{n} non confirmé(s)",
   },
   en: {
     "Menu": "Menu",
@@ -57,5 +60,8 @@ export default {
     "Het menu voor vandaag is nog niet ingevuld.": "Today's menu has not been filled in yet.",
     "Allergenen": "Allergens",
     "Allergenen: vraag het aan de keuken.": "Allergens: ask the kitchen.",
+    "Standaard: {status}, nog niet bevestigd": "Default: {status}, not confirmed yet",
+    "{n} maaltijden zijn nog niet bevestigd (standaard gegeten).": "{n} meals are not confirmed yet (default: eaten).",
+    "{n} niet bevestigd": "{n} not confirmed",
   },
 } satisfies Vertaling
