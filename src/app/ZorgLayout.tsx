@@ -43,6 +43,7 @@ export default function ZorgLayout() {
     { to: '/zorg/overdracht', label: tt('Overdracht'), icoon: ClipboardList, groep: 'Dagelijks', onderaan: true },
     { to: '/zorg/taken', label: tt('Taken'), icoon: ClipboardList, groep: 'Dagelijks', onderaan: false },
     { to: '/zorg/maaltijden', label: tt('Maaltijden'), icoon: UtensilsCrossed, groep: 'Dagelijks', onderaan: false },
+    { to: '/zorg/menu', label: tt('Menu'), icoon: UtensilsCrossed, groep: 'Dagelijks', onderaan: false },
     { to: '/zorg/team', label: tt('Team'), icoon: MessagesSquare, groep: 'Dagelijks', onderaan: true },
     { to: '/zorg/activiteiten', label: tt('Activiteiten'), icoon: CalendarDays, groep: 'Planning' },
     { to: '/zorg/week', label: tt('Weekplanning'), icoon: CalendarRange, groep: 'Planning' },
