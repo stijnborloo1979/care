@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useOrganisatie } from './useOrganisatie'
 import { afdelingen as haalAfdelingen, mijnBewoners } from './zorgApi'
-import { registratieVoor, maaltijdZet, maaltijdAnalyse } from './maaltijdApi'
+import { maaltijdDagOverzicht, maaltijdZet, maaltijdAnalyse, type MaaltijdStand } from './maaltijdApi'
 import { vasteDag } from '../../services/afdelingsdag'
-import { uitstappen as uitstapLijst, uitstapVervaltMaaltijd, uitLokaleTijd } from '../../services/uitstap'
 import { maaltijdMomenten, nietGeregistreerd, opvallend, procent, STATUSSEN, totaal, type MaaltijdStatus } from '../../services/maaltijdPuur'
 import { localDateKey } from '../../lib/time'
 import { Fout, Kaart, Laden, Leeg, knopKlein } from './ui'
@@ -14,6 +13,17 @@ const chip = (aan: boolean) => `${knopKlein} ${aan ? 'border-accent-ink bg-accen
 import { tt } from '../../lib/uiTaal'
 
 const TZ = 'Europe/Brussels'
+
+/**
+ * Wat er onder de knoppen staat. Een standaard "gegeten" is zichtbaar als
+ * niet bevestigd: het team tikt op de juiste knop om het te bevestigen.
+ */
+function statusTekst(rij: MaaltijdStand): string {
+  const woord = tt(STATUSSEN.find((s) => s.waarde === rij.status)!.woord)
+  if (rij.bron === 'team') return tt('Geregistreerd: {status}', { status: woord })
+  if (rij.bron === 'uitstap') return tt('Op uitstap, geen maaltijd')
+  return tt('Standaard: {status}, nog niet bevestigd', { status: woord })
+}
 
 /**
  * Maaltijden (107): per bewoner noteren wat er gegeten is, en het WZC zien
@@ -55,25 +65,22 @@ function Vandaag({ orgId }: { orgId: string }) {
   const gekozen = afdeling ?? afd.data?.[0]?.id ?? null
   const naam = afd.data?.find((a) => a.id === gekozen)?.name ?? null
   const mijn = (bewoners.data ?? []).filter((b) => b.afdeling === naam)
-  const hhs = mijn.map((b) => b.household_id)
 
   const momenten = maaltijdMomenten(vast.data ?? [], gekozen, nu)
   const [moment, setMoment] = useState<string | null>(null)
   const gekozenMoment = momenten.find((m) => m.id === moment) ?? momenten[0] ?? null
 
-  const reg = useQuery({ queryKey: ['zorg', 'maaltijd', orgId, dag, hhs.join(',')], queryFn: () => registratieVoor(hhs, dag), enabled: hhs.length > 0 })
-  const uit = useQuery({ queryKey: ['zorg', 'maaltijd-uitstap', orgId, hhs.join(',')], queryFn: () => uitstapLijst(hhs), enabled: hhs.length > 0, refetchInterval: 5 * 60_000 })
+  const dagStand = useQuery({ queryKey: ['zorg', 'maaltijd-dag', orgId, dag], queryFn: () => maaltijdDagOverzicht(orgId, dag), enabled: !!orgId, refetchInterval: 2 * 60_000 })
 
   const zet = useMutation({
     mutationFn: (p: { hh: string; status: MaaltijdStatus }) => maaltijdZet({ hh: p.hh, moment: gekozenMoment!.id, dag, status: p.status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['zorg', 'maaltijd', orgId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['zorg', 'maaltijd-dag', orgId] }),
   })
 
   if (afd.isLoading || bewoners.isLoading) return <Laden />
   if ((afd.data ?? []).length === 0) return <Leeg>{tt('Nog geen afdelingen.')}</Leeg>
 
-  const momentTijd = gekozenMoment ? uitLokaleTijd(`${dag}T${gekozenMoment.begint.slice(0, 5)}`, TZ) : null
-  const status = (hh: string) => reg.data?.find((r) => r.household_id === hh && r.afdeling_dag_id === gekozenMoment?.id)?.status
+  const stand = (hh: string) => dagStand.data?.find((r) => r.household_id === hh && r.afdeling_dag_id === gekozenMoment?.id)
 
   return (
     <div className="space-y-4">
@@ -96,7 +103,7 @@ function Vandaag({ orgId }: { orgId: string }) {
         ) : (
           <Leeg>{tt('Geen maaltijd op deze afdeling vandaag.')}</Leeg>
         )}
-        <Fout fout={reg.error ?? zet.error ?? uit.error} />
+        <Fout fout={dagStand.error ?? zet.error} />
       </Kaart>
 
       {gekozenMoment && mijn.length === 0 ? <Leeg>{tt('Geen bewoners op deze afdeling.')}</Leeg> : null}
@@ -104,13 +111,14 @@ function Vandaag({ orgId }: { orgId: string }) {
       {gekozenMoment && mijn.length > 0 ? (
         <ul className="space-y-2">
           {mijn.map((b) => {
-            const huidige = status(b.household_id)
-            const opUitstap = !!momentTijd && (uit.data ?? []).some((u) => u.household_id === b.household_id && uitstapVervaltMaaltijd(u, momentTijd))
+            const rij = stand(b.household_id)
+            const huidige = rij?.status
+            const opUitstap = rij?.bron === 'uitstap'
             return (
               <li key={b.household_id} className="rounded-card bg-surface p-4 shadow-card">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-lg font-bold">{b.naam}</p>
-                  {opUitstap && !huidige ? (
+                  {opUitstap ? (
                     <span className="rounded-pill bg-surface-soft px-3 py-1 text-sm font-semibold text-ink-soft">{tt('Op uitstap, geen maaltijd')}</span>
                   ) : null}
                 </div>
@@ -127,7 +135,7 @@ function Vandaag({ orgId }: { orgId: string }) {
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-sm text-ink-soft">{huidige ? tt('Geregistreerd: {status}', { status: tt(STATUSSEN.find((s) => s.waarde === huidige)!.woord) }) : tt('Nog niet geregistreerd')}</p>
+                <p className="mt-2 text-sm text-ink-soft">{rij ? statusTekst(rij) : tt('Nog niet geregistreerd')}</p>
               </li>
             )
           })}
@@ -164,7 +172,7 @@ function Analyse({ orgId }: { orgId: string }) {
             {tt('Gegeten {g}%, half {h}%, niet {n}%.', { g: t.gegeten, h: t.half, n: t.niet })}
           </p>
           {t.nietGeregistreerd > 0 ? (
-            <p className="mt-1 text-sm text-ink-faint">{tt('{n} maaltijden zijn nog niet geregistreerd.', { n: t.nietGeregistreerd })}</p>
+            <p className="mt-1 text-sm text-ink-faint">{tt('{n} maaltijden zijn nog niet bevestigd (standaard gegeten).', { n: t.nietGeregistreerd })}</p>
           ) : null}
         </Kaart>
       ) : null}
@@ -187,7 +195,7 @@ function Analyse({ orgId }: { orgId: string }) {
             </div>
             <p className="mt-2 text-sm text-ink-soft">
               {tt('Gegeten {g}%, half {h}%, niet {n}%.', { g: procent(r.aantal_gegeten, r.aantal_verwacht), h: procent(r.aantal_half, r.aantal_verwacht), n: procent(r.aantal_niet, r.aantal_verwacht) })}
-              {nietGeregistreerd(r) > 0 ? ` · ${tt('{n} niet geregistreerd', { n: nietGeregistreerd(r) })}` : ''}
+              {nietGeregistreerd(r) > 0 ? ` · ${tt('{n} niet bevestigd', { n: nietGeregistreerd(r) })}` : ''}
             </p>
           </li>
         ))}

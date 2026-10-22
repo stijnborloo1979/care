@@ -38,7 +38,7 @@ export async function meldUitstap(p: { hh: string; metWie: string; vertrek: Date
     vertrek: p.vertrek.toISOString(),
     terug: p.terug.toISOString(),
     notitie: p.notitie?.trim() || null,
-    eet_mee: p.eetMee ?? false,
+    eet_mee: p.eetMee ?? true,
     created_by: p.auteur,
   })
   if (error) throw error
