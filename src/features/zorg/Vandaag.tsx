@@ -12,6 +12,7 @@ import { activiteitenTussen, maandagVan, weekRooster } from '../../services/week
 import { bezetting, bezettingPerAfdeling, kamers as haalKamers, totalen } from '../../services/kamers'
 import { orgNieuws } from '../../services/nieuws'
 import AfdelingNu from './AfdelingNu'
+import MenuVandaag from './MenuVandaag'
 import { Overzicht } from './Beheer'
 import { Kaart, Leeg, dagEnUur } from './ui'
 import { tt, uiLocale } from '../../lib/uiTaal'
@@ -105,6 +106,8 @@ export default function Vandaag() {
           </Link>
         ))}
       </dl>
+
+      <MenuVandaag orgId={orgId} />
 
       <AfdelingNu orgId={orgId} mijn={mijn.data ?? []} />
 
