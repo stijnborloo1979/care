@@ -9,6 +9,7 @@ import { useHousehold } from '../features/household/useHousehold'
 import { useOrganisatie } from '../features/zorg/useOrganisatie'
 import { ROLNAAM } from '../features/zorg/zorgApi'
 import { useOngezien } from '../features/zorg/OpenVragen'
+import HulpAlarmen from '../features/zorg/HulpAlarmen'
 import { tt } from '../lib/uiTaal'
 import Logo from '../components/Logo'
 
@@ -187,6 +188,8 @@ export default function ZorgLayout() {
         <div className="mx-auto max-w-5xl px-4 pb-28 pt-5 sm:px-5 lg:pb-12">
           <div className="mb-4 lg:hidden print:hidden">{kopBalk}</div>
           <DemoBalk />
+          {/* Boven elk scherm: een hulpvraag mag nergens achter een menu zitten. */}
+          <HulpAlarmen org={org.org_id} />
           <Outlet />
         </div>
 

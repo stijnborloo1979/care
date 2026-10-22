@@ -14,6 +14,7 @@ import DagInHetHuis from '../afdelingsdag/DagInHetHuis'
 import NieuwsVanHetHuis from '../nieuws/NieuwsVanHetHuis'
 import UitstapKaart from '../uitstap/UitstapKaart'
 import SpullenKaart from '../spullen/SpullenKaart'
+import { useVerblijf } from '../zorg/useVerblijf'
 import { tt, uiLocale } from '../../lib/uiTaal'
 
 /** Groet en datum in de taal van de familie (niet die van de tablet). */
@@ -82,6 +83,8 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
   const now = useNow()
   const { household } = useHousehold()
   const queryClient = useQueryClient()
+  // Zelfde bron als de tablet: het open verblijf (109), niet household.org_id.
+  const { verblijf } = useVerblijf(householdId)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['summary', householdId],
@@ -190,7 +193,7 @@ export default function Dashboard({ householdId, personName, timezone, viewerNam
       <DagInHetHuis householdId={householdId} personName={personName} timezone={timezone} />
 
       {/* Alleen bij een verblijf in een woonzorgcentrum. */}
-      {household?.org_id && !household.is_self ? (
+      {verblijf && !household?.is_self ? (
         <div className="grid gap-6 lg:grid-cols-2">
           <UitstapKaart householdId={householdId} personName={personName} timezone={timezone} vorm="familie" />
           <SpullenKaart householdId={householdId} personName={personName} vorm="familie" />

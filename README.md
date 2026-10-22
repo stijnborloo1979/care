@@ -1071,6 +1071,30 @@ terug, en `null <> 'admin'` is `null`, geen waar. Een vreemde liep zo langs
 beide controles. Het moet `is distinct from` zijn. De test viel erover; zonder
 die test had het erin gezeten.
 
+## Wonen in een woonzorgcentrum
+
+Een koppeling met een WZC opent een verblijf (`stay`). Vanaf `109_verblijf_modus.sql`
+is dat open verblijf de enige bron voor "woont in een WZC": in de database
+`heeft_verblijf()`, in de app `useVerblijf()`. Niets wordt gewist bij een
+koppeling; wat niet meer past, pauzeert en komt na het verblijf vanzelf terug.
+
+| | thuis | in een WZC |
+|---|---|---|
+| "Ik heb hulp nodig" | familie, niveau alert | iedereen van de afdeling (`zorg_alarm`), familie een rustig bericht |
+| Help-scherm | familie, huisarts, 112 | hulp van de verpleging bovenaan, waar ze woont, familie |
+| thuisroutines in de agenda | ja | nee; de afdelingsdag staat er al |
+| nachtmeldingen aan familie | in de fase "ondersteund" | geen |
+| locatie en veilige zone | zoals ingesteld | gepauzeerd, niets bewaard |
+
+Een hulpvraag staat bovenaan elk zorgscherm tot iemand "Ik ga" drukt; dan
+verdwijnt ze bij iedereen en komt ze in het zorglogboek. Heeft het verblijf
+nog geen afdeling, dan zien de coördinatoren en beheerders de vraag: ze mag
+nooit bij niemand landen. Medewerkers krijgen nog geen push; het blok werkt
+alleen zolang het zorgscherm open staat.
+
+Nog te doen: medicatie in handen van het WZC (stap 2) en Home Memory als
+"Mijn kamer" (stap 3).
+
 ## Waarom een melding niet aankomt
 
 Push valt op drie plaatsen stil, en alle drie doen ze dat zonder een

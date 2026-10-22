@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import Icon, { type IconNaam } from '../components/Icon'
 import { t } from '../lib/i18n'
 import { useHousehold } from '../features/household/useHousehold'
+import { useVerblijf } from '../features/zorg/useVerblijf'
 import { useDisplayPrefs } from '../features/settings/useDisplayPrefs'
 import { useRealtime } from '../features/realtime/useRealtime'
 import { useLocationReporter, useLocationSetting } from '../features/location/useLocation'
@@ -48,7 +49,11 @@ export default function PersonLayout() {
   useDisplayPrefs(household?.household_id ?? '')
   useRealtime(household?.household_id ?? '')
   const { setting } = useLocationSetting(household?.household_id ?? '')
-  useLocationReporter(household?.household_id ?? '', !!setting?.enabled)
+  // In een woonzorgcentrum volgt het team, niet een kaart: geen locatie
+  // doorgeven en dus ook niet zeggen dat ze gedeeld wordt (109).
+  const { verblijf } = useVerblijf(household?.household_id ?? '')
+  const locatieAan = !!setting?.enabled && !verblijf
+  useLocationReporter(household?.household_id ?? '', locatieAan)
   const tz = household?.timezone ?? 'Europe/Brussels'
   const { data: vandaag } = useAgenda(household?.household_id ?? '', tz)
   const { spraakVrij } = useProactiveSpeech(vandaag ?? [], tz)
@@ -101,7 +106,7 @@ export default function PersonLayout() {
         </p>
       ) : null}
 
-      {setting?.enabled ? (
+      {locatieAan ? (
         <p className="bg-surface-soft px-4 py-1.5 text-center text-sm font-semibold text-ink-soft">
           {t('persoon.locatieGedeeld')}
         </p>

@@ -5,6 +5,7 @@ import { t } from '../../lib/i18n'
 import BelKnop from './BelKnop'
 import HulpKnop from './HulpKnop'
 import { huidigePrefs, magBellen } from '../settings/useDisplayPrefs'
+import { useVerblijf } from '../zorg/useVerblijf'
 
 /**
  * Wie er op het Help-scherm past.
@@ -36,6 +37,9 @@ export default function Help() {
   // betekent hier ja en op de tablet in de living nee.
   const bellenKan = magBellen(prefs)
   const hh = household?.household_id ?? ''
+  // In een woonzorgcentrum is de verpleging de hulp, niet 112 en niet de
+  // huisarts van thuis (109).
+  const { verblijf } = useVerblijf(hh)
 
   // Hoogstens drie namen, en dus mogen het alleen namen zijn die iets
   // opleveren.
@@ -46,7 +50,45 @@ export default function Help() {
   // toestel echt kan bellen — anders is hun kaart een nummer dat niets doet,
   // en dan neemt het een plaats in van iemand die wél te bereiken is. Ze
   // blijven gewoon zichtbaar bij "Wie is wie?", waar ze thuishoren.
-  const bellen = kiesBereikbaar(people ?? [], bellenKan)
+  const bellen = kiesBereikbaar(people ?? [], bellenKan && !verblijf)
+
+  if (verblijf) {
+    return (
+      <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">
+        <Link to="/" className="font-semibold text-accent-ink underline underline-offset-4">
+          ‹ {t('nav.vandaag')}
+        </Link>
+
+        <h1 className="mt-4 text-[2rem] font-extrabold leading-tight tracking-tight">{t('hulp.titel')}</h1>
+
+        {/* Bovenaan en vol: hier is dit de weg die werkt. */}
+        <div className="mt-6">
+          <HulpKnop householdId={hh} wzc />
+        </div>
+
+        <div className="mt-6 rounded-card border-[1.5px] border-line-strong bg-surface p-5">
+          <p className="text-xl font-bold">{t('hulp.waarBenIk')}</p>
+          <p className="mt-1 text-lg text-ink-soft">
+            {verblijf.kamer
+              ? t('hulp.wzcWaarKamer', { naam: verblijf.naam, kamer: verblijf.kamer })
+              : t('hulp.wzcWaar', { naam: verblijf.naam })}{' '}
+            {t('hulp.wzcRustig')}
+          </p>
+        </div>
+
+        {/* Familie blijft bereikbaar: bij hen wordt het een vraag om terug te bellen. */}
+        {bellen.length > 0 ? (
+          <div className="mt-6 space-y-3">
+            {bellen.map((p) => (
+              <BelKnop key={p.id} p={p} householdId={hh} kanBellen={bellenKan} />
+            ))}
+          </div>
+        ) : null}
+
+        <p className="mt-5 text-center text-sm text-ink-faint">{t('hulp.wzcUitleg')}</p>
+      </main>
+    )
+  }
 
   return (
     <main className="mx-auto max-w-[36rem] px-5 pb-28 pt-6">

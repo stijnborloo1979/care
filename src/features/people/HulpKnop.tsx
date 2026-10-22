@@ -14,11 +14,15 @@ import { t } from '../../lib/i18n'
  * bovenaan zou hem tot noodknop maken, en dat is hij niet. Wat hij wel
  * doet, zegt hij letterlijk: familie krijgt een bericht.
  *
+ * In een woonzorgcentrum (wzc) is het andersom: dan gaat de vraag naar
+ * iedereen van de afdeling (109) en is dit wél de hoofdweg. Dan staat hij
+ * bovenaan, vol, en zegt hij wat er gebeurt: de verpleging weet het.
+ *
  * Na het drukken verdwijnt de knop niet. Wie ongerust is, drukt nog eens;
  * de wachttijd van twee minuten zit in de database, niet hier. Op het
  * scherm staat alleen wat er gebeurd is.
  */
-export default function HulpKnop({ householdId }: { householdId: string }) {
+export default function HulpKnop({ householdId, wzc = false }: { householdId: string; wzc?: boolean }) {
   const [gevraagd, setGevraagd] = useState(false)
 
   const vraag = useMutation({
@@ -31,17 +35,19 @@ export default function HulpKnop({ householdId }: { householdId: string }) {
       <button
         onClick={() => vraag.mutate()}
         disabled={vraag.isPending}
-        className="flex min-h-[5rem] w-full items-center gap-4 rounded-card border-[1.5px] border-accent bg-accent-soft px-5 text-left text-xl font-bold shadow-card disabled:opacity-60"
+        className={`flex w-full items-center gap-4 rounded-card border-[1.5px] border-accent px-5 text-left text-xl font-bold shadow-card disabled:opacity-60 ${
+          wzc ? 'min-h-big bg-accent text-accent-ink' : 'min-h-[5rem] bg-accent-soft'
+        }`}
       >
         <span className="text-3xl" aria-hidden="true">
           🔔
         </span>
-        {vraag.isPending ? t('algemeen.bezig') : t('hulp.laatWeten')}
+        {vraag.isPending ? t('algemeen.bezig') : wzc ? t('hulp.wzcVraag') : t('hulp.laatWeten')}
       </button>
 
       {gevraagd ? (
         <p aria-live="polite" className="mt-2 text-lg font-semibold text-ok">
-          {t('hulp.verstuurd')}
+          {wzc ? t('hulp.wzcVerstuurd') : t('hulp.verstuurd')}
         </p>
       ) : null}
 
