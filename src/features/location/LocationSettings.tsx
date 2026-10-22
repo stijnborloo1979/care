@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useHousehold } from '../household/useHousehold'
+import { useVerblijf } from '../zorg/useVerblijf'
 import { useLastLocation, useLocationSetting } from './useLocation'
 import { tt, uiLocale } from '../../lib/uiTaal'
 
@@ -15,6 +16,8 @@ export default function LocationSettings() {
   const { setting, zet } = useLocationSetting(hh)
   const { data: laatste } = useLastLocation(hh, !!setting?.enabled)
   const [fout, setFout] = useState<string | null>(null)
+  // In een woonzorgcentrum ligt de zone rond de oude woning: gepauzeerd (109).
+  const { verblijf } = useVerblijf(hh)
 
   function zetAan() {
     setFout(null)
@@ -45,6 +48,12 @@ export default function LocationSettings() {
       <p className="mt-1 text-sm text-ink-soft">
         {tt('Staat uit tot iemand er toestemming voor geeft. {voornaam} ziet altijd wanneer het aan staat, en kan het zelf uitzetten.', { voornaam })}
       </p>
+
+      {verblijf ? (
+        <p className="mt-3 rounded-2xl bg-surface-soft px-4 py-3 text-ink-soft">
+          {tt('Gepauzeerd zolang {voornaam} in {wzc} woont. Er wordt geen locatie bewaard en er komt geen melding over de veilige zone. Na het verblijf werkt het weer zoals ingesteld.', { voornaam, wzc: verblijf.naam })}
+        </p>
+      ) : null}
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <span

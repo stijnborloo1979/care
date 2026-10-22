@@ -673,6 +673,28 @@ export async function mijnWzc(hh: string) {
   return rijen[0] ?? null
 }
 
+// ---- Hulpvragen van bewoners aan de afdeling (109) ----------------------
+
+export interface HulpAlarm {
+  id: string
+  household_id: string
+  naam: string
+  kamer: string | null
+  afdeling: string | null
+  herhalingen: number
+  created_at: string
+  laatst_at: string
+}
+
+/** Wat er nu openstaat voor deze medewerker. Zonder migratie 109: niets. */
+export const zorgAlarmen = (org: string) => rpcLijst<HulpAlarm>('zorg_alarmen', { org })
+
+/** "Ik ga": de hulpvraag is opgevolgd. Een collega die sneller was, is geen fout. */
+export async function alarmOpgevolgd(alarm: string) {
+  const { error } = await supabase.rpc('alarm_opgevolgd', { alarm })
+  if (error) throw error
+}
+
 export const ONBEKENDE_CODE =
   tt('Deze code kennen we niet. Kijk ze na of vraag ze opnieuw aan het woonzorgcentrum.')
 
