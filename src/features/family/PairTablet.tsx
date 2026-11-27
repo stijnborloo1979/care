@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Tablet } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { tt } from '../../lib/uiTaal'
+import { useHousehold } from '../household/useHousehold'
+import { useMag } from '../../core/access/useAccess'
+import { useOntkoppelTablet } from './useOntkoppelTablet'
 
 /**
  * Familie maakt hier een code, en tikt die in op de tablet onder
@@ -17,6 +20,26 @@ export default function PairTablet({
 }) {
   const [code, setCode] = useState<{ code: string; expires_at: string } | null>(null)
   const [rest, setRest] = useState(0)
+  const { household } = useHousehold()
+  const isBeheerder = useMag(householdId, 'membership.manage', household?.role === 'admin')
+  const ontkoppel = useOntkoppelTablet(householdId)
+
+  // Is er nu een tablet gekoppeld? Dat is het lidmaatschap 'person'.
+  const { data: tablet } = useQuery({
+    queryKey: ['tablet', householdId],
+    enabled: !!householdId,
+    queryFn: async (): Promise<{ profile_id: string } | null> => {
+      const { data, error } = await supabase
+        .from('membership')
+        .select('profile_id')
+        .eq('household_id', householdId)
+        .eq('role', 'person')
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      return data
+    },
+  })
 
   const maak = useMutation({
     mutationFn: async () => {
@@ -56,6 +79,39 @@ export default function PairTablet({
         <em>{tt('Dit is de tablet van de persoon')}</em>
         {uitlegNa}
       </p>
+
+      {tablet ? (
+        <div className="mt-5 rounded-2xl bg-surface-soft p-4">
+          <p className="font-semibold">{tt('Er is een tablet gekoppeld.')}</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            {tt('Kwijt, stuk of weggegeven? Ontkoppel hem hier. Elk toestel dat als {naam} aangemeld is, wordt afgemeld.', { naam: personName })}
+          </p>
+          {isBeheerder ? (
+            <button
+              onClick={() => {
+                if (confirm(tt('De tablet van {naam} ontkoppelen? Daarna toont hij niets meer tot je hem opnieuw koppelt.', { naam: personName })))
+                  ontkoppel.mutate(tablet.profile_id)
+              }}
+              disabled={ontkoppel.isPending}
+              className="mt-3 flex min-h-touch w-full items-center justify-center rounded-pill border-[1.5px] border-line-strong bg-surface px-5 font-semibold disabled:opacity-60"
+            >
+              {ontkoppel.isPending ? tt('Bezig…') : tt('Tablet ontkoppelen')}
+            </button>
+          ) : (
+            <p className="mt-2 text-sm text-ink-soft">{tt('Alleen de familiebeheerder kan de tablet ontkoppelen.')}</p>
+          )}
+        </div>
+      ) : ontkoppel.isSuccess ? (
+        <p className="mt-5 text-sm font-semibold text-accent-ink">
+          {tt('Ontkoppeld. Het staat in het zorglogboek.')}
+        </p>
+      ) : null}
+
+      {ontkoppel.error ? (
+        <p role="alert" className="mt-3 text-sm text-alert">
+          {ontkoppel.error instanceof Error ? ontkoppel.error.message : tt('Ontkoppelen lukte niet.')}
+        </p>
+      ) : null}
 
       {code && !verlopen ? (
         <div className="mt-5 rounded-2xl bg-accent-soft p-5 text-center">

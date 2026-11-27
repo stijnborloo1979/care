@@ -701,6 +701,25 @@ van familie. Staat in `display_prefs`, dus geen migratie nodig.
 Vastzetten doet het toestel zelf: Begeleide toegang op iPad, app
 vastzetten of Fully Kiosk op Android. De uitleg staat op `/installeren`.
 
+## De tablet ontkoppelen
+
+Instellingen → Tablet koppelen toont of er een tablet gekoppeld is, met de
+knop **Tablet ontkoppelen** (ook bij Delen → Wie er bij hoort). Alleen de
+familiebeheerder. `ontkoppel_tablet()` (`110_tablet_ontkoppelen.sql`) haalt
+het lidmaatschap `person` weg, koppelt de kaart "Dit ben jij" los, laat open
+koppelcodes vervallen, trekt de aanmeldingen in en schrijft het in het
+zorglogboek.
+
+Alleen de browsergegevens op de tablet wissen was niet genoeg: de rij bleef
+staan, dus familie zag de tablet nog. En wie die rij met "Toegang weghalen"
+wiste, liet de self-kaart aan het tablet-account hangen — `is_self()` bleef
+waar voor een account zonder lidmaatschap. Een trigger koppelt die kaart nu
+los, op welke manier het lidmaatschap ook verdwijnt.
+
+Alle toestellen van de persoon delen één account (`pair-device` hergebruikt
+het). Ontkoppelen meldt ze dus allemaal af; een nieuwe code maakt een nieuw
+account.
+
 ## Talen
 
 Nederlands, Frans en Engels. De taal staat bij de weergave-instellingen,
