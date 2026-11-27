@@ -25,7 +25,7 @@ do $$
 declare
   -- ▼▼▼ VUL DIT IN ▼▼▼
   v_project  text    := '<project-ref>';        -- bv. mawctyhvciudaucrucmx
-  v_sleutel  text    := '<service_role_key>';   -- Project Settings -> API
+  v_sleutel  text    := '<service_role_key>';   -- Project Settings -> API Keys -> Legacy -> service_role (NIET anon)
   v_embed    boolean := false;                  -- true als je 09_ai.sql en de functie embed gebruikt
   -- ▲▲▲ VUL DIT IN ▲▲▲
 
@@ -68,8 +68,10 @@ begin
   perform cron.schedule('spraak-log-opruimen',       '50 3 * * *', 'select public.spraak_log_opschonen()');
 
   -- Meldingen naar de toestellen van familie: elke vijf minuten.
+  -- 30 seconden: met de standaard van 5 gaf pg_net op terwijl push-notify
+  -- nog bezig was met versturen.
   perform cron.schedule('push-notify', '*/5 * * * *', format(
-    $c$select net.http_post(url := %L, headers := %L::jsonb)$c$,
+    $c$select net.http_post(url := %L, headers := %L::jsonb, timeout_milliseconds := 30000)$c$,
     v_basis || 'push-notify', v_kop));
 
   -- Bestanden die nergens meer bij horen: elke nacht, na de nachtjob.
