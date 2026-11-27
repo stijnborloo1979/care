@@ -720,6 +720,20 @@ Alle toestellen van de persoon delen één account (`pair-device` hergebruikt
 het). Ontkoppelen meldt ze dus allemaal af; een nieuwe code maakt een nieuw
 account.
 
+## De ledbalk van een Philips-scherm
+
+Op een Philips 10BDL4551T lichten de leds mee met de gloed op het scherm:
+blauw bij een nieuw bericht, oranje bij een herinnering of medicatie, groen
+knipperend bij een oproep, uit zodra het licht dooft (een tik op het
+scherm, of de tijd is om). Het licht moet aan staan bij de instellingen.
+
+Een webpagina kan zelf geen verbinding maken met de leds. Daarvoor draait
+op het scherm het hulpappje **LifeAngle Ledbalk** (`android/ledbalk`): een
+kleine dienst op `127.0.0.1:8765` die de leds via Philips SICP (TCP-poort
+5000, commando `F3`) aanstuurt. GitHub bouwt de APK (`ledbalk-apk`); hij
+staat bij de run onder *Artifacts*. De app vindt het hulpappje vanzelf
+(`src/features/licht/ledbalk.ts`); zonder hulpappje gebeurt er niets.
+
 ## Talen
 
 Nederlands, Frans en Engels. De taal staat bij de weergave-instellingen,

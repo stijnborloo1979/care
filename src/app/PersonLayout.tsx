@@ -17,6 +17,7 @@ import { MiniSpeler } from '../features/radio/Radio'
 import Licht from '../features/licht/Licht'
 import { useLichtSignalen } from '../features/licht/useLichtSignalen'
 import { useWakeLock } from '../features/licht/useWakeLock'
+import { useLedbalk } from '../features/licht/ledbalk'
 import { useKiosk } from '../features/kiosk/useKiosk'
 import Nachtscherm from '../features/kiosk/Nachtscherm'
 import VoiceButton from '../features/voice-assistant/VoiceButton'
@@ -65,6 +66,8 @@ export default function PersonLayout() {
   // Kioskmodus alleen op de gekoppelde tablet: familie die /persoon opent
   // op de eigen telefoon, hoort niet teruggestuurd of gedimd te worden.
   const kiosk = prefs.kiosk && household?.role === 'person'
+  // De ledbalk van een Philips-scherm, als het hulpappje erop staat.
+  useLedbalk(household?.role === 'person')
   useWakeLock(prefs.schermAan || kiosk)
   const voice = useVoice()
   useWekwoord({

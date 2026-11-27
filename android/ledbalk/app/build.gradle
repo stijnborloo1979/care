@@ -1,0 +1,28 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'be.lifeangle.ledbalk'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'be.lifeangle.ledbalk'
+        minSdk 21
+        // Bewust laag: de app wordt nooit via de Play Store verdeeld, en zo
+        // gelden de strengere regels voor achtergronddiensten niet.
+        targetSdk 28
+        versionCode 1
+        versionName '1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
