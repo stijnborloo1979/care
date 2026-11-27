@@ -5,6 +5,7 @@ import { useHousehold, type SupportLevel } from '../household/useHousehold'
 import { useMag } from '../../core/access/useAccess'
 import WieBekeek from './WieBekeek'
 import WzcKoppeling from './WzcKoppeling'
+import { useOntkoppelTablet } from '../family/useOntkoppelTablet'
 import { tt } from '../../lib/uiTaal'
 
 const NIVEAUS: { id: SupportLevel; titel: string; uitleg: string; ziet: string }[] = [
@@ -62,6 +63,8 @@ export default function Delen() {
       return (data ?? []) as unknown as Lid[]
     },
   })
+
+  const ontkoppel = useOntkoppelTablet(hh)
 
   const ververs = () => queryClient.invalidateQueries({ queryKey: ['households'] })
 
@@ -273,7 +276,19 @@ export default function Delen() {
                   {tt('Maak beheerder')}
                 </button>
               ) : null}
-              {isBeheerder && l.role !== 'admin' ? (
+              {isBeheerder && l.role === 'person' ? (
+                <button
+                  onClick={() => {
+                    if (confirm(tt('De tablet van {naam} ontkoppelen? Daarna toont hij niets meer tot je hem opnieuw koppelt.', { naam: voornaam })))
+                      ontkoppel.mutate(l.profile_id)
+                  }}
+                  disabled={ontkoppel.isPending}
+                  className="shrink-0 rounded-pill border border-line px-3 py-1 text-sm font-semibold text-ink-soft disabled:opacity-60"
+                >
+                  {tt('Ontkoppelen')}
+                </button>
+              ) : null}
+              {isBeheerder && l.role !== 'admin' && l.role !== 'person' ? (
                 <button
                   onClick={() => {
                     if (confirm(tt('{naam} geen toegang meer geven?', { naam: l.profile?.full_name ?? tt('Deze persoon') })))
@@ -287,6 +302,11 @@ export default function Delen() {
             </li>
           ))}
         </ul>
+        {ontkoppel.error ? (
+          <p role="alert" className="mt-3 text-sm text-alert">
+            {ontkoppel.error instanceof Error ? ontkoppel.error.message : tt('Ontkoppelen lukte niet.')}
+          </p>
+        ) : null}
       </section>
 
       <WzcKoppeling hh={hh} voornaam={voornaam} isBeheerder={isBeheerder} />
