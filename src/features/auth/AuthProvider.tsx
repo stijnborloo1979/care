@@ -40,7 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         loading,
         signOut: async () => {
-          await supabase.auth.signOut()
+          // Alleen dit toestel. Zonder scope meldt Supabase het account
+          // overal af — en alle toestellen van de persoon delen één account
+          // (pair-device). Uitloggen op een telefoon die even als tablet
+          // diende, logde zo ook de echte tablet uit. Alles afmelden hoort
+          // bij "Tablet ontkoppelen", niet bij Uitloggen.
+          await supabase.auth.signOut({ scope: 'local' })
         },
       }}
     >
