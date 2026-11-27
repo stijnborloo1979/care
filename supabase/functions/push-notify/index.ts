@@ -8,7 +8,8 @@
 //
 // De database maakt meldingen (public.notification); deze functie bezorgt
 // ze aan familie. Ze draait met de service role en mag dus niet publiek
-// aanroepbaar zijn: laat "Verify JWT" AAN. Ze wordt aangeroepen door
+// aanroepbaar zijn: magBinnen() laat alleen een aangemelde gebruiker of een
+// geheime sleutel van het project toe. Ze wordt aangeroepen door
 // pg_cron (zie onderaan 20_push.sql) én rechtstreeks door de app, meteen
 // nadat de persoon om terugbellen of om hulp vraagt — die twee mogen niet
 // vijf minuten op een job wachten.
@@ -171,7 +172,24 @@ async function magBinnen(req: Request): Promise<boolean> {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
     const { data, error } = await client.auth.getUser(token)
-    return !error && !!data?.user
+    if (!error && data?.user) return true
+  } catch {
+    // geen gebruiker: hieronder nog nagaan of het een geheime sleutel is
+  }
+
+  // Geen gebruiker, en niet letterlijk SUPABASE_SERVICE_ROLE_KEY. Supabase
+  // heeft twee soorten geheime sleutels: de oude (eyJ…) en de nieuwe
+  // (sb_secret_…). Welke van de twee in SUPABASE_SERVICE_ROLE_KEY staat,
+  // hangt van het project af — en de cron gaf zo maandenlang een 401 omdat
+  // de andere in cron_inplannen.sql stond. Daarom niet vergelijken maar
+  // proberen: alleen een echte geheime sleutel van dit project mag de
+  // gebruikerslijst opvragen. Een gebruikerstoken of de anon key niet.
+  try {
+    const probe = createClient(Deno.env.get('SUPABASE_URL')!, token, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { error } = await probe.auth.admin.listUsers({ page: 1, perPage: 1 })
+    return !error
   } catch {
     return false
   }
